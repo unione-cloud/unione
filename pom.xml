@@ -1,0 +1,281 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>unione.cloud</groupId>
+	<artifactId>unione</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<description>
+		统一建站云平台，提供一站式低代码建站服务
+	</description>
+	
+	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->
+	<!-- unione cloud:基础团队 -->
+	<developers>
+		<developer>
+			<name>Jeking Yang</name>
+			<email>jeking217@163.com</email>
+			<url>https://wiki.unione.cloud/jeking217</url>
+			<organization>unione cloud</organization>
+		</developer>
+	</developers>
+	
+	
+	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->
+	<!-- unione cloud 平台构建配置 -->
+	<build>
+		<resources>
+			<resource>
+				<!-- 不包含开发目录中源文件 -->
+				<directory>src/main/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<!-- 包含资源目录所有文件 -->
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<encoding>${encoding}</encoding>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.21.0</version>
+				<configuration>
+					<skip>true</skip>
+					<!-- once：在一个进程中进行所有测试|always：在一个进程中并行的运行脚本 -->
+					<forkMode>once</forkMode>
+					<includes>
+						<include>**/*Tests.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/Abstract*.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<username>${svn.username}</username>
+					<password>${svn.password}</password>
+					<tagBase>${project.scm.url}/tags/${project.artifactId}</tagBase>
+					<branchBase>${project.scm.url}/branchs/${project.artifactId}</branchBase>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.7.1</version>
+				<configuration>
+					<locales>zh_CN</locales>
+					<outputEncoding>${encoding}</outputEncoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!-- Apply more sensible defaults for user projects -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<mainClass>${start-class}</mainClass>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<failOnMissingWebXml>false</failOnMissingWebXml>
+						<archive>
+							<manifest>
+								<mainClass>${start-class}</mainClass>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+						</archive>
+						<packagingExcludes>%regex[WEB-INF/lib/.*-\d{8}.\d{6}-?\d*.jar]</packagingExcludes>
+						<!-- <outputFileNameMapping>@{groupId}@-@{artifactId}@-@{baseVersion}@.@{extension}@</outputFileNameMapping> -->
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<configuration>
+						<mainClass>${start-class}</mainClass>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.2</version>
+					<configuration>
+						<encoding>${encoding}</encoding>
+						<delimiters>
+							<delimiter>${resource.delimiter}</delimiter>
+						</delimiters>
+						<useDefaultDelimiters>false</useDefaultDelimiters>
+					</configuration>
+				</plugin>
+				<!-- Support our own plugin -->
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>2.2.1.RELEASE</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<skip>${spring.boot.skip}</skip>
+						<mainClass>${start-class}</mainClass>
+					</configuration>
+				</plugin>
+				<!-- Support shade packaging (if the user does not want to use our plugin) -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<dependencies>
+						<dependency>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-maven-plugin</artifactId>
+							<version>2.2.1.RELEASE</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
+						<createDependencyReducedPom>true</createDependencyReducedPom>
+						<filters>
+							<filter>
+								<artifact>*:*</artifact>
+								<excludes>
+									<exclude>META-INF/*.SF</exclude>
+									<exclude>META-INF/*.DSA</exclude>
+									<exclude>META-INF/*.RSA</exclude>
+								</excludes>
+							</filter>
+						</filters>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+							<configuration>
+								<transformers>
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+										<resource>META-INF/spring.handlers</resource>
+									</transformer>
+									<transformer
+										implementation="org.springframework.boot.maven.PropertiesMergingResourceTransformer">
+										<resource>META-INF/spring.factories</resource>
+									</transformer>
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+										<resource>META-INF/spring.schemas</resource>
+									</transformer>
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<mainClass>${start-class}</mainClass>
+									</transformer>
+								</transformers>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->
+	<!-- unione cloud:基础报告 -->
+	<reporting>
+		<plugins>
+			<!-- 生成单元测试代码覆盖率报告文档 -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<check>true</check>
+				</configuration>
+			</plugin>
+			<!-- 生成源码分析检测报告文档 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.9.0</version>
+			</plugin>
+			<!-- 生成代码检查报告文档 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.0.0</version>
+			</plugin>
+			<!-- 生成Java API 帮助文档 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<charset>${encoding}</charset>
+					<encoding>${encoding}</encoding>
+					<docencoding>${encoding}</docencoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->
+	<!-- unione cloud:基础版本 -->
+	<properties>
+		<encoding>UTF-8</encoding>
+		<jdk.version>1.8</jdk.version>
+		<spring.boot.skip>true</spring.boot.skip>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	
+	
+	<modules>
+		<module>unione-core</module>
+		<module>unione-beetsql</module>
+		<module>unione-web</module>
+		<module>unione-gateway</module>
+		<module>unione-job</module>
+		<module>unione-form</module>
+		<module>unione-portal</module>
+	</modules>
+</project>
