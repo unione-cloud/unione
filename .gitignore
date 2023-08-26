@@ -12,6 +12,7 @@ local.properties
 .classpath
 .project
 .class
+target
 
 # External tool builders
 .externalToolBuilders/
