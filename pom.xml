@@ -265,9 +265,50 @@
 		<jdk.version>1.8</jdk.version>
 		<spring.boot.skip>true</spring.boot.skip>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	
+		<!-- spring boot,cloud index -->
+		<spring.boot.version>2.7.4</spring.boot.version>
+		<spring.cloud.version>3.1.4</spring.cloud.version>
+		
+		<!-- feign index -->
+		<netflix.version>2.2.10.RELEASE</netflix.version>
+	
+		<!-- common index -->
+		<jakarta.version>2.0.1</jakarta.version>
+		<lombok.version>1.18.24</lombok.version>
+		<druid.version>1.2.11</druid.version>
+		<pool2.version>2.11.0</pool2.version>
+		
+		<!-- beetsql index -->
+		<ibeetl.version>3.18.0-RELEASE</ibeetl.version>
+		<hutool.version>5.8.21</hutool.version>
+		
+		<!-- swagger index -->
+		<swagger.version>3.0.0</swagger.version>
+		<knife4j.version>3.0.3</knife4j.version>
+		
+		<!-- jackson index -->
+		<jackson.version>2.13.3</jackson.version>
+		<lang.version>3.12.0</lang.version>
+		<codec.version>1.15</codec.version>
+		<beanutils.version>1.9.4</beanutils.version>
+		
+		<!-- jwt index -->
+		<jwt.version>4.0.0</jwt.version>
+		
+		<!-- logger index -->
+		<slf4j.version>1.7.36</slf4j.version>
+		<logback.version>1.2.11</logback.version>
+		
+		<!-- nacos index -->
+		<nacos.version>2.2.8.RELEASE</nacos.version>
+		<httpclient.version>4.5.13</httpclient.version>
+		
+		<!-- thymeleaf index -->
+		<thymeleaf.version>3.1.0.M2</thymeleaf.version>
+		<thymeleaf.extras.version>3.0.4.RELEASE</thymeleaf.extras.version>
+		
 	</properties>
-	
-	
 	
 	<modules>
 		<module>unione-core</module>
@@ -278,4 +319,5 @@
 		<module>unione-form</module>
 		<module>unione-portal</module>
 	</modules>
+	
 </project>
