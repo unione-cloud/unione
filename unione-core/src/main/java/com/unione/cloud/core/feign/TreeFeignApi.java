@@ -4,6 +4,7 @@ import com.unione.cloud.core.feign.api.FeignChildren;
 import com.unione.cloud.core.feign.api.FeignDelete;
 import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.feign.api.FeignUpdate;
 
@@ -13,6 +14,6 @@ import com.unione.cloud.core.feign.api.FeignUpdate;
  * @日期	2020-08-06
  * @版本	1.0.0
  */
-public interface TreeFeignApi<T> extends FeignSave<T>,FeignUpdate<T>,FeignDelete<T>,FeignFind<T>,FeignDetail<T>,FeignChildren<T>{
+public interface TreeFeignApi<T> extends FeignSave<T>,FeignUpdate<T>,FeignDelete<T>,FeignFind<T>,FeignFindById<T>,FeignDetail<T>,FeignChildren<T>{
 		
 }
