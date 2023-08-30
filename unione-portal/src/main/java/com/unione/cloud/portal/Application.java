@@ -1,4 +1,4 @@
-package com.unione.cloud.web;
+package com.unione.cloud.portal;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 /**
  * 微应用服务核心启动类
  */
-@EnableDiscoveryClient
+//@EnableDiscoveryClient
 @SpringBootApplication
 @ComponentScan("com.unione.cloud")
 @EnableFeignClients("com.unione.cloud")

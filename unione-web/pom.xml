@@ -23,6 +23,15 @@
 			<version>${project.version}</version>
 		</dependency>
 		
+		
+		
+		<!-- mysql-connector-java:配置依赖信息 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

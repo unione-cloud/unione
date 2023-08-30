@@ -1,0 +1,66 @@
+#============================================
+#
+# Spring config
+#
+#============================================
+spring:
+   #============================================
+   #
+   # Data Source config
+   #
+   #============================================
+   datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://8.134.11.253:2206/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8
+      username: unione
+      password: unione123@Admin
+
+
+   #============================================
+   #
+   # Data Pool Druid Config
+   #
+   #============================================
+      druid:
+         initial-size: 2
+         max-active: 20
+         min-idle: 2
+         max-wait: 60000
+         pool-prepared-statements: true
+         validation-query: select 'x'
+         test-on-borrow: false
+         test-on-return: false
+         test-while-idle: true
+         
+         web-stat-filter:
+            enabled: true
+            url-pattern: /druid
+         stat-view-servlet:
+            login-username: unione
+            login-password: unione@druid
+
+
+   #============================================
+   #
+   # Spring Multipart Config
+   #
+   #============================================
+   servlet:
+      multipart:
+         max-file-size: 100MB
+         max-request-size: 1024MB
+
+
+      
+#============================================
+#
+# Logging Config
+#
+#============================================      
+logging:
+   level:
+      ROOT: INFO
+
+
+
+

@@ -278,10 +278,12 @@
 		<lombok.version>1.18.24</lombok.version>
 		<druid.version>1.2.11</druid.version>
 		<pool2.version>2.11.0</pool2.version>
+		<httpclient.version>4.5.13</httpclient.version>
 		
 		<!-- beetsql index -->
 		<ibeetl.version>3.18.0-RELEASE</ibeetl.version>
 		<hutool.version>5.8.21</hutool.version>
+		<mysql.version>8.0.21</mysql.version>
 		
 		<!-- swagger index -->
 		<swagger.version>3.0.0</swagger.version>

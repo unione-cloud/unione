@@ -1,0 +1,70 @@
+#============================================
+#
+# server config
+#
+#============================================
+server:
+   port: 8080
+   servlet:
+      session:
+         timeout: 36000
+   tomcat:
+      uri-encoding: UTF-8
+
+spring:
+   main:
+      allow-circular-references: true
+   application:
+      name: unione-portal
+   profiles:
+      active: pro
+
+   #============================================
+   #
+   # nacos config
+   #
+   #============================================
+   cloud:
+      nacos:
+         config:
+            enabled: false
+            server-addr: 8.134.11.253:8850
+            file-extension: yaml
+            shared-dataids: unione-global-config.yaml
+            refreshable-dataids: unione-global-config.yaml
+         discovery:
+            enabled: false
+            server-addr: ${spring.cloud.nacos.config.server-addr}
+
+            
+            
+#============================================
+#
+# BeetlSql Config
+#
+#============================================
+beetlsql:
+  sqlManagers: sqlManager
+  sqlManager:
+    ds: dataSource
+    basePackage: com.unione.cloud.**.dao
+    daoSuffix: Dao
+
+
+
+
+#============================================
+#
+#SECURITY config
+#
+#============================================
+security:
+   enabled: true
+   filter:
+      includes: /**
+      executions: /,/swagger-ui.html/**,/webjars/**,/swagger-resources/**,/v2/api-docs,/doc.html/**,/druid/**
+
+
+
+
+            
