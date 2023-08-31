@@ -52,7 +52,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	public Results<List<SysLogs>> find(Params<SysLogs> params) {
 		log.debug("进入:查询系统日志列表方法,params:{}",params);
 		// 参数处理
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				params.getBody().setOrgId(sessionService.getOrgId());
@@ -85,7 +85,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		// 参数处理
 		SysLogs entity=new SysLogs();
 		entity.setSid(sid);
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());
@@ -109,7 +109,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		// 参数处理
 		SysLogs entity=new SysLogs();
 		entity.setIds(params.getBody());
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());

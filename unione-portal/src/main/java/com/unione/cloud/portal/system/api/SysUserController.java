@@ -2,13 +2,12 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.List;
 
+import org.beetl.sql.core.SQLManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aifa.mins.ibls.core.LogsUtil;
-import com.aifa.mins.ibls.core.LogsUtil.LogType;
 import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
@@ -18,6 +17,8 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.portal.system.model.SysUser;
+import com.unione.cloud.util.LogsUtil;
+import com.unione.cloud.util.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
@@ -35,11 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 @Api(tags = "系统管理：用户信息 管理服务",description="SysUser")
 @RequestMapping("/api/user")
 public class SysUserController implements PojoFeignApi<SysUser>{
-	/**
-	 * 数据访问对象
-	 */
+	
 	@Autowired
-	private SysUserDao sysUserDao;
+	private SQLManager sqlManager;
 
 	/**
 	 * 用户会话对象
@@ -55,13 +54,13 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		LogsUtil.set(LogType.Query, "查询SYS_USER列表");
 		// 参数处理
 //			AssertUtil.service().notNull(params.getBody(), new String[] {"appId"},"参数%s不能为空");
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				params.getBody().setOrgId(sessionService.getOrgId());
 			}
 		}
-		params.getBody().setDelFlag(0);
+		
 		
 		results=sysUserDao.findListByPage(params);
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
@@ -95,7 +94,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		LogsUtil.set(LogType.Modify, "修改SYS_USER",entity.getSid());
 		// 参数处理
 		//AssertUtil.service().notNull(entity, new String[] {"sid","appId","name","title"},"参数%s不能为空");
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());
@@ -128,7 +127,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		SysUser entity=new SysUser();
 		entity.setIds(params.getBody());
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());
@@ -154,7 +153,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		SysUser entity=new SysUser();
 		entity.setSid(sid);
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());
@@ -183,7 +182,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		SysUser entity=new SysUser();
 		entity.setIds(params.getBody());
-		if(!sessionService.isAdministrator() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
 				entity.setOrgId(sessionService.getOrgId());

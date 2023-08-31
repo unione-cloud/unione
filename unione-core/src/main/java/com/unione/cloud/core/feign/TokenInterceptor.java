@@ -47,15 +47,22 @@ public class TokenInterceptor implements RequestInterceptor {
 		
 		if(this.sessionService!=null){
 			try {
-				// 使用sessionService服务获取token
+				// 设置token
 				token=sessionService.getToken();
 				if(!StringUtils.isEmpty(token)) {
 					template.header(TOKEN_NAME, TOKEN_PREFIX+token+TOKEN_SUFIX);
 					template.header(signature(token), "true");
 				}
 				
-				
-				
+				// 设置请求信息
+				Object _unione_actionid=sessionService.getVar("_unione_actionid");
+				Object _unione_requestid=sessionService.getVar("_unione_requestid");
+				if(_unione_actionid!=null) {
+					template.header("_unione_actionid", _unione_actionid+"");
+				}
+				if(_unione_requestid!=null) {
+					template.header("_unione_requestid", _unione_requestid+"");
+				}
 			} catch (Exception e) {
 				logger.error("feign 请求头设置失败",e);
 			}

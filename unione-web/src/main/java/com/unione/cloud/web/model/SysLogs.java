@@ -68,7 +68,7 @@ public class SysLogs extends Pojo{
 	/**
 	 * 应用编码
 	 */
-	@ApiModelProperty(value="应用编码",notes="字符长度为：19")
+	@ApiModelProperty(value="应用编码",notes="字符长度为：20")
 	private String appCode;
 	/**
 	 * 用户姓名
@@ -76,15 +76,20 @@ public class SysLogs extends Pojo{
 	@ApiModelProperty(value="用户姓名",notes="字符长度为：50")
 	private String userName;
 	/**
-	 * 业务请求ID
+	 * 	业务操作ID
 	 */
-	@ApiModelProperty(value="业务请求ID",notes="字符长度为：19")
+	@ApiModelProperty(value="业务操作ID",notes="")
+	private Long actionId;
+	/**
+	 * 	请求ID
+	 */
+	@ApiModelProperty(value="请求ID",notes="")
 	private Long requestId;
 	/**
-	 * 前置请求ID
+	 * 	前置请求ID（调用链）
 	 */
-	@ApiModelProperty(value="前置请求ID",notes="字符长度为：19")
-	private Long preActionId;
+	@ApiModelProperty(value="前置请求ID",notes="")
+	private Long prequestId;
 	/**
 	 * 操作标题
 	 */
@@ -114,14 +119,14 @@ public class SysLogs extends Pojo{
 	 * 开始时间
 	 */
 	@ApiModelProperty(value="开始时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date startTime;
 	/**
 	 * 完成时间
 	 */
 	@ApiModelProperty(value="完成时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date endTime;
 	/**

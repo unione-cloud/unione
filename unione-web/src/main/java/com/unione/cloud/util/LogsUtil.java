@@ -7,7 +7,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +35,25 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class LogsUtil {
 	
+	private static String     appCode;
 	private static SysLogsDao sysLogsDao;
 	
 	@Autowired
 	public void setSysLogsDao(SysLogsDao sysLogsDao) {
 		LogsUtil.sysLogsDao = sysLogsDao;
 	}
+	
+	@Value("${spring.application.name}")
+	public void setAppCode(String appCode) {
+		LogsUtil.appCode=appCode;
+	}
 	@Autowired(required = false)
 	public void setRequest(HttpServletRequest req) {
 		request.set(req);
+	}
+	@Autowired(required = false)
+	public void setResponse(HttpServletResponse res) {
+		response.set(res);
 	}
 	/**
 	 * 	用户会话对象
@@ -91,6 +103,8 @@ public class LogsUtil {
 	
 	// 当前请求对象
 	private static ThreadLocal<HttpServletRequest> request=new ThreadLocal<>();
+	// 当前相应对象
+	private static ThreadLocal<HttpServletResponse> response=new ThreadLocal<>();
 	// 日志记录对象
 	private static ThreadLocal<SysLogs> entry=new ThreadLocal<>();
 	// 日志内容对象
@@ -111,7 +125,7 @@ public class LogsUtil {
 	}
 	
 	/**
-	 * 获得请求对象
+	 * 	获得请求对象
 	 * @return
 	 */
 	private static HttpServletRequest getRequest() {
@@ -123,7 +137,46 @@ public class LogsUtil {
 	}
 	
 	/**
-	 * 获得请求 IP 地址
+	 * 	获得响应对象
+	 * @return
+	 */
+	private static HttpServletResponse getResponse() {
+		HttpServletResponse res=response.get();
+		if(res==null) {
+			res = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
+		}
+		return res;
+	}
+	
+	/**
+	 * 	设置响应cookie
+	 * @param name
+	 * @param value
+	 */
+	private static void setCookie(String name,String value) {
+		HttpServletResponse res=getResponse();
+		if(res==null) {
+			return;
+		}
+		Cookie ck=new Cookie(name,value);
+		res.addCookie(ck);
+	}
+	
+	private static String getCookie(String name) {
+		HttpServletRequest req=getRequest();
+		if(req==null) {
+			return null;
+		}
+		for(Cookie ck:req.getCookies()) {
+			if(name.equals(ck.getName())) {
+				return ck.getValue();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 	获得请求 IP 地址
 	 * @author YangGuangJian <br>
 	 * @param request
 	 * @return
@@ -161,6 +214,7 @@ public class LogsUtil {
 		if(ent==null) {
 			contents.set(null);
 			ent=new SysLogs();
+			ent.setAppCode(appCode);
 			ent.setCreated(DateUtil.date());
 			ent.setStartTime(DateUtil.date());
 			if(sessionService.getUserPrincipal()!=null) {
@@ -176,19 +230,34 @@ public class LogsUtil {
 			// 从request中获取请求ID
 			HttpServletRequest req=getRequest();
 			if(req!=null) {
+				String actionid=req.getHeader("_unione_actionid");
+				if(StringUtils.isEmpty(actionid)) {
+					actionid=getCookie("_unione_actionid");
+				}
+				if(!StringUtils.isEmpty(actionid)) {
+					ent.setActionId(Long.parseLong(actionid));
+				}else {
+					ent.setActionId(SidGenHolder.generate());
+				}
+				setCookie("_unione_actionid", ent.getActionId()+"");
+				
 				String requestid=req.getHeader("_unione_requestid");
+				if(StringUtils.isEmpty(requestid)) {
+					requestid=getCookie("_unione_requestid");
+				}
 				if(!StringUtils.isEmpty(requestid)) {
-					ent.setRequestId(Long.parseLong(requestid));
+					ent.setPrequestId(Long.parseLong(requestid));
 				}
-				String preActionId=req.getHeader("_unione_pre_actionid");
-				if(!StringUtils.isEmpty(preActionId)) {
-					ent.setPreActionId(Long.parseLong(preActionId));
-				}
-			}
-			if(ent.getRequestId()==null) {
 				ent.setRequestId(SidGenHolder.generate());
+				setCookie("_unione_requestid", ent.getRequestId()+"");
+			}else {
+				ent.setRequestId(SidGenHolder.generate());
+				ent.setActionId(SidGenHolder.generate());
 			}
 			
+			// 保存请求信息到session
+			sessionService.setVar("_unione_actionid", ent.getActionId());
+			sessionService.setVar("_unione_requestid", ent.getRequestId());
 		}
 		return ent;
 	} 
@@ -239,14 +308,6 @@ public class LogsUtil {
 		log.setExtData(extData);
 	}
 	
-	/**
-	 * 设置应用ID
-	 * @param appId
-	 */
-	public static void setAppCode(String appCode) {
-		SysLogs log=getEntry();
-		log.setAppCode(appCode);
-	}
 	
 	/**
 	 * 设置目标信息

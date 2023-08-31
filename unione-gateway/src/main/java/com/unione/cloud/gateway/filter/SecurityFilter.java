@@ -526,20 +526,10 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 */
 	protected ServerWebExchange setRequestHeader(ServerWebExchange exchange,Config config, String token,
 			String remoteAddress) {
-		
-		ServerHttpRequest request = exchange.getRequest();
-		String requestid=request.getHeaders().getFirst("_unione_requestid");
-		
-		
 		// 添加当前用户信息到header
 		Builder reqBuilder = exchange.getRequest().mutate()
 				.header(config.getTokenName(), tokenService.getAuthToken(token))
-				.header("RemoteAddress", remoteAddress)
-				.header("_unione_requestid", SidGenHolder.generate()+"");
-		if(!StringUtils.isEmpty(requestid)) {
-			reqBuilder.header("_unione_pre_actionid", requestid);
-		}
-		
+				.header("RemoteAddress", remoteAddress);
 		return exchange.mutate().request(reqBuilder.build()).build();
 	}
 

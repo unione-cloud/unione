@@ -174,11 +174,11 @@ public class LogsUtil {
 	
 	/**
 	 * 设置服务名称
-	 * @param serverName
+	 * @param appCode
 	 */
-	public static void setServerName(String serverName) {
+	public static void setAppCode(String appCode) {
 		UniOneLogs log=getEntry();
-		log.setServerName(serverName);
+		log.setAppCode(appCode);
 	}
 	
 	/**

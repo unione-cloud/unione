@@ -34,19 +34,23 @@ public interface UniOneLogsApi {
 		/**
 		 * 服务名称
 		 */
-		private String serverName;
-		/**
-		 * 每个业务请求，生成一个唯一ID
-		 */
-		private Long requestId;
-		/**
-		 * 前置请求ID（调用链）
-		 */
-		private Long preActionId;
+		private String appCode;
 		/**
 		 * 操作用户姓名
 		 */
 		private String userName;
+		/**
+		 * 	业务操作ID
+		 */
+		private Long actionId;
+		/**
+		 * 	请求ID
+		 */
+		private Long requestId;
+		/**
+		 * 	前置请求ID（调用链）
+		 */
+		private Long prequestId;
 		/**
 		 * 日志标题
 		 */
