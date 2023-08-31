@@ -69,7 +69,7 @@ public class SysLogs extends Pojo{
 	 * 应用编码
 	 */
 	@ApiModelProperty(value="应用编码",notes="字符长度为：19")
-	private Long appCode;
+	private String appCode;
 	/**
 	 * 用户姓名
 	 */
@@ -143,7 +143,7 @@ public class SysLogs extends Pojo{
 	 * 异常代码
 	 */
 	@ApiModelProperty(value="异常代码",notes="字符长度为：10")
-	private String erroroCode;
+	private String errorCode;
 	// fields end
 
 	/**

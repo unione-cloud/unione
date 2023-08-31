@@ -1,6 +1,7 @@
 package com.unione.cloud.core.security;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class SessionHolder implements SessionService {
 	private static SessionHolder holder;
 	private static ThreadLocal<UserPrincipal> session=new NamedInheritableThreadLocal<>("Session context");
 	private static ThreadLocal<String> token=new NamedInheritableThreadLocal<>("Token context");
+	private static ThreadLocal<Map<String,Object>> var=new NamedInheritableThreadLocal<>("Var context");
 	
 	@Value("${security.administrator:administrator}")
 	private String administrator;
@@ -141,10 +143,31 @@ public class SessionHolder implements SessionService {
 		}
 		return null;
 	}
+	
+	@Override
+	public Map<String, Object> getVars(){
+		Map<String, Object> map=var.get();
+		if(map==null) {
+			map=new HashMap<String, Object>();
+			var.set(map);
+		}
+		return map; 
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <V> V getVar(String name) {
+		return (V)getVars().get(name);
+	}
+	@Override
+	public <V> void setVar(String name, V value) {
+		getVars().put(name, value);
+	}
 
 	@Override
-	public boolean isAdministrator() {
+	public boolean isAdmin() {
 		return administrator!=null && administrator.equals(this.getUsername());
 	}
+	
 
 }

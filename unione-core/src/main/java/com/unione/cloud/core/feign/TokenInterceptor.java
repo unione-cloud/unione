@@ -45,14 +45,17 @@ public class TokenInterceptor implements RequestInterceptor {
 		logger.debug("Feign Token TOKEN_NAME:{},TOKEN_PRE:{},TOKEN_SUFX:{}",TOKEN_NAME,TOKEN_PREFIX,TOKEN_SUFIX);
 		String token=null;
 		
-		// 使用sessionService服务获取token
 		if(this.sessionService!=null){
 			try {
+				// 使用sessionService服务获取token
 				token=sessionService.getToken();
 				if(!StringUtils.isEmpty(token)) {
 					template.header(TOKEN_NAME, TOKEN_PREFIX+token+TOKEN_SUFIX);
 					template.header(signature(token), "true");
 				}
+				
+				
+				
 			} catch (Exception e) {
 				logger.error("feign 请求头设置失败",e);
 			}

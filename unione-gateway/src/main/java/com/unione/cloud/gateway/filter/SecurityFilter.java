@@ -20,12 +20,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest.Builder;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
@@ -184,7 +186,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			if (!matcher.match("/*/isAuthed", requestUri) && !matcher.match("/login/logout", requestUri) && 
 					config.getExclusion().stream().anyMatch(x -> matcher.match(x, requestUri))) {
 				log.debug("url白名单,直接放行,uri:{}",requestUri);
-				ServerWebExchange ex = setToken2Header(exchange,config, token, ip);
+				ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
 				return chain.filter(ex).then(Mono.fromRunnable(()->{
 					after(exchange, config);
 				}));
@@ -269,7 +271,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 							log.debug("第三方认证接入，首次进行认证，realm name:{},auth code:{},认证成功,token:{}",rlName,authCode,token);
 							
 							// 添加token到header
-							ServerWebExchange ex = setToken2Header(exchange,config, token, ip);
+							ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
 							String _tk=token;
 							return chain.filter(ex).then(Mono.fromRunnable(()->{
 								afterThirdAuth(ex, config,_tk);
@@ -305,7 +307,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 						log.warn("使用当前授权code重现认证成功,token:{}",token);
 						
 						// 添加token到header
-						ServerWebExchange ex = setToken2Header(exchange,config, token, ip);
+						ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
 						String _tk=token;
 						return chain.filter(ex).then(Mono.fromRunnable(()->{
 							afterThirdAuth(ex, config,_tk);
@@ -379,7 +381,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 				}
 					
 				// 添加token到header
-				ServerWebExchange ex = setToken2Header(exchange,config, token, ip);
+				ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
 				return chain.filter(ex).then(Mono.fromRunnable(()->{
 					after(ex, config);
 				}));
@@ -516,22 +518,29 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
     }
 
 	/**
-	 * 	设置用户信息到header
+	 * 	设置请求头信息
 	 * @param exchange
 	 * @param principal
 	 * @param remoteAddress
 	 * @return
 	 */
-	protected ServerWebExchange setToken2Header(ServerWebExchange exchange,Config config, String token,
+	protected ServerWebExchange setRequestHeader(ServerWebExchange exchange,Config config, String token,
 			String remoteAddress) {
 		
+		ServerHttpRequest request = exchange.getRequest();
+		String requestid=request.getHeaders().getFirst("_unione_requestid");
+		
+		
 		// 添加当前用户信息到header
-		ServerHttpRequest req = exchange.getRequest().mutate()
+		Builder reqBuilder = exchange.getRequest().mutate()
 				.header(config.getTokenName(), tokenService.getAuthToken(token))
 				.header("RemoteAddress", remoteAddress)
-				.build();
-
-		return exchange.mutate().request(req).build();
+				.header("_unione_requestid", SidGenHolder.generate()+"");
+		if(!StringUtils.isEmpty(requestid)) {
+			reqBuilder.header("_unione_pre_actionid", requestid);
+		}
+		
+		return exchange.mutate().request(reqBuilder.build()).build();
 	}
 
 	

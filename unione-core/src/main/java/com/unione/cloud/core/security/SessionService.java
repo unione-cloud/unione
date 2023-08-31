@@ -1,6 +1,7 @@
 package com.unione.cloud.core.security;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @描述 <p>用户会话接口
@@ -50,6 +51,12 @@ public interface SessionService{
 	
 	public <A> A getAttr(String name);
 	
-	public boolean isAdministrator();
+	public Map<String, Object> getVars();
+	
+	public <V> V getVar(String name);
+	
+	public <V> void setVar(String name,V value);
+	
+	public boolean isAdmin();
 
 }
