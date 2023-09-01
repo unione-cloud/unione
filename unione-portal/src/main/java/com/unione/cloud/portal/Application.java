@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 /**
  * 微应用服务核心启动类
  */
-//@EnableDiscoveryClient
+@EnableDiscoveryClient
 @SpringBootApplication
 @ComponentScan("com.unione.cloud")
 @EnableFeignClients("com.unione.cloud")

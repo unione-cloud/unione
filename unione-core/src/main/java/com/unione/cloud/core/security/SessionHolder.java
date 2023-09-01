@@ -53,19 +53,19 @@ public class SessionHolder implements SessionService {
 	
 	@Override
 	public Long getUserId() {
-		UserPrincipal principal=this.getUserPrincipal();
-		return principal!=null?principal.getSid():null;
+		UserPrincipal principal=this.getPrincipal();
+		return principal!=null?principal.getId():null;
 	}
 
 	@Override
 	public Long getTenantId() {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getTenantId():null;
 	}
 
 	@Override
 	public Long getOrgId() {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getOrgId():null;
 	}
 
@@ -86,43 +86,37 @@ public class SessionHolder implements SessionService {
 	
 	@Override
 	public String getUsername() {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getUsername():null;
 	}
 
 	@Override
 	public String getRealname() {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getRealName():null;
 	}
 
 	@Override
 	public String getAliasname() {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getAliasName():null;
 	}
 
 	@Override
-	public String getUsertype() {
-		UserPrincipal principal=this.getUserPrincipal();
+	public Integer getUsertype() {
+		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getType():null;
 	}
 
 	@Override
-	public String getUserstatus() {
-		UserPrincipal principal=this.getUserPrincipal();
-		return principal!=null?principal.getStatus():null;
-	}
-
-	@Override
-	public List<Long> getUserRoles() {
-		UserPrincipal principal=this.getUserPrincipal();
+	public List<String> getUserRoles() {
+		UserPrincipal principal=this.getPrincipal();
 		log.debug("获取当前用户信息,principal:{}",principal);
-		return principal!=null?principal.getUserRoles():new ArrayList<Long>();
+		return principal!=null?principal.getUserRoles():new ArrayList<String>();
 	}
 
 	@Override
-	public UserPrincipal getUserPrincipal() {
+	public UserPrincipal getPrincipal() {
 		return session.get();
 	}
 
@@ -134,7 +128,7 @@ public class SessionHolder implements SessionService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <A> A getAttr(String name) {
-		UserPrincipal principal=this.getUserPrincipal();
+		UserPrincipal principal=this.getPrincipal();
 		if(principal!=null) {
 			Map<String , Object> map=principal.getAttr();
 			if(map!=null) {

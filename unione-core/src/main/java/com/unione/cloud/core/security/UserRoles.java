@@ -53,12 +53,15 @@ public interface UserRoles {
 	@ToString
 	public static class Roles{
 		private Long value;
+		private String code;
 		private String name;
 		public Roles(Long value, String name) {
 			this.value = value;
+			this.code=value+"";
 			this.name = name;
 		}
 		public Long value() {return value;}
 		public String name() {return name;}
+		public String code() {return code;}
 	}
 }

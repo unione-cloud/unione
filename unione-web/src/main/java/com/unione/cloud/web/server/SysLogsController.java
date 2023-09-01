@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -17,7 +18,6 @@ import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.web.dao.SysLogsDao;
 import com.unione.cloud.web.model.SysLogs;
 
 import io.swagger.annotations.Api;
@@ -39,7 +39,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	 * 数据访问对象
 	 */
 	@Autowired
-	private SysLogsDao sysLogsDao;
+	private DataBaseDao dataBaseDao;
 
 	/**
 	 * 用户会话对象
@@ -59,7 +59,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 			}
 		}
 		
-		Results<List<SysLogs>> results=sysLogsDao.findListByPage(params);
+		Results<List<SysLogs>> results=dataBaseDao.findListByPage(params);
 		log.debug("退出:查询系统日志列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
 	}
@@ -69,10 +69,10 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	public Results<Long> save(@Validated(Validator.save.class) SysLogs entity) {
 		log.debug("进入:新增系统日志信息.entity:{}",entity);
 		
-		sysLogsDao.insert(entity);
+		dataBaseDao.insert(entity);
 		
 		log.debug("退出:新增系统日志信息.entity:{},result:true",entity);
-		return Results.success(entity.getSid());
+		return Results.success(entity.getId());
 	}
 
 
@@ -84,7 +84,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		
 		// 参数处理
 		SysLogs entity=new SysLogs();
-		entity.setSid(sid);
+		entity.setId(sid);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
@@ -92,7 +92,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 			}
 		}
 		
-		SysLogs tmp = sysLogsDao.findById(entity);
+		SysLogs tmp = dataBaseDao.findById(entity);
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		log.debug("退出:查看系统日志详细信息方法，sid:{},result:true",sid);
@@ -117,7 +117,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		}
 		
 		// 执行删除
-		int count = sysLogsDao.deleteLogicById(entity);
+		int count = dataBaseDao.deleteLogicById(entity);
 
 		log.debug("退出:删除系统日志信息方法，params:{}",params);
 		return Results.build(count>0, (long)count);

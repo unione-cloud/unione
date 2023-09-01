@@ -48,10 +48,13 @@ public class ApiPermisUtil {
 	 */
 	private static Cache<String, Object> urlCache;
 	/**
-	 * 	api 权限缓存
+	 * 	用户 api 权限缓存
 	 */
-	private static Cache<String, List<Long>> permisCache;
-	
+	private static Cache<String, List<Long>> userPermisCache;
+	/**
+	 *  角色	api 权限缓存
+	 */
+	private static Cache<String, List<String>> rolePermisCache;
 	
 	/**
 	 * 	 api => {path:api}				map集合
@@ -124,7 +127,8 @@ public class ApiPermisUtil {
 	 */
 	@Value("${permis.api.cache.permistime:300}")
 	public void setApiPermisCacheTime(int time) {
-		permisCache=CacheBuilder.newBuilder().expireAfterWrite(time, TimeUnit.SECONDS).build();
+		userPermisCache=CacheBuilder.newBuilder().expireAfterWrite(time, TimeUnit.SECONDS).build();
+		rolePermisCache=CacheBuilder.newBuilder().expireAfterWrite(time, TimeUnit.SECONDS).build();
 	}
 	
 	
@@ -136,12 +140,12 @@ public class ApiPermisUtil {
 	 */
 	private static boolean validUserPsermis(Long userid,String apiUrl) {
 		log.debug("进入:验证用户api权限方法，user id:{},api url:{}",userid,apiUrl);
-		List<Long> users=permisCache.getIfPresent("USER_PERMIS_"+apiUrl);
+		List<Long> users=userPermisCache.getIfPresent("USER_PERMIS_"+apiUrl);
 		if(users==null) {
 			Set<Long> uids = redisService.getSet(String.format(PERMIS_API_USER, apiUrl));
 			if(uids!=null && !uids.isEmpty()) {
 				users = new ArrayList<>(uids);
-				permisCache.put("USER_PERMIS_"+apiUrl, users);
+				userPermisCache.put("USER_PERMIS_"+apiUrl, users);
 			}
 		}
 		
@@ -166,14 +170,14 @@ public class ApiPermisUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private static boolean validRolePsermis(List<Long> roleIds,String apiUrl) {
+	private static boolean validRolePsermis(List<String> roleIds,String apiUrl) {
 		log.debug("进入:验证角色api权限方法，role ids:{},api url:{}",roleIds,apiUrl);
-		List<Long> roles=permisCache.getIfPresent("ROLE_PERMIS_"+apiUrl);
+		List<String> roles=rolePermisCache.getIfPresent("ROLE_PERMIS_"+apiUrl);
 		if(roles==null) {
-			Set<Long> rids = redisService.getSet(String.format(PERMIS_API_ROLE, apiUrl));
+			Set<String> rids = redisService.getSet(String.format(PERMIS_API_ROLE, apiUrl));
 			if(rids!=null && !rids.isEmpty()) {
 				roles = new ArrayList<>(rids);
-				permisCache.put("ROLE_PERMIS_"+apiUrl, roles);
+				rolePermisCache.put("ROLE_PERMIS_"+apiUrl, roles);
 			}
 		}
 		
@@ -200,7 +204,7 @@ public class ApiPermisUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static boolean validPsermis(UserPrincipal principal,String url) {
-		log.debug("进入:验证用户是否拥有该url反问权限方法,permis enable:{},user id:{},user name:{},请求url:{}",API_PERMIS_ENABLE,principal.getSid(),principal.getUsername(),url);
+		log.debug("进入:验证用户是否拥有该url反问权限方法,permis enable:{},user id:{},user name:{},请求url:{}",API_PERMIS_ENABLE,principal.getId(),principal.getUsername(),url);
 		if(!API_PERMIS_ENABLE) {
 			return true;
 		}
@@ -209,7 +213,7 @@ public class ApiPermisUtil {
 		// 超级管理员、系统运维人员过滤
 		if(ObjectUtil.equals(ADMIN_USER, principal.getUsername()) || principal.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value()) ||
 				principal.getUserRoles().contains(UserRoles.SYSOPS_USER.value())) {
-			log.info("api权限验证:当前用户为超级管理员或系统运维人员，所有api接口都可以访问,user id:{},user name:{},请求url:{}",principal.getSid(),principal.getUsername(),url);
+			log.info("api权限验证:当前用户为超级管理员或系统运维人员，所有api接口都可以访问,user id:{},user name:{},请求url:{}",principal.getId(),principal.getUsername(),url);
 			return true;
 		}
 		
@@ -247,10 +251,10 @@ public class ApiPermisUtil {
 				log.debug("成功获取api信息,count:{}",apiUrls.size());
 			}else{
 				if(API_PERMIS_POWER_ENABLE==false) {
-					log.warn("api权限集合缓存为空，未开启强验证，所有请求将放行,redis key:{},user id:{},user name:{},请求url:{}",PERMIS_API_INFO,principal.getSid(),principal.getUsername(),url);
+					log.warn("api权限集合缓存为空，未开启强验证，所有请求将放行,redis key:{},user id:{},user name:{},请求url:{}",PERMIS_API_INFO,principal.getId(),principal.getUsername(),url);
 					return true;
 				}
-				log.warn("api权限集合缓存为空，开启强验证，所有请求将限制,redis key:{},user id:{},user name:{},请求url:{}",PERMIS_API_INFO,principal.getSid(),principal.getUsername(),url);
+				log.warn("api权限集合缓存为空，开启强验证，所有请求将限制,redis key:{},user id:{},user name:{},请求url:{}",PERMIS_API_INFO,principal.getId(),principal.getUsername(),url);
 				return false;
 			}
 		}
@@ -272,13 +276,13 @@ public class ApiPermisUtil {
 				if(permised==null || ObjectUtil.equals(permised, 0)) {
 					return true;
 				}
-				log.info("api url权限验证[本地缓存]: 用户user id:{},user name:{},请求url:{},api id:{},api url:{},api title:{}",principal.getSid(),principal.getUsername(),url,apiId,apiUrl,apiTitle);
+				log.info("api url权限验证[本地缓存]: 用户user id:{},user name:{},请求url:{},api id:{},api url:{},api title:{}",principal.getId(),principal.getUsername(),url,apiId,apiUrl,apiTitle);
 				
 				// 根据用户角色验证权限
 				boolean hadRolePermis = validRolePsermis(principal.getUserRoles(), ctx+apiUrl);
 				if(hadRolePermis==false) {
 					// 根据用户id验证权限
-					boolean hadUserPermis = validUserPsermis(principal.getSid(), ctx+apiUrl);
+					boolean hadUserPermis = validUserPsermis(principal.getId(), ctx+apiUrl);
 					AssertUtil.service().isTrue(hadUserPermis, "当前用户无该api访问权限");
 				}
 				return true;
@@ -301,15 +305,15 @@ public class ApiPermisUtil {
 						if(permised==null || ObjectUtil.equals(permised, 0)) {
 							return true;
 						}
-						log.info("api url权限验证: 用户user id:{},user name:{},请求url:{},api id:{},api url:{},api title:{}",principal.getSid(),principal.getUsername(),url,apiId,x,apiTitle);
+						log.info("api url权限验证: 用户user id:{},user name:{},请求url:{},api id:{},api url:{},api title:{}",principal.getId(),principal.getUsername(),url,apiId,x,apiTitle);
 						
 						// 根据用户角色验证权限
 						boolean hadRolePermis = validRolePsermis(principal.getUserRoles(), x);
 						if(hadRolePermis==false) {
 							// 根据用户id验证权限
-							boolean hadUserPermis = validUserPsermis(principal.getSid(), x);
+							boolean hadUserPermis = validUserPsermis(principal.getId(), x);
 							if(hadUserPermis==false && x.endsWith("/**")) {
-								log.info("当前用户无前缀匹配url权限,继续匹配,user id:{},user name:{}api url:{},req url:{}",principal.getSid(),principal.getUsername(),x,url);
+								log.info("当前用户无前缀匹配url权限,继续匹配,user id:{},user name:{}api url:{},req url:{}",principal.getId(),principal.getUsername(),x,url);
 								return false;
 							}
 							AssertUtil.service().isTrue(hadUserPermis, "当前用户无该api访问权限");
@@ -321,18 +325,18 @@ public class ApiPermisUtil {
 			}
 			
 		} catch (ServiceException e) {
-			log.warn("url权限验证失败，当前用户无权限,用户user id:{},user name:{},请求url:{},error:{}",principal.getSid(),principal.getUsername(),url,e.getMessage());
+			log.warn("url权限验证失败，当前用户无权限,用户user id:{},user name:{},请求url:{},error:{}",principal.getId(),principal.getUsername(),url,e.getMessage());
 			return false;
 		} catch (Exception e) {
-			log.warn("url权限处理失败,用户user id:{},user name:{},请求url:{}",principal.getSid(),principal.getUsername(),url,e);
+			log.warn("url权限处理失败,用户user id:{},user name:{},请求url:{}",principal.getId(),principal.getUsername(),url,e);
 		}
 		
 		if(fundedApi == false && API_PERMIS_POWER_ENABLE==false) {
-			log.warn("用户user id:{},user name:{},请求url:{},url匹配失败，未找到api信息，未开启权限强验证，当前请求：放行",principal.getSid(),principal.getUsername(),url);
+			log.warn("用户user id:{},user name:{},请求url:{},url匹配失败，未找到api信息，未开启权限强验证，当前请求：放行",principal.getId(),principal.getUsername(),url);
 			return true;
 		}
 		
-		log.debug("退出:验证用户是否拥有该url反问权限方法,permis enable:{},user id:{},user name:{},请求url:{},result:{}",API_PERMIS_ENABLE,principal.getSid(),principal.getUsername(),url,fundedApi);
+		log.debug("退出:验证用户是否拥有该url反问权限方法,permis enable:{},user id:{},user name:{},请求url:{},result:{}",API_PERMIS_ENABLE,principal.getId(),principal.getUsername(),url,fundedApi);
 		return fundedApi;
 	}
 	

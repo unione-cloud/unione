@@ -118,7 +118,7 @@ public abstract class AbstractAuthRealm {
 					if("redis".equals(AUTH_CACHE_TYPE)) {
 						redisService.put(AUTH_CACHE_PREFIX+authCode,principal,Duration.ofSeconds((long)(AUTH_CACHE_TIME*(Math.random()+1))));
 					}
-					log.info("SSO授权认证成功,realm name:{},auth code:{},user id:{}",realmName,authCode,principal.getSid());
+					log.info("SSO授权认证成功,realm name:{},auth code:{},user id:{}",realmName,authCode,principal.getId());
 				}else {
 					log.error("执行SSO授权认证失败，error:{}",result.getMessage());
 					// 清空缓存

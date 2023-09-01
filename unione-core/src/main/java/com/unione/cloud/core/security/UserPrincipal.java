@@ -2,20 +2,16 @@ package com.unione.cloud.core.security;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
 /**
- * @描述 <p>安全认证模型类
+ * @描述 用户认证凭证对象
  * @author Jeking Yang
  * @since 1.0.0
  */
@@ -27,53 +23,80 @@ public class UserPrincipal implements Serializable {
 	/**
 	 * 用户主键
 	 */
-	private Long sid;
-	
-	private Long orgId;
-
+	private Long id;
 	/**
 	 * 租户编码
 	 */
 	private Long tenantId;
-	
+	/**
+	 * 机构ID
+	 */
+	private Long orgId;
+	/**
+	 * 机构名称
+	 */
 	private String orgName;
-	
+	/**
+	 * 用户账号
+	 */
 	private String username;
-	
+	/**
+	 * 账号密码
+	 */
 	@JsonIgnore
-	private String password;
-	
+	private String pwdText;
+	/**
+	 * 密码盐
+	 */
+	@JsonIgnore
+	private String pwdSalt;
+	/**
+	 * 真实姓名
+	 */
 	private String realName;
-	
+	/**
+	 * 昵称
+	 */
 	private String aliasName;
-	
-	private String photo;
-	
-	private String type;
-	
-	private String status;
-	
+	/**
+	 * 头像
+	 */
+	private String avatar;
+	/**
+	 * 用户类型
+	 */
+	private Integer type;
+	/**
+	 * 用户状态
+	 */
+	private Integer status;
+	/**
+	 * 上次登录IP
+	 */
 	private String lastLoginIp;
-	
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date lastLoginTime;
-	
-	private long totalLoginCount;
-	
-	private Integer totalLoginFailure;
-	
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date expireTime;
-
-	private List<Long> userRoles=new ArrayList<Long>();
-
+	/**
+	 * 上次登录时间：时间戳
+	 */
+	private Long lastLoginTime;
+	/**
+	 * 累计成功登陆次数
+	 */
+	private Long totalLoginSuccess;
+	/**
+	 * 累计失败登陆次数
+	 */
+	private Long totalLoginFailure;
+	/**
+	 * 锁定时间期限
+	 */
+	private Long lockTime;
+	/**
+	 * 用户角色列表(编码)
+	 */
+	private List<String> userRoles=new ArrayList<String>();
+	/**
+	 * 扩展属性
+	 */
 	private Map<String, Object> attr=new HashMap<String, Object>();
-	
-	// web 回话token（jwt+md5签名串）
-	private String webToken;
-	// app 回话token（jwt+md5签名串）
-	private String appToken;
 	
 }

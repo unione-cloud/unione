@@ -27,7 +27,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
@@ -201,8 +200,8 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 					
 					// token鉴权防止越权逻辑：开始  
 					if(config.tokenSignatureEnable && StringUtils.isNotEmpty((String)principal.getAttr().get("signature")) || config.tokenSignatureForce) {
-						// token 签名验证 signature = base64(md5(username+ip+totalLoginCount))
-						String signature=SmUtil.sm3().digestHex(principal.getUsername()+ip+principal.getTotalLoginCount());
+						// token 签名验证 signature = base64(md5(username+ip+totalLoginSuccess))
+						String signature=SmUtil.sm3().digestHex(principal.getUsername()+ip+principal.getTotalLoginSuccess());
 						log.debug("token签名验证,signature input:{},sign:{},client ip:{},call url:{},trust ips:{}",principal.getAttr().get("signature"),
 								signature,ip,requestUri,config.trustIpAddrs);
 						
@@ -223,7 +222,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 							
 							SessionHolder.setToken(tokenService.getAuthToken(token));
 							LogsUtil.set(LogType.Token, "token签名验证失败");
-							LogsUtil.setTarget(principal.getSid());
+							LogsUtil.setTarget(principal.getId());
 							LogsUtil.setIp(ip);
 							LogsUtil.setPrincipal(principal);
 							LogsUtil.add("token签名验证失败，用户username:%s,的token被非法获取并使用,非法使用ip:%s",principal.getUsername(),ip);
@@ -503,9 +502,6 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			HttpHeaders httpHeaders = response.getHeaders();
 			httpHeaders.add("Content-Type", "application/json; charset=UTF-8");
 			httpHeaders.add("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-			if(principle!=null) {
-				httpHeaders.add("mbp-uid", principle.getSid()+"");
-			}
 			
 			// 添加 token cookie
 			ResponseCookie cookie = ResponseCookie.from(config.getTokenName(), token).path("/").build();

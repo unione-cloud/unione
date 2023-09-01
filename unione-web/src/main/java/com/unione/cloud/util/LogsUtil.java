@@ -18,12 +18,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.web.dao.SysLogsDao;
 import com.unione.cloud.web.model.SysLogs;
 
 import cn.hutool.core.date.DateUtil;
@@ -36,11 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 public class LogsUtil {
 	
 	private static String     appCode;
-	private static SysLogsDao sysLogsDao;
+	private static DataBaseDao dataBaseDao;
 	
 	@Autowired
-	public void setSysLogsDao(SysLogsDao sysLogsDao) {
-		LogsUtil.sysLogsDao = sysLogsDao;
+	public void setDataBaseDao(DataBaseDao dataBaseDao) {
+		LogsUtil.dataBaseDao = dataBaseDao;
 	}
 	
 	@Value("${spring.application.name}")
@@ -217,13 +217,13 @@ public class LogsUtil {
 			ent.setAppCode(appCode);
 			ent.setCreated(DateUtil.date());
 			ent.setStartTime(DateUtil.date());
-			if(sessionService.getUserPrincipal()!=null) {
+			if(sessionService.getPrincipal()!=null) {
 				ent.setTenantId(sessionService.getTenantId());
 				ent.setOrgId(sessionService.getOrgId());
 				ent.setUserId(sessionService.getUserId());
 				ent.setUserName(sessionService.getRealname());
-				ent.setCreatedBy(sessionService.getUserId());
-				ent.setLastUpdatedBy(sessionService.getUserId());
+				ent.setCreatedBy(sessionService.getUsername());
+				ent.setLastUpdatedBy(sessionService.getUsername());
 			}
 			entry.set(ent);
 			
@@ -583,7 +583,7 @@ public class LogsUtil {
 		entry.remove();
 		request.remove();
 		try {
-			runnable = new SaveLogsThread(sysLogsDao, logs);
+			runnable = new SaveLogsThread(dataBaseDao, logs);
 			
 			// 判断是否要保存日志
 			if(OPEN_STATUS && (NO_QUERY_LOG==false || 
@@ -613,11 +613,11 @@ public class LogsUtil {
 	 * 	异步保存日志线程
 	 */
 	private static class SaveLogsThread implements Runnable{
-		private SysLogsDao sysLogsDao;
+		private DataBaseDao dataBaseDao;
 		private SysLogs logs;
 		
-		public SaveLogsThread(SysLogsDao sysLogsDao, SysLogs logs) {
-			this.sysLogsDao = sysLogsDao;
+		public SaveLogsThread(DataBaseDao dataBaseDao, SysLogs logs) {
+			this.dataBaseDao = dataBaseDao;
 			this.logs = logs;
 		}
 
@@ -625,8 +625,8 @@ public class LogsUtil {
 		public void run() {
 			log.debug("异步保存日志信息线程启动成功,thread:{}",this);
 			log.debug("异步保存日志信息开始>>");
-			sysLogsDao.insert(logs);
-			log.debug("异步保存日志信息完成>>log id:{}",logs.getSid());
+			dataBaseDao.insert(logs);
+			log.debug("异步保存日志信息完成>>log id:{}",logs.getId());
 		}
 		
 	}

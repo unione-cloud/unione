@@ -1,21 +1,16 @@
 package com.unione.cloud.core.token;
 
 import java.security.MessageDigest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.Converter;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +31,7 @@ import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,7 +50,13 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 public class TokenService{
 	
-	@Value("${security.jwt.secret:com.aifa.mins.token}")
+	/**
+	 * 	请求信息token名称
+	 */
+	@Value("${security.jwt.token:token}")
+	private String REQUEST_TOKEN;
+	
+	@Value("${security.jwt.secret:com.unione.cloud.token}")
     private String JWT_SECRET;
 
     @Value("${security.jwt.expires:3600}")
@@ -69,6 +71,18 @@ public class TokenService{
 
     @Value("${security.jwt.issuer:mins-token}")
     private String JWT_ISSUER;
+    
+    /**
+     * 	自动刷新开关（统一在gateway中开启，其他服务中关闭）
+     */
+    @Value("${security.jwt.autoEnable:false}")
+    private boolean autoEnable;
+    
+    /**
+     * 	token自动续期时间（默认：token过期前10分钟）
+     */
+    @Value("${security.jwt.autoTime:10}")
+    private int autoLiteTime;
 
     /**
 	 * 	Token Center Manage 令牌中心化管理:开关，默认关闭
@@ -88,18 +102,6 @@ public class TokenService{
     @Value("${security.tcm.key:TOKEN}")
     private String tcmKey;
     
-    /**
-     * 	Token Center Manage 令牌中心化管理，自动刷新（统一在gateway中开启，其他服务中关闭）
-     */
-    @Value("${security.tcm.autoEnable:false}")
-    private boolean tcmAutoEnable;
-    
-    /**
-     * 	Token Center Manage 令牌中心化管理，token自动续期时间（默认：token过期前10分钟）
-     */
-    @Value("${security.tcm.lifetime:10}")
-    private int tcmAutoLiteTime;
-    
     
     /**
      * Redis 服务
@@ -110,48 +112,7 @@ public class TokenService{
     private JWTVerifier jwtv;
     
     
-    public TokenService() {
-		ConvertUtils.register(new Converter() {
-			private SimpleDateFormat format1=new SimpleDateFormat("yyyy-MM-dd");
-			private SimpleDateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			private SimpleDateFormat format3=new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T> T convert(Class<T> type, Object value) {
-				if(value!=null) {
-					if(value instanceof Date || value.getClass().equals(type)) {
-						return (T)value;
-					}
-					if(value instanceof java.sql.Date) {
-						java.sql.Date sdate=(java.sql.Date)value;
-						return (T)new Date(sdate.getTime());
-					}
-					if(value instanceof String) {
-						String str=StringUtils.trim(value.toString());
-						try {
-							if(str.length()==10) {
-								// format=yyyy-MM-dd
-								return (T)format1.parse(str);
-							}
-							if(str.length()==19) {
-								// format=yyyy-MM-dd HH:mm:ss
-								return (T)format2.parse(str);
-							}
-							return (T)format3.parse(str);
-						} catch (ParseException e) {
-							log.error("Date Parse Error,source:{}",str,e);
-						}
-					}
-				}
-				return null;
-			}
-		}, Date.class);
-    }
-    
-    
-    
     /**
-     * 	
      * @param principal
      * @return
      */
@@ -179,28 +140,11 @@ public class TokenService{
 				.withIssuedAt(issued)
 				.withIssuer(JWT_ISSUER)
 				.withSubject(principal.getUsername())
-				.withClaim("sid", principal.getSid())
-				.withClaim("orgId", principal.getOrgId())
-				.withClaim("tenantId", principal.getTenantId())
-				.withClaim("orgName", principal.getOrgName())
-				.withClaim("username", principal.getUsername())
-				.withClaim("realName", principal.getRealName())
-				.withClaim("aliasName", principal.getAliasName())
-				.withClaim("photo", principal.getPhoto())
-				.withClaim("type", principal.getType())
-				.withClaim("status", principal.getStatus())
-				.withClaim("lastLoginIp", principal.getLastLoginIp())
-				.withClaim("totalLoginCount", principal.getTotalLoginCount())
-				.withClaim("attr", mapper.writeValueAsString(principal.getAttr()))
-				.withArrayClaim("userRoles", principal.getUserRoles().toArray(new Long[principal.getUserRoles().size()]));
-			
-			if(principal.getLastLoginTime()!=null) {
-				builder.withClaim("lastLoginTime", principal.getLastLoginTime().getTime());
-			}
+				.withClaim("principal", mapper.writeValueAsString(principal));
 			
 			return builder.sign(algorithm);
 		} catch (Exception e) {
-			log.error("token生成失败,user name:{},sid:{}",principal.getUsername(),principal.getSid(),e);
+			log.error("token生成失败,user name:{},sid:{}",principal.getUsername(),principal.getId(),e);
 			throw new ServiceException("token生成失败",e);
 		}
     }
@@ -238,7 +182,7 @@ public class TokenService{
         	TcmEntry tcm=TcmEntry.builder()
         			.token(origToken)
         			.tenantId(principal.getTenantId())
-        			.userId(principal.getSid())
+        			.userId(principal.getId())
         			.userName(principal.getUsername())
         			.build();
             this.redisService.put(tcmDb,tcmKey+":"+token,tcm,Duration.ofSeconds(JWT_EXPIRES-30));
@@ -317,16 +261,28 @@ public class TokenService{
 		// 2、生成token
 		if(principal!=null) {
 			newToken=this.build(principal);
-			//token长度大于100则是未进行token签名的原生jwt令牌
-			if(tcmEnable && token.length()<100){
+			//token中心化管理
+			if(tcmEnable){
+				this.redisService.delete(tcmDb,tcmKey+":"+token);			
+				token = this.signature(newToken);
 				TcmEntry tcm=TcmEntry.builder()
 	        			.token(newToken)
 	        			.tenantId(principal.getTenantId())
-	        			.userId(principal.getSid())
+	        			.userId(principal.getId())
 	        			.userName(principal.getUsername())
 	        			.build();
 	            this.redisService.put(tcmDb,tcmKey+":"+token,tcm,Duration.ofSeconds(JWT_EXPIRES-30));
 	            newToken=token;
+			}else {
+				// 设置cookie
+    			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+	        	if(attributes!=null) {
+	        		HttpServletResponse response = attributes.getResponse();
+	        		if(response!=null) {
+	        			Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
+	        			response.addCookie(ck);
+	        		}
+	        	}
 			}
 		}
     	
@@ -363,7 +319,6 @@ public class TokenService{
 	    		jwtv = JWT.require(Algorithm.HMAC256(JWT_SECRET)).build();
 	    	}
 	        DecodedJWT jwt = null;
-	
 	        try {
 	            jwt=jwtv.verify(token);
 	        } catch (Exception e) {
@@ -378,11 +333,11 @@ public class TokenService{
 	            log.error("token验证失败，uri:{},token:{}",uri,token,e);
 	            return null;
 	        }
-	        
+	       
 	        // 解析payload
 	        String payload = jwt.getPayload();
 	        if(StringUtils.isEmpty(payload)){
-	            log.error("用户信息不能为空,token:{}",token);
+	            log.error("token信息异常，payload不能为空,token:{}",token);
 	            return null;
 			}
 			
@@ -391,39 +346,39 @@ public class TokenService{
 	
 	        ObjectMapper  mapper = new ObjectMapper();
             Map<String,Object> map=mapper.readValue(json, Map.class);
-            if(map.get("attr")!=null) {
-            	// 扩展属性信息处理
-            	map.put("attr", mapper.readValue((String)map.get("attr"), Map.class));
+            if(ObjectUtil.isEmpty(map.get("principal"))) {
+            	log.error("token信息异常，principal不能为空,token:{}",token);
+ 	            return null;
             }
-            if(map.get("userRoles")!=null) {
-            	List<Object> rr=(List<Object>)map.get("userRoles");
-            	List<Long> roles=new ArrayList<Long>();
-            	for(Object r:rr) {
-            		roles.add(Long.parseLong(r.toString()));
-            	}
-            	map.put("userRoles", roles);
-            }
-            if(map.get("lastLoginTime")!=null) {
-            	map.put("lastLoginTime", new Date(Long.parseLong(map.get("lastLoginTime").toString())));
-            }else {
-            	map.remove("lastLoginTime");
-            }
-            principal=new UserPrincipal();
-            BeanUtils.populate(principal, map);
             
-            // 如果是中心化管理，则在token过期前自动续期
-            if(tcmEnable && tcmAutoEnable && origToken.length()<100){
+            // 转换成用户认证凭证对象
+            principal=mapper.readValue(map.get("principal").toString(), UserPrincipal.class);
+            
+            // 如果是开启了自动续期，则在token过期前自动续期
+            if(autoEnable){
             	long timelife = jwt.getExpiresAt().getTime()-System.currentTimeMillis();
-            	if(timelife<=(tcmAutoLiteTime*60*1000)) {
-            		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
+            	if(timelife<=(autoLiteTime*60*1000)) {
             		String newToken=transform(principal);
-            		TcmEntry tcm=TcmEntry.builder()
-    	        			.token(newToken)
-    	        			.tenantId(principal.getTenantId())
-    	        			.userId(principal.getSid())
-    	        			.userName(principal.getUsername())
-    	        			.build();
-            		this.redisService.put(tcmDb,tcmKey+":"+origToken,tcm,Duration.ofSeconds(JWT_EXPIRES-30));
+            		if(tcmEnable) {
+	            		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
+	            		TcmEntry tcm=TcmEntry.builder()
+	    	        			.token(newToken)
+	    	        			.tenantId(principal.getTenantId())
+	    	        			.userId(principal.getId())
+	    	        			.userName(principal.getUsername())
+	    	        			.build();
+	            		this.redisService.put(tcmDb,tcmKey+":"+origToken,tcm,Duration.ofSeconds(JWT_EXPIRES-30));
+            		}else {
+            			// 设置cookie
+            			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        	        	if(attributes!=null) {
+        	        		HttpServletResponse response = attributes.getResponse();
+        	        		if(response!=null) {
+        	        			Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
+        	        			response.addCookie(ck);
+        	        		}
+        	        	}
+            		}
             	}
             }
             

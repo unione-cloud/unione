@@ -110,10 +110,10 @@ public class LogsUtil {
 		UniOneLogs ent=getEntry();
 		ent.setTenantId(principal.getTenantId());
 		ent.setOrgId(principal.getOrgId());
-		ent.setUserId(principal.getSid());
+		ent.setUserId(principal.getId());
 		ent.setUserName(principal.getRealName());
-		ent.setCreatedBy(principal.getSid());
-		ent.setLastUpdatedBy(principal.getSid());
+		ent.setCreatedBy(principal.getUsername());
+		ent.setLastUpdatedBy(principal.getUsername());
 	}
 	
 	/**
