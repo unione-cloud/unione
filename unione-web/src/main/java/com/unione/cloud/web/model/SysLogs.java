@@ -1,11 +1,10 @@
 package com.unione.cloud.web.model;
 
-import java.util.Date;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import org.beetl.sql.annotation.entity.Column;
+import org.beetl.sql.annotation.entity.Table;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -55,98 +54,104 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
+@Table(name="SYS_LOGS")
 public class SysLogs extends Pojo{
-	
-//	/**
-//	 * 	数据验证demo
-//	 */
-//	@NotNull(message = "xxx不能为空",groups = {Validator.save.class,Validator.update.class})
-//	@ApiModelProperty("demo")
-//	private Long demo;
 	
 	// fields start
 	/**
 	 * 应用编码
 	 */
+	@Column("appCode")
 	@ApiModelProperty(value="应用编码",notes="字符长度为：20")
 	private String appCode;
 	/**
 	 * 用户姓名
 	 */
+	@Column("userName")
 	@ApiModelProperty(value="用户姓名",notes="字符长度为：50")
 	private String userName;
 	/**
 	 * 	业务操作ID
 	 */
+	@Column("actionId")
 	@ApiModelProperty(value="业务操作ID",notes="")
 	private Long actionId;
 	/**
 	 * 	请求ID
 	 */
+	@Column("requestId")
 	@ApiModelProperty(value="请求ID",notes="")
 	private Long requestId;
 	/**
 	 * 	前置请求ID（调用链）
 	 */
+	@Column("prequestId")
 	@ApiModelProperty(value="前置请求ID",notes="")
 	private Long prequestId;
 	/**
 	 * 操作标题
 	 */
+	@Column("title")
 	@ApiModelProperty(value="操作标题",notes="字符长度为：50")
 	private String title;
 	/**
 	 * 操作内容
 	 */
+	@Column("contents")
 	@ApiModelProperty(value="操作内容",notes="字符长度为：65,535")
 	private String contents;
 	/**
 	 * 操作类别，字典LOGTYPE query查询，insert新增，update修改，delete删除,login登录，logout注销，resetpwd修改密码
 	 */
+	@Column("types")
 	@ApiModelProperty(value="操作类别，字典LOGTYPE query查询，insert新增，update修改，delete删除,login登录，logout注销，resetpwd修改密码",notes="字符长度为：10")
 	private String types;
 	/**
 	 * 操作状态，字典LOGSTATUS 1成功，2失败，3异常
 	 */
+	@Column("status")
 	@ApiModelProperty(value="操作状态，字典LOGSTATUS 1成功，2失败，3异常",notes="字符长度为：10")
 	private Integer status;
 	/**
 	 * 目标ID
 	 */
+	@Column("targetId")
 	@ApiModelProperty(value="目标ID",notes="字符长度为：19")
 	private Long targetId;
 	/**
 	 * 开始时间
 	 */
+	@Column("startTime")
 	@ApiModelProperty(value="开始时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date startTime;
+	private Long startTime;
 	/**
 	 * 完成时间
 	 */
+	@Column("endTime")
 	@ApiModelProperty(value="完成时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date endTime;
+	private Long endTime;
 	/**
 	 * 操作IP
 	 */
+	@Column("ip")
 	@ApiModelProperty(value="操作IP",notes="字符长度为：50")
 	private String ip;
 	/**
 	 * 扩展信息，标准json对象存储{}
 	 */
+	@Column("extData")
 	@ApiModelProperty(value="扩展信息，标准json对象存储{}",notes="字符长度为：2,147,483,647")
 	private String extData;
 	/**
 	 * 异常消息
 	 */
+	@Column("errorMessage")
 	@ApiModelProperty(value="异常消息",notes="字符长度为：2,147,483,647")
 	private String errorMessage;
 	/**
 	 * 异常代码
 	 */
+	@Column("errorCode")
 	@ApiModelProperty(value="异常代码",notes="字符长度为：10")
 	private String errorCode;
 	// fields end

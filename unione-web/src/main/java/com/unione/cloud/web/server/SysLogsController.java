@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.Finder;
+import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -52,14 +54,20 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	public Results<List<SysLogs>> find(Params<SysLogs> params) {
 		log.debug("进入:查询系统日志列表方法,params:{}",params);
 		// 参数处理
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
-			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
+			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
 				params.getBody().setOrgId(sessionService.getOrgId());
 			}
 		}
 		
-		Results<List<SysLogs>> results=dataBaseDao.findListByPage(params);
+		// 构造sql
+		SqlBuilder<SysLogs> builder=SqlBuilder.build(params)
+			.field("id,name,sex,age")
+			.where("name=? and age>? and realname like ? and time>#{timeBegin} and time<=#{timeEnd}");
+		// 执行查询
+		Results<List<SysLogs>> results=dataBaseDao.findListByPage(builder);
+		
 		log.debug("退出:查询系统日志列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
 	}

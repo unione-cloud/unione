@@ -62,8 +62,8 @@ public class Params<T> implements Serializable {
 	@ApiModelProperty(hidden=true)
 	private boolean dtps;
 
-	@ApiModelProperty(value = "排序字段", example = "sid")
-	private String sortName = "SID";
+	@ApiModelProperty(value = "排序字段", example = "id")
+	private String sortName = "ID";
 
 	@ApiModelProperty(value = "排序方式", example = "desc")
 	private String sortOrder = "DESC";
@@ -129,7 +129,7 @@ public class Params<T> implements Serializable {
 	}
 	
 	public void setSortOrder(String sortOrder) {
-		if(sortOrder!=null && sortOrder.matches("^(?i)(desc|asc)$")) {
+		if(sortOrder!=null && sortOrder.matches("^(?i)(desc|asc|,)$")) {
 			this.sortOrder=sortOrder.toUpperCase();
 		}
 	}

@@ -1,107 +1,104 @@
 package com.unione.cloud.beetsql;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
+
+import lombok.Data;
 
 
 /**
  * 	数据查询对象
  * @author Jeking Yang
  */
+@Data
 public class Finder<T> {
 
-	private Map<String, Boolean> fields=new HashMap<>();
-	private T data;
+	private String[] fields;
 	private T params;
+	private Where where;
 	private Sort[] sorts;
+	private String group;
+	private String having;
 	
-	private Finder(T data) {
-		this.data=data;
-		this.params=data;
-	}
+	private long pageSize = 10;
+	private long page = 1;
 	
-	private Finder(T data,Sort[] sorts) {
-		this.data=data;
-		this.params=data;
-		this.sorts=sorts;
-	}
-	
-	private Finder(T data,T params) {
-		this.data=data;
+	private Finder(T params) {
 		this.params=params;
 	}
 	
 	/**
-	 * 	构建Updater实例
-	 * @param data
-	 * @return
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> Finder<T> build(T data) {
-		return new Finder(data);
-	}
-	
-	public static <T> Finder<T> build(T data,Sort[] sorts) {
-		return new Finder(data);
-	}
-	
-	/**
-	 * 	构建Updater实例
-	 * @param data
+	 * 	构建Finder实例
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static <T> Finder<T> build(T data,T params) {
-		return new Finder(data,params);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> Finder<T> build(T params) {
+		return new Finder(params);
 	}
 	
-	public Sort[] getSorts() {
-		return sorts;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> Finder<T> build(Params<T> params) {
+		Finder<T> finder=new Finder(params.getBody());
+		finder.setPage(params.getPage());
+		finder.setPageSize(params.getPageSize());
+		return finder;
 	}
-	public void setSorts(Sort[] sorts) {
-		this.sorts = sorts;
-	}
-
-	/**
-	 * 	设置可以更新的字段集合
-	 * @param field
-	 * @return
-	 */
-	public Finder<T> fields(String... fields) {
-		for(String field:fields) {
-			this.fields.put(field, true);
+	
+	public Finder<T> field(String... fields){
+		this.fields=fields;
+		return this;
+	} 
+	
+	public Finder<T> where(String where){
+		this.where=new Where(params,where);
+		if(this.group!=null) {
+			this.where.group(this.group);
+		}
+		if(this.having!=null) {
+			this.where.having(this.having);
 		}
 		return this;
 	}
-
-	public Map<String, Boolean> getFields() {
-		return fields;
+	
+	public Finder<T> group(String group){
+		this.group=group.trim();
+		if(this.where!=null) {
+			this.where.group(group);
+		}
+		return this;
 	}
-	public T getData() {
-		return data;
+	
+	public Finder<T> having(String having){
+		this.having=having.trim();
+		if(this.where!=null) {
+			this.where.having(having);
+		}
+		return this;
 	}
-	public T getParams() {
-		return params;
+	
+	public long getStart() {
+		return (page - 1) * pageSize;
 	}
 
 	public Long getId() {
-		AssertUtil.service().isTrue(params instanceof Pojo, "Finder params实例对象类型必须是com.unione.cloud.core.model.Pojo");
+		AssertUtil.service().isTrue(params instanceof Pojo, "Updater params实例对象类型必须是com.unione.cloud.core.model.Pojo");
 		return ((Pojo)params).getId();
 	}
 	public Long getTenantId() {
-		AssertUtil.service().isTrue(params instanceof Pojo, "Finder params实例对象类型必须是com.unione.cloud.core.model.Pojo");
+		AssertUtil.service().isTrue(params instanceof Pojo, "Updater params实例对象类型必须是com.unione.cloud.core.model.Pojo");
 		return ((Pojo)params).getTenantId();
 	}
 	public Long getOrgId() {
-		AssertUtil.service().isTrue(params instanceof Pojo, "Finder params实例对象类型必须是com.unione.cloud.core.model.Pojo");
+		AssertUtil.service().isTrue(params instanceof Pojo, "Updater params实例对象类型必须是com.unione.cloud.core.model.Pojo");
 		return ((Pojo)params).getOrgId();
 	}
 	public Long getUserId() {
-		AssertUtil.service().isTrue(params instanceof Pojo, "Finder params实例对象类型必须是com.unione.cloud.core.model.Pojo");
+		AssertUtil.service().isTrue(params instanceof Pojo, "Updater params实例对象类型必须是com.unione.cloud.core.model.Pojo");
 		return ((Pojo)params).getUserId();
 	}
+	
+	
+	
 }

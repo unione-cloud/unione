@@ -1,13 +1,9 @@
 package com.unione.cloud.gateway.feign;
 
-import java.util.Date;
-
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.model.Pojo;
 
@@ -74,15 +70,11 @@ public interface UniOneLogsApi {
 		/**
 		 * 操作开始时间
 		 */
-		@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-		@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-		private Date startTime;
+		private Long startTime;
 		/**
 		 * 操作完成时间
 		 */
-		@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-		@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-		private Date endTime;
+		private Long endTime;
 		
 		/**
 		 * 操作IP
