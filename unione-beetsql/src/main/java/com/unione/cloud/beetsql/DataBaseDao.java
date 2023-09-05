@@ -55,7 +55,7 @@ public class DataBaseDao {
 			pojo.setLastUpdatedBy(sessionService.getUsername());
 		}
 		
-		int len = this.sqlManager.insertTemplate(entity);
+		int len = this.sqlManager.insertTemplate(entity.getClass(),entity);
 		AssertUtil.service().isTrue(len>0, "保存数据失败");
 	}
 

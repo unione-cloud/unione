@@ -53,18 +53,13 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	@Override
 	public Results<List<SysLogs>> find(Params<SysLogs> params) {
 		log.debug("进入:查询系统日志列表方法,params:{}",params);
-		// 参数处理
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			params.getBody().setTenantId(sessionService.getTenantId());
-			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				params.getBody().setOrgId(sessionService.getOrgId());
-			}
-		}
 		
 		// 构造sql
 		SqlBuilder<SysLogs> builder=SqlBuilder.build(params)
-			.field("id,name,sex,age")
-			.where("name=? and age>? and realname like ? and time>#{timeBegin} and time<=#{timeEnd}");
+			.field("id as sid,title,types,userName,actionId,requestId")
+			.where("appCode=? AND actionId=? AND requestId=? AND userName like ? AND "
+					+ "title like ? AND types=? AND targetId=? AND status=? AND "
+					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
 		// 执行查询
 		Results<List<SysLogs>> results=dataBaseDao.findListByPage(builder);
 		

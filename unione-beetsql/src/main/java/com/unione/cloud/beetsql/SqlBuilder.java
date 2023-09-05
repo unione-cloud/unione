@@ -1,5 +1,6 @@
 package com.unione.cloud.beetsql;
 
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,12 +13,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.annotation.entity.Table;
+import org.beetl.sql.core.engine.SQLParameter;
 
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
-import com.unione.cloud.core.security.UserPrincipal;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +62,12 @@ public class SqlBuilder<T> {
 	private long pageSize = 10;
 	@Getter
 	private long page = 1;
+	
+	private Pattern fieldRegix=Pattern.compile("[\\w]+");
+	private Pattern varRegix=Pattern.compile("\\[[\\s]*\\w*[\\s]*\\]");
+	private Pattern conditionRegix=Pattern.compile("[\\w]+[\\s]*(=|>|>=|<|<=|like|LIKE|rlike|RLIKE|llike|LLIKE)[\\s]*(\\?|\\[[\\s]*\\w*[\\s]*\\])");
+	@Getter
+	private List<SQLParameter> conditions=new ArrayList<>();
 	
 	private SqlBuilder(T params) {
 		this.params=params;
@@ -142,6 +150,7 @@ public class SqlBuilder<T> {
 		}
 		if(StringUtils.isEmpty(this.where)) {
 			this.whereSql="";
+			return;
 		}
 		
 		// (name=? and age>? and realname like ?) and (time>#{timeBegin} or time<=#{timeEnd})
@@ -149,25 +158,55 @@ public class SqlBuilder<T> {
 		
 		// 思路： 正则替换成beetl函数处理，
 		// 如：(uniWhere("name=?") and uniWhere("age>?") and uniWhere("realname like ?") ) and ( uniWhere("time>#{timeBegin}") or uniWhere("time<=#{timeEnd}"))
-		Pattern pattern=Pattern.compile("[\\w]+[\\s]*(=|>|>=|<|<=|like|LIKE|rlike|RLIKE|llike|LLIKE)[\\s]*(\\?|#\\{[\\s]*\\w*[\\s]*\\})");
-		Matcher matcher=pattern.matcher(this.where);
-		
-		this.whereSql=this.where;
+		Matcher matcher=conditionRegix.matcher(this.where);
+		this.whereSql="WHERE "+this.where;
 		while(matcher.find()) {
-			this.whereSql=this.whereSql.replace(matcher.group(), "uniWhere(\""+matcher.group()+"\")");
+			String condition=matcher.group();
+			this.whereSql=this.whereSql.replace(condition, "${uniWhere("+conditions.size()+")}");
+			condition(condition);
 		}
+	}
+	
+	private void condition(String condition) {
+		Matcher matcher=fieldRegix.matcher(condition);
+		matcher.find();
+		String fieldName=matcher.group();
+		if(condition.indexOf("?")<0) {
+			matcher=varRegix.matcher(condition);
+			matcher.find();
+			String group=matcher.group();
+			fieldName=group.substring(1, group.length()-1);
+			condition=condition.replace(group, "?");
+		}
+		
+		// 验证属性名称
+		if(this.params instanceof Map) {
+			// 动态表单字段验证
+			
+		}else {
+			// Model字段验证
+			PropertyDescriptor prop = BeanUtil.getPropertyDescriptor(this.params.getClass(), fieldName);
+			AssertUtil.database().notNull(prop, "属性"+fieldName+"非法，请检查");
+		}
+		
+		Object fieldValue=BeanUtil.getFieldValue(this.params, fieldName);
+		this.conditions.add(new SQLParameter(condition, fieldValue));
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){
 		String[] list=fieldList;
 		if(fieldList.length==1 && fieldList[0].indexOf(",")>0) {
-			list=fieldList[0].replaceAll("\\s", "").split(",");
+			list=fieldList[0].split(",");
 		}
 		this.fields=new HashMap<>();
 		this.fieldList=new String[list.length];
 		for(int i=0;i<list.length;i++) {
-			String field=list[i]; 
+			String field=list[i].trim(); 
 			String colName=field.replaceAll("[A-Z]", "_$0").toUpperCase();
+			Integer asIndex = field.toUpperCase().indexOf(" AS ");
+			if(asIndex > 0) {
+				colName=field.substring(0, asIndex).replaceAll("[A-Z]", "_$0").toUpperCase()+field.substring(asIndex);
+			}
 			this.fields.put(field,colName);
 			this.fieldList[i]=colName;
 		}
