@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.Finder;
 import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;

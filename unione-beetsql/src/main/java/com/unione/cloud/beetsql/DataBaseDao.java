@@ -32,6 +32,9 @@ public class DataBaseDao {
 	
 	@Autowired
 	protected SQLManager sqlManager;
+	{
+		SQLManager.javabeanStrict(false);
+	}
 	
 	/**
 	 * 	保存数据
