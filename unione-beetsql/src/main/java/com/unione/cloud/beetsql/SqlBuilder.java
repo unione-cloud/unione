@@ -153,44 +153,35 @@ public class SqlBuilder<T> {
 			return;
 		}
 		
-		// (name=? and age>? and realname like ?) and (time>#{timeBegin} or time<=#{timeEnd})
+		// (name=? and age>? and realname like [?+'%'] and title like [keyword+'%']) 
+		// and types in ? and subtype not in [subtypes]
+		// and (time>[timeBegin] or time<=[timeEnd])
 		log.info("SQL 查询条件处理 where:{}",where);
 		
 		// 思路： 正则替换成beetl函数处理，
-		// 如：(uniWhere("name=?") and uniWhere("age>?") and uniWhere("realname like ?") ) and ( uniWhere("time>#{timeBegin}") or uniWhere("time<=#{timeEnd}"))
 		Matcher matcher=conditionRegix.matcher(this.where);
-		this.whereSql="WHERE "+this.where;
+		this.whereSql="WHERE 1=1 "+this.where;
 		while(matcher.find()) {
 			String condition=matcher.group();
-			this.whereSql=this.whereSql.replace(condition, "${uniWhere("+conditions.size()+")}");
-			condition(condition);
+			this.whereSql=this.whereSql.replace(condition, whereCondition(condition));
 		}
 	}
 	
-	private void condition(String condition) {
+	private String whereCondition(String condition) {
 		Matcher matcher=fieldRegix.matcher(condition);
 		matcher.find();
 		String fieldName=matcher.group();
+		condition=condition.replace(fieldName, fieldName.replaceAll("[A-Z]", "_$0"));
 		if(condition.indexOf("?")<0) {
 			matcher=varRegix.matcher(condition);
 			matcher.find();
 			String group=matcher.group();
-			fieldName=group.substring(1, group.length()-1);
-			condition=condition.replace(group, "?");
-		}
-		
-		// 验证属性名称
-		if(this.params instanceof Map) {
-			// 动态表单字段验证
-			
+			String paramName=group.substring(1, group.length()-1);
+			condition=condition.replace(group, String.format("#{%s}", paramName));
 		}else {
-			// Model字段验证
-			PropertyDescriptor prop = BeanUtil.getPropertyDescriptor(this.params.getClass(), fieldName);
-			AssertUtil.database().notNull(prop, "属性"+fieldName+"非法，请检查");
+			condition=condition.replace("?", String.format("#{params.%s}", fieldName));
 		}
-		
-		Object fieldValue=BeanUtil.getFieldValue(this.params, fieldName);
-		this.conditions.add(new SQLParameter(condition, fieldValue));
+		return String.format("-- @if(uniNotNull(params.%s)){\r\n%s\r\n -- @}",condition);
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){
