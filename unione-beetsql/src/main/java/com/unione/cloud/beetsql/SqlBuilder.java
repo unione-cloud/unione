@@ -64,8 +64,8 @@ public class SqlBuilder<T> {
 	private long page = 1;
 	
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
-	private Pattern varRegix=Pattern.compile("\\[[\\s]*\\w*[\\s]*\\]");
-	private Pattern conditionRegix=Pattern.compile("[\\w]+[\\s]*(=|>|>=|<|<=|like|LIKE|rlike|RLIKE|llike|LLIKE)[\\s]*(\\?|\\[[\\s]*\\w*[\\s]*\\])");
+	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\]");
+	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|LIKE|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	@Getter
 	private List<SQLParameter> conditions=new ArrayList<>();
 	
@@ -171,17 +171,37 @@ public class SqlBuilder<T> {
 		Matcher matcher=fieldRegix.matcher(condition);
 		matcher.find();
 		String fieldName=matcher.group();
-		condition=condition.replace(fieldName, fieldName.replaceAll("[A-Z]", "_$0"));
-		if(condition.indexOf("?")<0) {
-			matcher=varRegix.matcher(condition);
-			matcher.find();
+		// 字段名称变成大写
+		condition=condition.replace(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
+		
+		matcher=varRegix.matcher(condition);
+		if(matcher.find()) {
+			// [复杂变量处理]，eg：[%name%]
 			String group=matcher.group();
 			String paramName=group.substring(1, group.length()-1);
+			
+			// 变量名称处理
+			if(paramName.indexOf("?")>=0) {
+				paramName=paramName.replace("?", String.format("params.%s", fieldName));
+			}else {
+				paramName=paramName.replaceAll("(?<=\\s|^)(?=\\S)", "params.");
+			}
+			
+			// 模糊查询处理
+			if(paramName.indexOf("%")>=0) {
+				paramName=paramName.replaceAll("%","+'%'+").trim();
+				if(paramName.startsWith("+")) {
+					paramName=paramName.substring(1);
+				}
+				if(paramName.endsWith("+")) {
+					paramName=paramName.substring(0, paramName.length()-1);
+				}
+			}
 			condition=condition.replace(group, String.format("#{%s}", paramName));
 		}else {
 			condition=condition.replace("?", String.format("#{params.%s}", fieldName));
 		}
-		return String.format("-- @if(uniNotNull(params.%s)){\r\n%s\r\n -- @}",condition);
+		return String.format("\n-- @if(varNotNull(params.%s)){\n%s\n-- @}\n",fieldName,condition);
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){
