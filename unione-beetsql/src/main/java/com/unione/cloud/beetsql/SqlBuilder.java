@@ -32,6 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SqlBuilder<T> {
 
+	@Getter
+	private String name;
+	
 	private String[] fieldList;				// 数据查询/更新字段
 	@Getter
 	private Map<String, String> fields; 	// 字段map集合
@@ -79,6 +82,7 @@ public class SqlBuilder<T> {
 		if(table!=null) {
 			this.tableName=table.name();
 		}
+		this.name=String.format("sql.builder.%s", params.getClass().getName());
 	}
 	
 	private SqlBuilder(T data,T params) {
@@ -88,6 +92,8 @@ public class SqlBuilder<T> {
 		if(table!=null) {
 			this.tableName=table.name();
 		}
+		
+		this.name=String.format("sql.builder.%s", data.getClass().getName());
 	}
 	
 	/**
@@ -117,7 +123,22 @@ public class SqlBuilder<T> {
 		return this.data.getClass();
 	}
 	
-	public String countSql() {
+	public String toSql(SqlType type) {
+		if(SqlType.INSERT.equals(type)) {
+			
+		}else if(SqlType.UPDATE.equals(type)) {
+			return this.updateSql();
+		}else if(SqlType.COUNT.equals(type)) {
+			return this.countSql();
+		}else if(SqlType.FIND.equals(type)) {
+			return this.findSql();
+		}else if(SqlType.DELETE.equals(type)){
+			
+		}
+		return null;
+	}
+	
+	private String countSql() {
 		this.process();
 		
 		if(this.countSql==null) {
@@ -126,7 +147,7 @@ public class SqlBuilder<T> {
 		return this.countSql;
 	}
 	
-	public String findSql() {
+	private String findSql() {
 		this.process();
 		
 		if(this.findSql==null) {
@@ -139,7 +160,7 @@ public class SqlBuilder<T> {
 		return this.findSql;
 	}
 	
-	public String updateSql() {
+	private String updateSql() {
 		
 		return this.sql;
 	}
@@ -238,6 +259,11 @@ public class SqlBuilder<T> {
 		}
 		return this;
 	} 
+	
+	public SqlBuilder<T> name(String name){
+		this.name=name;
+		return this;
+	}
 	
 	public SqlBuilder<T> where(String where){
 		this.where=where;
@@ -362,6 +388,10 @@ public class SqlBuilder<T> {
 			return buf.toString();
 		}
 		
+	}
+	
+	public static enum SqlType{
+		INSERT,UPDATE,FIND,COUNT,DELETE
 	}
 	
 //	public static void main(String[] args) {

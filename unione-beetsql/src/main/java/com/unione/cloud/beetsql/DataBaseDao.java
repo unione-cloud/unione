@@ -10,6 +10,7 @@ import org.beetl.sql.core.SqlId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -496,26 +497,15 @@ public class DataBaseDao {
 		try {
 			// count 统计
 			if(builder.isNeedCount()) {
-				SqlId countsql=SqlId.of(this.getNameSpace(builder.targetClass()), "count");
-				if(this.sqlManager.containSqlId(countsql)) {
-					Long total = this.sqlManager.selectUnique(countsql, builder, Long.class);
-					results.setTotal(total);
-				}else {
-					List<Long> list = this.sqlManager.execute(builder.countSql(),Long.class,builder);
-					Long total = list.get(0);
-					results.setTotal(total);
-				}
+				SqlId countsql=this.loadSql(builder, SqlType.COUNT);
+				Long total = this.sqlManager.selectUnique(countsql, builder, Long.class);
+				results.setTotal(total);
 			}
 			
 			// 数据查询
-			SqlId findsql=SqlId.of(this.getNameSpace(builder.targetClass()), "findList");
-			if(this.sqlManager.containSqlId(findsql)) {
-				List<T> rows = (List<T>) this.sqlManager.select(findsql, builder, builder.targetClass(),builder.getStart(),builder.getPageSize());
-				results.setBody(rows);
-			}else {
-				List<T> rows = (List<T>)this.sqlManager.execute(builder.findSql(),builder.targetClass(),builder);
-				results.setBody(rows);
-			}
+			SqlId findsql=this.loadSql(builder, SqlType.FIND);
+			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder, builder.targetClass(),builder.getStart(),builder.getPageSize());
+			results.setBody(rows);
 			
 			results.setSuccess(true);
 		} catch (Exception e) {
@@ -524,6 +514,28 @@ public class DataBaseDao {
 		
 		return results;
 	}
+	
+	
+	/**
+	 * 	加载SQL
+	 * @param <T>
+	 * @param builder
+	 * @param name
+	 * @return
+	 */
+	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type) {
+		SqlId sql=SqlId.of(this.getNameSpace(builder.targetClass()), type.name());
+		if(this.sqlManager.containSqlId(sql)) {
+			return sql;
+		}else {
+			11
+			
+			//List<Long> list = this.sqlManager.execute(builder.countSql(),Long.class,builder);
+			
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * 	获得当前Dao服务Sql命名空间名称
