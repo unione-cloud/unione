@@ -65,7 +65,10 @@ public class SqlBuilder<T> {
 	
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
 	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\]");
+	private Pattern funRegix=Pattern.compile("[\\s]*(AND|OR)[\\s]*",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|LIKE|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
+	
+	
 	@Getter
 	private List<SQLParameter> conditions=new ArrayList<>();
 	
@@ -160,24 +163,36 @@ public class SqlBuilder<T> {
 		
 		// 思路： 正则替换成beetl函数处理，
 		Matcher matcher=conditionRegix.matcher(this.where);
-		this.whereSql="WHERE 1=1 "+this.where;
+		this.where=this.where.replaceAll("\\(", "\r\n-- @ SQLTRIM_{\r\n(")
+				.replaceAll("\\)", ")\r\n-- @}\r\n")
+				.replaceAll("@ SQLTRIM_", "@ sqlTrim()");
+		this.whereSql="\r\n-- @ where(){\r\n"+this.where+"\r\n-- @}\r\n";
 		while(matcher.find()) {
 			String condition=matcher.group();
 			this.whereSql=this.whereSql.replace(condition, whereCondition(condition));
 		}
+		
 	}
 	
 	private String whereCondition(String condition) {
-		Matcher matcher=fieldRegix.matcher(condition);
-		matcher.find();
-		String fieldName=matcher.group();
+		Matcher funMatcher=funRegix.matcher(condition);
+		String funName="";
+		if(funMatcher.find()) {
+			funName=funMatcher.group();
+			condition=condition.replace(funName, "");
+		}
+		
+		Matcher fieldMatcher=fieldRegix.matcher(condition);
+		fieldMatcher.find();
+		String fieldName=fieldMatcher.group();
+		
 		// 字段名称变成大写
 		condition=condition.replace(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
 		
-		matcher=varRegix.matcher(condition);
-		if(matcher.find()) {
+		Matcher varMatcher=varRegix.matcher(condition);
+		if(varMatcher.find()) {
 			// [复杂变量处理]，eg：[%name%]
-			String group=matcher.group();
+			String group=varMatcher.group();
 			String paramName=group.substring(1, group.length()-1);
 			
 			// 变量名称处理
@@ -201,7 +216,7 @@ public class SqlBuilder<T> {
 		}else {
 			condition=condition.replace("?", String.format("#{params.%s}", fieldName));
 		}
-		return String.format("\n-- @if(varNotNull(params.%s)){\n%s\n-- @}\n",fieldName,condition);
+		return String.format("\n-- @if(varNotNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){
