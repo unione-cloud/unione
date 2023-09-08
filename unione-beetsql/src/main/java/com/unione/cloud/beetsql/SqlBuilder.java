@@ -68,6 +68,7 @@ public class SqlBuilder<T> {
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
 	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\]");
 	private Pattern funRegix=Pattern.compile("[\\s]*(AND|OR)[\\s]*",Pattern.CASE_INSENSITIVE);
+	private Pattern inRegix=Pattern.compile("IN|(NOT IN)",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|LIKE|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	
 	
@@ -190,9 +191,9 @@ public class SqlBuilder<T> {
 	 * Sql Where 处理
 	 */
 	private void process() {
-		if(this.whereSql!=null) {
-			return;
-		}
+//		if(this.whereSql!=null) {
+//			return;
+//		}
 		if(StringUtils.isEmpty(this.where)) {
 			this.whereSql="";
 			return;
@@ -223,7 +224,7 @@ public class SqlBuilder<T> {
 		String fieldName=fieldMatcher.group();
 		
 		// 字段名称变成大写
-		condition=condition.replace(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
+		condition=condition.replaceFirst(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
 		
 		Matcher varMatcher=varRegix.matcher(condition);
 		if(varMatcher.find()) {
@@ -249,6 +250,13 @@ public class SqlBuilder<T> {
 					paramName=paramName.substring(0, paramName.length()-1);
 				}
 			}
+			
+			// IN ， NOT IN 查询处理
+			Matcher inMatcher = inRegix.matcher(condition);
+			if(inMatcher.find()) {
+				paramName=String.format("join(%s)", paramName);
+			}
+			
 			condition=condition.replace(group, String.format("#{%s}", paramName));
 		}else {
 			condition=condition.replace("?", String.format("#{params.%s}", fieldName));

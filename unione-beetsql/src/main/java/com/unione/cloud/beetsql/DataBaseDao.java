@@ -538,6 +538,8 @@ public class DataBaseDao {
 			name=String.format("builder.%s.%s", type.name(),name);
 		}
 		
+		log.info(builder.toSql(type));
+		
 		SqlId sql=SqlId.of(builder.nameSpace(), name);
 		if(this.sqlManager.containSqlId(sql)) {
 			return sql;
