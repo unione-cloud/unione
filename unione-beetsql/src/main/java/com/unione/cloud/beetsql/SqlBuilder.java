@@ -1,6 +1,5 @@
 package com.unione.cloud.beetsql;
 
-import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +42,7 @@ public class SqlBuilder<T> {
 	private T params;			// 查询，更新，删除的过滤条件
 	
 	private Long   sourceId;	// 为空，默认数据源
+	private String nameSpace;
 	private String tableName;	// 数据表名称
 	
 	private String where;		// 数据过滤条件定义
@@ -123,6 +122,28 @@ public class SqlBuilder<T> {
 		return this.data.getClass();
 	}
 	
+	public String nameSpace() {
+		if(StringUtils.isEmpty(this.nameSpace)) {
+			this.nameSpace=this.tableName;
+			if(StringUtils.isEmpty(this.nameSpace)) {
+				this.nameSpace=this.data.getClass().getSimpleName();
+			}else {
+				String attr[] = this.tableName.toLowerCase().split("_");
+				this.nameSpace = "";
+				for(int i = 0; i < attr.length; i++){
+					String temp = attr[i];
+					String tt = (temp.charAt(0)+"").toUpperCase();
+					if(temp.length() > 1){
+						tt += temp.substring(1, temp.length());
+					}
+					this.nameSpace += tt;
+				}
+			}
+			this.nameSpace=(this.nameSpace.charAt(0)+"").toLowerCase()+this.nameSpace.substring(1);
+		}
+		return this.nameSpace;
+	}
+	
 	public String toSql(SqlType type) {
 		if(SqlType.INSERT.equals(type)) {
 			
@@ -130,7 +151,7 @@ public class SqlBuilder<T> {
 			return this.updateSql();
 		}else if(SqlType.COUNT.equals(type)) {
 			return this.countSql();
-		}else if(SqlType.FIND.equals(type)) {
+		}else if(SqlType.SELECT.equals(type)) {
 			return this.findSql();
 		}else if(SqlType.DELETE.equals(type)){
 			
@@ -177,11 +198,6 @@ public class SqlBuilder<T> {
 			return;
 		}
 		
-		// (name=? and age>? and realname like [?+'%'] and title like [keyword+'%']) 
-		// and types in ? and subtype not in [subtypes]
-		// and (time>[timeBegin] or time<=[timeEnd])
-		log.info("SQL 查询条件处理 where:{}",where);
-		
 		// 思路： 正则替换成beetl函数处理，
 		Matcher matcher=conditionRegix.matcher(this.where);
 		this.where=this.where.replaceAll("\\(", "\r\n-- @ SQLTRIM_{\r\n(")
@@ -192,7 +208,6 @@ public class SqlBuilder<T> {
 			String condition=matcher.group();
 			this.whereSql=this.whereSql.replace(condition, whereCondition(condition));
 		}
-		
 	}
 	
 	private String whereCondition(String condition) {
@@ -220,6 +235,7 @@ public class SqlBuilder<T> {
 			if(paramName.indexOf("?")>=0) {
 				paramName=paramName.replace("?", String.format("params.%s", fieldName));
 			}else {
+				fieldName=paramName.trim();
 				paramName=paramName.replaceAll("(?<=\\s|^)(?=\\S)", "params.");
 			}
 			
@@ -391,7 +407,7 @@ public class SqlBuilder<T> {
 	}
 	
 	public static enum SqlType{
-		INSERT,UPDATE,FIND,COUNT,DELETE
+		INSERT,UPDATE,SELECT,COUNT,DELETE
 	}
 	
 //	public static void main(String[] args) {

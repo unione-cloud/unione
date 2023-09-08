@@ -57,8 +57,8 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		SqlBuilder<SysLogs> builder=SqlBuilder.build(params)
 			.field("id as sid,title,types,userName,actionId,requestId")
 //			.where("(appCode=? OR title like ?) AND types=?");
-			.where("appCode=? AND actionId=? AND requestId=? AND userName like ? AND "
-					+ "title like ? AND types=? AND targetId=? AND status=? AND "
+			.where("appCode=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
+					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
 					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
 		// 执行查询
 		Results<List<SysLogs>> results=dataBaseDao.findListByPage(builder);
