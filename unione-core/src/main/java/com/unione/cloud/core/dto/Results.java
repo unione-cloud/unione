@@ -69,7 +69,20 @@ public class Results<T> implements Serializable {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer page;
 	
-		
+	
+	/**
+	 * 	构建响应
+	 * @param <T>
+	 * @param isSuccess
+	 * @return
+	 */
+	public static <T> Results<T> build(boolean isSuccess){
+		Results<T> Results=new Results<>();
+		Results.setSuccess(isSuccess);
+		Results.setMessage(isSuccess?"操作成功":"操作失败");
+		Results.setCode(200);
+		return Results;
+	}
 
 	/**
 	 * 	构建响应

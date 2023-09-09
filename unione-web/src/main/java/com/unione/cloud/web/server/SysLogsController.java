@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,12 +20,11 @@ import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.web.model.SysLogs;
 
 import cn.hutool.core.collection.ListUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,7 +56,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
 					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
 		// 执行查询
-		Results<List<SysLogs>> results=dataBaseDao.findListByPage(builder);
+		Results<List<SysLogs>> results=dataBaseDao.findPages(builder);
 		
 		log.debug("退出:查询系统日志列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
@@ -72,21 +73,32 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		return Results.success(entity.getId());
 	}
 
+	@PostMapping("/update")
+	@ApiOperation("修改")
+	public Results<Void> update(@RequestBody @Validated(Validator.update.class) SysLogs entity){
+		log.debug("进入:修改系统日志信息.entity:{}",entity);
+		AssertUtil.service().notNull(entity.getId(),"参数id不能为空");
+		
+		int len=dataBaseDao.updateById(entity);
+		
+		log.debug("退出:修改系统日志信息.entity:{},len:{}",entity,len);
+		return Results.build(len>0);
+	}
 
 	@Override
-	public Results<SysLogs> detail(Long sid) {
-		log.debug("进入:查看系统日志详细信息方法，sid:{}",sid);
+	public Results<SysLogs> detail(Long id) {
+		log.debug("进入:查看系统日志详细信息方法，id:{}",id);
 		// 参数处理
-		AssertUtil.service().notNull(sid,"参数sid不能为空");
+		AssertUtil.service().notNull(id,"参数id不能为空");
 		
 		// 参数处理
 		SysLogs entity=new SysLogs();
-		entity.setId(sid);
+		entity.setId(id);
 		
 		SysLogs tmp = dataBaseDao.findById(entity);
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
-		log.debug("退出:查看系统日志详细信息方法，sid:{},result:true",sid);
+		log.debug("退出:查看系统日志详细信息方法，id:{},result:true",id);
 		return Results.success(tmp);
 	}
 	
