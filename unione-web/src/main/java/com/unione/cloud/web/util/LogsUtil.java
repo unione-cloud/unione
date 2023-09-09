@@ -164,7 +164,7 @@ public class LogsUtil {
 	
 	private static String getCookie(String name) {
 		HttpServletRequest req=getRequest();
-		if(req==null) {
+		if(req==null || req.getCookies()==null) {
 			return null;
 		}
 		for(Cookie ck:req.getCookies()) {

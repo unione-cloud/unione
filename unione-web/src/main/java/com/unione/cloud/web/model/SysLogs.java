@@ -2,9 +2,9 @@ package com.unione.cloud.web.model;
 
 import java.util.List;
 
-import org.beetl.sql.annotation.entity.Column;
 import org.beetl.sql.annotation.entity.Table;
 
+import com.unione.cloud.beetsql.annotation.KeyWordQuery;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -57,16 +57,18 @@ import lombok.experimental.Accessors;
 @Table(name="SYS_LOGS")
 public class SysLogs extends Pojo{
 	
+	private static final long serialVersionUID = 9176487311413735522L;
 	// fields start
 	/**
 	 * 应用编码
 	 */
-	@Column("appCode")
+	@KeyWordQuery
 	@ApiModelProperty(value="应用编码",notes="字符长度为：20")
 	private String appCode;
 	/**
 	 * 用户姓名
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="用户姓名",notes="字符长度为：50")
 	private String userName;
 	/**
@@ -87,6 +89,7 @@ public class SysLogs extends Pojo{
 	/**
 	 * 操作标题
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="操作标题",notes="字符长度为：50")
 	private String title;
 	/**

@@ -1,9 +1,12 @@
 package com.unione.cloud.beetsql;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -11,9 +14,18 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.beetl.sql.annotation.entity.Table;
+import org.beetl.sql.clazz.ClassDesc;
+import org.beetl.sql.clazz.TableDesc;
+import org.beetl.sql.clazz.kit.BeanKit;
+import org.beetl.sql.clazz.kit.DefaultKeyWordHandler;
+import org.beetl.sql.core.SQLManager;
+import org.beetl.sql.core.concat.ConcatContext;
+import org.beetl.sql.core.concat.Update;
 import org.beetl.sql.core.engine.SQLParameter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.unione.cloud.beetsql.annotation.KeyWordQuery;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
@@ -28,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Jeking Yang
  */
 @Slf4j
+@Service
 public class SqlBuilder<T> {
 
 	@Getter
@@ -44,7 +57,10 @@ public class SqlBuilder<T> {
 	private Long   sourceId;	// 为空，默认数据源
 	private String nameSpace;
 	private String tableName;	// 数据表名称
+	private TableDesc tableDesc;
+	private ClassDesc classDesc;
 	
+	private String keywords;	// 关键字搜索字段
 	private String where;		// 数据过滤条件定义
 	private Sort[] sorts;		// 数据排序
 	private String group;		// 数据分组
@@ -56,7 +72,9 @@ public class SqlBuilder<T> {
 	private String countSql;
 	private String findSql;
 	private String whereSql;
-	private String sql;
+	private String updateSql;
+	private String deleteSql;
+	
 	@Getter
 	private List<Object> values=new ArrayList<Object>();
 	
@@ -65,33 +83,44 @@ public class SqlBuilder<T> {
 	@Getter
 	private long page = 1;
 	
+	
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
 	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\]");
-	private Pattern funRegix=Pattern.compile("[\\s]*(AND|OR)[\\s]*",Pattern.CASE_INSENSITIVE);
+	private Pattern funRegix=Pattern.compile("[\\s]+(AND|OR)[\\s]+",Pattern.CASE_INSENSITIVE);
 	private Pattern inRegix=Pattern.compile("IN|(NOT IN)",Pattern.CASE_INSENSITIVE);
-	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|LIKE|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
+	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	
 	
 	@Getter
 	private List<SQLParameter> conditions=new ArrayList<>();
 	
+	
+	private static SQLManager sqlManager;
+	@Autowired
+	public void setSqlManager(SQLManager sqlManager) {
+		SqlBuilder.sqlManager=sqlManager;
+	}
+	
+	public SqlBuilder() {}
+	
 	private SqlBuilder(T params) {
 		this.params=params;
 		this.data=params;
-		Table table = params.getClass().getAnnotation(Table.class);
-		if(table!=null) {
-			this.tableName=table.name();
-		}
+		
+		this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
+		this.tableDesc = sqlManager.getTableDesc(this.tableName);
+		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
+		
 		this.name=String.format("sql.builder.%s", params.getClass().getName());
 	}
 	
 	private SqlBuilder(T data,T params) {
 		this.params=params;
 		this.data=data;
-		Table table = params.getClass().getAnnotation(Table.class);
-		if(table!=null) {
-			this.tableName=table.name();
-		}
+		
+		this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
+		this.tableDesc = sqlManager.getTableDesc(this.tableName);
+		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
 		
 		this.name=String.format("sql.builder.%s", data.getClass().getName());
 	}
@@ -155,24 +184,34 @@ public class SqlBuilder<T> {
 		}else if(SqlType.SELECT.equals(type)) {
 			return this.findSql();
 		}else if(SqlType.DELETE.equals(type)){
-			
+			return this.deleteSql();
 		}
 		return null;
 	}
 	
+	public Map<String, Object> toParams(){
+		Map<String, Object> params=new HashMap<String, Object>();
+		params.put("data", this.data);
+		params.put("params", this.params);
+		params.put("fields", this.fields);
+		return params;
+	}
+	
 	private String countSql() {
-		this.process();
+		this.processKeywordsQuery();
+		this.processCondition();
 		
-		if(this.countSql==null) {
+		if(StringUtils.isEmpty(this.countSql)) {
 			this.countSql=String.format("SELECT COUNT(*) FROM %s %s ",this.tableName,this.whereSql);
 		}
 		return this.countSql;
 	}
 	
 	private String findSql() {
-		this.process();
+		this.processKeywordsQuery();
+		this.processCondition();
 		
-		if(this.findSql==null) {
+		if(StringUtils.isEmpty(this.findSql)) {
 			String selectField="*";
 			if(this.fieldList!=null && this.fieldList.length>0) {
 				selectField=ArrayUtil.join(this.fieldList, ",");
@@ -183,28 +222,110 @@ public class SqlBuilder<T> {
 	}
 	
 	private String updateSql() {
-		
-		return this.sql;
+		this.processCondition();
+		if(StringUtils.isEmpty(this.updateSql)) {
+			AssertUtil.database().isTrue(!fields.isEmpty(), "更新字段不能为空");
+			List<String> idCols = classDesc.getIdCols();
+			Iterator<String> cols = classDesc.getInCols().iterator();
+			Iterator<String> properties = classDesc.getAttrs().iterator();
+			
+			ConcatContext concatContext = ConcatContext
+					.createTemplateContext(sqlManager.getNc(),new DefaultKeyWordHandler(), sqlManager.getSqlTemplateEngine());
+			
+			Update update = concatContext.update().from(this.data.getClass());
+			while (cols.hasNext() && properties.hasNext()) {
+				String col = cols.next();
+				String prop = properties.next();
+				if (classDesc.getClassAnnotation().isUpdateIgnore(prop)) {
+					continue;
+				}
+				if (idCols.contains(col)) {
+					continue;
+				}
+				if (prop.equals(classDesc.getClassAnnotation().getVersionProperty())) {
+					//版本字段
+					update.assignVersion(col);
+					continue;
+				}
+				update.notEmptyAssign(String.format("data.%s", prop), col);
+			}
+			if(StringUtils.isEmpty(this.whereSql)) {
+				// 如果未设置过滤条件，则自动使用主键
+				StringBuffer buf=new StringBuffer();
+				String keyField=classDesc.getIdAttr();
+				buf.append(String.format("%s=?", keyField));
+				this.where=buf.toString();
+				this.processCondition();
+			}
+			this.updateSql=String.format("%s %s", update.toSql(),this.whereSql);
+		}
+		return this.updateSql;
+	}
+	
+	
+	private String deleteSql() {
+		this.processCondition();
+		if(StringUtils.isEmpty(this.deleteSql)) {
+			if(StringUtils.isEmpty(this.whereSql)) {
+				// 如果未设置过滤条件，则自动使用主键
+				StringBuffer buf=new StringBuffer();
+				String keyField=classDesc.getIdAttr();
+				buf.append(String.format("%s=? OR %s in [ids]", keyField,keyField));
+				
+				this.where=buf.toString();
+				this.processCondition();
+			}
+			this.deleteSql=String.format("DELETE FROM %s %s",this.tableName,this.whereSql);
+		}
+		return this.deleteSql;
+	}
+	
+	private void processKeywordsQuery() {
+		// keywords条件处理
+		if(StringUtils.isEmpty(this.keywords)) {
+			try {
+				StringBuffer buf=new StringBuffer();
+				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
+				for(PropertyDescriptor p:ps) {
+					KeyWordQuery keyWordQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),KeyWordQuery.class);
+					if(keyWordQuery!=null) {
+						buf.append(" OR ").append(p.getName()).append(" LIKE [%keywords%]");
+					}
+				}
+				if(!buf.isEmpty()) {
+					this.keywords=String.format("(%s)", buf.substring(4, buf.length()));
+				}
+			} catch (IntrospectionException e) {
+			}
+		}	
+		if(!StringUtils.isEmpty(this.keywords)) {
+			if(StringUtils.isEmpty(this.where)) {
+				this.where=this.keywords;
+			}else {
+				this.where=String.format("%s AND %s",this.where, this.keywords);
+			}
+		}
 	}
 	
 	/**
 	 * Sql Where 处理
 	 */
-	private void process() {
-//		if(this.whereSql!=null) {
-//			return;
-//		}
+	private void processCondition() {
+		if(!StringUtils.isEmpty(this.whereSql)) {
+			return;
+		}
+		
 		if(StringUtils.isEmpty(this.where)) {
 			this.whereSql="";
 			return;
 		}
 		
-		// 思路： 正则替换成beetl函数处理，
+		// where条件处理
 		Matcher matcher=conditionRegix.matcher(this.where);
-		this.where=this.where.replaceAll("\\(", "\r\n-- @ SQLTRIM_{\r\n(")
+		String where=this.where.replaceAll("\\(", "\r\n-- @ SQLTRIM_{\r\n(")
 				.replaceAll("\\)", ")\r\n-- @}\r\n")
 				.replaceAll("@ SQLTRIM_", "@ sqlTrim()");
-		this.whereSql="\r\n-- @ where(){\r\n"+this.where+"\r\n-- @}\r\n";
+		this.whereSql="\r\n-- @ sqlWhere(){\r\n"+where+"\r\n-- @}\r\n";
 		while(matcher.find()) {
 			String condition=matcher.group();
 			this.whereSql=this.whereSql.replace(condition, whereCondition(condition));
@@ -237,11 +358,16 @@ public class SqlBuilder<T> {
 				paramName=paramName.replace("?", String.format("params.%s", fieldName));
 			}else {
 				fieldName=paramName.trim();
-				paramName=paramName.replaceAll("(?<=\\s|^)(?=\\S)", "params.");
+				if(fieldName.startsWith("%")) {
+					paramName="%"+String.format("params.%s", fieldName.substring(1));
+				}else {
+					paramName=String.format("params.%s", fieldName);
+				}
 			}
 			
 			// 模糊查询处理
 			if(paramName.indexOf("%")>=0) {
+				fieldName=fieldName.replaceAll("%", "");
 				paramName=paramName.replaceAll("%","+'%'+").trim();
 				if(paramName.startsWith("+")) {
 					paramName=paramName.substring(1);
@@ -255,9 +381,11 @@ public class SqlBuilder<T> {
 			Matcher inMatcher = inRegix.matcher(condition);
 			if(inMatcher.find()) {
 				paramName=String.format("join(%s)", paramName);
+				condition=condition.replace(group, String.format("(#{%s})", paramName));
+			}else {
+				condition=condition.replace(group, String.format("#{%s}", paramName));
 			}
 			
-			condition=condition.replace(group, String.format("#{%s}", paramName));
 		}else {
 			condition=condition.replace("?", String.format("#{params.%s}", fieldName));
 		}
@@ -286,6 +414,11 @@ public class SqlBuilder<T> {
 	
 	public SqlBuilder<T> name(String name){
 		this.name=name;
+		return this;
+	}
+	
+	public SqlBuilder<T> keywords(String keywords){
+		this.keywords=keywords;
 		return this;
 	}
 	

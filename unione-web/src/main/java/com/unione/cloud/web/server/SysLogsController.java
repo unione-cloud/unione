@@ -1,6 +1,7 @@
 package com.unione.cloud.web.server;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +22,7 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.web.model.SysLogs;
 
+import cn.hutool.core.collection.ListUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,12 +44,6 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	@Autowired
 	private DataBaseDao dataBaseDao;
 
-	/**
-	 * 用户会话对象
-	 */
-	@Autowired
-	private SessionService sessionService;
-
 	
 	@Override
 	public Results<List<SysLogs>> find(Params<SysLogs> params) {
@@ -55,11 +51,9 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		
 		// 构造sql
 		SqlBuilder<SysLogs> builder=SqlBuilder.build(params)
-			.field("id as sid,title,types,userName,actionId,requestId")
-			.where("(appCode=? OR title like ?) AND types=? AND id in [ids]");
-//			.where("appCode=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
-//					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
-//					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
+			.where("appCode=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
+					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
+					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
 		// 执行查询
 		Results<List<SysLogs>> results=dataBaseDao.findListByPage(builder);
 		
@@ -88,12 +82,6 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 		// 参数处理
 		SysLogs entity=new SysLogs();
 		entity.setId(sid);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
 		
 		SysLogs tmp = dataBaseDao.findById(entity);
 		AssertUtil.service().notNull(tmp, "记录未找到");
@@ -104,25 +92,15 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignDelete<SysLogs
 	
 
 	@Override
-	public Results<Long> delete(Params<List<Long>> params){
-		log.debug("进入:删除系统日志信息方法，params:{}",params);
+	public Results<Long> delete(Set<Long> ids){
+		log.debug("进入:删除系统日志信息方法，ids:{}",ids);
 		// 参数处理
-		AssertUtil.service().isTrue(params.getBody()!=null && !params.getBody().isEmpty(), "参数body不能为空");
-		
-		// 参数处理
-		SysLogs entity=new SysLogs();
-		entity.setIds(params.getBody());
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.value())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
+		AssertUtil.service().notEmpty(ids, "参数ids不能为空");
 		
 		// 执行删除
-		int count = dataBaseDao.deleteLogicById(entity);
-
-		log.debug("退出:删除系统日志信息方法，params:{}",params);
+		int count = dataBaseDao.delete(SysLogs.builder().ids(ListUtil.toList(ids)).build());
+		
+		log.debug("退出:删除系统日志信息方法，ids:{},count:{}",ids,count);
 		return Results.build(count>0, (long)count);
 	}
 

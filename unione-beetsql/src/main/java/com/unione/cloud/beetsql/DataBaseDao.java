@@ -49,7 +49,9 @@ public class DataBaseDao {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)entity;
 			pojo.setId(SidGenHolder.generate());
-			pojo.setTenantId(sessionService.getTenantId());
+			if(pojo.getTenantId()==null) {
+				pojo.setTenantId(sessionService.getTenantId());
+			}
 			if(pojo.getOrgId()==null) {
 				pojo.setOrgId(sessionService.getOrgId());
 			}
@@ -207,36 +209,9 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "delete");
-		if(this.sqlManager.containSqlId(sqlId)) {
-			try {
-				Map<String,Object> map = new HashMap<>();
-				map.put("params", params);
-				return this.sqlManager.update(sqlId, map);
-			} catch (Exception e) {
-				log.error("删除数据失败,sql namespace:{},sql id:{},params:{}",sqlId.getNamespace(),sqlId.getId(),params,e);
-				throw new ServiceException("删除数据失败",e);
-			}
-		}
-		
-		return 0;
-	}
-	
-	
-	public <T> int deleteByid(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteById");
-		if(this.sqlManager.containSqlId(sqlId)) {
-			try {
-				Map<String,Object> map = new HashMap<>();
-				map.put("params", params);
-				return this.sqlManager.update(sqlId, map);
-			} catch (Exception e) {
-				log.error("删除数据失败,sql namespace:{},sql id:{},params:{}",sqlId.getNamespace(),sqlId.getId(),params,e);
-				throw new ServiceException("删除数据失败",e);
-			}
-		}
-		
-		return 0;
+		SqlBuilder<T> builder=SqlBuilder.build(params);
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
+		return this.sqlManager.update(sqlId,builder.toParams());
 	}
 	
 	/**
@@ -262,38 +237,9 @@ public class DataBaseDao {
 				throw new ServiceException("逻辑删除失败",e);
 			}
 		}
-		
-		
 		return 0;
 	}
 	
-	/**
-	 * 	逻辑删除(根据sid或ids集合删除数据)
-	 * @param params
-	 * @return
-	 */
-	public <T> int deleteLogicById(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogicById");
-		if(params instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)params;
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
-		if(this.sqlManager.containSqlId(sqlId)) {
-			try {
-				Map<String,Object> map = new HashMap<>();
-				map.put("params", params);
-				return this.sqlManager.update(sqlId, map);
-			} catch (Exception e) {
-				log.error("删除数据失败,sql namespace:{},sql id:{},params:{}",sqlId.getNamespace(),sqlId.getId(),params,e);
-				throw new ServiceException("删除数据失败",e);
-			}
-		}
-		
-		return 0;
-	}
-
 	/**
 	 * 	统计数量
 	 * @param params
@@ -502,13 +448,13 @@ public class DataBaseDao {
 			// count 统计
 			if(builder.isNeedCount()) {
 				SqlId countsql=this.loadSql(builder, SqlType.COUNT);
-				Long total = this.sqlManager.selectUnique(countsql, builder, Long.class);
+				Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
 				results.setTotal(total);
 			}
 			
 			// 数据查询
 			SqlId findsql=this.loadSql(builder, SqlType.SELECT);
-			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder, builder.targetClass(),builder.getStart()+1,builder.getPageSize());
+			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 			results.setBody(rows);
 			
 			results.setSuccess(true);
@@ -538,7 +484,7 @@ public class DataBaseDao {
 			name=String.format("builder.%s.%s", type.name(),name);
 		}
 		
-		log.info(builder.toSql(type));
+//		log.info(builder.toSql(type));
 		
 		SqlId sql=SqlId.of(builder.nameSpace(), name);
 		if(this.sqlManager.containSqlId(sql)) {
