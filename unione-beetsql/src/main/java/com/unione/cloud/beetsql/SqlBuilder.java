@@ -198,6 +198,7 @@ public class SqlBuilder<T> {
 	}
 	
 	private String countSql() {
+		this.processIdQuerys();
 		this.processKeywordsQuery();
 		this.processCondition();
 		
@@ -208,6 +209,7 @@ public class SqlBuilder<T> {
 	}
 	
 	private String findSql() {
+		this.processIdQuerys();
 		this.processKeywordsQuery();
 		this.processCondition();
 		
@@ -264,20 +266,23 @@ public class SqlBuilder<T> {
 	
 	
 	private String deleteSql() {
+		this.processIdQuerys();
 		this.processCondition();
 		if(StringUtils.isEmpty(this.deleteSql)) {
-			if(StringUtils.isEmpty(this.whereSql)) {
-				// 如果未设置过滤条件，则自动使用主键
-				StringBuffer buf=new StringBuffer();
-				String keyField=classDesc.getIdAttr();
-				buf.append(String.format("%s=? OR %s in [ids]", keyField,keyField));
-				
-				this.where=buf.toString();
-				this.processCondition();
-			}
 			this.deleteSql=String.format("DELETE FROM %s %s",this.tableName,this.whereSql);
 		}
 		return this.deleteSql;
+	}
+	
+	private void processIdQuerys() {
+		if(StringUtils.isEmpty(this.where)) {
+			// 如果未设置过滤条件，则自动使用主键
+			StringBuffer buf=new StringBuffer();
+			String keyField=classDesc.getIdAttr();
+			buf.append(String.format("(%s=? OR %s in [ids])", keyField,keyField));
+			
+			this.where=buf.toString();
+		}
 	}
 	
 	private void processKeywordsQuery() {

@@ -21,11 +21,13 @@ import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 
 import cn.hutool.core.date.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 	数据库操作Dao基础接口
  * @author Jeking Yang
  */
+@Slf4j
 @Service
 public class DataBaseDao {
 	
@@ -348,7 +350,7 @@ public class DataBaseDao {
 			name=String.format("builder.%s.%s", type.name(),name);
 		}
 		
-//		log.info(builder.toSql(type));
+		log.info(builder.toSql(type));
 		
 		SqlId sql=SqlId.of(builder.nameSpace(), name);
 		if(this.sqlManager.containSqlId(sql)) {
