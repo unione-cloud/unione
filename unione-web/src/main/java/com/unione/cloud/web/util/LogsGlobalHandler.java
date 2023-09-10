@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.sql.clazz.kit.BeetlSQLException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -33,6 +34,21 @@ public class LogsGlobalHandler {
 		Results<?> result=new Results<>();
 		result.setCode(500);
         result.setMessage("系统异常");
+        
+        if(e instanceof BeetlSQLException) {
+        	BeetlSQLException beetException=(BeetlSQLException)e;
+        	switch (beetException.code) {
+			case BeetlSQLException.UNIQUE_EXCEPT_ERROR:
+				result.setMessage("记录未找到");
+				break;
+			case BeetlSQLException.NOT_UNIQUE_ERROR:
+				result.setMessage("记录不唯一");
+				break;
+			default:
+				break;
+			}
+        }
+        
         if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
         	// 如果未设置日志类型，则认为未记录业务日志
         	LogsUtil.error(e);

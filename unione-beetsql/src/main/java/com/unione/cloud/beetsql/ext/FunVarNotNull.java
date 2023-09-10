@@ -6,7 +6,7 @@ import org.beetl.core.Function;
 import cn.hutool.core.util.ObjectUtil;
 
 
-public class VarNotNull implements Function {
+public class FunVarNotNull implements Function {
 
 	@Override
 	public Boolean call(Object[] paras, Context ctx) {

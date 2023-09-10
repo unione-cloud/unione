@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.beetl.sql.core.engine.WhereTag;
 
-public class SqlWhere extends WhereTag {
+public class TagSqlWhere extends WhereTag {
 
 	@Override
 	public void render() {

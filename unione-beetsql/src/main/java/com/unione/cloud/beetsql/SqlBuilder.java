@@ -31,6 +31,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.crypto.digest.MD5;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,12 +44,15 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class SqlBuilder<T> {
 
+	/**
+	 * 查询名称，指定查询SQL名称
+	 */
 	@Getter
 	private String name;
 	
 	private String[] fieldList;				// 数据查询/更新字段
 	@Getter
-	private Map<String, String> fields; 	// 字段map集合
+	private Map<String, String> fields=new HashMap<>(); 	// 字段map集合
 	@Getter
 	private T data;				// 更新操作的数据对象
 	@Getter
@@ -110,8 +114,6 @@ public class SqlBuilder<T> {
 		this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
 		this.tableDesc = sqlManager.getTableDesc(this.tableName);
 		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
-		
-		this.name=String.format("sql.builder.%s", params.getClass().getName());
 	}
 	
 	private SqlBuilder(T data,T params) {
@@ -121,8 +123,6 @@ public class SqlBuilder<T> {
 		this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
 		this.tableDesc = sqlManager.getTableDesc(this.tableName);
 		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
-		
-		this.name=String.format("sql.builder.%s", data.getClass().getName());
 	}
 	
 	/**
@@ -173,6 +173,7 @@ public class SqlBuilder<T> {
 		}
 		return this.nameSpace;
 	}
+	
 	
 	public String toSql(SqlType type) {
 		if(SqlType.INSERT.equals(type)) {
@@ -226,7 +227,7 @@ public class SqlBuilder<T> {
 	private String updateSql() {
 		this.processCondition();
 		if(StringUtils.isEmpty(this.updateSql)) {
-			AssertUtil.database().isTrue(!fields.isEmpty(), "更新字段不能为空");
+//			AssertUtil.database().isTrue(!fields.isEmpty(), "更新字段不能为空");
 			List<String> idCols = classDesc.getIdCols();
 			Iterator<String> cols = classDesc.getInCols().iterator();
 			Iterator<String> properties = classDesc.getAttrs().iterator();
@@ -298,7 +299,7 @@ public class SqlBuilder<T> {
 					}
 				}
 				if(!buf.isEmpty()) {
-					this.keywords=String.format("(%s)", buf.substring(4, buf.length()));
+					this.keywords=String.format("(AND %s)", buf.substring(4, buf.length()));
 				}
 			} catch (IntrospectionException e) {
 			}
@@ -307,7 +308,7 @@ public class SqlBuilder<T> {
 			if(StringUtils.isEmpty(this.where)) {
 				this.where=this.keywords;
 			}else {
-				this.where=String.format("%s AND %s",this.where, this.keywords);
+				this.where=String.format("%s %s",this.where, this.keywords);
 			}
 		}
 	}
@@ -459,6 +460,14 @@ public class SqlBuilder<T> {
 	
 	public long getStart() {
 		return (page - 1) * pageSize;
+	}
+	
+	public String getKey() {
+		if(StringUtils.isEmpty(this.where)) {
+			return MD5.create().digestHex(this.where);
+		}else {
+			return "sql";
+		}
 	}
 
 	public Long getId() {

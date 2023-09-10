@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.beetl.sql.clazz.kit.StringKit;
 import org.beetl.sql.core.engine.TrimTag;
 
-public class SqlTrim extends TrimTag {
+public class TagSqlTrim extends TrimTag {
 	@Override
 	public void render() {
 		try {

@@ -171,7 +171,7 @@ public class DataBaseDao {
 	 */
 	public <T> int updateById(T params) {
 		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
+		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE,"UPDATE_BY_ID");
 		if(builder.getData() instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)builder.getData();
@@ -235,7 +235,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findUnique(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_UNIQUE");
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -247,7 +247,7 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(T params) {
 		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_ONE");
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -259,7 +259,7 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> T findById(T params) {
 		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_BYID");
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -273,7 +273,7 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(T params,Sort ...sort){
 		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_BYIDS");
 		List<T> rows = (List<T>) this.sqlManager.select(sqlId, builder.targetClass(), builder.toParams());
 		return rows;
 	}
@@ -287,7 +287,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(SqlBuilder<T> builder){
-		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_LIST");
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
 		return rows;
 	}
@@ -300,7 +300,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findPage(SqlBuilder<T> builder){
-		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_PAGE");
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
 	}
@@ -313,13 +313,13 @@ public class DataBaseDao {
 		try {
 			// count 统计
 			if(builder.isNeedCount()) {
-				SqlId countsql=this.loadSql(builder, SqlType.COUNT);
+				SqlId countsql=this.loadSql(builder, SqlType.COUNT,"FIND_PAGES_COUNT");
 				Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
 				results.setTotal(total);
 			}
 			
 			// 数据查询
-			SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+			SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_PAGES_LIST");
 			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 			results.setBody(rows);
 			
@@ -344,10 +344,17 @@ public class DataBaseDao {
 	}
 	
 	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type,String name) {
+		if(!StringUtils.isEmpty(builder.getName())) {
+			SqlId sql=SqlId.of(builder.nameSpace(), builder.getName());
+			if(this.sqlManager.containSqlId(sql)) {
+				return sql;
+			}
+		}
+		
 		if(StringUtils.isEmpty(name)) {
-			name=String.format("builder.%s", type.name());
+			name=String.format("builder_%s_%s",builder.getKey(),type.name());
 		}else {
-			name=String.format("builder.%s.%s", type.name(),name);
+			name=String.format("builder_%s_%s",builder.getKey(),name);
 		}
 		
 		log.info(builder.toSql(type));
