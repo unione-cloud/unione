@@ -59,7 +59,7 @@ beetlsql:
 #
 #============================================
 security:
-   enabled: false
+   enabled: true
    filter:
       includes: /**
       executions: /,/swagger-ui.html/**,/webjars/**,/swagger-resources/**,/v2/api-docs,/doc.html/**,/druid/**

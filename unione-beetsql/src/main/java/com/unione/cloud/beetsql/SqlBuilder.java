@@ -298,7 +298,7 @@ public class SqlBuilder<T> {
 						buf.append(" OR ").append(p.getName()).append(" LIKE [%keywords%]");
 					}
 				}
-				if(!buf.isEmpty()) {
+				if(buf.length()>0) {
 					this.keywords=String.format("(AND %s)", buf.substring(4, buf.length()));
 				}
 			} catch (IntrospectionException e) {
