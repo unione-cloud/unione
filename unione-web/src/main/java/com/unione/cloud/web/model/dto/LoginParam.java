@@ -8,7 +8,7 @@ import lombok.Data;
 @ApiModel("认证参数")
 public class LoginParam {
 
-	@ApiModelProperty("帐号")
+	@ApiModelProperty("帐号|手机号")
 	private String username;
 	
 	@ApiModelProperty("密码")

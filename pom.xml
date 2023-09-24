@@ -310,6 +310,9 @@
 		<thymeleaf.version>3.1.0.M2</thymeleaf.version>
 		<thymeleaf.extras.version>3.0.4.RELEASE</thymeleaf.extras.version>
 		
+		<!-- cache -->
+		<ehcache.version>3.10.8</ehcache.version>
+		
 	</properties>
 	
 	<modules>

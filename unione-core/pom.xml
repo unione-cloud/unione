@@ -338,6 +338,15 @@
 		</dependency>
 		<!-- jackson END-->
 		
+		
+		<!-- ehcache:配置依赖信息 -->
+		<dependency>
+			<groupId>org.ehcache</groupId>
+		    <artifactId>ehcache</artifactId>
+			<version>${ehcache.version}</version>
+		</dependency>
+		
+		
 	</dependencies>
 	
 	<build>

@@ -298,6 +298,11 @@ public class LogsUtil {
 		setTarget(targetId);
 	}
 	
+	public static void setCreator(String username) {
+		SysLogs log=getEntry();
+		log.setCreatedBy(username);
+		log.setLastUpdatedBy(username);
+	}
 	
 	/**
 	 * 设置扩展数据

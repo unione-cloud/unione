@@ -1,6 +1,5 @@
 package com.unione.cloud.web.server;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
+import com.unione.cloud.web.service.CaptchaService;
+import com.unione.cloud.web.service.LoginService;
+import com.unione.cloud.web.util.LogsUtil;
+import com.unione.cloud.web.util.LogsUtil.LogType;
 
+import cn.hutool.captcha.AbstractCaptcha;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +24,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @Api(tags = "基础服务：登录服务")
-@RequestMapping("/api/login")
+@RequestMapping("/api")
 public class SysLoginController {
 	
 	@Autowired
-	private HttpServletRequest request;
-	@Autowired
 	private HttpServletResponse response;
+	
+	@Autowired
+	private CaptchaService captchaService;
+	
+	@Autowired
+	private LoginService loginService;
+	
 	
 	/**
 	 * 生成验证码图片
@@ -41,20 +50,30 @@ public class SysLoginController {
 		response.setHeader("Cache-Control", "no-cache");
 		response.setDateHeader("Expire", 0);
 		
+		try {
+			AbstractCaptcha captcha=captchaService.create();
+			captcha.write(response.getOutputStream());
+		} catch (Exception e) {
+			log.error("验证码生成失败",e);
+		}
 		
 		log.debug("退出->生成验证码图片控制器");
 	}
 	
 	
-	@PostMapping("/username")
-	@ApiOperation(value="帐号密码登录",notes="")
-	public LoginResult username(@RequestBody LoginParam param) {
-		log.info("用户登录：帐号密码登录，usrename:{}",param.getUsername());
+	
+	@PostMapping("/login")
+	@ApiOperation(value="用户登录",notes="")
+	public LoginResult login(@RequestBody LoginParam param) {
+		log.info("用户登录，usrename:{}",param.getUsername());
+		LogsUtil.set(LogType.Login, "用户登录");
+		LogsUtil.setCreator(param.getUsername());
 		
+		// 执行登录
+		LoginResult result = loginService.doLogin(param);
 		
-		
-		
-		return null;
+		LogsUtil.save(result.isSuccess());
+		return result;
 	}
 	
 	
