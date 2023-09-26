@@ -2,6 +2,7 @@ package com.unione.cloud.web.service;
 
 import java.time.Duration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfiguration;
@@ -14,10 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
+import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
+import com.unione.cloud.web.model.dto.LoginUser;
 import com.unione.cloud.web.util.LogsUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -161,6 +165,14 @@ public class LoginService {
 			return LoginResult.fail(LOGIN_FAILURE_TIP);
 		}
 		
+		LogsUtil.add("加载帐号信息,username:%s",param.getUsername());
+		LoginUser user=new LoginUser();
+		user.setUsername(StringUtils.trim(param.getUsername()));
+		SqlBuilder<LoginUser> builder=SqlBuilder.build(user).where("username=? OR tel=?");
+		user=dataBaseDao.findUnique(builder);
+		AssertUtil.service()
+			.notNull(user, LOGIN_FAILURE_TIP)
+			.notNull(user,new String[] {"pwdText","pwdSalt"}, LOGIN_FAILURE_TIP);
 		
 		
 		

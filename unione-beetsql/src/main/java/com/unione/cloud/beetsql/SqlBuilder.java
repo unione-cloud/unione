@@ -116,6 +116,15 @@ public class SqlBuilder<T> {
 		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
 	}
 	
+	private SqlBuilder(String tableName, T params) {
+		this.params=params;
+		this.data=params;
+		
+		this.tableName=tableName;
+		this.tableDesc = sqlManager.getTableDesc(this.tableName);
+		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
+	}
+	
 	private SqlBuilder(T data,T params) {
 		this.params=params;
 		this.data=data;
@@ -133,6 +142,11 @@ public class SqlBuilder<T> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(T params) {
 		return new SqlBuilder(params);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(String tableName,T params) {
+		return new SqlBuilder(tableName,params);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
