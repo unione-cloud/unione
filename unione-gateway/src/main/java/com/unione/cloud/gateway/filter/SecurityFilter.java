@@ -200,8 +200,8 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 					
 					// token鉴权防止越权逻辑：开始  
 					if(config.tokenSignatureEnable && StringUtils.isNotEmpty((String)principal.getAttr().get("signature")) || config.tokenSignatureForce) {
-						// token 签名验证 signature = base64(md5(username+ip+totalLoginSuccess))
-						String signature=SmUtil.sm3().digestHex(principal.getUsername()+ip+principal.getTotalLoginSuccess());
+						// token 签名验证 signature = base64(md5(username+ip))
+						String signature=SmUtil.sm3().digestHex(principal.getUsername()+ip);
 						log.debug("token签名验证,signature input:{},sign:{},client ip:{},call url:{},trust ips:{}",principal.getAttr().get("signature"),
 								signature,ip,requestUri,config.trustIpAddrs);
 						

@@ -241,6 +241,17 @@ public class DataBaseDao {
 	
 	/**
 	 * 	查询一条数据
+	 * @param builder
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findOne(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_ONE");
+		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
+	}
+	
+	/**
+	 * 	查询一条数据
 	 * @param params
 	 * @return
 	 */
@@ -250,6 +261,7 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_ONE");
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
+	
 	
 	/**
 	 * 	查询列表(根据id查询数据)

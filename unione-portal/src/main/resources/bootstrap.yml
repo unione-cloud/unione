@@ -62,7 +62,7 @@ security:
    enabled: true
    filter:
       includes: /**
-      executions: /,/api/login/captcha,/swagger-ui.html/**,/webjars/**,/swagger-resources/**,/v2/api-docs,/doc.html/**,/druid/**
+      executions: /,/api/login,/api/captcha,/swagger-ui.html/**,/webjars/**,/swagger-resources/**,/v2/api-docs,/doc.html/**,/druid/**
 
 
 

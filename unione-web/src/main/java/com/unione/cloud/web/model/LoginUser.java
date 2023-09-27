@@ -1,4 +1,4 @@
-package com.unione.cloud.web.model.dto;
+package com.unione.cloud.web.model;
 
 import java.util.Date;
 import java.util.List;
@@ -24,13 +24,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="SYS_USER")
 public class LoginUser extends Pojo{
-	
-//	/**
-//	 * 	数据验证demo
-//	 */
-//	@NotNull(message = "xxx不能为空",groups = {Validator.save.class,Validator.update.class})
-//	@ApiModelProperty("demo")
-//	private Long demo;
 	
 	// fields start
 	/**
@@ -72,8 +65,8 @@ public class LoginUser extends Pojo{
 	 * 生日
 	 */
 	@ApiModelProperty(value="生日",notes="字符长度为：10")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
 	/**
 	 * 性别，字典SEX 1女，2男
@@ -109,9 +102,7 @@ public class LoginUser extends Pojo{
 	 * 上次登录时间
 	 */
 	@ApiModelProperty(value="上次登录时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date lastLoginTime;
+	private Long lastLoginTime;
 	/**
 	 * 上次登录ip
 	 */
@@ -126,9 +117,7 @@ public class LoginUser extends Pojo{
 	 * 锁定时间，锁定时间后才能继续登录
 	 */
 	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date lockTime;
+	private Long lockTime;
 	/**
 	 * 描述
 	 */
@@ -136,4 +125,9 @@ public class LoginUser extends Pojo{
 	private String descs;
 	// fields end
 
+	//////////////////
+	// 非持久化属性
+	private String areaCode;
+	private String orgName;
+	private String orgLvsn;
 }

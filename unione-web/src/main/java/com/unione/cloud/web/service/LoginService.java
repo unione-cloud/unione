@@ -1,7 +1,13 @@
 package com.unione.cloud.web.service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ehcache.Cache;
@@ -20,15 +26,20 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
+import com.unione.cloud.core.security.UserPrincipal;
+import com.unione.cloud.core.token.TokenService;
+import com.unione.cloud.web.model.LoginRole;
+import com.unione.cloud.web.model.LoginUser;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
-import com.unione.cloud.web.model.dto.LoginUser;
 import com.unione.cloud.web.util.LogsUtil;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.SmUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -49,6 +60,9 @@ public class LoginService {
 	
 	@Autowired
 	private RedisService redisService;
+	
+	@Autowired
+	private TokenService tokenService;
 	
 	/**
 	 * 	缓存类型： ehcache/redis
@@ -105,6 +119,12 @@ public class LoginService {
 	private String LOGIN_FAILURE_TIP;
 	
 	/**
+	 * 	帐号禁止提示信息
+	 */
+	@Value("${security.login.failur.forbid:当前帐号已被{forbid}}")
+	private String LOGIN_FAILURE_FORBID;
+	
+	/**
 	 * 	登录失败：提示信息
 	 */
 	@Value("${security.login.failur.limittip:帐号或密码错误{failureCount}次，连续{totalCount}次错误帐号将被锁}")
@@ -115,6 +135,23 @@ public class LoginService {
 	 */
 	@Value("${security.login.failur.limited:帐号或密码错误{failureCount}次，请在{LimitTime}后再试}")
 	private String LOGIN_FAILURE_LLIMITEED;
+	
+	/**
+	 *  	登录允许状态：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
+	 */
+	@Value("${security.login.status.allow:1}")
+	private List<Integer> LOGIN_STATUS_ALLOW=new ArrayList<Integer>();
+	
+	/**
+	 * 	用户登录状态定义：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
+	 */
+	@SuppressWarnings("unchecked")
+	@Value("${security.login.status.maps:{1:\"正常\",2:\"禁用\",3:\"注销\",4:\"锁定\"}}")
+	public void setLoingStatusMap(String maps) {
+		LOGIN_STATUS_MAP=JSONUtil.toBean(maps, Map.class);
+	}
+	private Map<Integer, String> LOGIN_STATUS_MAP=new HashMap<>();
+	
 	
 	
 	/**
@@ -138,23 +175,6 @@ public class LoginService {
 		return cache;
 	}
 	
-//	/**
-//	 * 判断用户帐号是否已被锁
-//	 * @param username
-//	 * @return
-//	 */
-//	public boolean isLocked(String username) {
-//		log.info("判断用户帐号是否已被锁,username:{}",username);
-//		if(!LOGIN_SINGLELIMIT) {
-//			log.warn("判断用户帐号是否已被锁,目前未开启，如需开启，请修改配置，ecurity.login.failLimit=true");
-//			return false;
-//		}
-//		Integer count=this.getFailure(username);
-//		if(count!=null && count>=LOGIN_FAILCOUNT) {
-//			return true;
-//		}
-//		return false;
-//	}
 	
 	@SuppressWarnings("deprecation")
 	public Date getLimitTime(String username) {
@@ -204,6 +224,8 @@ public class LoginService {
 	 * @return
 	 */
 	private int incFailure(String username) {
+		LogsUtil.add("认证失败，累计该帐号失败次数,username:%s",username);
+		
 		Integer count=null;
 		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
 			Cache<String,Integer> cache=this.getCache();
@@ -214,7 +236,17 @@ public class LoginService {
 			count=count+1;
 			cache.put(username, count);
 		}else {
-			count=redisService.getObj(String.format("%s-%s", CACHE_NAME,username));
+			Long value=redisService.getObjOps().increment(String.format("%s-%s", CACHE_NAME,username));
+			count=value.intValue();
+		}
+		// 如果已经超过阀值，则更新用户锁定时间
+		if(count>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
+			Long lockTime=DateUtil.date().offset(DateField.SECOND, CACHE_TIME).getTime();
+			LoginUser user=LoginUser.builder().username(username).lockTime(lockTime).build();
+			SqlBuilder<LoginUser> builder=SqlBuilder
+					.build(user).field("lockTime").where("username=?");
+			int len = dataBaseDao.update(builder);
+			LogsUtil.add("更新用户锁定时间，username:%s,len:%s",username,len);
 		}
 		return count;
 	}
@@ -224,9 +256,13 @@ public class LoginService {
 	 * @param username
 	 */
 	public void cleanFailure(String username) {
-		
-		
-		
+		LogsUtil.add("清空登录错误次数,username:%s",username);
+		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
+			Cache<String,Integer> cache=this.getCache();
+			cache.remove(username);
+		}else {
+			redisService.delete(String.format("%s-%s", CACHE_NAME,username));
+		}
 	}
 	
 	/**
@@ -238,8 +274,6 @@ public class LoginService {
 		log.info("进入：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s",param.getUsername(),param.getCaptcha());
 		AssertUtil.service().notNull(param, new String[] {"username","password"},"请求参数%s不能为空");
-		
-		LoginResult result=null;
 		
 		LogsUtil.add("验证帐号是否已被锁,username:%s",param.getUsername());
 		int failureCount=this.getFailure(param.getUsername());
@@ -256,42 +290,113 @@ public class LoginService {
 		LogsUtil.add("加载帐号信息,username:%s",param.getUsername());
 		LoginUser user=new LoginUser();
 		user.setUsername(StringUtils.trim(param.getUsername()));
-		SqlBuilder<LoginUser> builder=SqlBuilder.build(user).where("username=? OR tel=?");
-		user=dataBaseDao.findUnique(builder);
-		AssertUtil.service()
-			.notNull(user, LOGIN_FAILURE_TIP)
-			.notNull(user,new String[] {"pwdText","pwdSalt"}, LOGIN_FAILURE_TIP);
+		SqlBuilder<LoginUser> builder=SqlBuilder
+				.build(user)
+				.query("SELECT u.*,org.ID as orgId,org.NAME as orgName,org.AREA_CODE as areaCode FROM SYS_USER u LEFT JOIN SYS_ORGAN org on u.ORG_ID=org.ID WHERE u.USERNAME=#{params.username}");
+		user=dataBaseDao.findOne(builder);
+		if(user==null) {
+			LogsUtil.add("认证失败：帐号不正确");
+			return this.loginFailure(param.getUsername());
+		}
+		
+		if(!LOGIN_STATUS_ALLOW.contains(user.getStatus())) {
+			String text=LOGIN_STATUS_MAP.get(user.getStatus());
+			if(StringUtils.isEmpty(text)) {
+				text="禁用";
+			}
+			LogsUtil.add("认证失败：帐号已%s",text);
+			return LoginResult.fail(LOGIN_FAILURE_FORBID.replace("{forbid}", text));
+		}
+		
+		if(StringUtils.isEmpty(user.getPwdText())) {
+			LogsUtil.add("认证失败：帐号密码为空");
+			return this.loginFailure(param.getUsername());
+		}
+		
+		if(StringUtils.isEmpty(user.getPwdSalt())) {
+			LogsUtil.add("认证失败：密码盐为空");
+			return this.loginFailure(param.getUsername());
+		}
 		
 		LogsUtil.add("使用用户密码盐对输入密码进行加密并判断和密码是否一致");
 		String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(param.getPassword());
 		if(ObjectUtil.notEqual(pwd, user.getPwdText())) {
-			LogsUtil.add("帐号或密码不正确，累计该帐号错误次数");
-			failureCount=this.incFailure(param.getUsername());
-			LogsUtil.add("该帐号错误次数为：%s,限制次数为：%s，限制开关：%s",failureCount,LOGIN_FAILCOUNT,LOGIN_FAILLIMITE);
-			
-			// 输出错误提示
-			if(LOGIN_FAILLIMITE) {
-				if(failureCount>=LOGIN_FAILCOUNT) {
-					return LoginResult.fail(LOGIN_FAILURE_LLIMITEED
-							.replace("{failureCount}", failureCount+"")
-							.replace("{totalCount}", LOGIN_FAILCOUNT+""));
-				}
-				return LoginResult.fail(LOGIN_FAILURE_LLIMITETIP
-						.replace("{failureCount}", failureCount+"")
-						.replace("{totalCount}", LOGIN_FAILCOUNT+""));
-			}else {
-				return LoginResult.fail(LOGIN_FAILURE_TIP);
-			}
-		}else {
-			// 密码正确
-			
+			LogsUtil.add("认证失败：密码不正确");
+			return this.loginFailure(param.getUsername());
 		}
 		
-		
+		// 密码正确
+		this.cleanFailure(param.getUsername());	//清空失败信息
+			
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
-		return result;
+		// 构建认证信息
+		return this.loginSuccess(user);
 	}
 	
+	
+	/**
+	 * 	登录成功
+	 * @param user
+	 * @return
+	 */
+	private LoginResult loginSuccess(LoginUser user) {
+		LogsUtil.add("用户登录成功，username:%s",user.getUsername());
+		
+		// 实例化用户认证对象
+		UserPrincipal principal=new UserPrincipal();
+		BeanUtil.copyProperties(user, principal);
+		principal.setAvatar(user.getPortrait());
+		
+		// 加载用户角色
+		LoginRole role=new LoginRole();
+		role.setUserId(user.getId());
+		SqlBuilder<LoginRole> loadUserRole=SqlBuilder
+				.build(role).query("SELECT r.* FROM SYS_USER_ROLE ur LEFT JOIN SYS_ROLE r ON ur.ROLE_ID=r.ID WEHRE r.STATUS=1 AND ur.USER_ID=#{params.userId}");
+		List<LoginRole> roles = dataBaseDao.findList(loadUserRole);
+		Set<String> roleCodes = roles.stream().map(row->row.getCodes()).filter(row->row!=null).collect(Collectors.toSet());
+		principal.setUserRoles(new ArrayList<>(roleCodes));
+		LogsUtil.add("加载用户角色,role list:%s",roleCodes);
+		
+		// 更新用户登录信息
+		user.setLastLoginIp(LogsUtil.getClientIp());
+		user.setLastLoginTime(DateUtil.date().getTime());
+		SqlBuilder<LoginUser> updater=SqlBuilder
+				.build(user).field("lastLoginTime,lastLoginIp").where("id=?");
+		int len = dataBaseDao.update(updater);
+		LogsUtil.add("更新用户登录信息,user id:%s,len:%s",user.getId(),len);
+		
+		LogsUtil.add("生成认证令牌并返回结果");
+		String token=tokenService.build4auth(principal);
+		return LoginResult.success(token, principal);
+	}
+	
+	/**
+	 * 	登录失败
+	 * @param username
+	 * @return
+	 */
+	private LoginResult loginFailure(String username) {
+		
+		int failureCount=this.incFailure(username);
+		LogsUtil.add("该帐号错误次数为：%s,限制次数为：%s，限制开关：%s",failureCount,LOGIN_FAILCOUNT,LOGIN_FAILLIMITE);
+		
+		// 输出错误提示
+		if(LOGIN_FAILLIMITE) {
+			if(failureCount>=LOGIN_FAILCOUNT) {
+				Date expire=this.getLimitTime(username);
+				if(expire!=null) {
+					return LoginResult.fail(LOGIN_FAILURE_LLIMITEED
+							.replace("{failureCount}", failureCount+"")
+							.replace("{LimitTime}", DateUtil.format(expire, "yyyy-MM-dd HH:mm")));
+				}
+			}
+			return LoginResult.fail(LOGIN_FAILURE_LLIMITETIP
+					.replace("{failureCount}", failureCount+"")
+					.replace("{totalCount}", LOGIN_FAILCOUNT+""));
+		}else {
+			return LoginResult.fail(LOGIN_FAILURE_TIP);
+		}
+	}
 	
 
 }

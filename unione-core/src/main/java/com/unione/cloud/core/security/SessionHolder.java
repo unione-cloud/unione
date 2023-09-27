@@ -71,23 +71,26 @@ public class SessionHolder implements SessionService {
 
 	@Override
 	public String getOrgLvsn() {
-		return this.getAttr("orgLvsn");
+		UserPrincipal principal=this.getPrincipal();
+		return principal!=null?principal.getOrgLvsn():null;
 	}
 	
 	@Override
-	public String getAreaName() {
-		return this.getAttr("areaName");
-	}
-	
-	@Override
-	public String getAreaSn() {
-		return this.getAttr("areaCode");
+	public String getAreaCode() {
+		UserPrincipal principal=this.getPrincipal();
+		return principal!=null?principal.getAreaCode():null;
 	}
 	
 	@Override
 	public String getUsername() {
 		UserPrincipal principal=this.getPrincipal();
 		return principal!=null?principal.getUsername():null;
+	}
+	
+	@Override
+	public String getUserTel() {
+		UserPrincipal principal=this.getPrincipal();
+		return principal!=null?principal.getTel():null;
 	}
 
 	@Override
@@ -105,7 +108,7 @@ public class SessionHolder implements SessionService {
 	@Override
 	public Integer getUsertype() {
 		UserPrincipal principal=this.getPrincipal();
-		return principal!=null?principal.getType():null;
+		return principal!=null?principal.getUserType():null;
 	}
 
 	@Override

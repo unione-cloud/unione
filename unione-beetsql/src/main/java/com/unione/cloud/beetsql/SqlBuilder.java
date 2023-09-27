@@ -224,11 +224,11 @@ public class SqlBuilder<T> {
 	}
 	
 	private String findSql() {
-		this.processIdQuerys();
-		this.processKeywordsQuery();
-		this.processCondition();
-		
 		if(StringUtils.isEmpty(this.findSql)) {
+			this.processIdQuerys();
+			this.processKeywordsQuery();
+			this.processCondition();
+			
 			String selectField="*";
 			if(this.fieldList!=null && this.fieldList.length>0) {
 				selectField=ArrayUtil.join(this.fieldList, ",");
@@ -439,6 +439,11 @@ public class SqlBuilder<T> {
 	
 	public SqlBuilder<T> keywords(String keywords){
 		this.keywords=keywords;
+		return this;
+	}
+	
+	public SqlBuilder<T> query(String sql){
+		this.findSql=sql;
 		return this;
 	}
 	

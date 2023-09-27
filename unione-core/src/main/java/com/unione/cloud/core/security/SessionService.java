@@ -43,25 +43,25 @@ public interface SessionService{
 	 * 获取用户机构层级编码
 	 * @return
 	 */
-	default public String getOrgLvsn() {return null;};
-	
-	/**
-	 * 获取用户所在区域名称
-	 * @return
-	 */
-	default public String getAreaName() {return null;};
+	public String getOrgLvsn();
 	
 	/**
 	 * 获取用户所在区域编码
 	 * @return
 	 */
-	default public String getAreaSn() {return null;};
+	public String getAreaCode();
 	
 	/**
 	 * 获取用户账号
 	 * @return
 	 */
 	public String getUsername();
+	
+	/**
+	 * 获取用户手机号
+	 * @return
+	 */
+	public String getUserTel();
 
 	/**
 	 * 获取用户真实姓名

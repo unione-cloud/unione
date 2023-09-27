@@ -178,25 +178,29 @@ public class LogsUtil {
 	/**
 	 * 	获得请求 IP 地址
 	 * @author YangGuangJian <br>
-	 * @param request
 	 * @return
 	 */
-	public static String getClientIp(HttpServletRequest request) {
+	public static String getClientIp() {
+		HttpServletRequest req=request.get();
+		if(req==null) {
+			return null;
+		}
+		
 		String ip = null;
-		Enumeration<String> enu = request.getHeaderNames();
+		Enumeration<String> enu = req.getHeaderNames();
 		while (enu.hasMoreElements()) {
 			String name = enu.nextElement();
 			if (name.equalsIgnoreCase("X-Forwarded-For") || name.equalsIgnoreCase("X-Real-IP") || 
 					name.equalsIgnoreCase("Proxy-Client-IP") || name.equalsIgnoreCase("WL-Proxy-Client-IP") || 
 					name.equalsIgnoreCase("RemoteAddress")) {
-				ip = request.getHeader(name);
+				ip = req.getHeader(name);
 			}
 			if (ip != null && ip.length() >= 0 && !"unknown".equalsIgnoreCase(ip)) {
 				break;
 			}
 		}
 		if (ip == null || ip.length() == 0) {
-			ip = request.getRemoteAddr();
+			ip = req.getRemoteAddr();
 		}
 		if (StringUtils.isNotEmpty(ip)) {
 			ip = ip.split(",")[0];
@@ -575,7 +579,7 @@ public class LogsUtil {
 			HttpServletRequest req=getRequest();
 			if(req!=null) {
 				// 获取IP
-				String ip=getClientIp(req);
+				String ip=getClientIp();
 				logs.setIp(ip);
 			}
 		}

@@ -37,19 +37,21 @@ public class UserPrincipal implements Serializable {
 	 */
 	private String orgName;
 	/**
+	 * 机构层级编码
+	 */
+	private String orgLvsn;
+	/**
+	 * 区域编码
+	 */
+	private String areaCode;
+	/**
 	 * 用户账号
 	 */
 	private String username;
 	/**
-	 * 账号密码
+	 * 用户手机号
 	 */
-	@JsonIgnore
-	private String pwdText;
-	/**
-	 * 密码盐
-	 */
-	@JsonIgnore
-	private String pwdSalt;
+	private String tel;
 	/**
 	 * 真实姓名
 	 */
@@ -65,7 +67,7 @@ public class UserPrincipal implements Serializable {
 	/**
 	 * 用户类型
 	 */
-	private Integer type;
+	private Integer userType;
 	/**
 	 * 用户状态
 	 */
@@ -78,18 +80,7 @@ public class UserPrincipal implements Serializable {
 	 * 上次登录时间：时间戳
 	 */
 	private Long lastLoginTime;
-	/**
-	 * 累计成功登陆次数
-	 */
-	private Long totalLoginSuccess;
-	/**
-	 * 累计失败登陆次数
-	 */
-	private Long totalLoginFailure;
-	/**
-	 * 锁定时间期限
-	 */
-	private Long lockTime;
+
 	/**
 	 * 用户角色列表(编码)
 	 */

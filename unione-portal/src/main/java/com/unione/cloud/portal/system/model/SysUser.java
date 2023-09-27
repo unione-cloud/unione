@@ -109,8 +109,8 @@ public class SysUser extends Pojo{
 	 * 生日
 	 */
 	@ApiModelProperty(value="生日",notes="字符长度为：10")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
 	/**
 	 * 性别，字典SEX 1女，2男
@@ -146,9 +146,7 @@ public class SysUser extends Pojo{
 	 * 上次登录时间
 	 */
 	@ApiModelProperty(value="上次登录时间",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date lastLoginTime;
+	private Long lastLoginTime;
 	/**
 	 * 上次登录ip
 	 */
@@ -163,9 +161,7 @@ public class SysUser extends Pojo{
 	 * 锁定时间，锁定时间后才能继续登录
 	 */
 	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="字符长度为：26")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date lockTime;
+	private Long lockTime;
 	/**
 	 * 描述
 	 */
