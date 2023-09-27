@@ -1,10 +1,12 @@
 package com.unione.cloud.web.service;
 
 import java.time.Duration;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.ValueSupplier;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
@@ -18,12 +20,15 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
-import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
 import com.unione.cloud.web.model.dto.LoginUser;
 import com.unione.cloud.web.util.LogsUtil;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.crypto.SmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -90,7 +95,7 @@ public class LoginService {
 	/**
 	 * 	单端登录验证提示信息
 	 */
-	@Value("${security.login.singleTip:账号[%s]已在其他设备登录}")
+	@Value("${security.login.singleTip:账号[{username}]已在其他设备登录}")
 	private String LOGIN_SINGLETIP;
 	
 	/**
@@ -98,6 +103,18 @@ public class LoginService {
 	 */
 	@Value("${security.login.failur.tip:账号或密码不正确}")
 	private String LOGIN_FAILURE_TIP;
+	
+	/**
+	 * 	登录失败：提示信息
+	 */
+	@Value("${security.login.failur.limittip:帐号或密码错误{failureCount}次，连续{totalCount}次错误帐号将被锁}")
+	private String LOGIN_FAILURE_LLIMITETIP;
+	
+	/**
+	 * 	登录失败：帐号被锁提示信息
+	 */
+	@Value("${security.login.failur.limited:帐号或密码错误{failureCount}次，请在{LimitTime}后再试}")
+	private String LOGIN_FAILURE_LLIMITEED;
 	
 	
 	/**
@@ -121,17 +138,54 @@ public class LoginService {
 		return cache;
 	}
 	
+//	/**
+//	 * 判断用户帐号是否已被锁
+//	 * @param username
+//	 * @return
+//	 */
+//	public boolean isLocked(String username) {
+//		log.info("判断用户帐号是否已被锁,username:{}",username);
+//		if(!LOGIN_SINGLELIMIT) {
+//			log.warn("判断用户帐号是否已被锁,目前未开启，如需开启，请修改配置，ecurity.login.failLimit=true");
+//			return false;
+//		}
+//		Integer count=this.getFailure(username);
+//		if(count!=null && count>=LOGIN_FAILCOUNT) {
+//			return true;
+//		}
+//		return false;
+//	}
+	
+	@SuppressWarnings("deprecation")
+	public Date getLimitTime(String username) {
+		Long limit=null;
+		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
+			Cache<String,Integer> cache=this.getCache();
+			Integer count=cache.get(username);
+			org.ehcache.expiry.Duration duration = cache.getRuntimeConfiguration().getExpiry().getExpiryForAccess(username, new ValueSupplier<Integer>() {
+				@Override
+				public Integer value() {
+					return count;
+				}
+			});
+			if(duration!=null) {
+				limit=duration.getLength();
+			}
+		}else {
+			limit=redisService.getExpire(String.format("%s-%s", CACHE_NAME,username));
+		}
+		if(limit!=null) {
+			return DateUtil.date().offset(DateField.SECOND, limit.intValue());
+		}
+		return null;
+	}
+	
 	/**
-	 * 判断用户帐号是否已被锁
+	 * 	获得帐号登录失败次数
 	 * @param username
 	 * @return
 	 */
-	public boolean isLocked(String username) {
-		log.info("判断用户帐号是否已被锁,username:{}",username);
-		if(!LOGIN_SINGLELIMIT) {
-			log.warn("判断用户帐号是否已被锁,目前未开启，如需开启，请修改配置，ecurity.login.failLimit=true");
-			return false;
-		}
+	public int getFailure(String username) {
 		Integer count=null;
 		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
 			Cache<String,Integer> cache=this.getCache();
@@ -139,13 +193,41 @@ public class LoginService {
 		}else {
 			count=redisService.getObj(String.format("%s-%s", CACHE_NAME,username));
 		}
-		if(count!=null && count>=LOGIN_FAILCOUNT) {
-			return true;
-		}
-		return false;
+		return count!=null?count:0;
 	}
 	
 	
+	
+	/**
+	 * 	登录错误累计次数，超出限制后
+	 * @param username
+	 * @return
+	 */
+	private int incFailure(String username) {
+		Integer count=null;
+		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
+			Cache<String,Integer> cache=this.getCache();
+			count=cache.get(username);
+			if(count==null) {
+				count=0;
+			}
+			count=count+1;
+			cache.put(username, count);
+		}else {
+			count=redisService.getObj(String.format("%s-%s", CACHE_NAME,username));
+		}
+		return count;
+	}
+	
+	/**
+	 * 	清空登录错误次数
+	 * @param username
+	 */
+	public void cleanFailure(String username) {
+		
+		
+		
+	}
 	
 	/**
 	 * 执行用户登录方
@@ -160,9 +242,15 @@ public class LoginService {
 		LoginResult result=null;
 		
 		LogsUtil.add("验证帐号是否已被锁,username:%s",param.getUsername());
-		if(this.isLocked(param.getUsername())) {
+		int failureCount=this.getFailure(param.getUsername());
+		if(failureCount>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
 			LogsUtil.add("帐号已被锁定，拒绝本次登录请求");
-			return LoginResult.fail(LOGIN_FAILURE_TIP);
+			Date expire=this.getLimitTime(param.getUsername());
+			if(expire!=null) {
+				return LoginResult.fail(LOGIN_FAILURE_LLIMITEED
+						.replace("{failureCount}", failureCount+"")
+						.replace("{LimitTime}", DateUtil.format(expire, "yyyy-MM-dd HH:mm")));
+			}
 		}
 		
 		LogsUtil.add("加载帐号信息,username:%s",param.getUsername());
@@ -174,9 +262,30 @@ public class LoginService {
 			.notNull(user, LOGIN_FAILURE_TIP)
 			.notNull(user,new String[] {"pwdText","pwdSalt"}, LOGIN_FAILURE_TIP);
 		
-		
-		
-		
+		LogsUtil.add("使用用户密码盐对输入密码进行加密并判断和密码是否一致");
+		String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(param.getPassword());
+		if(ObjectUtil.notEqual(pwd, user.getPwdText())) {
+			LogsUtil.add("帐号或密码不正确，累计该帐号错误次数");
+			failureCount=this.incFailure(param.getUsername());
+			LogsUtil.add("该帐号错误次数为：%s,限制次数为：%s，限制开关：%s",failureCount,LOGIN_FAILCOUNT,LOGIN_FAILLIMITE);
+			
+			// 输出错误提示
+			if(LOGIN_FAILLIMITE) {
+				if(failureCount>=LOGIN_FAILCOUNT) {
+					return LoginResult.fail(LOGIN_FAILURE_LLIMITEED
+							.replace("{failureCount}", failureCount+"")
+							.replace("{totalCount}", LOGIN_FAILCOUNT+""));
+				}
+				return LoginResult.fail(LOGIN_FAILURE_LLIMITETIP
+						.replace("{failureCount}", failureCount+"")
+						.replace("{totalCount}", LOGIN_FAILCOUNT+""));
+			}else {
+				return LoginResult.fail(LOGIN_FAILURE_TIP);
+			}
+		}else {
+			// 密码正确
+			
+		}
 		
 		
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());

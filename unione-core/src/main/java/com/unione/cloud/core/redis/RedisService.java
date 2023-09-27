@@ -260,6 +260,16 @@ public class RedisService {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	public Long getExpire(String key) {
+		return redisTemplate.getExpire(key);
+	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Long getExpire(int db,String key) {
+		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
+		return redisTemplate.getExpire(key);
+	}
+	
 	/**
 	 * @获得obj数据
 	 * @param key
