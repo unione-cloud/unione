@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
+import com.unione.cloud.web.model.dto.UserRegister;
 import com.unione.cloud.web.service.CaptchaService;
 import com.unione.cloud.web.service.LoginService;
+import com.unione.cloud.web.service.RegisterService;
 import com.unione.cloud.web.util.LogsUtil;
 import com.unione.cloud.web.util.LogsUtil.LogType;
 
@@ -23,9 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@Api(tags = "基础服务：登录服务")
+@Api(tags = "基础服务：认证服务")
 @RequestMapping("/api")
-public class SysLoginController {
+public class SysSecurityController {
 	
 	@Autowired
 	private HttpServletResponse response;
@@ -35,6 +38,9 @@ public class SysLoginController {
 	
 	@Autowired
 	private LoginService loginService;
+	
+	@Autowired
+	private RegisterService registerService;
 	
 	
 	/**
@@ -71,6 +77,20 @@ public class SysLoginController {
 		
 		// 执行登录
 		LoginResult result = loginService.doLogin(param);
+		
+		LogsUtil.save(result.isSuccess());
+		return result;
+	}
+	
+	
+	@PostMapping("/register")
+	@ApiOperation(value = "用户注册",notes = "需要开启注册功能并设置默认分配角色等信息")
+	public Results<Void> register(@RequestBody UserRegister param){
+		log.info("用户注册：usrename:{}",param.getUsername());
+		LogsUtil.set(LogType.Register, "用户注册");
+		LogsUtil.setCreator(param.getUsername());
+		
+		Results<Void> result=registerService.doRegister(param);
 		
 		LogsUtil.save(result.isSuccess());
 		return result;

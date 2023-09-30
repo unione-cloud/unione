@@ -52,41 +52,52 @@ public class CaptchaService {
 	@Autowired
 	private HttpServletRequest request;
 	
+	/**
+	 * 验证码：宽度
+	 */
+	@Value("${security.captcha.width:150}")
+	private int WIDTH;
 	
-	@Value("${captcha.width:150}")
-	private int width;
+	/**
+	 * 验证码：高度
+	 */
+	@Value("${security.captcha.height:50}")
+	private int HEIGHT;
 	
-	@Value("${captcha.height:50}")
-	private int height;
+	/**
+	 * 验证码：字符数量
+	 */
+	@Value("${security.captcha.codecount:5}")
+	private int CODECOUNT;
 	
 	/**
 	 * 验证码使用状态，默认开启
 	 */
-	@Value("${captcha.enable:true}")
+	@Value("${security.captcha.enable:true}")
 	private boolean ENABLE;
 	
 	/**
 	 * 	缓存类型： ehcache/redis
 	 */
-	@Value("${captcha.cache.type:ehcache}")
+	@Value("${security.captcha.cache.type:ehcache}")
 	private String CACHE_TYPE;
 	
 	/**
 	 * 缓存名称
 	 */
-	@Value("${captcha.cache.name:captcha-cache}")
+	@Value("${security.captcha.cache.name:captcha-cache}")
 	private String CACHE_NAME;
 	
 	/**
 	 * 缓存内存大小：单位M，默认10M
 	 */
-	@Value("${captcha.cache.memory:10}")
+	@Value("${security.captcha.cache.memory:10}")
 	private int    CACHE_MEMORY;
 	
 	/**
 	 * 缓存时间：单位秒，默认300秒
 	 */
-	@Value("${captcha.cache.time:300}")
+	@Value("${security.captcha.cache.time:300}")
 	private int    CACHE_TIME;
 	
 	
@@ -121,7 +132,7 @@ public class CaptchaService {
 	 */
 	public AbstractCaptcha create() {
 		log.debug("进入->创建验证码");
-		AbstractCaptcha captcha=CaptchaUtil.createGifCaptcha(width, height);
+		AbstractCaptcha captcha=CaptchaUtil.createGifCaptcha(WIDTH, HEIGHT,CODECOUNT);
 		
 		String captchaid=UUID.randomUUID().toString();
 		// 设置cookie

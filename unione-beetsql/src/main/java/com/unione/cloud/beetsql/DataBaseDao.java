@@ -19,6 +19,7 @@ import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.util.BeanUtils;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -45,20 +46,13 @@ public class DataBaseDao {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)entity;
 			pojo.setId(SidGenHolder.generate());
-			if(pojo.getTenantId()==null) {
-				pojo.setTenantId(sessionService.getTenantId());
-			}
-			if(pojo.getOrgId()==null) {
-				pojo.setOrgId(sessionService.getOrgId());
-			}
-			if(pojo.getUserId()==null) {
-				pojo.setUserId(sessionService.getUserId());
-			}
-			
-			pojo.setCreated(DateUtil.current());
-			pojo.setCreatedBy(sessionService.getUsername());
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
+			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
+			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
+			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
+			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
+			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 		}
 		
 		int len = this.sqlManager.insertTemplate(entity.getClass(),entity);
@@ -74,17 +68,13 @@ public class DataBaseDao {
 			list.stream().forEach(i->{
 				Pojo pojo=(Pojo)i;
 				pojo.setId(SidGenHolder.generate());
-				pojo.setTenantId(sessionService.getTenantId());
-				if(pojo.getOrgId()==null) {
-					pojo.setOrgId(sessionService.getOrgId());
-				}
-				if(pojo.getUserId()==null) {
-					pojo.setUserId(sessionService.getUserId());
-				}
-				
-				pojo.setCreated(DateUtil.current());				pojo.setCreatedBy(sessionService.getUsername());
-				pojo.setLastUpdated(DateUtil.current());
-				pojo.setLastUpdatedBy(sessionService.getUsername());
+				BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
+				BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
+				BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
+				BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
+				BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
+				BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
+				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 			});
 		}
 		this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -98,18 +88,13 @@ public class DataBaseDao {
 		if(entity instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)entity;
-			pojo.setTenantId(sessionService.getTenantId());
-			if(pojo.getOrgId()==null) {
-				pojo.setOrgId(sessionService.getOrgId());
-			}
-			if(pojo.getUserId()==null) {
-				pojo.setUserId(sessionService.getUserId());
-			}
-			
-			pojo.setCreated(DateUtil.current());
-			pojo.setCreatedBy(sessionService.getUsername());
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
+			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
+			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
+			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
+			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
+			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 		}
 		int len = this.sqlManager.insertTemplate(entity);
 		AssertUtil.service().isTrue(len>0, "保存数据失败");
@@ -124,18 +109,13 @@ public class DataBaseDao {
 			SessionService sessionService=SessionHolder.build();
 			list.stream().forEach(i->{
 				Pojo pojo=(Pojo)i;
-				pojo.setTenantId(sessionService.getTenantId());
-				if(pojo.getOrgId()==null) {
-					pojo.setOrgId(sessionService.getOrgId());
-				}
-				if(pojo.getUserId()==null) {
-					pojo.setUserId(sessionService.getUserId());
-				}
-				
-				pojo.setCreated(DateUtil.current());
-				pojo.setCreatedBy(sessionService.getUsername());
-				pojo.setLastUpdated(DateUtil.current());
-				pojo.setLastUpdatedBy(sessionService.getUsername());
+				BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
+				BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
+				BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
+				BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
+				BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
+				BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
+				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 			});
 		}
 		int ln[]= this.sqlManager.insertBatch(list.get(0).getClass(), list);

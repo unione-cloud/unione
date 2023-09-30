@@ -47,14 +47,7 @@ public class LogsUtil {
 	public void setAppCode(String appCode) {
 		LogsUtil.appCode=appCode;
 	}
-	@Autowired(required = false)
-	public void setRequest(HttpServletRequest req) {
-		request.set(req);
-	}
-	@Autowired(required = false)
-	public void setResponse(HttpServletResponse res) {
-		response.set(res);
-	}
+	
 	/**
 	 * 	用户会话对象
 	 */
@@ -101,10 +94,6 @@ public class LogsUtil {
 	}
 	
 	
-	// 当前请求对象
-	private static ThreadLocal<HttpServletRequest> request=new ThreadLocal<>();
-	// 当前相应对象
-	private static ThreadLocal<HttpServletResponse> response=new ThreadLocal<>();
 	// 日志记录对象
 	private static ThreadLocal<SysLogs> entry=new ThreadLocal<>();
 	// 日志内容对象
@@ -113,7 +102,7 @@ public class LogsUtil {
 	// 操作类型
 	public static enum LogType{
 		Query("query"),Insert("insert"),Modify("modify"),Delete("delete"),
-		Login("login"),Logout("logout"),ResetPwd("resetpwd");
+		Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd");
 		
 		private String value;
 		LogType(String value){
@@ -129,10 +118,7 @@ public class LogsUtil {
 	 * @return
 	 */
 	private static HttpServletRequest getRequest() {
-		HttpServletRequest req=request.get();
-		if(req==null) {
-			req = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-		}
+		HttpServletRequest req=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 		return req;
 	}
 	
@@ -141,10 +127,7 @@ public class LogsUtil {
 	 * @return
 	 */
 	private static HttpServletResponse getResponse() {
-		HttpServletResponse res=response.get();
-		if(res==null) {
-			res = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
-		}
+		HttpServletResponse res=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
 		return res;
 	}
 	
@@ -181,7 +164,7 @@ public class LogsUtil {
 	 * @return
 	 */
 	public static String getClientIp() {
-		HttpServletRequest req=request.get();
+		HttpServletRequest req=getRequest();
 		if(req==null) {
 			return null;
 		}
@@ -590,7 +573,6 @@ public class LogsUtil {
 		// 异步保存日志
 		Runnable runnable=null;
 		entry.remove();
-		request.remove();
 		try {
 			runnable = new SaveLogsThread(dataBaseDao, logs);
 			

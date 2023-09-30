@@ -28,13 +28,14 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
-import com.unione.cloud.web.model.LoginRole;
-import com.unione.cloud.web.model.LoginUser;
+import com.unione.cloud.web.model.SysRole;
+import com.unione.cloud.web.model.SysUser;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
 import com.unione.cloud.web.util.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -63,6 +64,10 @@ public class LoginService {
 	
 	@Autowired
 	private TokenService tokenService;
+	
+	@Autowired
+	private CaptchaService captchaService;	
+	
 	
 	/**
 	 * 	缓存类型： ehcache/redis
@@ -140,17 +145,21 @@ public class LoginService {
 	 *  	登录允许状态：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
 	 */
 	@Value("${security.login.status.allow:1}")
-	private List<Integer> LOGIN_STATUS_ALLOW=new ArrayList<Integer>();
+	private List<Integer> LOGIN_STATUS_ALLOW=new ArrayList<>();
 	
+	private Map<Integer, String> LOGIN_STATUS_MAP=new HashMap<>();
 	/**
 	 * 	用户登录状态定义：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
 	 */
 	@SuppressWarnings("unchecked")
 	@Value("${security.login.status.maps:{1:\"正常\",2:\"禁用\",3:\"注销\",4:\"锁定\"}}")
 	public void setLoingStatusMap(String maps) {
-		LOGIN_STATUS_MAP=JSONUtil.toBean(maps, Map.class);
+		LOGIN_STATUS_MAP=new HashMap<>();
+		Map<String,String> map=JSONUtil.toBean(maps, Map.class);
+		map.entrySet().stream().forEach(entry->{
+			LOGIN_STATUS_MAP.put(Integer.parseInt(entry.getKey()),entry.getValue());
+		});
 	}
-	private Map<Integer, String> LOGIN_STATUS_MAP=new HashMap<>();
 	
 	
 	
@@ -242,8 +251,8 @@ public class LoginService {
 		// 如果已经超过阀值，则更新用户锁定时间
 		if(count>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
 			Long lockTime=DateUtil.date().offset(DateField.SECOND, CACHE_TIME).getTime();
-			LoginUser user=LoginUser.builder().username(username).lockTime(lockTime).build();
-			SqlBuilder<LoginUser> builder=SqlBuilder
+			SysUser user=SysUser.builder().username(username).lockTime(lockTime).build();
+			SqlBuilder<SysUser> builder=SqlBuilder
 					.build(user).field("lockTime").where("username=?");
 			int len = dataBaseDao.update(builder);
 			LogsUtil.add("更新用户锁定时间，username:%s,len:%s",username,len);
@@ -273,8 +282,10 @@ public class LoginService {
 	public LoginResult doLogin(LoginParam param) {
 		log.info("进入：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s",param.getUsername(),param.getCaptcha());
-		AssertUtil.service().notNull(param, new String[] {"username","password"},"请求参数%s不能为空");
-		
+		AssertUtil.service()
+			.notNull(param, new String[] {"username","password"},"请求参数%s不能为空")
+			.isTrue(captchaService.validate(param.getCaptcha()), "验证码不正确");
+				
 		LogsUtil.add("验证帐号是否已被锁,username:%s",param.getUsername());
 		int failureCount=this.getFailure(param.getUsername());
 		if(failureCount>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
@@ -288,9 +299,9 @@ public class LoginService {
 		}
 		
 		LogsUtil.add("加载帐号信息,username:%s",param.getUsername());
-		LoginUser user=new LoginUser();
+		SysUser user=new SysUser();
 		user.setUsername(StringUtils.trim(param.getUsername()));
-		SqlBuilder<LoginUser> builder=SqlBuilder
+		SqlBuilder<SysUser> builder=SqlBuilder
 				.build(user)
 				.query("SELECT u.*,org.ID as orgId,org.NAME as orgName,org.AREA_CODE as areaCode FROM SYS_USER u LEFT JOIN SYS_ORGAN org on u.ORG_ID=org.ID WHERE u.USERNAME=#{params.username}");
 		user=dataBaseDao.findOne(builder);
@@ -319,7 +330,7 @@ public class LoginService {
 		}
 		
 		LogsUtil.add("使用用户密码盐对输入密码进行加密并判断和密码是否一致");
-		String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(param.getPassword());
+		String pwd = SmUtil.sm4(Base64.decode(user.getPwdSalt())).encryptHex(param.getPassword());
 		if(ObjectUtil.notEqual(pwd, user.getPwdText())) {
 			LogsUtil.add("认证失败：密码不正确");
 			return this.loginFailure(param.getUsername());
@@ -339,7 +350,7 @@ public class LoginService {
 	 * @param user
 	 * @return
 	 */
-	private LoginResult loginSuccess(LoginUser user) {
+	private LoginResult loginSuccess(SysUser user) {
 		LogsUtil.add("用户登录成功，username:%s",user.getUsername());
 		
 		// 实例化用户认证对象
@@ -348,11 +359,11 @@ public class LoginService {
 		principal.setAvatar(user.getPortrait());
 		
 		// 加载用户角色
-		LoginRole role=new LoginRole();
+		SysRole role=new SysRole();
 		role.setUserId(user.getId());
-		SqlBuilder<LoginRole> loadUserRole=SqlBuilder
-				.build(role).query("SELECT r.* FROM SYS_USER_ROLE ur LEFT JOIN SYS_ROLE r ON ur.ROLE_ID=r.ID WEHRE r.STATUS=1 AND ur.USER_ID=#{params.userId}");
-		List<LoginRole> roles = dataBaseDao.findList(loadUserRole);
+		SqlBuilder<SysRole> loadUserRole=SqlBuilder
+				.build(role).query("SELECT r.CODES FROM SYS_USER_ROLE ur LEFT JOIN SYS_ROLE r ON ur.ROLE_ID=r.ID WHERE r.STATUS=1 AND ur.USER_ID=#{params.userId}");
+		List<SysRole> roles = dataBaseDao.findList(loadUserRole);
 		Set<String> roleCodes = roles.stream().map(row->row.getCodes()).filter(row->row!=null).collect(Collectors.toSet());
 		principal.setUserRoles(new ArrayList<>(roleCodes));
 		LogsUtil.add("加载用户角色,role list:%s",roleCodes);
@@ -360,7 +371,7 @@ public class LoginService {
 		// 更新用户登录信息
 		user.setLastLoginIp(LogsUtil.getClientIp());
 		user.setLastLoginTime(DateUtil.date().getTime());
-		SqlBuilder<LoginUser> updater=SqlBuilder
+		SqlBuilder<SysUser> updater=SqlBuilder
 				.build(user).field("lastLoginTime,lastLoginIp").where("id=?");
 		int len = dataBaseDao.update(updater);
 		LogsUtil.add("更新用户登录信息,user id:%s,len:%s",user.getId(),len);
@@ -398,5 +409,4 @@ public class LoginService {
 		}
 	}
 	
-
 }
