@@ -1,7 +1,5 @@
 package com.unione.cloud.core.feign;
 
-import java.security.MessageDigest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.unione.cloud.core.security.SessionService;
 
+import cn.hutool.crypto.digest.DigestUtil;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
@@ -51,7 +50,7 @@ public class TokenInterceptor implements RequestInterceptor {
 				token=sessionService.getToken();
 				if(!StringUtils.isEmpty(token)) {
 					template.header(TOKEN_NAME, TOKEN_PREFIX+token+TOKEN_SUFIX);
-					template.header(signature(token), "true");
+					template.header(DigestUtil.md5Hex(token), "true");
 				}
 				
 				// 设置请求信息
@@ -77,38 +76,6 @@ public class TokenInterceptor implements RequestInterceptor {
 		logger.debug("Feign Token Interceptor apply Token :{}",token);
 	}
 	
-	
-	 /**
-     * feign MD5签名
-     * @param token
-     * @return
-     */
-    public static String signature(String token) {
-    	try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] resBytes = md.digest(token.getBytes());
-			StringBuffer sBuffer = new StringBuffer();
-	        for (int i = 0; i < resBytes.length; i++) {
-	            sBuffer.append(byteToArrayString(resBytes[i]));
-	        }
-			return sBuffer.toString();
-		} catch (Exception e) {
-			logger.error("feign签名失败,token:{}",token,e);
-		}
-    	return null;
-    }
-    
-	// 全局数组
-    private final static String[] strDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
-    private static String byteToArrayString(byte bByte) {
-        int iRet = bByte;
-        if (iRet < 0) {
-            iRet += 256;
-        }
-        int iD1 = iRet / 16;
-        int iD2 = iRet % 16;
-        return strDigits[iD1] + strDigits[iD2];
-    }
 	
 
 }

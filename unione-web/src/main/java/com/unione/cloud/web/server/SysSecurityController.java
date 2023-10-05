@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.web.model.dto.LoginParam;
 import com.unione.cloud.web.model.dto.LoginResult;
 import com.unione.cloud.web.model.dto.UserRegister;
@@ -41,6 +43,10 @@ public class SysSecurityController {
 	
 	@Autowired
 	private RegisterService registerService;
+	
+	
+	@Autowired
+	private SessionService sessionService;	
 	
 	
 	/**
@@ -80,6 +86,17 @@ public class SysSecurityController {
 		
 		LogsUtil.save(result.isSuccess());
 		return result;
+	}
+	
+	
+	@GetMapping("/isAuthed")
+	@ApiOperation(value="令牌验证",notes="验证是否登录，token是否有效")
+	public LoginResult isAuthed() {
+		UserPrincipal principal=sessionService.getPrincipal();
+		if(principal!=null) {
+			return LoginResult.success(sessionService.getToken(),principal);
+		}
+		return LoginResult.fail("当前账号未认证");
 	}
 	
 	

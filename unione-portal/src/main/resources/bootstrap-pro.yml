@@ -42,6 +42,18 @@ spring:
 
    #============================================
    #
+   # Redis Config
+   #
+   #============================================
+   redis:
+      database: 0
+      host: 8.134.11.253
+      port: 2379
+      password: redis@jeking
+
+
+   #============================================
+   #
    # Spring Multipart Config
    #
    #============================================
@@ -49,6 +61,8 @@ spring:
       multipart:
          max-file-size: 100MB
          max-request-size: 1024MB
+
+
 
 
       

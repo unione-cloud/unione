@@ -38,6 +38,7 @@ import com.unione.cloud.gateway.util.LogsUtil;
 import com.unione.cloud.gateway.util.LogsUtil.LogType;
 
 import cn.hutool.crypto.SmUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -205,7 +206,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 						log.debug("token签名验证,signature input:{},sign:{},client ip:{},call url:{},trust ips:{}",principal.getAttr().get("signature"),
 								signature,ip,requestUri,config.trustIpAddrs);
 						
-						String isFeignReq=request.getHeaders().getFirst(tokenService.signature(token));
+						String isFeignReq=request.getHeaders().getFirst(DigestUtil.md5Hex(token));
 						log.debug("验证当前请求是否为内部feign调用,token:{},isFeignReq:{}",token,isFeignReq);
 						if(!"true".equalsIgnoreCase(isFeignReq) && ObjectUtils.notEqual(signature, principal.getAttr().get("signature")) && 
 								!config.trustIpAddrs.stream().anyMatch(i->{
