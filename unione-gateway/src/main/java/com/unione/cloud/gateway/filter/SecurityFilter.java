@@ -183,7 +183,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			}
 			
 			// 公共的url,直接放行
-			if (!matcher.match("/*/isAuthed", requestUri) && !matcher.match("/login/logout", requestUri) && 
+			if (!matcher.match("/*/security/isAuthed", requestUri) && !matcher.match("/*/security/logout", requestUri) && 
 					config.getExclusion().stream().anyMatch(x -> matcher.match(x, requestUri))) {
 				log.debug("url白名单,直接放行,uri:{}",requestUri);
 				ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
@@ -339,8 +339,8 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 				}));
 			}			
 			
-			// 判断是否为 /login/logout请求
-			if(matcher.match("/login/logout", requestUri)) {
+			// 判断是否为 /security/logout请求
+			if(matcher.match("/*/security/logout", requestUri)) {
 				String method=request.getMethodValue();
 				if(!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
 					Results<?> result=new Results<>();
@@ -354,7 +354,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			}
 			
 			// 判断是否为 /*/isAuthed请求
-			if(matcher.match("/*/isAuthed", requestUri)) {
+			if(matcher.match("/*/security/isAuthed", requestUri)) {
 				String method=request.getMethodValue();
 				if(!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
 					Results<?> result=new Results<>();

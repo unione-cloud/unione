@@ -88,12 +88,6 @@ public class TokenService{
     private int autoLiteTime;
 
     /**
-	 * 	Token Center Manage 令牌中心化管理:开关，默认关闭
-	 */
-    @Value("${security.tcm.enable:true}")
-	private boolean tcmEnable;
-    
-    /**
      * 	Token Center Manage 令牌中心化管理，redis 数据库，默认：10
      */
     @Value("${security.tcm.db:10}")
@@ -181,28 +175,26 @@ public class TokenService{
      * @return
      */
     public String build4auth(UserPrincipal principal) {
-    	log.debug("进入服务:根据 principal 生成token,tcmEnable:{},principal:{}",tcmEnable,principal);
+    	log.debug("进入服务:根据 principal 生成token,principal:{}",principal);
 		// 生成token
     	String token = this.build(principal);
 		
-		String origToken=token;
 		// redis 存放token
-        if(tcmEnable){
-        	token = this.signature(principal.getUsername(), origToken);
-        	TcmEntry tcm=TcmEntry.builder()
-        			.token(origToken)
-        			.tenantId(principal.getTenantId())
-        			.userId(principal.getId())
-        			.userName(principal.getUsername())
-        			.times(DateUtil.current())
-        			.build();
-            this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
-            SessionHolder.setToken(token);
-		}
-        
-        this.redisService.putList(origToken, null);
+    	TcmEntry tcm=TcmEntry.builder()
+    			.token(token)
+    			.tenantId(principal.getTenantId())
+    			.userId(principal.getId())
+    			.userName(principal.getUsername())
+    			.times(DateUtil.current())
+    			.build();
     	
-    	log.debug("退出服务:根据 principal 生成token,tcmEnable:{},principal:{},token:{}",tcmEnable,principal,token);
+    	// token 签名处理
+    	token = this.signature(principal.getUsername(), token);
+    	
+        this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
+        SessionHolder.setToken(token);
+          	
+    	log.debug("退出服务:根据 principal 生成token,principal:{},token:{}",principal,token);
     	return token;
     }
     
@@ -211,7 +203,7 @@ public class TokenService{
      * @param token
      */
     public void clean4auth(String token) {
-    	log.debug("用户注销，tcmEnable:{},清理token:{}",tcmEnable,token);
+    	log.debug("用户注销，清理token:{}",token);
     	if(!StringUtils.isEmpty(token)){
     		if(token.length()<=120) {
     			try {
@@ -232,7 +224,7 @@ public class TokenService{
      * @return	
      */
     public String getAuthToken(String token) {
-    	if(!StringUtils.isEmpty(token) && tcmEnable && token.length()<120){
+    	if(!StringUtils.isEmpty(token) && token.length()<120){
     		try {
 				String username=sm4.decryptStr(token).split("@")[0];
 				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
@@ -257,7 +249,7 @@ public class TokenService{
      * @return
      */
     public boolean isAuthToken(String token) {
-    	if(!StringUtils.isEmpty(token) && tcmEnable && token.length()<120){
+    	if(!StringUtils.isEmpty(token) && token.length()<120){
     		try {
 				String username=sm4.decryptStr(token).split("@")[0];
 				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
@@ -291,28 +283,26 @@ public class TokenService{
 		if(principal!=null) {
 			newToken=this.build(principal);
 			//token中心化管理
-			if(tcmEnable){
-				this.redisService.delete(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token));			
-				token = this.signature(principal.getUsername(), newToken);
-				TcmEntry tcm=TcmEntry.builder()
-	        			.token(newToken)
-	        			.tenantId(principal.getTenantId())
-	        			.userId(principal.getId())
-	        			.userName(principal.getUsername())
-	        			.times(DateUtil.current())
-	        			.build();
-	            this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
-	            newToken=token;
-			}else {
-				// 设置cookie
-    			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-	        	if(attributes!=null) {
-	        		HttpServletResponse response = attributes.getResponse();
-	        		if(response!=null) {
-	        			Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
-	        			response.addCookie(ck);
-	        		}
-	        	}
+			TcmEntry tcm=TcmEntry.builder()
+					.token(newToken)
+					.tenantId(principal.getTenantId())
+					.userId(principal.getId())
+					.userName(principal.getUsername())
+					.times(DateUtil.current())
+					.build();
+			
+			this.redisService.delete(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token));			
+			newToken = this.signature(principal.getUsername(), newToken);
+            this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),newToken),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
+			
+			// 设置cookie
+			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+			if(attributes!=null) {
+				HttpServletResponse response = attributes.getResponse();
+				if(response!=null) {
+					Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
+					response.addCookie(ck);
+				}
 			}
 		}
     	
@@ -333,7 +323,7 @@ public class TokenService{
     	String origToken=token;
     	
 		// token中心化管理，token长度大于120则是未进行token签名的原生jwt令牌
-    	if(tcmEnable && token.length()<120){
+    	if(token.length()<120){
     		try {
 				String username=sm4.decryptStr(token).split("@")[0];
 				TcmEntry tcm=this.redisService.getObj(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
@@ -345,7 +335,7 @@ public class TokenService{
 				}
 				log.debug("开启token中心化管理，真实token:{}",token);
 			} catch (Exception e) {
-				log.error("验证token并获取UserPrincipal信息失败，token非法,tcmEnable:{},token:{}",tcmEnable,token,e);
+				log.error("验证token并获取UserPrincipal信息失败，token非法,token:{}",token,e);
 			}
 		}
 		
@@ -394,27 +384,15 @@ public class TokenService{
             	long timelife = jwt.getExpiresAt().getTime()-System.currentTimeMillis();
             	if(timelife<=(autoLiteTime*60*1000)) {
             		String newToken=transform(principal);
-            		if(tcmEnable) {
-	            		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
-	            		TcmEntry tcm=TcmEntry.builder()
-	    	        			.token(newToken)
-	    	        			.tenantId(principal.getTenantId())
-	    	        			.userId(principal.getId())
-	    	        			.userName(principal.getUsername())
-	    	        			.times(DateUtil.current())
-	    	        			.build();
-	            		this.redisService.put(tcmDb,String.format("%s:%s:%s", tcmKey,principal.getUsername(),origToken),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
-            		}else {
-            			// 设置cookie
-            			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        	        	if(attributes!=null) {
-        	        		HttpServletResponse response = attributes.getResponse();
-        	        		if(response!=null) {
-        	        			Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
-        	        			response.addCookie(ck);
-        	        		}
-        	        	}
-            		}
+            		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
+            		TcmEntry tcm=TcmEntry.builder()
+    	        			.token(newToken)
+    	        			.tenantId(principal.getTenantId())
+    	        			.userId(principal.getId())
+    	        			.userName(principal.getUsername())
+    	        			.times(DateUtil.current())
+    	        			.build();
+            		this.redisService.put(tcmDb,String.format("%s:%s:%s", tcmKey,principal.getUsername(),origToken),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
             	}
             }
             

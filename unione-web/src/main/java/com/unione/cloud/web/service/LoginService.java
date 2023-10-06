@@ -20,6 +20,7 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.config.units.MemoryUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
@@ -51,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
+@RefreshScope
 public class LoginService {
 	
 	@Autowired
@@ -140,6 +142,12 @@ public class LoginService {
 	 */
 	@Value("${security.login.failur.limited:帐号或密码错误{failureCount}次，请在{LimitTime}后再试}")
 	private String LOGIN_FAILURE_LLIMITEED;
+	
+    /**
+     * 	Token Center Manage 令牌中心化管理，key前缀
+     */
+    @Value("${security.tcm.key:TOKEN}")
+    private String tcmKey;
 	
 	/**
 	 *  	登录允许状态：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
@@ -338,6 +346,12 @@ public class LoginService {
 		
 		// 密码正确
 		this.cleanFailure(param.getUsername());	//清空失败信息
+		
+		if(LOGIN_SINGLELIMIT) {
+			// 如果开启了单设备登录
+			
+			
+		}
 			
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		// 构建认证信息

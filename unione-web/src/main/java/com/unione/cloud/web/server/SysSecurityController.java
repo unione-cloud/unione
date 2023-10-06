@@ -28,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@Api(tags = "基础服务：认证服务")
-@RequestMapping("/api")
+@Api(tags = "基础服务：安全服务")
+@RequestMapping("/security")
 public class SysSecurityController {
 	
 	@Autowired
