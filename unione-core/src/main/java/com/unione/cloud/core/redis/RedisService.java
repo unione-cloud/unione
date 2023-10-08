@@ -6,15 +6,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -22,6 +22,8 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.core.exception.ServiceException;
+
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -31,10 +33,10 @@ import com.unione.cloud.core.exception.ServiceException;
  * @version 5.0.0
  * @since 2019.04.22
  */
+@Slf4j
 @Service
 @RefreshScope
 public class RedisService {
-	private Logger logger=LoggerFactory.getLogger(RedisService.class);
 	
 	@Autowired
 	private RedisConfig redisConfig;
@@ -62,14 +64,14 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void put(String key,Object value) {
-		logger.debug("设置Object数据，Key:{}",key);
+		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		valueOps.set(key, value);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void put(int db, String key,Object value) {
-		logger.debug("设置Object数据，db:{},Key:{},value:{}",db,key,value);
+		log.debug("设置Object数据，db:{},Key:{},value:{}",db,key,value);
 		
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
@@ -84,13 +86,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void put(String key,Object value,Duration timeout) {
-		logger.debug("设置Object数据，Key:{}",key);
+		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		valueOps.set(key, value,timeout);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void put(int db, String key,Object value,Duration timeout) {
-		logger.debug("设置Object数据，db:{}，Key:{}",db,key);
+		log.debug("设置Object数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		valueOps.set(key, value,timeout);
@@ -106,13 +108,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean putIfAbsent(String key,Object value,Duration timeout) {
-		logger.debug("设置Object数据，Key:{}",key);
+		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		return valueOps.setIfAbsent(key, value,timeout);
 	}
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean putIfAbsent(int db, String key,Object value,Duration timeout) {
-		logger.debug("设置Object数据，db:{}，Key:{}",db,key);
+		log.debug("设置Object数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		return valueOps.setIfAbsent(key, value,timeout);
@@ -126,13 +128,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putMap(String key,Map<String, ?> value) {
-		logger.debug("设置Map数据，Key:{}",key);
+		log.debug("设置Map数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.putAll(key, value);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putMap(int db, String key,Map<String, ?> value) {
-		logger.debug("设置Map数据，db:{}，Key:{}",db,key);
+		log.debug("设置Map数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.putAll(key, value);
@@ -146,13 +148,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putMap(String key,String hashKey,Object value) {
-		logger.debug("设置Map数据，Key:{}",key);
+		log.debug("设置Map数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.put(key, hashKey, value);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putMap(int db, String key,String hashKey,Object value) {
-		logger.debug("设置Map数据，db:{}，Key:{}",db,key);
+		log.debug("设置Map数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.put(key, hashKey, value);
@@ -165,13 +167,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putSet(String key,Object... values) {
-		logger.debug("设置set数据，Key:{}",key);
+		log.debug("设置set数据，Key:{}",key);
 		SetOperations<String, Object> setOps=redisTemplate.opsForSet();
 		setOps.add(key, values);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putSet(int db, String key,Object... values) {
-		logger.debug("设置set数据，db:{}，Key:{}",db,key);
+		log.debug("设置set数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		SetOperations<String, Object> setOps=redisTemplate.opsForSet();
 		setOps.add(key, values);
@@ -185,13 +187,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putList(String key,List<?> value) {
-		logger.debug("设置List数据，Key:{}",key);
+		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPushAll(key, value);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putList(int db, String key,List<?> value) {
-		logger.debug("设置List数据，db:{}，Key:{}",db,key);
+		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPushAll(key, value);
@@ -205,13 +207,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putListValue(String key,Object value) {
-		logger.debug("设置List数据，Key:{}",key);
+		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPush(key, value);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putListValue(int db, String key,Object value) {
-		logger.debug("设置List数据，db:{}，Key:{}",db,key);
+		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPush(key, value);
@@ -225,13 +227,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void putListValue(String key,int index,Object value) {
-		logger.debug("设置List数据，Key:{}",key);
+		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.set(key, index, value);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void putListValue(int db, String key,int index,Object value) {
-		logger.debug("设置List数据，db:{}，Key:{}",db,key);
+		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.set(key, index, value);
@@ -310,13 +312,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getList(String key) {
-		logger.debug("获得数据，Key:{}",key);
+		log.debug("获得数据，Key:{}",key);
 		if(redisTemplate!=null) {
 			ListOperations<String, Object> listOps = redisTemplate.opsForList();
 			long size=listOps.size(key);
 			return(List<T>)listOps.range(key, 0, size);
 		}
-		logger.warn("未开启redis服务,缓存获取失败,key:{}",key);
+		log.warn("未开启redis服务,缓存获取失败,key:{}",key);
 		return null;
 	}
 	
@@ -330,13 +332,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getListValue(String key,int index) {
-		logger.debug("获得数据，Key:{}",key);
+		log.debug("获得数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		return (T)listOps.index(key, index);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> T getListValue(int db ,String key,int index) {
-		logger.debug("获得数据，Key:{}",key);
+		log.debug("获得数据，Key:{}",key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		return (T)listOps.index(key, index);
@@ -363,13 +365,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Map<String, T> getMap(String key) {
-		logger.debug("获得数据，Key:{}",key);
+		log.debug("获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (Map<String, T>)hashOps.entries(key);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> Map<String, T> getMap(int db,String key) {
-		logger.debug("获得数据，db:{},Key:{}",db,key);
+		log.debug("获得数据，db:{},Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (Map<String, T>)hashOps.entries(key);
@@ -383,13 +385,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getMap(String key,String hashKey) {
-		logger.debug("获得数据，Key:{}",key);
+		log.debug("获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (T)hashOps.get(key, hashKey);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> T getMap(int db,String key,String hashKey) {
-		logger.debug("获得数据,db:{}，Key:{}",db,key);
+		log.debug("获得数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (T)hashOps.get(key, hashKey);
@@ -403,14 +405,14 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getMap(String key,Set<String> hashKeys) {
-		logger.debug("批量获得数据，Key:{}",key);
+		log.debug("批量获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		List<T> list = (List<T>)hashOps.multiGet(key, hashKeys);
 		return list.stream().filter(item->item!=null).collect(Collectors.toList());
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> List<T> getMap(int db,String key,Set<String> hashKeys) {
-		logger.debug("批量获得数据,db:{}，Key:{}",db,key);
+		log.debug("批量获得数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		List<T> list = (List<T>)hashOps.multiGet(key, hashKeys);
@@ -456,12 +458,12 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void delete(String key) {
-		logger.debug("删除数据，Key:{}",key);
+		log.debug("删除数据，Key:{}",key);
 		redisTemplate.delete(key);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void delete(int db,String key) {
-		logger.debug("删除数据,db:{}，Key:{}",db,key);
+		log.debug("删除数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		redisTemplate.delete(key);
 	}
@@ -473,13 +475,13 @@ public class RedisService {
 	 */
 	@SuppressWarnings("unchecked")
 	public void deleteMapHash(String key,String hashKey) {
-		logger.debug("删除map hashKey，Key:{},hashKey:{}",key,hashKey);
+		log.debug("删除map hashKey，Key:{},hashKey:{}",key,hashKey);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.delete(key, hashKey);
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void deleteMapHash(int db,String key,String hashKey) {
-		logger.debug("删除map hashKey,db:{}，Key:{},hashKey:{}",db,key,hashKey);
+		log.debug("删除map hashKey,db:{}，Key:{},hashKey:{}",db,key,hashKey);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.delete(key, hashKey);
@@ -508,11 +510,11 @@ public class RedisService {
 	 * @param listener
 	 */
 	public void subscribe(String key,MessageListener listener) {
-		logger.debug("订阅消息，Key:{}",key);
+		log.debug("订阅消息，Key:{}",key);
 		redisMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
 	}
 	public void subscribe(int db,String key,MessageListener listener) {
-		logger.debug("订阅消息，db:{},Key:{}",db,key);
+		log.debug("订阅消息，db:{},Key:{}",db,key);
 		redisConfig.getRedisMessageListener(db).addMessageListener(listener, new ChannelTopic(key));
 	}
 	
@@ -522,12 +524,12 @@ public class RedisService {
 	 * @param message
 	 */
 	public void publish(String key,Object message) {
-		logger.debug("发布消息，Key:{}",key);
+		log.debug("发布消息，Key:{}",key);
 		redisTemplate.convertAndSend(key, message);
 	}
 	@SuppressWarnings("rawtypes")
 	public void publish(int db,String key,Object message) {
-		logger.debug("发布消息，db:{},Key:{}",db,key);
+		log.debug("发布消息，db:{},Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		redisTemplate.convertAndSend(key, message);
 	}
@@ -543,7 +545,7 @@ public class RedisService {
 	 * @param tcount		尝试次数
 	 */
 	public <T> T doHpdl(HpdlProcess<T> process,long ptime,long stime,int tcount) {
-		logger.info("进入:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount);
+		log.info("进入:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount);
 		T result=null;
 		if(tcount<=0) {
 			return null;
@@ -554,19 +556,19 @@ public class RedisService {
 			try {
 				result=process.process();
 			} catch (Exception e) {
-				logger.error("高可用分布式锁处理异常",e);
+				log.error("高可用分布式锁处理异常",e);
 				throw new ServiceException("高可用分布式锁处理异常",e);
 			} finally {
 				// 删除全局事务锁
 				delete(String.format("HPDL:%s", process.getHpdlName()));
 			}
-			logger.info("退出:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount);
+			log.info("退出:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount);
 		}else {
 			try {
 				Thread.sleep(stime);
 				result=doHpdl(process, ptime, stime, tcount-1);
 			} catch (InterruptedException e) {
-				logger.error("退出:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount,e);
+				log.error("退出:高可用分布式锁处理方法,process id:{},hpdl name:{},process time:{},sleep time:{},try count:{}",process,process.getHpdlName(),ptime,stime,tcount,e);
 				return null;
 			}
 		}
@@ -577,5 +579,57 @@ public class RedisService {
 		return doHpdl(process, ptime, stime, 1);
 	}
 	
+	
+	@SuppressWarnings("unchecked")
+	public <T> T execute(RedisCallback<T> action) {
+		return (T)redisTemplate.execute(action);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> T execute(int db, RedisCallback<T> action) {
+		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
+		return (T)redisTemplate.execute(action);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public <T> T execute(SessionCallback<T> action) {
+		return (T)redisTemplate.execute(action);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> T execute(int db, SessionCallback<T> action) {
+		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
+		return (T)redisTemplate.execute(action);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public <T> T executePipelined(RedisCallback<T> action) {
+		return (T)redisTemplate.executePipelined(action);
+	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> T executePipelined(int db, RedisCallback<T> action) {
+		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
+		return (T)redisTemplate.executePipelined(action);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public <T> T executePipelined(SessionCallback<T> action) {
+		return (T)redisTemplate.executePipelined(action);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T executePipelined(int db, SessionCallback<T> action) {
+		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
+		return (T)redisTemplate.executePipelined(action);
+	}
+	
+	
+	@SuppressWarnings("rawtypes")
+	public RedisTemplate template() {
+		return redisTemplate;
+	}
 
 }

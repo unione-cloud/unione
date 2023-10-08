@@ -21,6 +21,9 @@ import org.ehcache.config.units.MemoryUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
@@ -29,6 +32,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
+import com.unione.cloud.core.token.TokenService.TcmEntry;
 import com.unione.cloud.web.model.SysRole;
 import com.unione.cloud.web.model.SysUser;
 import com.unione.cloud.web.model.dto.LoginParam;
@@ -148,6 +152,12 @@ public class LoginService {
      */
     @Value("${security.tcm.key:TOKEN}")
     private String tcmKey;
+    
+    /**
+     * 	Token Center Manage 令牌中心化管理，redis 数据库，默认：10
+     */
+    @Value("${security.tcm.db:10}")
+    private int     tcmDb;
 	
 	/**
 	 *  	登录允许状态：用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
@@ -347,10 +357,15 @@ public class LoginService {
 		// 密码正确
 		this.cleanFailure(param.getUsername());	//清空失败信息
 		
+		// 单设备登录
 		if(LOGIN_SINGLELIMIT) {
 			// 如果开启了单设备登录
-			
-			
+			boolean flag = redisService.execute(tcmDb,(RedisCallback<Boolean>) action->{
+				ScanOptions options = ScanOptions.scanOptions().match(String.format("%s:%s:*",tcmKey,param.getUsername())).build();
+				Cursor<byte[]> cursor = action.scan(options);
+				return cursor.hasNext();
+			});
+			AssertUtil.service().isTrue(!flag, LOGIN_SINGLETIP.replace("{username}", param.getUsername()));
 		}
 			
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
