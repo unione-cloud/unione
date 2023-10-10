@@ -1,4 +1,4 @@
-package com.unione.cloud.web.model.dto;
+package com.unione.cloud.portal.system.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

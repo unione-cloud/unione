@@ -1,4 +1,4 @@
-package com.unione.cloud.web.model;
+package com.unione.cloud.web.logs.model;
 
 import java.util.List;
 

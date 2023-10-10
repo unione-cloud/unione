@@ -1,4 +1,4 @@
-package com.unione.cloud.web.model.dto;
+package com.unione.cloud.portal.system.dto;
 
 import com.unione.cloud.core.security.UserPrincipal;
 

@@ -1,4 +1,4 @@
-package com.unione.cloud.web.util;
+package com.unione.cloud.web.logs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestControllerAdvice("com.unione.cloud")
-public class LogsGlobalHandler {
+public class LogsHandler {
 
 	@ExceptionHandler(Exception.class)
     public Results<?> exception(Exception e) {

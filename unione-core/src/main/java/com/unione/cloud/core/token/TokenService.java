@@ -193,6 +193,17 @@ public class TokenService{
     	
         this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
         SessionHolder.setToken(token);
+        
+        // 设置cookie
+		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		if(attributes!=null) {
+			HttpServletResponse response = attributes.getResponse();
+			if(response!=null) {
+				Cookie ck=new Cookie(REQUEST_TOKEN, token);
+				ck.setPath("/");
+				response.addCookie(ck);
+			}
+		}
           	
     	log.debug("退出服务:根据 principal 生成token,principal:{},token:{}",principal,token);
     	return token;
@@ -214,6 +225,18 @@ public class TokenService{
 					log.error("用户注销异常，token非法",e);
 				}
     		}
+		}
+    	
+    	// 清空cookie
+    	ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		if(attributes!=null) {
+			HttpServletResponse response = attributes.getResponse();
+			if(response!=null) {
+				Cookie ck=new Cookie(REQUEST_TOKEN, null);
+				ck.setPath("/");
+				ck.setMaxAge(0);
+				response.addCookie(ck);
+			}
 		}
     }
     
@@ -301,6 +324,7 @@ public class TokenService{
 				HttpServletResponse response = attributes.getResponse();
 				if(response!=null) {
 					Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
+					ck.setPath("/");
 					response.addCookie(ck);
 				}
 			}

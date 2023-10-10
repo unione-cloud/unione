@@ -1,4 +1,4 @@
-package com.unione.cloud.web.service;
+package com.unione.cloud.portal.system.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -32,12 +32,11 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
-import com.unione.cloud.core.token.TokenService.TcmEntry;
-import com.unione.cloud.web.model.SysRole;
-import com.unione.cloud.web.model.SysUser;
-import com.unione.cloud.web.model.dto.LoginParam;
-import com.unione.cloud.web.model.dto.LoginResult;
-import com.unione.cloud.web.util.LogsUtil;
+import com.unione.cloud.portal.system.dto.LoginParam;
+import com.unione.cloud.portal.system.dto.LoginResult;
+import com.unione.cloud.portal.system.model.SysRole;
+import com.unione.cloud.portal.system.model.SysUser;
+import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;

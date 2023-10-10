@@ -1,4 +1,4 @@
-package com.unione.cloud.web.server;
+package com.unione.cloud.portal.system.api;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.web.model.SysLogs;
+import com.unione.cloud.web.logs.model.SysLogs;
 
 import cn.hutool.core.collection.ListUtil;
 import io.swagger.annotations.Api;

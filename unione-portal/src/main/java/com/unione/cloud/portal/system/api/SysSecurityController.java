@@ -1,4 +1,4 @@
-package com.unione.cloud.web.server;
+package com.unione.cloud.portal.system.api;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,14 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserPrincipal;
-import com.unione.cloud.web.model.dto.LoginParam;
-import com.unione.cloud.web.model.dto.LoginResult;
-import com.unione.cloud.web.model.dto.UserRegister;
-import com.unione.cloud.web.service.CaptchaService;
-import com.unione.cloud.web.service.LoginService;
-import com.unione.cloud.web.service.RegisterService;
-import com.unione.cloud.web.util.LogsUtil;
-import com.unione.cloud.web.util.LogsUtil.LogType;
+import com.unione.cloud.core.token.TokenService;
+import com.unione.cloud.portal.system.dto.LoginParam;
+import com.unione.cloud.portal.system.dto.LoginResult;
+import com.unione.cloud.portal.system.dto.UserRegister;
+import com.unione.cloud.portal.system.service.CaptchaService;
+import com.unione.cloud.portal.system.service.LoginService;
+import com.unione.cloud.portal.system.service.RegisterService;
+import com.unione.cloud.web.logs.LogsUtil;
+import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import io.swagger.annotations.Api;
@@ -48,6 +49,8 @@ public class SysSecurityController {
 	@Autowired
 	private SessionService sessionService;	
 	
+	@Autowired
+	private TokenService tokenService;
 	
 	/**
 	 * 生成验证码图片
@@ -86,6 +89,18 @@ public class SysSecurityController {
 		
 		LogsUtil.save(result.isSuccess());
 		return result;
+	}
+	
+	@PostMapping("/logout")
+	@ApiOperation(value="用户注销",notes="")
+	public Results<Void> logout(){
+		log.info("用户注销，usrename:{}",sessionService.getUsername());
+		LogsUtil.set(LogType.Logout, "用户注销");
+		
+		tokenService.clean4auth(sessionService.getToken());
+		
+		LogsUtil.success();
+		return Results.success();
 	}
 	
 	

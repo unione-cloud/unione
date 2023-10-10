@@ -1,4 +1,4 @@
-package com.unione.cloud.web.service;
+package com.unione.cloud.portal.system.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +14,10 @@ import com.unione.cloud.beetsql.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.web.model.SysUser;
-import com.unione.cloud.web.model.SysUserRole;
-import com.unione.cloud.web.model.dto.UserRegister;
-import com.unione.cloud.web.util.LogsUtil;
+import com.unione.cloud.portal.system.dto.UserRegister;
+import com.unione.cloud.portal.system.model.SysUser;
+import com.unione.cloud.portal.system.model.SysUserRole;
+import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.ObjectUtil;

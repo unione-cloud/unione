@@ -1,4 +1,4 @@
-package com.unione.cloud.web.util;
+package com.unione.cloud.web.logs;
 
 import java.util.Enumeration;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,13 +18,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.SidGenHolder;
+import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.web.model.SysLogs;
+import com.unione.cloud.web.logs.model.SysLogs;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
@@ -37,6 +40,8 @@ public class LogsUtil {
 	
 	private static String     appCode;
 	private static DataBaseDao dataBaseDao;
+	private static LogsApi     logsApi;
+	private static boolean    IS_CLOUD_MODEL;
 	
 	@Autowired
 	public void setDataBaseDao(DataBaseDao dataBaseDao) {
@@ -46,6 +51,16 @@ public class LogsUtil {
 	@Value("${spring.application.name}")
 	public void setAppCode(String appCode) {
 		LogsUtil.appCode=appCode;
+	}
+	
+	@Value("${unione.cloud.model:false}")
+	public void setIsCloudModel(boolean flag) {
+		LogsUtil.IS_CLOUD_MODEL=flag;
+	}
+	
+	@Autowired(required = false)
+	public void setLogsApi(LogsApi logsApi) {
+		LogsUtil.logsApi=logsApi;
 	}
 	
 	/**
@@ -571,10 +586,25 @@ public class LogsUtil {
 		}
 		
 		// 异步保存日志
-		Runnable runnable=null;
 		entry.remove();
 		try {
-			runnable = new SaveLogsThread(dataBaseDao, logs);
+			String token=sessionService.getToken();
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					log.debug("异步保存日志信息线程启动成功,thread:{}",this);
+					log.debug("异步保存日志信息开始>>");
+					if(IS_CLOUD_MODEL) {
+						HystrixRequestContext.initializeContext();
+						SessionHolder.setToken(token);
+						Results<Long> results = logsApi.save(logs);
+						logs.setId(results.getBody());
+					}else {
+						dataBaseDao.insert(logs);
+					}
+					log.debug("异步保存日志信息完成>>log id:{}",logs.getId());
+				}
+			};
 			
 			// 判断是否要保存日志
 			if(OPEN_STATUS && (NO_QUERY_LOG==false || 
@@ -596,31 +626,10 @@ public class LogsUtil {
 		}
 		
 		log.info("业务日志json：{}",JSONUtil.toJsonStr(logs));
-		log.debug("退出：保存日志信息	【异步】方法,logs:{},runnable:{},ThreadQueue:{}",logs,runnable,executor.getQueue().size());
+		log.debug("退出：保存日志信息	【异步】方法,logs:{},ThreadQueue:{}",logs,executor.getQueue().size());
 	}
 	
 	
-	/**
-	 * 	异步保存日志线程
-	 */
-	private static class SaveLogsThread implements Runnable{
-		private DataBaseDao dataBaseDao;
-		private SysLogs logs;
-		
-		public SaveLogsThread(DataBaseDao dataBaseDao, SysLogs logs) {
-			this.dataBaseDao = dataBaseDao;
-			this.logs = logs;
-		}
-
-		@Override
-		public void run() {
-			log.debug("异步保存日志信息线程启动成功,thread:{}",this);
-			log.debug("异步保存日志信息开始>>");
-			dataBaseDao.insert(logs);
-			log.debug("异步保存日志信息完成>>log id:{}",logs.getId());
-		}
-		
-	}
 	
 	
 }
