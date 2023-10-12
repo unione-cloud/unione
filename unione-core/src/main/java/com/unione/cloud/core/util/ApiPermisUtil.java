@@ -211,8 +211,8 @@ public class ApiPermisUtil {
 		log.debug("开始验证url权限");
 		
 		// 超级管理员、系统运维人员过滤
-		if(ObjectUtil.equals(ADMIN_USER, principal.getUsername()) || principal.getUserRoles().contains(UserRoles.SUPPER_ADMIN.value()) ||
-				principal.getUserRoles().contains(UserRoles.SYSOPS_USER.value())) {
+		if(ObjectUtil.equals(ADMIN_USER, principal.getUsername()) || principal.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code()) ||
+				principal.getUserRoles().contains(UserRoles.SYSOPS_USER.code())) {
 			log.info("api权限验证:当前用户为超级管理员或系统运维人员，所有api接口都可以访问,user id:{},user name:{},请求url:{}",principal.getId(),principal.getUsername(),url);
 			return true;
 		}
