@@ -7,6 +7,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -85,11 +86,13 @@ public class SysUser extends Pojo{
 	/**
 	 * 用户密码
 	 */
+	@JsonIgnore
 	@ApiModelProperty(value="用户密码",notes="字符长度为：250")
 	private String pwdText;
 	/**
 	 * 密码加密盐
 	 */
+	@JsonIgnore
 	@ApiModelProperty(value="密码加密盐",notes="字符长度为：50")
 	private String pwdSalt;
 	/**

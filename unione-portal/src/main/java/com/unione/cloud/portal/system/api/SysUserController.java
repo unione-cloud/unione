@@ -44,7 +44,6 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	public Results<List<SysUser>> find(Params<SysUser> params) {
 		log.debug("进入控制:查询系统用户列表方法,params:{}",params);
 		LogsUtil.set(LogType.Query, "查询系统用户列表");
-		// 参数处理
 		
 		SqlBuilder<SysUser> builder=SqlBuilder.build(params);
 		Results<List<SysUser>> results = dataBaseDao.findPages(builder);
@@ -63,8 +62,6 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		log.debug("进入控制:新增系统用户信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增系统用户");
 		// 参数处理
-		//AssertUtil.service().notNull(entity, new String[] {"appId","name","title"},"参数%s不能为空");
-		
 		dataBaseDao.insert(entity);
 		
 		LogsUtil.success(entity.getId());
