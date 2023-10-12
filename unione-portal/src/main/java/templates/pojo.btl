@@ -1,0 +1,27 @@
+package ${package};
+<%for(impCls in imports){%>
+import ${impCls};
+<%}%>
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+/*
+* ${comment}
+* gen by unione cloud ${date(),"yyyy-MM-dd"}
+*/
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+@Table(name="${has(catalog)?(catalog+".")}${table}")
+public class ${className} extends ${parentClass} {
+	<%include("pojoAttribute.btl"){}%>
+
+}

@@ -1,0 +1,21 @@
+<%
+	for(attr in attrs){
+	if(!isEmpty(attr.comment)){%>
+	/**
+	 * ${attr.comment}
+	 */
+	<%}
+	if(attr.id&&attr.auto){
+	%>
+	@AutoID
+	<%
+	}else if(attr.id){
+	%>
+	@AssignID
+	<%}%>
+	<%if(!isEmpty(attr.comment)){%>
+	@ApiModelProperty(value="${attr.comment}",notes="长度为：${attr.colSize}")
+	<%}%>
+	private ${attr.javaType} ${attr.name};
+	<%}%>
+%>
