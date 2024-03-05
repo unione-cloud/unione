@@ -3,7 +3,9 @@ package com.unione.cloud.portal.system.model;
 import java.util.Date;
 import java.util.List;
 
+import org.beetl.sql.annotation.entity.LogicDelete;
 import org.beetl.sql.annotation.entity.Table;
+import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -162,6 +164,12 @@ public class SysUser extends Pojo{
 	 */
 	@ApiModelProperty(value="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",notes="字符长度为：10")
 	private Integer status;
+	/**
+	 * 删除标记，0:正常,1:已删除
+	 */
+	@LogicDelete(1)
+	@ApiModelProperty(value="删除标记，0:正常,1:已删除",notes="字符长度为：10")
+	private Integer delFlag;
 	/**
 	 * 审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过
 	 */

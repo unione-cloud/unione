@@ -148,7 +148,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(entity.getIds()));
-		int count = dataBaseDao.deleteLogic(entity);
+		int count = dataBaseDao.delete(entity);
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);

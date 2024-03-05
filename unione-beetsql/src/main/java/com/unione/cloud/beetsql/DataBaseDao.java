@@ -8,6 +8,7 @@ import org.beetl.sql.core.ExecuteContext;
 import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLSource;
 import org.beetl.sql.core.SqlId;
+import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +40,12 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	插入数据
+	 *	 插入数据
+	 * @param <T>
+	 * @param entity
+	 * @return
 	 */
-	public <T> void insert(T entity) {
+	public <T> int insert(T entity) {
 		if(entity instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)entity;
@@ -55,14 +59,37 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 		}
 		
-		int len = this.sqlManager.insertTemplate(entity.getClass(),entity);
-		AssertUtil.service().isTrue(len>0, "保存数据失败");
+		return this.sqlManager.insertTemplate(entity.getClass(),entity);
+	}
+	
+	/**
+	 * 	保存数据(自己设置主键)
+	 * @param <T>
+	 * @param entity
+	 * @return
+	 */
+	public <T> int insertWithId(T entity) {
+		if(entity instanceof Pojo) {
+			SessionService sessionService=SessionHolder.build();
+			Pojo pojo=(Pojo)entity;
+			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
+			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
+			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
+			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
+			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
+			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
+		}
+		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
 
 	/**
 	 * 	批量插入数据
+	 * @param <T>
+	 * @param list
+	 * @return
 	 */
-	public <T> void insertBatch(List<T> list) {
+	public <T> int[] insertBatch(List<T> list) {
 		if(list.get(0) instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			list.stream().forEach(i->{
@@ -77,34 +104,17 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 			});
 		}
-		this.sqlManager.insertBatch(list.get(0).getClass(),list);
-	}
-
-	/**
-	 * 	保存数据(手动设置主键)
-	 * @param entity
-	 */
-	public <T> int save(T entity) {
-		if(entity instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)entity;
-			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
-			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
-			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
-			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
-			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
-		}
-		int len = this.sqlManager.insertTemplate(entity);
-		AssertUtil.service().isTrue(len>0, "保存数据失败");
-		return len;
+		
+		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
 	}
 	
 	/**
-	 * 	批量保存数据(手动设置主键)
+	 * 	批量插入数据
+	 * @param <T>
+	 * @param list
+	 * @return
 	 */
-	public <T> int saveBatch(List<T> list) {
+	public <T> int[] insertBatchWithId(List<T> list) {
 		if(list.get(0) instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			list.stream().forEach(i->{
@@ -118,14 +128,31 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
 			});
 		}
-		int ln[]= this.sqlManager.insertBatch(list.get(0).getClass(), list);
-		int size=0;
-		for(int i=0;i<ln.length;i++) {
-			size=size+ln[i];
-		}
-		return size;
+		
+		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
 	}
+
 	
+	/**
+	 * 	更新数据
+	 * @param updater
+	 * @return
+	 */
+	public <T> int update(Updater<T> updater) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
+		try {
+			if(updater.getData() instanceof Pojo) {
+				SessionService sessionService=SessionHolder.build();
+				Pojo pojo=(Pojo)updater.getData();
+				pojo.setLastUpdated(DateUtil.current());
+				pojo.setLastUpdatedBy(sessionService.getUsername());
+			}
+			return this.sqlManager.update(sqlId, updater);
+		} catch (Exception e) {
+			log.error("更新数据失败,sql namespace:{},sql id:{},updater:{}",sqlId.getNamespace(),sqlId.getId(),updater,e);
+			throw new ServiceException("更新数据失败",e);
+		}
+	 }
 	
 	/**
 	 * 	更新数据
@@ -144,7 +171,24 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 更新数据
+	 * 	更新数据
+	 * @param updater
+	 * @return
+	 */
+	public <T> int updateById(Updater<T> updater) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
+		
+		if(updater.getData() instanceof Pojo) {
+			SessionService sessionService=SessionHolder.build();
+			Pojo pojo=(Pojo)updater.getData();
+			pojo.setLastUpdated(DateUtil.current());
+			pojo.setLastUpdatedBy(sessionService.getUsername());
+		}
+		return this.sqlManager.update(sqlId, updater);
+	}
+	
+	/**
+	 * 	更新数据
 	 * @param <T>
 	 * @param params
 	 * @return
@@ -161,6 +205,7 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 	
+	
 	/**
 	 * 	删除数据
 	 * @param params
@@ -173,30 +218,15 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	逻辑删除
+	 * 	删除数据
 	 * @param params
 	 * @return
 	 */
-	public <T> int deleteLogic(T params) {
-//		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogic");
-//		if(params instanceof Pojo) {
-//			SessionService sessionService=SessionHolder.build();
-//			Pojo pojo=(Pojo)params;
-//			pojo.setLastUpdated(DateUtil.current());
-//			pojo.setLastUpdatedBy(sessionService.getUsername());
-//		}
-//		if(this.sqlManager.containSqlId(sqlId)) {
-//			try {
-//				Map<String,Object> map = new HashMap<>();
-//				map.put("params", params);
-//				return this.sqlManager.update(sqlId, map);
-//			} catch (Exception e) {
-//				log.error("逻辑删除失败,sql namespace:{},sql id:{},params:{}",sqlId.getNamespace(),sqlId.getId(),params,e);
-//				throw new ServiceException("逻辑删除失败",e);
-//			}
-//		}
-		return 0;
+	public <T> int delete(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
+		return this.sqlManager.update(sqlId,builder.toParams());
 	}
+	
 	
 	/**
 	 * 	统计数量
@@ -368,5 +398,18 @@ public class DataBaseDao {
 		return sql;
 	}
 	
+	
+	/**
+	 * 	获得当前Dao服务Sql命名空间名称
+	 * @return
+	 */
+	private <T> String getNameSpace(Class<T> cla) {
+		SqlResource sqlResource = cla.getAnnotation(SqlResource.class);
+		if(sqlResource!=null) {
+			return sqlResource.value();
+		}
+		String simpleName=cla.getSimpleName();
+		return (simpleName.charAt(0)+"").toLowerCase()+simpleName.substring(1, simpleName.length());
+	}
 	
 }

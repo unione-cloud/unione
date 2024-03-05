@@ -22,6 +22,7 @@ import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.concat.ConcatContext;
 import org.beetl.sql.core.concat.Update;
 import org.beetl.sql.core.engine.SQLParameter;
+import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.crypto.digest.MD5;
 import lombok.Getter;
@@ -50,6 +52,8 @@ public class SqlBuilder<T> {
 	@Getter
 	private String name;
 	
+	private String key;
+	
 	private String[] fieldList;				// 数据查询/更新字段
 	@Getter
 	private Map<String, String> fields=new HashMap<>(); 	// 字段map集合
@@ -58,7 +62,6 @@ public class SqlBuilder<T> {
 	@Getter
 	private T params;			// 查询，更新，删除的过滤条件
 	
-	private Long   sourceId;	// 为空，默认数据源
 	private String nameSpace;
 	private String tableName;	// 数据表名称
 	private TableDesc tableDesc;
@@ -168,8 +171,13 @@ public class SqlBuilder<T> {
 	
 	public String nameSpace() {
 		if(StringUtils.isEmpty(this.nameSpace)) {
-			this.nameSpace=this.tableName;
-			if(StringUtils.isEmpty(this.nameSpace)) {
+			SqlResource sqlResource = this.data.getClass().getAnnotation(SqlResource.class);
+			if(sqlResource!=null) {
+				this.nameSpace=sqlResource.value();
+				return this.nameSpace;
+			}
+			
+			if(StringUtils.isEmpty(this.tableName)) {
 				this.nameSpace=this.data.getClass().getSimpleName();
 			}else {
 				String attr[] = this.tableName.toLowerCase().split("_");
@@ -482,11 +490,18 @@ public class SqlBuilder<T> {
 	}
 	
 	public String getKey() {
-		if(StringUtils.isEmpty(this.where)) {
-			return MD5.create().digestHex(this.where);
-		}else {
-			return "sql";
+		if(!StringUtils.isEmpty(this.key)) {
+			return MD5.create().digestHex(this.key);
 		}
+		StackTraceElement stes[] = ThreadUtil.getStackTrace();
+		StringBuffer buffer=new StringBuffer();
+		for(StackTraceElement ste:stes) {
+			String clasName[]=ste.getClassName().split("\\.");
+			String tmp=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
+			buffer.append(tmp).append("->");
+		}
+		this.key=buffer.substring(0, buffer.length()-2);
+		return MD5.create().digestHex(this.key);
 	}
 
 	public Long getId() {
