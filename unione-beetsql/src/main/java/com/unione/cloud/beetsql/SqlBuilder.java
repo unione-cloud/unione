@@ -35,14 +35,12 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.crypto.digest.MD5;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * 	SQL构建对象
  * @author Jeking Yang
  */
-@Slf4j
 @Service
 public class SqlBuilder<T> {
 
@@ -137,6 +135,15 @@ public class SqlBuilder<T> {
 		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
 	}
 	
+	private SqlBuilder(String tableName,T data,T params) {
+		this.params=params;
+		this.data=data;
+		
+		this.tableName=tableName;
+		this.tableDesc = sqlManager.getTableDesc(this.tableName);
+		this.classDesc = this.tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
+	}
+	
 	/**
 	 * 	构建Finder实例
 	 * @param params
@@ -155,6 +162,11 @@ public class SqlBuilder<T> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(T data,T params) {
 		return new SqlBuilder(data,params);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(String tableName,T data,T params) {
+		return new SqlBuilder(tableName,data,params);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -177,7 +189,7 @@ public class SqlBuilder<T> {
 				return this.nameSpace;
 			}
 			
-			if(StringUtils.isEmpty(this.tableName)) {
+			if(!(this.data instanceof Map)) {
 				this.nameSpace=this.data.getClass().getSimpleName();
 			}else {
 				String attr[] = this.tableName.toLowerCase().split("_");
@@ -498,9 +510,9 @@ public class SqlBuilder<T> {
 		for(StackTraceElement ste:stes) {
 			String clasName[]=ste.getClassName().split("\\.");
 			String tmp=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
-			buffer.append(tmp).append("->");
+			buffer.append(tmp).append("\n");
 		}
-		this.key=buffer.substring(0, buffer.length()-2);
+		this.key=buffer.substring(0, buffer.length()-"\n".length());
 		return MD5.create().digestHex(this.key);
 	}
 

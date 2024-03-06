@@ -1,6 +1,8 @@
 package com.unione.cloud.beetsql;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.SQLType;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.model.Pojo;
@@ -152,7 +153,7 @@ public class DataBaseDao {
 			log.error("更新数据失败,sql namespace:{},sql id:{},updater:{}",sqlId.getNamespace(),sqlId.getId(),updater,e);
 			throw new ServiceException("更新数据失败",e);
 		}
-	 }
+	}
 	
 	/**
 	 * 	更新数据
@@ -194,8 +195,8 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int updateById(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE,"UPDATE_BY_ID");
+		SqlBuilder<T> builder=SqlBuilder.build(params).name("updateById");
+		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
 		if(builder.getData() instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)builder.getData();
@@ -212,7 +213,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params);
+		SqlBuilder<T> builder=SqlBuilder.build(params).name("delete");
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -223,6 +224,9 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(SqlBuilder<T> builder) {
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("delete");
+		}
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -234,8 +238,23 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> long count(SqlBuilder<T> builder) {
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("count");
+		}
 		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
-		return (long) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
+		return (long) this.sqlManager.selectUnique(sqlId, builder.toParams(),Long.class);
+	}
+	
+	/**
+	 * 	统计数量
+	 * @param params
+	 * @return
+	 */
+	public <T> long count(T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "count");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		return this.sqlManager.selectUnique(sqlId, map, Long.class);
 	}
 	
 	/**
@@ -245,8 +264,25 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findUnique(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_UNIQUE");
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("findUnique");
+		}
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
+	}
+	
+	/**
+	 * 	查询唯一数据
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findUnique(T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findUnique");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+
+		return (T) this.sqlManager.selectUnique(sqlId, map, params.getClass());
 	}
 	
 	/**
@@ -256,7 +292,10 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_ONE");
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("findOne");
+		}
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -267,9 +306,10 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_ONE");
-		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findOne");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
 	
@@ -280,9 +320,10 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findById(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_BYID");
-		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findById");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
 	
@@ -294,10 +335,11 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(T params,Sort ...sort){
-		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT,"FIND_BYIDS");
-		List<T> rows = (List<T>) this.sqlManager.select(sqlId, builder.targetClass(), builder.toParams());
-		return rows;
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findByIds");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
 	
 	
@@ -309,7 +351,10 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(SqlBuilder<T> builder){
-		SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_LIST");
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("findList");
+		}
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
 		return rows;
 	}
@@ -322,7 +367,10 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findPage(SqlBuilder<T> builder){
-		SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_PAGE");
+		if(StringUtils.isEmpty(builder.getName())) {
+			builder.name("findPage");
+		}
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
 	}
@@ -333,15 +381,25 @@ public class DataBaseDao {
 		Results<List<T>> results=new Results<>();
 		
 		try {
+			if(StringUtils.isEmpty(builder.getName())) {
+				builder.name("findPage");
+			}
+			String name=builder.getName();
+			
 			// count 统计
 			if(builder.isNeedCount()) {
-				SqlId countsql=this.loadSql(builder, SqlType.COUNT,"FIND_PAGES_COUNT");
+				SqlId countsql=SqlId.of(builder.nameSpace(), String.format("%s_%s", name,"count"));
+				if(!this.sqlManager.containSqlId(countsql)) {
+					builder.name("count");
+					countsql=this.loadSql(builder, SqlType.COUNT);
+				}
 				Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
 				results.setTotal(total);
 			}
 			
 			// 数据查询
-			SqlId findsql=this.loadSql(builder, SqlType.SELECT,"FIND_PAGES_LIST");
+			builder.name(name);
+			SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 			results.setBody(rows);
 			
@@ -362,26 +420,10 @@ public class DataBaseDao {
 	 * @return
 	 */
 	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type) {
-		return loadSql(builder,type,null);
-	}
-	
-	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type,String name) {
-		if(!StringUtils.isEmpty(builder.getName())) {
-			SqlId sql=SqlId.of(builder.nameSpace(), builder.getName());
-			if(this.sqlManager.containSqlId(sql)) {
-				return sql;
-			}
-		}
+		log.debug("进入：load sql 方法");
+		log.info("namespace:{},sql name:{},sql type:{},sql{}",builder.getName(),builder.getName(),type,builder.toSql(type));
 		
-		if(StringUtils.isEmpty(name)) {
-			name=String.format("builder_%s_%s",builder.getKey(),type.name());
-		}else {
-			name=String.format("builder_%s_%s",builder.getKey(),name);
-		}
-		
-		log.info(builder.toSql(type));
-		
-		SqlId sql=SqlId.of(builder.nameSpace(), name);
+		SqlId sql=SqlId.of(builder.nameSpace(), builder.getName());
 		if(this.sqlManager.containSqlId(sql)) {
 			return sql;
 		}else {
