@@ -55,6 +55,9 @@ public class Params<T> implements Serializable {
 	@ApiModelProperty(hidden=true)
 	private int limit;
 	
+	@ApiModelProperty(value="是否需要count统计",notes = "前端查询条件无变化时，可以传入false，减少count统计时间消耗")
+	private boolean needCount=true;
+	
 	/**
 	 * 	查询操作数据权限开关，根据业务场景进行设置，默认关闭
 	 */

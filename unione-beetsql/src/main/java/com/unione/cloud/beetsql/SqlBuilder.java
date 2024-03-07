@@ -26,9 +26,11 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.beetsql.annotation.KeyWordQuery;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.Pojo;
 
 import cn.hutool.core.thread.ThreadUtil;
@@ -44,13 +46,7 @@ import lombok.Getter;
 @Service
 public class SqlBuilder<T> {
 
-	/**
-	 * 查询名称，指定查询SQL名称
-	 */
-	@Getter
-	private String name;
-	
-	private String key;
+	private String nameSpace;
 	
 	private String[] fieldList;				// 数据查询/更新字段
 	@Getter
@@ -60,7 +56,6 @@ public class SqlBuilder<T> {
 	@Getter
 	private T params;			// 查询，更新，删除的过滤条件
 	
-	private String nameSpace;
 	private String tableName;	// 数据表名称
 	private TableDesc tableDesc;
 	private ClassDesc classDesc;
@@ -182,36 +177,28 @@ public class SqlBuilder<T> {
 	}
 	
 	public String nameSpace() {
-		if(StringUtils.isEmpty(this.nameSpace)) {
-			SqlResource sqlResource = this.data.getClass().getAnnotation(SqlResource.class);
-			if(sqlResource!=null) {
-				this.nameSpace=sqlResource.value();
-				return this.nameSpace;
-			}
-			
-			if(!(this.data instanceof Map)) {
-				this.nameSpace=this.data.getClass().getSimpleName();
-			}else {
-				String attr[] = this.tableName.toLowerCase().split("_");
-				this.nameSpace = "";
-				for(int i = 0; i < attr.length; i++){
-					String temp = attr[i];
-					String tt = (temp.charAt(0)+"").toUpperCase();
-					if(temp.length() > 1){
-						tt += temp.substring(1, temp.length());
-					}
-					this.nameSpace += tt;
-				}
-			}
-			this.nameSpace=(this.nameSpace.charAt(0)+"").toLowerCase()+this.nameSpace.substring(1);
+		if(!StringUtils.isEmpty(this.nameSpace)) {
+			return MD5.create().digestHex(this.nameSpace);
 		}
-		return this.nameSpace;
+		StackTraceElement stes[] = ThreadUtil.getStackTrace();
+		StringBuffer buffer=new StringBuffer();
+		for(StackTraceElement ste:stes) {
+			String clasName[]=ste.getClassName().split("\\.");
+			String tmp=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
+			buffer.append(tmp).append("\n");
+		}
+		this.nameSpace=buffer.substring(0, buffer.length()-"\n".length());
+		return MD5.create().digestHex(this.nameSpace);
+	}
+	
+	public String key(SqlType type) {
+		return MD5.create().digestHex(this.toSql(type));
 	}
 	
 	
 	public String toSql(SqlType type) {
 		if(SqlType.INSERT.equals(type)) {
-			
+			throw new DataBaseException("SqlBuilder暂不支持insert操作");
 		}else if(SqlType.UPDATE.equals(type)) {
 			return this.updateSql();
 		}else if(SqlType.COUNT.equals(type)) {
@@ -452,11 +439,6 @@ public class SqlBuilder<T> {
 		return this;
 	} 
 	
-	public SqlBuilder<T> name(String name){
-		this.name=name;
-		return this;
-	}
-	
 	public SqlBuilder<T> keywords(String keywords){
 		this.keywords=keywords;
 		return this;
@@ -501,21 +483,6 @@ public class SqlBuilder<T> {
 		return (page - 1) * pageSize;
 	}
 	
-	public String getKey() {
-		if(!StringUtils.isEmpty(this.key)) {
-			return MD5.create().digestHex(this.key);
-		}
-		StackTraceElement stes[] = ThreadUtil.getStackTrace();
-		StringBuffer buffer=new StringBuffer();
-		for(StackTraceElement ste:stes) {
-			String clasName[]=ste.getClassName().split("\\.");
-			String tmp=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
-			buffer.append(tmp).append("\n");
-		}
-		this.key=buffer.substring(0, buffer.length()-"\n".length());
-		return MD5.create().digestHex(this.key);
-	}
-
 	public Long getId() {
 		AssertUtil.service().isTrue(params instanceof Pojo, "Updater params实例对象类型必须是com.unione.cloud.core.model.Pojo");
 		return ((Pojo)params).getId();

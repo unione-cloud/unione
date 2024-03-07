@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.SqlBuilder.SqlType;
+import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.SidGenHolder;
@@ -24,13 +25,11 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 
 import cn.hutool.core.date.DateUtil;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 	数据库操作Dao基础接口
  * @author Jeking Yang
  */
-@Slf4j
 @Service
 public class DataBaseDao {
 	
@@ -141,18 +140,13 @@ public class DataBaseDao {
 	 */
 	public <T> int update(Updater<T> updater) {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
-		try {
-			if(updater.getData() instanceof Pojo) {
-				SessionService sessionService=SessionHolder.build();
-				Pojo pojo=(Pojo)updater.getData();
-				pojo.setLastUpdated(DateUtil.current());
-				pojo.setLastUpdatedBy(sessionService.getUsername());
-			}
-			return this.sqlManager.update(sqlId, updater);
-		} catch (Exception e) {
-			log.error("更新数据失败,sql namespace:{},sql id:{},updater:{}",sqlId.getNamespace(),sqlId.getId(),updater,e);
-			throw new ServiceException("更新数据失败",e);
+		if(updater.getData() instanceof Pojo) {
+			SessionService sessionService=SessionHolder.build();
+			Pojo pojo=(Pojo)updater.getData();
+			pojo.setLastUpdated(DateUtil.current());
+			pojo.setLastUpdatedBy(sessionService.getUsername());
 		}
+		return this.sqlManager.update(sqlId, updater);
 	}
 	
 	/**
@@ -178,7 +172,6 @@ public class DataBaseDao {
 	 */
 	public <T> int updateById(Updater<T> updater) {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
-		
 		if(updater.getData() instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
 			Pojo pojo=(Pojo)updater.getData();
@@ -195,7 +188,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int updateById(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params).name("updateById");
+		SqlBuilder<T> builder=SqlBuilder.build(params);
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
 		if(builder.getData() instanceof Pojo) {
 			SessionService sessionService=SessionHolder.build();
@@ -206,17 +199,18 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 	
-	
 	/**
 	 * 	删除数据
 	 * @param params
 	 * @return
 	 */
 	public <T> int delete(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params).name("delete");
-		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
-		return this.sqlManager.update(sqlId,builder.toParams());
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "delete");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		return this.sqlManager.update(sqlId, map);
 	}
+	
 	
 	/**
 	 * 	删除数据
@@ -224,9 +218,6 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(SqlBuilder<T> builder) {
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("delete");
-		}
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -238,9 +229,6 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> long count(SqlBuilder<T> builder) {
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("count");
-		}
 		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
 		return (long) this.sqlManager.selectUnique(sqlId, builder.toParams(),Long.class);
 	}
@@ -264,9 +252,6 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findUnique(SqlBuilder<T> builder) {
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("findUnique");
-		}
 		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
 	}
@@ -281,7 +266,6 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findUnique");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
-
 		return (T) this.sqlManager.selectUnique(sqlId, map, params.getClass());
 	}
 	
@@ -292,9 +276,6 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(SqlBuilder<T> builder) {
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("findOne");
-		}
 		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
@@ -328,7 +309,7 @@ public class DataBaseDao {
 	
 	
 	/**
-	 * 	查询列表(根据ids集合加载数据)，同时会根据租户id，机构id进行过滤
+	 * 	查询列表(根据ids集合加载数据)
 	 * @param params
 	 * @param sort
 	 * @return
@@ -351,12 +332,27 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(SqlBuilder<T> builder){
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("findList");
-		}
 		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
 		return rows;
+	}
+	
+	
+	/**
+	 * 	查询列表(不分页)
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findList(T params,Sort ...sort){
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findList");
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		
+		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
 
 	/**
@@ -366,13 +362,78 @@ public class DataBaseDao {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> List<T> findPage(SqlBuilder<T> builder){
-		if(StringUtils.isEmpty(builder.getName())) {
-			builder.name("findPage");
-		}
+	public <T> List<T> findPageList(SqlBuilder<T> builder){
 		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
+	}
+	
+	/**
+	 * 	查询列表(分页),不执行total统计
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findPageList(Params<T> params,Sort ...sort){
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findList");
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params.getBody());
+		
+		// 如果未手动设置排序，则从params中获取排序
+		if(sort.length==0 && !StringUtils.isEmpty(params.getSortName())) {
+			String stns[]=params.getSortName().split(",");
+			String sons[]=null;
+			if(!StringUtils.isEmpty(params.getSortOrder())) {
+				sons=params.getSortOrder().split(",");
+			}
+			sort=new Sort[stns.length];
+			for(int i=0;i<stns.length;i++) {
+				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
+				sort[i]=Sort.build(stns[i], so);
+			}
+		}
+		
+		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		return (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
+	}
+	
+	/**
+	 * 	查询列表(分页)
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Results<List<T>> findPages(Params<T> params,Sort ...sort){
+		Results<List<T>> results=Results.success();
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findList");
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params.getBody());
+		if(params.isNeedCount()) {
+			Long total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), "count"), map, Long.class);
+			results.setTotal(total);
+		}
+		
+		// 如果未手动设置排序，则从params中获取排序
+		if(sort.length==0 && !StringUtils.isEmpty(params.getSortName())) {
+			String stns[]=params.getSortName().split(",");
+			String sons[]=null;
+			if(!StringUtils.isEmpty(params.getSortOrder())) {
+				sons=params.getSortOrder().split(",");
+			}
+			sort=new Sort[stns.length];
+			for(int i=0;i<stns.length;i++) {
+				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
+				sort[i]=Sort.build(stns[i], so);
+			}
+		}
+		
+		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		List<T> rows = (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
+		
+		return results.setBody(rows);
 	}
 	
 	
@@ -381,24 +442,14 @@ public class DataBaseDao {
 		Results<List<T>> results=new Results<>();
 		
 		try {
-			if(StringUtils.isEmpty(builder.getName())) {
-				builder.name("findPage");
-			}
-			String name=builder.getName();
-			
 			// count 统计
 			if(builder.isNeedCount()) {
-				SqlId countsql=SqlId.of(builder.nameSpace(), String.format("%s_%s", name,"count"));
-				if(!this.sqlManager.containSqlId(countsql)) {
-					builder.name("count");
-					countsql=this.loadSql(builder, SqlType.COUNT);
-				}
+				SqlId countsql=this.loadSql(builder, SqlType.COUNT);
 				Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
 				results.setTotal(total);
 			}
 			
 			// 数据查询
-			builder.name(name);
 			SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 			results.setBody(rows);
@@ -420,10 +471,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type) {
-		log.debug("进入：load sql 方法");
-		log.info("namespace:{},sql name:{},sql type:{},sql{}",builder.getName(),builder.getName(),type,builder.toSql(type));
-		
-		SqlId sql=SqlId.of(builder.nameSpace(), builder.getName());
+		SqlId sql=SqlId.of(builder.nameSpace(), builder.key(type));
 		if(this.sqlManager.containSqlId(sql)) {
 			return sql;
 		}else {
