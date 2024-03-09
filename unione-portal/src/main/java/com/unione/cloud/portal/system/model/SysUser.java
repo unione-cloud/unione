@@ -3,14 +3,20 @@ package com.unione.cloud.portal.system.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.beetl.sql.annotation.entity.LogicDelete;
 import org.beetl.sql.annotation.entity.Table;
-import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.beetsql.annotation.KeyWordQuery;
+import com.unione.cloud.beetsql.annotation.LikeQuery;
+import com.unione.cloud.beetsql.annotation.LikeQuery.TYPE;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -66,30 +72,32 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="SYS_USER")
 public class SysUser extends Pojo{
-	
-//	/**
-//	 * 	数据验证demo
-//	 */
-//	@NotNull(message = "xxx不能为空",groups = {Validator.save.class,Validator.update.class})
-//	@ApiModelProperty("demo")
-//	private Long demo;
-	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2229114793507234711L;
 	// fields start
 	/**
 	 * 用户类型，字典USERTYPE 1管理员，2普通用户，9其他
 	 */
+	@NotNull(message = "用户类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	@ApiModelProperty(value="用户类型，字典USERTYPE 1管理员，2普通用户，9其他",notes="字符长度为：10")
 	private Integer userType;
 	/**
 	 * 登录帐号
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="登录帐号",notes="字符长度为：250")
+	@NotNull(message = "登录帐号不能为空",groups = {Validator.save.class})
+	@NotEmpty(message = "登录帐号不能为空",groups = {Validator.save.class})
 	private String username;
 	/**
 	 * 用户密码
 	 */
 	@JsonIgnore
 	@ApiModelProperty(value="用户密码",notes="字符长度为：250")
+	@NotNull(message = "用户密码不能为空",groups = {Validator.save.class})
+	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
 	private String pwdText;
 	/**
 	 * 密码加密盐
@@ -100,11 +108,15 @@ public class SysUser extends Pojo{
 	/**
 	 * 真实姓名
 	 */
+	@LikeQuery
+	@KeyWordQuery
 	@ApiModelProperty(value="真实姓名",notes="字符长度为：50")
 	private String realName;
 	/**
 	 * 别名
 	 */
+	@LikeQuery
+	@KeyWordQuery
 	@ApiModelProperty(value="别名",notes="字符长度为：50")
 	private String aliasName;
 	/**
@@ -127,16 +139,19 @@ public class SysUser extends Pojo{
 	/**
 	 * 邮箱
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="邮箱",notes="字符长度为：250")
 	private String email;
 	/**
 	 * 联系qq
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="联系qq",notes="字符长度为：50")
 	private String qq;
 	/**
 	 * 联系电话
 	 */
+	@KeyWordQuery
 	@ApiModelProperty(value="联系电话",notes="字符长度为：30")
 	private String tel;
 	/**

@@ -1,5 +1,6 @@
 package com.unione.cloud.beetsql;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
@@ -295,6 +295,20 @@ public class DataBaseDao {
 	
 	
 	/**
+	 * 	根据id查询数据
+	 * @param cls
+	 * @param id
+	 * @return
+	 */
+	public <T> T findById(Class<T> cls,Object id) {
+		List<T> list=(List<T>) this.sqlManager.selectByIds(cls, Arrays.asList(id));
+		if(list.isEmpty()) {
+			return null;
+		}
+		return list.get(0);
+	}
+	
+	/**
 	 * 	查询列表(根据id查询数据)
 	 * @param params
 	 * @return
@@ -323,6 +337,15 @@ public class DataBaseDao {
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
 	
+	/**
+	 * 	根据ids查询数据
+	 * @param cls
+	 * @param ids
+	 * @return
+	 */
+	public <T> List<T> findByIds(Class<T> cls,List<Object> ids) {
+		return(List<T>) this.sqlManager.selectByIds(cls, ids);
+	}
 	
 	/**
 	 * 	查询列表(不分页)
@@ -439,27 +462,20 @@ public class DataBaseDao {
 	
 	@SuppressWarnings("unchecked")
 	public <T> Results<List<T>> findPages(SqlBuilder<T> builder){
-		Results<List<T>> results=new Results<>();
+		Results<List<T>> results=Results.success();
 		
-		try {
-			// count 统计
-			if(builder.isNeedCount()) {
-				SqlId countsql=this.loadSql(builder, SqlType.COUNT);
-				Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
-				results.setTotal(total);
-			}
-			
-			// 数据查询
-			SqlId findsql=this.loadSql(builder, SqlType.SELECT);
-			List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
-			results.setBody(rows);
-			
-			results.setSuccess(true);
-		} catch (Exception e) {
-			throw new ServiceException("执行分页查询失败",e);
+		// count 统计
+		if(builder.isNeedCount()) {
+			SqlId countsql=this.loadSql(builder, SqlType.COUNT);
+			Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
+			results.setTotal(total);
 		}
 		
-		return results;
+		// 数据查询
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
+		
+		return results.setBody(rows);
 	}
 	
 	
