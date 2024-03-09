@@ -351,8 +351,8 @@ public class SqlBuilder<T> {
 		Matcher matcher=conditionRegix.matcher(this.where);
 		String where=this.where.replaceAll("\\(", "\r\n-- @ SQLTRIM_{\r\n(")
 				.replaceAll("\\)", ")\r\n-- @}\r\n")
-				.replaceAll("@ SQLTRIM_", "@ sqlTrim()");
-		this.whereSql="\r\n-- @ sqlWhere(){\r\n"+where+"\r\n-- @}\r\n";
+				.replaceAll("@SQLTRIM_", "@sqlTrim()");
+		this.whereSql="\r\n-- @sqlWhere(){\r\n"+where+"\r\n-- @}\r\n";
 		while(matcher.find()) {
 			String condition=matcher.group();
 			this.whereSql=this.whereSql.replace(condition, whereCondition(condition));
