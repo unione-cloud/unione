@@ -200,6 +200,23 @@ public class DataBaseDao {
 	}
 	
 	/**
+	 * 	更新数据
+	 * @param <T>
+	 * @param builder
+	 * @return
+	 */
+	public <T> int updateById(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
+		if(builder.getData() instanceof Pojo) {
+			SessionService sessionService=SessionHolder.build();
+			Pojo pojo=(Pojo)builder.getData();
+			pojo.setLastUpdated(DateUtil.current());
+			pojo.setLastUpdatedBy(sessionService.getUsername());
+		}
+		return this.sqlManager.update(sqlId, builder.toParams());
+	}
+	
+	/**
 	 * 	删除数据
 	 * @param params
 	 * @return
@@ -293,6 +310,16 @@ public class DataBaseDao {
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
+	/**
+	 * 	根据id查询数据
+	 * @param builder
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findById(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
+	}
 	
 	/**
 	 * 	根据id查询数据
@@ -345,6 +372,17 @@ public class DataBaseDao {
 	 */
 	public <T> List<T> findByIds(Class<T> cls,List<Object> ids) {
 		return(List<T>) this.sqlManager.selectByIds(cls, ids);
+	}
+	
+	/**
+	 * 	根据ids查询数据
+	 * @param builder
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findByIds(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		return (List<T>) this.sqlManager.select(sqlId, builder.targetClass(), builder.toParams());
 	}
 	
 	/**

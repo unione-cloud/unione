@@ -9,11 +9,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.sql.annotation.entity.LogicDelete;
 import org.beetl.sql.clazz.ClassDesc;
 import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.BeanKit;
@@ -22,17 +24,18 @@ import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.concat.ConcatContext;
 import org.beetl.sql.core.concat.Update;
 import org.beetl.sql.core.engine.SQLParameter;
-import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.beetsql.annotation.KeyWordQuery;
+import com.unione.cloud.beetsql.annotation.LikeQuery;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.util.BeanUtils;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.crypto.digest.MD5;
@@ -62,6 +65,7 @@ public class SqlBuilder<T> {
 	
 	private String keywords;	// 关键字搜索字段
 	private String where;		// 数据过滤条件定义
+	private String likes;		// 模糊查询字段
 	private Sort[] sorts;		// 数据排序
 	private String group;		// 数据分组
 	private String having;		// 分组处理
@@ -171,6 +175,35 @@ public class SqlBuilder<T> {
 		return buildr;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(Class<T> cls,Set<Object> ids) {
+		try {
+			T obj=cls.newInstance();
+			BeanUtil.setFieldValue(obj,"ids", new ArrayList(ids));
+			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			return buildr;
+		} catch (Exception e) {
+			throw new DataBaseException("构建SqlBuilder实例失败",e);
+		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(Class<T> cls,Object id) {
+		try {
+			if(id instanceof Set) {
+				return build(cls,(Set<Object>)id);
+			}
+			T obj=BeanKit.newInstance(cls);
+			String tableName=sqlManager.getNc().getTableName(cls);
+			TableDesc tableDesc = sqlManager.getTableDesc(tableName);
+			ClassDesc classDesc = tableDesc.genClassDesc(cls, sqlManager.getNc());
+			BeanUtils.setFieldValue(obj, classDesc.getIdAttr(), id);
+			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			return buildr;
+		} catch (Exception e) {
+			throw new DataBaseException("构建SqlBuilder实例失败",e);
+		}
+	}
 	
 	public Class<?> targetClass(){
 		return this.data.getClass();
@@ -222,6 +255,7 @@ public class SqlBuilder<T> {
 	private String countSql() {
 		this.processIdQuerys();
 		this.processKeywordsQuery();
+		this.processLikeQuery();
 		this.processCondition();
 		
 		if(StringUtils.isEmpty(this.countSql)) {
@@ -234,6 +268,7 @@ public class SqlBuilder<T> {
 		if(StringUtils.isEmpty(this.findSql)) {
 			this.processIdQuerys();
 			this.processKeywordsQuery();
+			this.processLikeQuery();
 			this.processCondition();
 			
 			String selectField="*";
@@ -248,7 +283,6 @@ public class SqlBuilder<T> {
 	private String updateSql() {
 		this.processCondition();
 		if(StringUtils.isEmpty(this.updateSql)) {
-//			AssertUtil.database().isTrue(!fields.isEmpty(), "更新字段不能为空");
 			List<String> idCols = classDesc.getIdCols();
 			Iterator<String> cols = classDesc.getInCols().iterator();
 			Iterator<String> properties = classDesc.getAttrs().iterator();
@@ -260,6 +294,9 @@ public class SqlBuilder<T> {
 			while (cols.hasNext() && properties.hasNext()) {
 				String col = cols.next();
 				String prop = properties.next();
+				if(!this.fields.isEmpty() && !this.fields.containsKey(prop)) {
+					continue;
+				}
 				if (classDesc.getClassAnnotation().isUpdateIgnore(prop)) {
 					continue;
 				}
@@ -291,6 +328,34 @@ public class SqlBuilder<T> {
 		this.processIdQuerys();
 		this.processCondition();
 		if(StringUtils.isEmpty(this.deleteSql)) {
+			// 如果设置了逻辑删除
+			try {
+				StringBuffer buf=new StringBuffer();
+				
+				Map<String, String> fieldMap=new HashMap<>();
+				Iterator<String> cols = this.classDesc.getInCols().iterator();
+				Iterator<String> properties = this.classDesc.getAttrs().iterator();
+				while (cols.hasNext() && properties.hasNext()) {
+					String col = cols.next();
+					String field = properties.next();
+					fieldMap.put(field, col);
+				}
+				
+				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
+				for(PropertyDescriptor p:ps) {
+					LogicDelete loginDelete=BeanKit.getAnnotation(this.targetClass(), p.getName(),LogicDelete.class);
+					if(loginDelete!=null) {
+						buf.append(",").append(fieldMap.get(p.getName())).append(" = ").append(loginDelete.value()).append(" ");
+					}
+				}
+				
+				if(buf.length()>0) {
+					this.deleteSql=String.format("UPDATE %s SET %s %s",this.tableName,buf.substring(1),this.whereSql);
+					return this.deleteSql;
+				}
+			} catch (IntrospectionException e) {}
+			
+			// 物理删除
 			this.deleteSql=String.format("DELETE FROM %s %s",this.tableName,this.whereSql);
 		}
 		return this.deleteSql;
@@ -330,6 +395,44 @@ public class SqlBuilder<T> {
 				this.where=this.keywords;
 			}else {
 				this.where=String.format("%s %s",this.where, this.keywords);
+			}
+		}
+	}
+	
+	private void processLikeQuery() {
+		// like查询条件处理
+		if(StringUtils.isEmpty(this.likes)) {
+			try {
+				StringBuffer buf=new StringBuffer();
+				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
+				for(PropertyDescriptor p:ps) {
+					LikeQuery likeQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),LikeQuery.class);
+					if(likeQuery!=null) {
+						buf.append(" AND ").append(p.getName());
+						switch (likeQuery.value()) {
+						case LEFT:
+							buf.append(" LIKE [%").append(p.getDisplayName()).append("]");
+							break;
+						case RIGHT:
+							buf.append(" LIKE [").append(p.getDisplayName()).append("%]");
+							break;
+						default:
+							buf.append(" LIKE [%").append(p.getDisplayName()).append("%]");
+							break;
+						}
+					}
+				}
+				if(buf.length()>0) {
+					this.likes=buf.toString();
+				}
+			} catch (IntrospectionException e) {
+			}
+		}	
+		if(!StringUtils.isEmpty(this.likes)) {
+			if(StringUtils.isEmpty(this.where)) {
+				this.where=this.likes;
+			}else {
+				this.where=String.format("%s %s",this.where, this.likes);
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 package com.unione.cloud.portal.system.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.SqlBuilder;
-import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -40,13 +38,15 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	@Autowired
 	private DataBaseDao dataBaseDao;
 	
+	
 	@Override
 	public Results<List<SysUser>> find(Params<SysUser> params) {
 		log.debug("进入控制:查询系统用户列表方法,params:{}",params);
 		LogsUtil.set(LogType.Query, "查询系统用户列表");
-		
-		SqlBuilder<SysUser> builder=SqlBuilder.build(params);
-		Results<List<SysUser>> results = dataBaseDao.findPages(builder);
+		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
+				
+		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(params);
+		Results<List<SysUser>> results = dataBaseDao.findPages(sqlBuilder);
 				
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -76,9 +76,9 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改系统用户",entity.getId());
 		
-		String[] fields = {"userType","username","pwdText","pwdSalt","realName","aliasName","portrait","birthday","sex","email","qq","tel","securityQuestion","sucurityMfa","lastLoginTime","lastLoginIp","status","lockTime","descs"};
-		
-		int len = dataBaseDao.updateById(Updater.build(entity).fields(fields));
+		String[] fields = {"userType","realName","aliasName","portrait","birthday","sex","email","qq","tel","securityQuestion","sucurityMfa","lastLoginTime","lastLoginIp","descs"};
+		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(entity).field(fields);
+		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);
 		
 		results.setBody(entity.getId());
@@ -99,11 +99,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		// 参数处理
-		SysUser entity=new SysUser();
-		entity.setIds(new ArrayList<>(ids));
-		
-		List<SysUser> rows= dataBaseDao.findByIds(entity);
+		List<SysUser> rows = dataBaseDao.findByIds(SqlBuilder.build(SysUser.class,ids));
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		LogsUtil.success();
@@ -113,22 +109,18 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 
 
 	@Override
-	public Results<SysUser> detail(Long sid) {
-		log.debug("进入控制:查看系统用户详细信息方法，sid:{}",sid);
-		LogsUtil.set(LogType.Query, "查看系统用户详细",sid);
+	public Results<SysUser> detail(Long id) {
+		log.debug("进入控制:查看系统用户详细信息方法，id:{}",id);
+		LogsUtil.set(LogType.Query, "查看系统用户详细",id);
 		// 参数处理
-		AssertUtil.service().notNull(sid,"参数sid不能为空");
-		
-		// 参数处理
-		SysUser entity=new SysUser();
-		entity.setId(sid);
+		AssertUtil.service().notNull(id,"参数id不能为空");
 		
 		LogsUtil.add("查找记录");
-		SysUser tmp = dataBaseDao.findById(entity);
+		SysUser tmp = dataBaseDao.findById(SqlBuilder.build(SysUser.class,id));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		LogsUtil.success(tmp.getId());
-		log.debug("退出控制:查看系统用户详细信息方法，sid:{},result:true",sid);
+		log.debug("退出控制:查看系统用户详细信息方法，id:{},result:true",id);
 		return Results.success(tmp);
 	}
 	
@@ -142,13 +134,9 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		// 参数处理
-		SysUser entity=new SysUser();
-		entity.setIds(new ArrayList<>(ids));
-		
 		// 执行删除
-		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(entity.getIds()));
-		int count = dataBaseDao.delete(entity);
+		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
+		int count = dataBaseDao.delete(SqlBuilder.build(SysUser.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);

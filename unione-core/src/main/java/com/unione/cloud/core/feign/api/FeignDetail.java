@@ -11,12 +11,12 @@ public interface FeignDetail<T> {
 
 	/**
 	 * Feign 详情接口
-	 * @param sid
+	 * @param id
 	 * @return
 	 */
 	@PostMapping("/detail")
 	@ApiOperation(value = "详情")
-	public Results<T> detail(@RequestBody Long sid);
+	public Results<T> detail(@RequestBody Long id);
 	
 	
 	
