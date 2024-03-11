@@ -1,5 +1,6 @@
 package com.unione.cloud.beetsql;
 
+import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.SQLType;
+import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.ExecuteContext;
 import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLSource;
@@ -16,10 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.SqlBuilder.SqlType;
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.generator.SidGenHolder;
-import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -46,18 +50,18 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int insert(T entity) {
-		if(entity instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)entity;
-			pojo.setId(SidGenHolder.generate());
-			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
-			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
-			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
-			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
-			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
+		SessionService sessionService=SessionHolder.build();
+		PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.name());
+		if(Long.class.equals(idProp.getPropertyType())) {
+			BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
 		}
+		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
 		
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
@@ -69,17 +73,14 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int insertWithId(T entity) {
-		if(entity instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)entity;
-			BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
-			BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
-			BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
-			BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
-			BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
-			BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
-		}
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
 
@@ -90,20 +91,20 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int[] insertBatch(List<T> list) {
-		if(list.get(0) instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			list.stream().forEach(i->{
-				Pojo pojo=(Pojo)i;
-				pojo.setId(SidGenHolder.generate());
-				BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
-				BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
-				BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
-				BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
-				BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
-				BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
-				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
-			});
-		}
+		SessionService sessionService=SessionHolder.build();
+		list.stream().forEach(entity->{
+			PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.name());
+			if(Long.class.equals(idProp.getPropertyType())) {
+				BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
+			}
+			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
 	}
@@ -115,37 +116,34 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int[] insertBatchWithId(List<T> list) {
-		if(list.get(0) instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			list.stream().forEach(i->{
-				Pojo pojo=(Pojo)i;
-				BeanUtils.setDefaultValue(pojo, "tenantId", sessionService.getTenantId());
-				BeanUtils.setDefaultValue(pojo, "orgId", sessionService.getOrgId());
-				BeanUtils.setDefaultValue(pojo, "userId", sessionService.getUserId());
-				BeanUtils.setDefaultValue(pojo, "created", DateUtil.current());
-				BeanUtils.setDefaultValue(pojo, "createdBy", sessionService.getUsername());
-				BeanUtils.setDefaultValue(pojo, "lastUpdated", DateUtil.current());
-				BeanUtils.setDefaultValue(pojo, "lastUpdatedBy", sessionService.getUsername());
-			});
-		}
+		SessionService sessionService=SessionHolder.build();
+		list.stream().forEach(entity->{
+			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
 	}
 
 	
 	/**
-	 * 	更新数据
+	 * 	更新数据,使用sql更新{ResoruceName}.update
 	 * @param updater
 	 * @return
 	 */
 	public <T> int update(Updater<T> updater) {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
-		if(updater.getData() instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)updater.getData();
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
+		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
 	}
 	
@@ -156,47 +154,44 @@ public class DataBaseDao {
 	 */
 	public <T> int update(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
-		if(builder.getData() instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)builder.getData();
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
+
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 	
 	/**
-	 * 	更新数据
+	 * 	更新数据,使用sql更新{ResoruceName}.updateById
 	 * @param updater
 	 * @return
 	 */
 	public <T> int updateById(Updater<T> updater) {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
-		if(updater.getData() instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)updater.getData();
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
+
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
+		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
 	}
 	
+	
 	/**
-	 * 	更新数据
+	 * 	更新数据，无数据权限验证
 	 * @param <T>
 	 * @param params
 	 * @return
 	 */
 	public <T> int updateById(T params) {
-		SqlBuilder<T> builder=SqlBuilder.build(params);
-		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
-		if(builder.getData() instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)builder.getData();
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
-		return this.sqlManager.update(sqlId, builder.toParams());
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
+		return this.sqlManager.updateById(params);
 	}
 	
 	/**
@@ -207,17 +202,16 @@ public class DataBaseDao {
 	 */
 	public <T> int updateById(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
-		if(builder.getData() instanceof Pojo) {
-			SessionService sessionService=SessionHolder.build();
-			Pojo pojo=(Pojo)builder.getData();
-			pojo.setLastUpdated(DateUtil.current());
-			pojo.setLastUpdatedBy(sessionService.getUsername());
-		}
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 	
 	/**
-	 * 	删除数据
+	 * 	删除数据,使用sql删除{ResoruceName}.delete
 	 * @param params
 	 * @return
 	 */
@@ -225,7 +219,24 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "delete");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
+		this.setDataPermis(params);
 		return this.sqlManager.update(sqlId, map);
+	}
+	
+	/**
+	 * 	删除数据，根据数据id删除，无数据权限验证
+	 * @param <T>
+	 * @param cls
+	 * @param id
+	 * @return
+	 */
+	public <T> int delete(Class<T> cls,Object id) {
+		return this.sqlManager.deleteById(cls, id);
 	}
 	
 	
@@ -236,6 +247,11 @@ public class DataBaseDao {
 	 */
 	public <T> int delete(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
 	
@@ -251,7 +267,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	统计数量
+	 * 	统计数量,使用sql统计{ResoruceName}.count
 	 * @param params
 	 * @return
 	 */
@@ -259,6 +275,7 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "count");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		this.setDataPermis(params);
 		return this.sqlManager.selectUnique(sqlId, map, Long.class);
 	}
 	
@@ -274,7 +291,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	查询唯一数据
+	 * 	查询唯一数据,使用sql查询{ResoruceName}.findUnique
 	 * @param params
 	 * @return
 	 */
@@ -283,6 +300,7 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findUnique");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		this.setDataPermis(params);
 		return (T) this.sqlManager.selectUnique(sqlId, map, params.getClass());
 	}
 	
@@ -298,7 +316,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	查询一条数据
+	 * 	查询一条数据,使用sql查询{ResoruceName}.findOne
 	 * @param params
 	 * @return
 	 */
@@ -307,6 +325,7 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findOne");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		this.setDataPermis(params);
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
@@ -322,7 +341,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	根据id查询数据
+	 * 	根据id查询数据，无数据权限验证
 	 * @param cls
 	 * @param id
 	 * @return
@@ -336,7 +355,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	查询列表(根据id查询数据)
+	 * 	查询列表(根据id查询数据),使用sql查询{ResoruceName}.findById
 	 * @param params
 	 * @return
 	 */
@@ -345,12 +364,13 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findById");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		this.setDataPermis(params);
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
 	
 	/**
-	 * 	查询列表(根据ids集合加载数据)
+	 * 	查询列表(根据ids集合加载数据),使用sql查询{ResoruceName}.findByIds
 	 * @param params
 	 * @param sort
 	 * @return
@@ -361,11 +381,12 @@ public class DataBaseDao {
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
 	
 	/**
-	 * 	根据ids查询数据
+	 * 	根据ids查询数据，无数据权限验证
 	 * @param cls
 	 * @param ids
 	 * @return
@@ -400,7 +421,7 @@ public class DataBaseDao {
 	
 	
 	/**
-	 * 	查询列表(不分页)
+	 * 	查询列表(不分页),使用sql查询{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
@@ -412,7 +433,7 @@ public class DataBaseDao {
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
-		
+		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
 
@@ -430,7 +451,7 @@ public class DataBaseDao {
 	}
 	
 	/**
-	 * 	查询列表(分页),不执行total统计
+	 * 	查询列表(分页),不执行total统计,使用sql查询{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
@@ -456,11 +477,12 @@ public class DataBaseDao {
 		}
 		
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
 	}
 	
 	/**
-	 * 	查询列表(分页)
+	 * 	查询列表(分页),使用sql查询{ResoruceName}.count，{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
@@ -472,6 +494,8 @@ public class DataBaseDao {
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
+		this.setDataPermis(params);
+		
 		if(params.isNeedCount()) {
 			Long total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), "count"), map, Long.class);
 			results.setTotal(total);
@@ -516,6 +540,27 @@ public class DataBaseDao {
 		return results.setBody(rows);
 	}
 	
+	
+	private void setDataPermis(Object obj) {
+		UniDataPermis dataPermis = obj.getClass().getAnnotation(UniDataPermis.class);
+		if(dataPermis!=null && !dataPermis.value().equals(DataPermis.ALL)) {
+			SessionService sessionService=SessionHolder.build();
+			switch (dataPermis.value()) {
+			case TENANTID:
+				BeanUtils.setDefaultValue(obj, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+				break;
+			case ORGANID:
+				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+				break;	
+			case ORGANCODE:
+				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_CODE.name(), sessionService.getOrgLvsn());
+				break;		
+			default:
+				BeanUtils.setDefaultValue(obj, BaseField.USER_ID.name(), sessionService.getUserId());
+				break;
+			}
+		}
+	}
 	
 	/**
 	 * 	加载SQL

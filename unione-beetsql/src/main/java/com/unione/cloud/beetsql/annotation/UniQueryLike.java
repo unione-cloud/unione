@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD})
-public @interface LikeQuery {
+public @interface UniQueryLike {
 	
 	TYPE value() default TYPE.ALL;
 	

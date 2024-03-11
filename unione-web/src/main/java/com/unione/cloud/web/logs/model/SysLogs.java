@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
 
-import com.unione.cloud.beetsql.annotation.KeyWordQuery;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -62,13 +62,13 @@ public class SysLogs extends Pojo{
 	/**
 	 * 应用编码
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="应用编码",notes="字符长度为：20")
 	private String appCode;
 	/**
 	 * 用户姓名
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="用户姓名",notes="字符长度为：50")
 	private String userName;
 	/**
@@ -89,7 +89,7 @@ public class SysLogs extends Pojo{
 	/**
 	 * 操作标题
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="操作标题",notes="字符长度为：50")
 	private String title;
 	/**

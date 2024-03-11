@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -42,6 +44,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_USER_ROLE")
+@UniDataPermis(DataPermis.TENANT)
 public class SysUserRole extends Pojo{
 	
 //	/**

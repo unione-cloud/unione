@@ -27,12 +27,17 @@ import org.beetl.sql.core.engine.SQLParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.annotation.KeyWordQuery;
-import com.unione.cloud.beetsql.annotation.LikeQuery;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.UniQueryLike;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
+import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.security.SessionHolder;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -62,6 +67,7 @@ public class SqlBuilder<T> {
 	private String tableName;	// 数据表名称
 	private TableDesc tableDesc;
 	private ClassDesc classDesc;
+	private DataPermis dataPermis;
 	
 	private String keywords;	// 关键字搜索字段
 	private String where;		// 数据过滤条件定义
@@ -211,21 +217,19 @@ public class SqlBuilder<T> {
 	
 	public String nameSpace() {
 		if(!StringUtils.isEmpty(this.nameSpace)) {
-			return MD5.create().digestHex(this.nameSpace);
+			return this.nameSpace;
 		}
-		StackTraceElement stes[] = ThreadUtil.getStackTrace();
-		StringBuffer buffer=new StringBuffer();
-		for(StackTraceElement ste:stes) {
-			String clasName[]=ste.getClassName().split("\\.");
-			String tmp=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
-			buffer.append(tmp).append("\n");
-		}
-		this.nameSpace=buffer.substring(0, buffer.length()-"\n".length());
-		return MD5.create().digestHex(this.nameSpace);
+		StackTraceElement stes[]=ThreadUtil.getStackTrace();
+		StackTraceElement ste=stes[5];
+		String clasName[]=ste.getClassName().split("\\.");
+		String service=String.format("%s.%s", clasName[clasName.length-1],ste.getMethodName());
+		
+		this.nameSpace=String.format("SqlBuilder.%s",service);
+		return this.nameSpace;
 	}
 	
 	public String key(SqlType type) {
-		return MD5.create().digestHex(this.toSql(type));
+		return String.format("%s.%s",type, MD5.create().digestHex(this.toSql(type)));
 	}
 	
 	
@@ -249,6 +253,29 @@ public class SqlBuilder<T> {
 		params.put("data", this.data);
 		params.put("params", this.params);
 		params.put("fields", this.fields);
+		if(this.dataPermis==null) {
+			UniDataPermis dataPermis = this.data.getClass().getAnnotation(UniDataPermis.class);
+			if(dataPermis!=null) {
+				this.dataPermis=dataPermis.value();
+			}
+		}
+		if(this.dataPermis!=null && !this.dataPermis.equals(DataPermis.ALL)) {
+			SessionService sessionService=SessionHolder.build();
+			switch (dataPermis) {
+			case TENANTID:
+				BeanUtils.setDefaultValue(this.params, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+				break;
+			case ORGANID:
+				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+				break;	
+			case ORGANCODE:
+				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_CODE.name(), sessionService.getOrgLvsn());
+				break;		
+			default:
+				BeanUtils.setDefaultValue(this.params, BaseField.USER_ID.name(), sessionService.getUserId());
+				break;
+			}
+		}
 		return params;
 	}
 	
@@ -379,7 +406,7 @@ public class SqlBuilder<T> {
 				StringBuffer buf=new StringBuffer();
 				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
 				for(PropertyDescriptor p:ps) {
-					KeyWordQuery keyWordQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),KeyWordQuery.class);
+					UniQueryKeyWord keyWordQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),UniQueryKeyWord.class);
 					if(keyWordQuery!=null) {
 						buf.append(" OR ").append(p.getName()).append(" LIKE [%keywords%]");
 					}
@@ -406,7 +433,7 @@ public class SqlBuilder<T> {
 				StringBuffer buf=new StringBuffer();
 				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
 				for(PropertyDescriptor p:ps) {
-					LikeQuery likeQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),LikeQuery.class);
+					UniQueryLike likeQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),UniQueryLike.class);
 					if(likeQuery!=null) {
 						buf.append(" AND ").append(p.getName());
 						switch (likeQuery.value()) {
@@ -520,6 +547,16 @@ public class SqlBuilder<T> {
 			condition=condition.replace("?", String.format("#{params.%s}", fieldName));
 		}
 		return String.format("\n-- @if(varNotNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
+	}
+	
+	/**
+	 * 	设置数据权限级别
+	 * @param dataPermis
+	 * @return
+	 */
+	public SqlBuilder<T> dataPermis(DataPermis dataPermis){
+		this.dataPermis=dataPermis;
+		return this;
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){

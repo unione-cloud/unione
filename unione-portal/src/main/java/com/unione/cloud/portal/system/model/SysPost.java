@@ -2,6 +2,8 @@ package com.unione.cloud.portal.system.model;
 
 import java.util.List;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -51,6 +53,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
+@UniDataPermis(DataPermis.TENANT)
 public class SysPost extends Pojo{
 	
 //	/**

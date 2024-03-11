@@ -12,9 +12,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.unione.cloud.beetsql.annotation.KeyWordQuery;
-import com.unione.cloud.beetsql.annotation.LikeQuery;
-import com.unione.cloud.beetsql.annotation.LikeQuery.TYPE;
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.UniQueryLike;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.UniQueryLike.TYPE;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -71,6 +73,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_USER")
+@UniDataPermis(DataPermis.TENANT)
 public class SysUser extends Pojo{
 	/**
 	 * 
@@ -86,7 +89,7 @@ public class SysUser extends Pojo{
 	/**
 	 * 登录帐号
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="登录帐号",notes="字符长度为：250")
 	@NotNull(message = "登录帐号不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "登录帐号不能为空",groups = {Validator.save.class})
@@ -108,15 +111,15 @@ public class SysUser extends Pojo{
 	/**
 	 * 真实姓名
 	 */
-	@LikeQuery
-	@KeyWordQuery
+	@UniQueryLike
+	@UniQueryKeyWord
 	@ApiModelProperty(value="真实姓名",notes="字符长度为：50")
 	private String realName;
 	/**
 	 * 别名
 	 */
-	@LikeQuery
-	@KeyWordQuery
+	@UniQueryLike
+	@UniQueryKeyWord
 	@ApiModelProperty(value="别名",notes="字符长度为：50")
 	private String aliasName;
 	/**
@@ -139,19 +142,19 @@ public class SysUser extends Pojo{
 	/**
 	 * 邮箱
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="邮箱",notes="字符长度为：250")
 	private String email;
 	/**
 	 * 联系qq
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="联系qq",notes="字符长度为：50")
 	private String qq;
 	/**
 	 * 联系电话
 	 */
-	@KeyWordQuery
+	@UniQueryKeyWord
 	@ApiModelProperty(value="联系电话",notes="字符长度为：30")
 	private String tel;
 	/**
