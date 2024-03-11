@@ -47,7 +47,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_ROLE")
-@UniDataPermis(DataPermis.TENANT)
+@UniDataPermis(DataPermis.TENANTID)
 public class SysRole extends Pojo{
 	
 //	/**

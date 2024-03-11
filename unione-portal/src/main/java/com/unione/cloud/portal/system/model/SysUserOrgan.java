@@ -49,7 +49,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@UniDataPermis(DataPermis.TENANT)
+@UniDataPermis(DataPermis.TENANTID)
 public class SysUserOrgan extends Pojo{
 	
 //	/**

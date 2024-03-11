@@ -73,7 +73,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_USER")
-@UniDataPermis(DataPermis.TENANT)
+@UniDataPermis(DataPermis.TENANTID)
 public class SysUser extends Pojo{
 	/**
 	 * 
