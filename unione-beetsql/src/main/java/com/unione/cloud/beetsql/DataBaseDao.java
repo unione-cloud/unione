@@ -201,7 +201,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int updateById(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
+		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
@@ -228,17 +228,6 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, map);
 	}
 	
-	/**
-	 * 	删除数据，根据数据id删除，无数据权限验证
-	 * @param <T>
-	 * @param cls
-	 * @param id
-	 * @return
-	 */
-	public <T> int delete(Class<T> cls,Object id) {
-		return this.sqlManager.deleteById(cls, id);
-	}
-	
 	
 	/**
 	 * 	删除数据
@@ -247,6 +236,33 @@ public class DataBaseDao {
 	 */
 	public <T> int delete(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		
+		return this.sqlManager.update(sqlId,builder.toParams());
+	}
+	
+	/**
+	 * 	根据数据id删除，无数据权限验证
+	 * @param <T>
+	 * @param cls
+	 * @param id
+	 * @return
+	 */
+	public <T> int deleteById(Class<T> cls,Object id) {
+		return this.sqlManager.deleteById(cls, id);
+	}
+	
+	
+	/**
+	 * 	根据数据id删除
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteById(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());

@@ -320,7 +320,9 @@ public class LoginService {
 		user.setUsername(StringUtils.trim(param.getUsername()));
 		SqlBuilder<SysUser> builder=SqlBuilder
 				.build(user)
-				.query("SELECT u.*,org.ID as orgId,org.NAME as orgName,org.AREA_CODE as areaCode FROM SYS_USER u LEFT JOIN SYS_ORGAN org on u.ORG_ID=org.ID WHERE u.USERNAME=#{params.username}");
+				.query("SELECT u.*,org.ID as orgId,org.NAME as orgName,org.AREA_CODE as areaCode "
+						+ "FROM SYS_USER u LEFT JOIN SYS_ORGAN org on u.ORG_ID=org.ID "
+						+ "WHERE u.USERNAME=#{params.username}");
 		user=dataBaseDao.findOne(builder);
 		if(user==null) {
 			LogsUtil.add("认证失败：帐号不正确");

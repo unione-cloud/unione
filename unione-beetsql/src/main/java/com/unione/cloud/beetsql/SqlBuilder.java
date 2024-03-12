@@ -27,8 +27,11 @@ import org.beetl.sql.core.engine.SQLParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.UniQueryAction;
+import com.unione.cloud.beetsql.annotation.UniQueryAction.ACTION;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.beetsql.annotation.UniQueryLike;
 import com.unione.cloud.core.dto.Params;
@@ -69,9 +72,10 @@ public class SqlBuilder<T> {
 	private ClassDesc classDesc;
 	private DataPermis dataPermis;
 	
-	private String keywords;	// 关键字搜索字段
+	private String keywordsQuery;	// 关键字搜索字段
+	private String likesQuery;		// 模糊查询字段
+	private String normalQuery;		// 常规查询字段
 	private String where;		// 数据过滤条件定义
-	private String likes;		// 模糊查询字段
 	private Sort[] sorts;		// 数据排序
 	private String group;		// 数据分组
 	private String having;		// 分组处理
@@ -237,13 +241,17 @@ public class SqlBuilder<T> {
 		if(SqlType.INSERT.equals(type)) {
 			throw new DataBaseException("SqlBuilder暂不支持insert操作");
 		}else if(SqlType.UPDATE.equals(type)) {
-			return this.updateSql();
+			return this.updateSql(type);
+		}else if(SqlType.UPDATE_BYID.equals(type)) {
+			return this.updateSql(type);
 		}else if(SqlType.COUNT.equals(type)) {
 			return this.countSql();
 		}else if(SqlType.SELECT.equals(type)) {
 			return this.findSql();
 		}else if(SqlType.DELETE.equals(type)){
-			return this.deleteSql();
+			return this.deleteSql(type);
+		}else if(SqlType.DELETE_BYID.equals(type)){
+			return this.deleteSql(type);
 		}
 		return null;
 	}
@@ -280,9 +288,11 @@ public class SqlBuilder<T> {
 	}
 	
 	private String countSql() {
-		this.processIdQuerys();
+		
 		this.processKeywordsQuery();
 		this.processLikeQuery();
+		this.processNormalQuery();
+		this.processDataPermis();
 		this.processCondition();
 		
 		if(StringUtils.isEmpty(this.countSql)) {
@@ -293,9 +303,11 @@ public class SqlBuilder<T> {
 	
 	private String findSql() {
 		if(StringUtils.isEmpty(this.findSql)) {
-			this.processIdQuerys();
+			
 			this.processKeywordsQuery();
 			this.processLikeQuery();
+			this.processNormalQuery();
+			this.processDataPermis();
 			this.processCondition();
 			
 			String selectField="*";
@@ -307,8 +319,14 @@ public class SqlBuilder<T> {
 		return this.findSql;
 	}
 	
-	private String updateSql() {
+	private String updateSql(SqlType type) {
+		if(type.equals(SqlType.UPDATE_BYID)) {
+			this.processIdQuerys();
+		}
+		this.processNormalQuery();
+		this.processDataPermis();
 		this.processCondition();
+		
 		if(StringUtils.isEmpty(this.updateSql)) {
 			List<String> idCols = classDesc.getIdCols();
 			Iterator<String> cols = classDesc.getInCols().iterator();
@@ -351,9 +369,14 @@ public class SqlBuilder<T> {
 	}
 	
 	
-	private String deleteSql() {
-		this.processIdQuerys();
+	private String deleteSql(SqlType type) {
+		if(type.equals(SqlType.UPDATE_BYID)) {
+			this.processIdQuerys();
+		}
+		this.processNormalQuery();
+		this.processDataPermis();
 		this.processCondition();
+		
 		if(StringUtils.isEmpty(this.deleteSql)) {
 			// 如果设置了逻辑删除
 			try {
@@ -401,7 +424,7 @@ public class SqlBuilder<T> {
 	
 	private void processKeywordsQuery() {
 		// keywords条件处理
-		if(StringUtils.isEmpty(this.keywords)) {
+		if(StringUtils.isEmpty(this.keywordsQuery)) {
 			try {
 				StringBuffer buf=new StringBuffer();
 				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
@@ -412,23 +435,23 @@ public class SqlBuilder<T> {
 					}
 				}
 				if(buf.length()>0) {
-					this.keywords=String.format("(AND %s)", buf.substring(4, buf.length()));
+					this.keywordsQuery=String.format("(AND %s)", buf.substring(4, buf.length()));
 				}
 			} catch (IntrospectionException e) {
 			}
 		}	
-		if(!StringUtils.isEmpty(this.keywords)) {
+		if(!StringUtils.isEmpty(this.keywordsQuery)) {
 			if(StringUtils.isEmpty(this.where)) {
-				this.where=this.keywords;
+				this.where=this.keywordsQuery;
 			}else {
-				this.where=String.format("%s %s",this.where, this.keywords);
+				this.where=String.format("%s %s",this.where, this.keywordsQuery);
 			}
 		}
 	}
 	
 	private void processLikeQuery() {
 		// like查询条件处理
-		if(StringUtils.isEmpty(this.likes)) {
+		if(StringUtils.isEmpty(this.likesQuery)) {
 			try {
 				StringBuffer buf=new StringBuffer();
 				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
@@ -438,28 +461,71 @@ public class SqlBuilder<T> {
 						buf.append(" AND ").append(p.getName());
 						switch (likeQuery.value()) {
 						case LEFT:
-							buf.append(" LIKE [%").append(p.getDisplayName()).append("]");
+							buf.append(" LIKE [%").append(p.getName()).append("]");
 							break;
 						case RIGHT:
-							buf.append(" LIKE [").append(p.getDisplayName()).append("%]");
+							buf.append(" LIKE [").append(p.getName()).append("%]");
 							break;
 						default:
-							buf.append(" LIKE [%").append(p.getDisplayName()).append("%]");
+							buf.append(" LIKE [%").append(p.getName()).append("%]");
 							break;
 						}
 					}
 				}
 				if(buf.length()>0) {
-					this.likes=buf.toString();
+					this.likesQuery=buf.toString();
 				}
 			} catch (IntrospectionException e) {
 			}
 		}	
-		if(!StringUtils.isEmpty(this.likes)) {
+		if(!StringUtils.isEmpty(this.likesQuery)) {
 			if(StringUtils.isEmpty(this.where)) {
-				this.where=this.likes;
+				this.where=this.likesQuery;
 			}else {
-				this.where=String.format("%s %s",this.where, this.likes);
+				this.where=String.format("%s %s",this.where, this.likesQuery);
+			}
+		}
+	}
+	
+	private void processNormalQuery() {
+		if(StringUtils.isEmpty(this.normalQuery)) {
+			List<String> idCols = classDesc.getIdCols();
+			Iterator<String> cols = classDesc.getInCols().iterator();
+			Iterator<String> properties = classDesc.getAttrs().iterator();
+			StringBuffer buffer=new StringBuffer();
+			while (cols.hasNext() && properties.hasNext()) {
+				String col = cols.next();
+				String prop = properties.next();
+				if (idCols.contains(col)) {
+					// 主键字段，忽略
+					continue;
+				}
+				UniQueryLike likeQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryLike.class);
+				if(likeQuery!=null) {
+					// 该字段已设置like查询，忽略
+					continue;
+				}
+				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryIgnore.class);
+				if(ignorQuery!=null) {
+					// 该字段已设置Ignore，忽略
+					continue;
+				}
+				UniQueryAction actionQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryAction.class);
+				ACTION action=ACTION.EQ;
+				if(actionQuery!=null) {
+					action=actionQuery.value();
+				}
+				buffer.append("AND ").append(col).append(action.express()).append("[").append(prop).append("] ");
+			}
+			if(buffer.length()>0) {
+				this.normalQuery=String.format("AND (%s) ", buffer.substring(4));
+			}
+		}
+		if(!StringUtils.isEmpty(this.normalQuery)) {
+			if(StringUtils.isEmpty(this.where)) {
+				this.where=this.normalQuery;
+			}else {
+				this.where=String.format("%s %s",this.where, this.normalQuery);
 			}
 		}
 	}
@@ -489,6 +555,39 @@ public class SqlBuilder<T> {
 		}
 	}
 	
+	private void processDataPermis() {
+		StringBuffer permis=new StringBuffer();
+		if(this.dataPermis==null) {
+			UniDataPermis dataPermis = this.data.getClass().getAnnotation(UniDataPermis.class);
+			if(dataPermis!=null) {
+				this.dataPermis=dataPermis.value();
+			}
+		}
+		if(this.dataPermis!=null && !this.dataPermis.equals(DataPermis.ALL)) {
+			switch (dataPermis) {
+			case TENANTID:
+				permis.append("AND ").append(BaseField.TENANT_ID.column()).append(" = [").append(BaseField.TENANT_ID.name()).append("] ");
+				break;
+			case ORGANID:
+				permis.append("AND ").append(BaseField.ORGAN_ID.column()).append(" = [").append(BaseField.ORGAN_ID.name()).append("] ");
+				break;	
+			case ORGANCODE:
+				permis.append("AND ").append(BaseField.ORGAN_CODE.column()).append(" LIKE [").append(BaseField.ORGAN_CODE.name()).append("%] ");
+				break;		
+			default:
+				permis.append("AND ").append(BaseField.USER_ID.column()).append(" = [").append(BaseField.USER_ID.name()).append("] ");
+				break;
+			}
+		}
+		if(!StringUtils.isEmpty(permis)) {
+			if(StringUtils.isEmpty(this.where)) {
+				this.where=permis.substring(4);
+			}else {
+				this.where=String.format("%s AND (%s) ",this.where, permis.substring(4));
+			}
+		}
+	}
+	
 	private String whereCondition(String condition) {
 		Matcher funMatcher=funRegix.matcher(condition);
 		String funName="";
@@ -502,7 +601,9 @@ public class SqlBuilder<T> {
 		String fieldName=fieldMatcher.group();
 		
 		// 字段名称变成大写
-		condition=condition.replaceFirst(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
+		if(!fieldName.matches("^[A-Z\\_]*$")) {
+			condition=condition.replaceFirst(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
+		}
 		
 		Matcher varMatcher=varRegix.matcher(condition);
 		if(varMatcher.find()) {
@@ -580,7 +681,7 @@ public class SqlBuilder<T> {
 	} 
 	
 	public SqlBuilder<T> keywords(String keywords){
-		this.keywords=keywords;
+		this.keywordsQuery=keywords;
 		return this;
 	}
 	
@@ -715,7 +816,7 @@ public class SqlBuilder<T> {
 	}
 	
 	public static enum SqlType{
-		INSERT,UPDATE,SELECT,COUNT,DELETE
+		INSERT,UPDATE,UPDATE_BYID,SELECT,COUNT,DELETE,DELETE_BYID
 	}
 	
 //	public static void main(String[] args) {
