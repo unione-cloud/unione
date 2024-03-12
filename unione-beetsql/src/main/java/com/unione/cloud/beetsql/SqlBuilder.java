@@ -101,7 +101,7 @@ public class SqlBuilder<T> {
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
 	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\]");
 	private Pattern funRegix=Pattern.compile("[\\s]+(AND|OR)[\\s]+",Pattern.CASE_INSENSITIVE);
-	private Pattern inRegix=Pattern.compile("IN|(NOT IN)",Pattern.CASE_INSENSITIVE);
+	private Pattern inRegix=Pattern.compile("(^IN$)|(^NOT IN$)",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	
 	
@@ -261,13 +261,8 @@ public class SqlBuilder<T> {
 		params.put("data", this.data);
 		params.put("params", this.params);
 		params.put("fields", this.fields);
-		if(this.dataPermis==null) {
-			UniDataPermis dataPermis = this.data.getClass().getAnnotation(UniDataPermis.class);
-			if(dataPermis!=null) {
-				this.dataPermis=dataPermis.value();
-			}
-		}
-		if(this.dataPermis!=null && !this.dataPermis.equals(DataPermis.ALL)) {
+		DataPermis dataPermis=this.loadDataPermis();
+		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
 			SessionService sessionService=SessionHolder.build();
 			switch (dataPermis) {
 			case TENANTID:
@@ -292,7 +287,6 @@ public class SqlBuilder<T> {
 		this.processKeywordsQuery();
 		this.processLikeQuery();
 		this.processNormalQuery();
-		this.processDataPermis();
 		this.processCondition();
 		
 		if(StringUtils.isEmpty(this.countSql)) {
@@ -307,7 +301,6 @@ public class SqlBuilder<T> {
 			this.processKeywordsQuery();
 			this.processLikeQuery();
 			this.processNormalQuery();
-			this.processDataPermis();
 			this.processCondition();
 			
 			String selectField="*";
@@ -324,7 +317,6 @@ public class SqlBuilder<T> {
 			this.processIdQuerys();
 		}
 		this.processNormalQuery();
-		this.processDataPermis();
 		this.processCondition();
 		
 		if(StringUtils.isEmpty(this.updateSql)) {
@@ -374,7 +366,6 @@ public class SqlBuilder<T> {
 			this.processIdQuerys();
 		}
 		this.processNormalQuery();
-		this.processDataPermis();
 		this.processCondition();
 		
 		if(StringUtils.isEmpty(this.deleteSql)) {
@@ -435,7 +426,7 @@ public class SqlBuilder<T> {
 					}
 				}
 				if(buf.length()>0) {
-					this.keywordsQuery=String.format("(AND %s)", buf.substring(4, buf.length()));
+					this.keywordsQuery=String.format("AND (%s)", buf.substring(4, buf.length()));
 				}
 			} catch (IntrospectionException e) {
 			}
@@ -493,6 +484,7 @@ public class SqlBuilder<T> {
 			Iterator<String> cols = classDesc.getInCols().iterator();
 			Iterator<String> properties = classDesc.getAttrs().iterator();
 			StringBuffer buffer=new StringBuffer();
+			
 			while (cols.hasNext() && properties.hasNext()) {
 				String col = cols.next();
 				String prop = properties.next();
@@ -510,6 +502,13 @@ public class SqlBuilder<T> {
 					// 该字段已设置Ignore，忽略
 					continue;
 				}
+				
+				// 如果是机构编码，则使用右模糊查询
+				if(col.equals(BaseField.ORGAN_CODE.column())) {
+					buffer.append("AND ").append(col).append(" LIKE ").append("[").append(prop).append("%] ");
+					continue;
+				}
+				
 				UniQueryAction actionQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryAction.class);
 				ACTION action=ACTION.EQ;
 				if(actionQuery!=null) {
@@ -548,6 +547,9 @@ public class SqlBuilder<T> {
 		String where=this.where.replaceAll("\\(", "\r\n-- @SQLTRIM_{\r\n(")
 				.replaceAll("\\)", ")\r\n-- @}\r\n")
 				.replaceAll("@SQLTRIM_", "@sqlTrim()");
+		if(where.startsWith("OR ") || where.startsWith("AND ") || where.startsWith("or ")||where.startsWith("and ")) {
+			where=where.trim().substring(3);
+		}
 		this.whereSql="\r\n-- @sqlWhere(){\r\n"+where+"\r\n-- @}\r\n";
 		while(matcher.find()) {
 			String condition=matcher.group();
@@ -555,37 +557,14 @@ public class SqlBuilder<T> {
 		}
 	}
 	
-	private void processDataPermis() {
-		StringBuffer permis=new StringBuffer();
+	private DataPermis loadDataPermis() {
 		if(this.dataPermis==null) {
 			UniDataPermis dataPermis = this.data.getClass().getAnnotation(UniDataPermis.class);
 			if(dataPermis!=null) {
 				this.dataPermis=dataPermis.value();
 			}
 		}
-		if(this.dataPermis!=null && !this.dataPermis.equals(DataPermis.ALL)) {
-			switch (dataPermis) {
-			case TENANTID:
-				permis.append("AND ").append(BaseField.TENANT_ID.column()).append(" = [").append(BaseField.TENANT_ID.name()).append("] ");
-				break;
-			case ORGANID:
-				permis.append("AND ").append(BaseField.ORGAN_ID.column()).append(" = [").append(BaseField.ORGAN_ID.name()).append("] ");
-				break;	
-			case ORGANCODE:
-				permis.append("AND ").append(BaseField.ORGAN_CODE.column()).append(" LIKE [").append(BaseField.ORGAN_CODE.name()).append("%] ");
-				break;		
-			default:
-				permis.append("AND ").append(BaseField.USER_ID.column()).append(" = [").append(BaseField.USER_ID.name()).append("] ");
-				break;
-			}
-		}
-		if(!StringUtils.isEmpty(permis)) {
-			if(StringUtils.isEmpty(this.where)) {
-				this.where=permis.substring(4);
-			}else {
-				this.where=String.format("%s AND (%s) ",this.where, permis.substring(4));
-			}
-		}
+		return this.dataPermis;
 	}
 	
 	private String whereCondition(String condition) {
