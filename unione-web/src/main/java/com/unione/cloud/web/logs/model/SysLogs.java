@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -55,6 +57,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_LOGS")
+@UniDataPermis(DataPermis.TENANTID)
 public class SysLogs extends Pojo{
 	
 	private static final long serialVersionUID = 9176487311413735522L;
