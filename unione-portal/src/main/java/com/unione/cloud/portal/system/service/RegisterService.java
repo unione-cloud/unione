@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.SqlBuilder;
+import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.util.BeanUtils;

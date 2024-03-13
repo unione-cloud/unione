@@ -72,7 +72,7 @@ public class TokenService{
     private Integer JWT_ISSUED_OFFSET;
     
 
-    @Value("${security.jwt.issuer:mins-token}")
+    @Value("${security.jwt.issuer:unione-cloud}")
     private String JWT_ISSUER;
     
     /**

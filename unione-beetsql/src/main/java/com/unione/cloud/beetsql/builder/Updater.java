@@ -1,4 +1,4 @@
-package com.unione.cloud.beetsql;
+package com.unione.cloud.beetsql.builder;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -5,22 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.unione.cloud.beetsql.builder.SqlAction;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD})
 public @interface UniQueryAction {
 	
-	ACTION value() default ACTION.EQ;
+	SqlAction value() default SqlAction.EQ;
 	
-	public static enum ACTION{
-		EQ(" = "),LT(" < "),LTE(" <= "),GT(" > "),GTE(" >= ");
-		
-		private ACTION(String express) {
-			this.express=express;
-		}
-		
-		private String express;
-		public String express() {
-			return this.express;
-		}
-	}
 }

@@ -1,4 +1,4 @@
-package com.unione.cloud.beetsql;
+package com.unione.cloud.beetsql.builder;
 
 import java.io.Serializable;
 import java.util.Arrays;

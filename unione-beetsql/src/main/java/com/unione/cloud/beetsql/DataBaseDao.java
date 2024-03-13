@@ -17,9 +17,13 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.SqlBuilder.SqlType;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.builder.Sort;
+import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.beetsql.builder.Updater;
+import com.unione.cloud.beetsql.builder.SqlBuilder.SqlType;
+import com.unione.cloud.beetsql.builder.SqlEntity;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.generator.SidGenHolder;
@@ -590,6 +594,10 @@ public class DataBaseDao {
 		if(this.sqlManager.containSqlId(sql)) {
 			return sql;
 		}else {
+			if(SqlType.COUNT.equals(type)) {
+				return this.buildCountSql(builder);
+			}
+			
 			SQLSource tempSource = this.sqlManager.getSqlLoader().queryAutoSQL(sql);
 			if(tempSource==null) {
 				tempSource=new SQLSource(sql, builder.toSql(type));
@@ -601,6 +609,15 @@ public class DataBaseDao {
 			}
 		}
 		return sql;
+	}
+	
+	
+	private <T> SqlId buildCountSql(SqlBuilder<T> builder) {
+		SqlEntity sqlEntity=builder.resolve(this.sqlManager);
+		
+		
+		
+		return null;
 	}
 	
 	

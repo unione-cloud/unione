@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.SqlBuilder;
+import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -49,6 +49,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignFind<SysLogs>,
 			.where("appCode=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
 					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
 					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
+		
 		// 执行查询
 		Results<List<SysLogs>> results=dataBaseDao.findPages(builder);
 		

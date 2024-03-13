@@ -13,10 +13,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
-import com.unione.cloud.beetsql.annotation.UniQueryLike;
 import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
-import com.unione.cloud.beetsql.annotation.UniQueryLike.TYPE;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -111,14 +109,12 @@ public class SysUser extends Pojo{
 	/**
 	 * 真实姓名
 	 */
-	@UniQueryLike
 	@UniQueryKeyWord
 	@ApiModelProperty(value="真实姓名",notes="字符长度为：50")
 	private String realName;
 	/**
 	 * 别名
 	 */
-	@UniQueryLike
 	@UniQueryKeyWord
 	@ApiModelProperty(value="别名",notes="字符长度为：50")
 	private String aliasName;
