@@ -1,5 +1,7 @@
 package com.unione.cloud.beetsql.builder;
 
+import com.unione.cloud.core.model.BaseField.Field;
+
 import lombok.Data;
 
 @Data
@@ -24,4 +26,9 @@ public class SqlField {
 	 * 	是否主键
 	 */
 	private boolean isPk;
+	
+	/**
+	 * 	是否为基础字段，baseField!=null 是，baseField==null 否
+	 */
+	private Field baseField;
 }

@@ -1,9 +1,7 @@
 package com.unione.cloud.beetsql.builder;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,14 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.ClassDesc;
 import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.SQLManager;
-import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
@@ -43,7 +39,6 @@ import lombok.Getter;
  * 	SQL构建对象
  * @author Jeking Yang
  */
-@Service
 public class SqlBuilder<T> {
 
 	private SQLManager sqlManager;
@@ -51,7 +46,6 @@ public class SqlBuilder<T> {
 	private String key;
 	
 	private SqlEntity entity=new SqlEntity();
-	private String sql;
 	private String where;			// 数据过滤条件定义
 	private String[] fieldList;		// 数据查询/更新字段
 	private String pkField;			// 主键字段名称
@@ -90,7 +84,7 @@ public class SqlBuilder<T> {
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	
 	
-	public SqlBuilder() {}
+	private SqlBuilder() {}
 	
 	private SqlBuilder(T params) {
 		this.params=params;
@@ -176,6 +170,9 @@ public class SqlBuilder<T> {
 	
 	public SqlEntity resolve(SQLManager sqlManager) {
 		this.sqlManager=sqlManager;
+		if(StringUtils.isEmpty(this.tableName)) {
+			this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
+		}
 		AssertUtil.service().notNull(this.tableName, "table name不能为空");
 		this.entity.setTable(tableName);
 		
@@ -336,36 +333,23 @@ public class SqlBuilder<T> {
 		return this.key;
 	}
 	
-	
-	public String toSql(SqlType type) {
-		if(SqlType.INSERT.equals(type)) {
-			throw new DataBaseException("SqlBuilder暂不支持insert操作");
-		}else if(SqlType.UPDATE.equals(type)) {
-			return this.updateSql(type);
-		}else if(SqlType.UPDATE_BYID.equals(type)) {
-			return this.updateSql(type);
-		}else if(SqlType.COUNT.equals(type)) {
-			return this.countSql();
-		}else if(SqlType.SELECT.equals(type)) {
-			return this.findSql();
-		}else if(SqlType.DELETE.equals(type)){
-			return this.deleteSql(type);
-		}else if(SqlType.DELETE_BYID.equals(type)){
-			return this.deleteSql(type);
-		}
-		return null;
-	}
-	
 	public Map<String, Object> toParams(){
 		Map<String, Object> params=new HashMap<String, Object>();
 		Map<String, String> fields=new HashMap<>();
 		this.entity.getFields().stream().forEach(field->{
 			fields.put(field.getAlias(), field.getColumn());
 		});
+		
+		SqlField pkField=this.entity.getPkField();
+		AssertUtil.database().notNull(pkField, "主键字段不能为空");
+		Object id = BeanUtil.getFieldValue(this.params, pkField.getAlias());
+		
 		params.put("data", this.data);
 		params.put("params", this.params);
-		params.put("keywords", this.keywords);
 		params.put("fields", fields);
+		params.put("keywords", this.keywords);
+		params.put("id", id);
+		params.put("ids", BeanUtil.getFieldValue(this.params, "ids"));
 		
 		DataPermis dataPermis=this.loadDataPermis();
 		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
@@ -388,204 +372,12 @@ public class SqlBuilder<T> {
 		return params;
 	}
 	
-	private String countSql() {
-		
-		
-		return null;
-	}
-	
-	private String findSql() {
-		return null;
-	}
-	
-	private String updateSql(SqlType type) {
-//		if(type.equals(SqlType.UPDATE_BYID)) {
-//			this.processIdQuerys();
-//		}
-//		this.processNormalQuery();
-//		this.processCondition();
-//		
-//		if(StringUtils.isEmpty(this.updateSql)) {
-//			List<String> idCols = classDesc.getIdCols();
-//			Iterator<String> cols = classDesc.getInCols().iterator();
-//			Iterator<String> properties = classDesc.getAttrs().iterator();
-//			
-//			ConcatContext concatContext = ConcatContext
-//					.createTemplateContext(sqlManager.getNc(),new DefaultKeyWordHandler(), sqlManager.getSqlTemplateEngine());
-//			
-//			Update update = concatContext.update().from(this.data.getClass());
-//			
-//			while (cols.hasNext() && properties.hasNext()) {
-//				String col = cols.next();
-//				String prop = properties.next();
-//				if(!this.fields.isEmpty() && !this.fields.containsKey(prop)) {
-//					continue;
-//				}
-//				if (classDesc.getClassAnnotation().isUpdateIgnore(prop)) {
-//					continue;
-//				}
-//				if (idCols.contains(col)) {
-//					continue;
-//				}
-//				if (prop.equals(classDesc.getClassAnnotation().getVersionProperty())) {
-//					//版本字段
-//					update.assignVersion(col);
-//					continue;
-//				}
-//				update.notEmptyAssign(String.format("data.%s", prop), col);
-//			}
-//			if(StringUtils.isEmpty(this.whereSql)) {
-//				// 如果未设置过滤条件，则自动使用主键
-//				StringBuffer buf=new StringBuffer();
-//				String keyField=classDesc.getIdAttr();
-//				buf.append(String.format("%s=?", keyField));
-//				this.where=buf.toString();
-//				this.processCondition();
-//			}
-//			
-//			this.updateSql=String.format("%s %s", update.toSql(),this.whereSql);
-//		}
-//		return this.updateSql;
-		return null;
-	}
-	
-	
-	private String deleteSql(SqlType type) {
-		return null;
-	}
-	
-//	private void processIdQuerys() {
-//		if(StringUtils.isEmpty(this.where)) {
-//			// 如果未设置过滤条件，则自动使用主键
-//			StringBuffer buf=new StringBuffer();
-//			String keyField=classDesc.getIdAttr();
-//			buf.append(String.format("(%s=? OR %s in [ids])", keyField,keyField));
-//			
-//			this.where=buf.toString();
-//		}
-//	}
-//	
-//	private void processKeywordsQuery() {
-//		// keywords条件处理
-//		if(StringUtils.isEmpty(this.keywordsQuery)) {
-//			try {
-//				StringBuffer buf=new StringBuffer();
-//				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
-//				for(PropertyDescriptor p:ps) {
-//					UniQueryKeyWord keyWordQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),UniQueryKeyWord.class);
-//					if(keyWordQuery!=null) {
-//						buf.append(" OR ").append(p.getName()).append(" LIKE [%keywords%]");
-//					}
-//				}
-//				if(buf.length()>0) {
-//					this.keywordsQuery=buf.substring(4, buf.length());
-//				}
-//			} catch (IntrospectionException e) {
-//			}
-//		}	
-//		if(!StringUtils.isEmpty(this.keywordsQuery)) {
-//			if(StringUtils.isEmpty(this.where)) {
-//				this.where=this.keywordsQuery;
-//			}else {
-//				this.where=String.format("%s \n-- @SQLTRIM_{AND (%s) \n--@}\n",this.where, this.keywordsQuery);
-//			}
-//		}
-//	}
-//	
-//	private void processLikeQuery() {
-//		// like查询条件处理
-//		if(StringUtils.isEmpty(this.likesQuery)) {
-//			try {
-//				StringBuffer buf=new StringBuffer();
-//				PropertyDescriptor ps[] = BeanKit.propertyDescriptors(this.targetClass());
-//				for(PropertyDescriptor p:ps) {
-//					UniQueryLike likeQuery=BeanKit.getAnnotation(this.targetClass(), p.getName(),UniQueryLike.class);
-//					if(likeQuery!=null) {
-//						buf.append(" AND ").append(p.getName());
-//						switch (likeQuery.value()) {
-//						case LEFT:
-//							buf.append(" LIKE [%").append(p.getName()).append("]");
-//							break;
-//						case RIGHT:
-//							buf.append(" LIKE [").append(p.getName()).append("%]");
-//							break;
-//						default:
-//							buf.append(" LIKE [%").append(p.getName()).append("%]");
-//							break;
-//						}
-//					}
-//				}
-//				if(buf.length()>0) {
-//					this.likesQuery=buf.toString();
-//				}
-//			} catch (IntrospectionException e) {
-//			}
-//		}	
-//		if(!StringUtils.isEmpty(this.likesQuery)) {
-//			if(StringUtils.isEmpty(this.where)) {
-//				this.where=this.likesQuery;
-//			}else {
-//				this.where=String.format("%s %s",this.where, this.likesQuery);
-//			}
-//		}
-//	}
-//	
-//	private void processNormalQuery() {
-//		if(StringUtils.isEmpty(this.normalQuery)) {
-//			List<String> idCols = classDesc.getIdCols();
-//			Iterator<String> cols = classDesc.getInCols().iterator();
-//			Iterator<String> properties = classDesc.getAttrs().iterator();
-//			StringBuffer buffer=new StringBuffer();
-//			
-//			while (cols.hasNext() && properties.hasNext()) {
-//				String col = cols.next();
-//				String prop = properties.next();
-//				if (idCols.contains(col)) {
-//					// 主键字段，忽略
-//					continue;
-//				}
-//				UniQueryLike likeQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryLike.class);
-//				if(likeQuery!=null) {
-//					// 该字段已设置like查询，忽略
-//					continue;
-//				}
-//				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryIgnore.class);
-//				if(ignorQuery!=null) {
-//					// 该字段已设置Ignore，忽略
-//					continue;
-//				}
-//				
-//				// 如果是机构编码，则使用右模糊查询
-//				if(col.equals(BaseField.ORGAN_CODE.column())) {
-//					buffer.append("AND ").append(col).append(" LIKE ").append("[").append(prop).append("%] ");
-//					continue;
-//				}
-//				
-//				UniQueryAction actionQuery=BeanKit.getAnnotation(this.targetClass(), prop,UniQueryAction.class);
-//				ACTION action=ACTION.EQ;
-//				if(actionQuery!=null) {
-//					action=actionQuery.value();
-//				}
-//				buffer.append("AND ").append(col).append(action.express()).append("[").append(prop).append("] ");
-//			}
-//			if(buffer.length()>0) {
-//				this.normalQuery=buffer.substring(4);
-//			}
-//		}
-//		if(!StringUtils.isEmpty(this.normalQuery)) {
-//			if(StringUtils.isEmpty(this.where)) {
-//				this.where=this.normalQuery;
-//			}else {
-//				this.where=String.format("%s AND %s",this.where, this.normalQuery);
-//			}
-//		}
-//	}
 	
 	/**
 	 * Sql Where 处理
 	 */
 	private void processCondition() {
-		if(!StringUtils.isEmpty(this.sql) || StringUtils.isEmpty(this.where)) {
+		if(!StringUtils.isEmpty(this.entity.getSql()) || StringUtils.isEmpty(this.where)) {
 			return;
 		}
 		
@@ -711,7 +503,7 @@ public class SqlBuilder<T> {
 	}
 	
 	public SqlBuilder<T> query(String sql){
-		this.sql=sql;
+		this.entity.setSql(sql);
 		return this;
 	}
 	
@@ -725,6 +517,18 @@ public class SqlBuilder<T> {
 		return this;
 	}
 	
+	public SqlBuilder<T> needCount(boolean needCount){
+		this.needCount=needCount;
+		return this;
+	} 
+	
+	public SqlBuilder<T> setId(Object id) {
+		SqlField pkField=this.entity.getPkField();
+		AssertUtil.database().notNull(pkField, "主键字段不能为空");
+		BeanUtil.setFieldValue(this.params, pkField.getAlias(),id);
+		return this;
+	}
+	
 	public SqlBuilder<T> page(long page){
 		this.page=page;
 		return this;
@@ -735,121 +539,10 @@ public class SqlBuilder<T> {
 		return this;
 	} 
 	
-	public SqlBuilder<T> needCount(boolean needCount){
-		this.needCount=needCount;
-		return this;
-	} 
-	
 	public long getStart() {
 		return (page - 1) * pageSize;
 	}
 	
-	public Object getId() {
-		SqlField pkField=this.entity.getPkField();
-		AssertUtil.database().notNull(pkField, "主键字段不能为空");
-		return BeanUtil.getFieldValue(this.params, pkField.getAlias());
-	}
-	public SqlBuilder<T> setId(Object id) {
-		SqlField pkField=this.entity.getPkField();
-		AssertUtil.database().notNull(pkField, "主键字段不能为空");
-		BeanUtil.setFieldValue(this.params, pkField.getAlias(),id);
-		return this;
-	}
-	
-	public Object getTenantId() {
-		return BeanUtil.getFieldValue(this.params, BaseField.TENANT_ID.name());
-	}
-	public Object getOrgId() {
-		return BeanUtil.getFieldValue(this.params, BaseField.ORGAN_ID.name());
-	}
-	public Object getUserId() {
-		return BeanUtil.getFieldValue(this.params, BaseField.USER_ID.name());
-	}
-	
-	
-	public static class Sort implements Serializable{
-		private static final long serialVersionUID = -762743521517102143L;
-		
-		@Getter
-		private String name;
-		@Getter
-		private String order="DESC";
-		
-		private Sort(String name,String order) {
-			this.setName(name);
-			this.setOrder(order);
-		}
-		
-		public static Sort build(String name) {
-			return new Sort(name,null);
-		}
-		public static Sort build(String name,String order) {
-			return new Sort(name,order);
-		}
-		
-		/**
-		 * 	构建排序信息
-		 * @param sorts	eg: age desc,name
-		 * @return
-		 */
-		public static Sort[] builds(String sorts){
-			String tt[]=sorts.split(",");
-			List<Sort> list=Arrays.asList(tt).stream().map(s->{
-				String t[]=s.replaceAll("  ", " ").split(" ");
-				if(t.length==1) {
-					return new Sort(t[0], null);
-				}else if(t.length==2) {
-					return new Sort(t[0], t[1]);
-				}
-				return null;
-			}).filter(r->r!=null).collect(Collectors.toList());
-			return list.isEmpty()?null:list.toArray(new Sort[list.size()]);
-		}
-		
-		private void setName(String name) {
-			if(name!=null && name.matches("[a-z\\_A-Z]*$")) {
-				if(name.matches("[A-Z\\_]*$")) {
-					this.name=name;
-				}else {
-					this.name=name.replaceAll("[A-Z]", "_$0").toUpperCase();
-				}
-			}
-		}
-		
-		private void setOrder(String order) {
-			if(order!=null && order.matches("^(?i)(desc|asc)$")) {
-				this.order=order.toUpperCase();
-			}
-		}
-
-		@Override
-		public String toString() {
-			return String.format("%s %s",this.name, this.order);
-		}
-		
-		public static String use(Sort[] sorts) {
-			StringBuffer buf=new StringBuffer();
-			for(int i=0;i<sorts.length;i++) {
-				buf.append(sorts[i]);
-				if(i<(sorts.length-1)) {
-					buf.append(",");
-				}
-			}
-			return buf.toString();
-		}
-		
-	}
-	
-	public static enum SqlType{
-		INSERT,UPDATE,UPDATE_BYID,SELECT,COUNT,DELETE,DELETE_BYID
-	}
-	
-//	public static void main(String[] args) {
-//		SqlBuilder<UserPrincipal> builder=SqlBuilder.build(new UserPrincipal())
-//				.field("id,name,sex,age")
-//				.where("name =? and age> ? and realname like ? and time > #{timeBegin} and time<= #{timeEnd}");
-//		System.out.println(builder.countSql());
-//	}
 	
 	
 }

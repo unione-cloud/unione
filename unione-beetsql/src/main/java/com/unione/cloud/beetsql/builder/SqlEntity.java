@@ -12,6 +12,13 @@ import lombok.Data;
 @Data
 public class SqlEntity {
 	
+	private String sql;
+	
+	/**
+	 * schema name
+	 */
+	private String schema;
+	
 	/**
 	 * table or view name
 	 */
@@ -21,6 +28,11 @@ public class SqlEntity {
 	 * 	查询字段列表，为空则是 *
 	 */
 	private List<SqlField> fields=new ArrayList<>();
+	
+	/**
+	 * 	当前table拥有的集成字段名称集合
+	 */
+	private List<SqlField> baseFields=new ArrayList<>();
 	
 	/**
 	 * 	查询条件集合
@@ -35,7 +47,7 @@ public class SqlEntity {
 	
 	public List<String> getFieldList(){
 		if(this.fields==null || this.fields.isEmpty()) {
-			return Arrays.asList("*");
+			return new ArrayList<>();
 		}
 		return this.fields.stream().map(field->{
 			if(StringUtils.isEmpty(field.getAlias())) {
