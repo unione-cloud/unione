@@ -1,7 +1,5 @@
 package com.unione.cloud.beetsql;
 
-import static org.mockito.ArgumentMatchers.nullable;
-
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,7 +22,6 @@ import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.builder.Sort;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.beetsql.builder.SqlEntity;
-import com.unione.cloud.beetsql.builder.SqlField;
 import com.unione.cloud.beetsql.builder.SqlType;
 import com.unione.cloud.beetsql.builder.Updater;
 import com.unione.cloud.core.dto.Params;
@@ -593,7 +590,8 @@ public class DataBaseDao {
 	 * @return
 	 */
 	private <T> SqlId loadSql(SqlBuilder<T> builder,SqlType type) {
-		SqlId sqlid=SqlId.of(builder.nameSpace(), builder.key(type));
+		builder.init(this.sqlManager);
+		SqlId sqlid=SqlId.of(builder.nameSpace(), builder.sqlId(type));
 		if(this.sqlManager.containSqlId(sqlid)) {
 			return sqlid;
 		}else {
@@ -613,13 +611,13 @@ public class DataBaseDao {
 	
 	
 	private <T> String buildSql(SqlBuilder<T> builder,SqlType type) {
-		SqlEntity sqlEntity = builder.resolve(this.sqlManager);
+		SqlEntity sqlEntity = builder.resolve();
 		if(!StringUtils.isEmpty(sqlEntity.getSql())) {
 			return sqlEntity.getSql();
 		}
 		
 		StringBuffer buffer=new StringBuffer();
-		if("SELECT".equalsIgnoreCase(type.value())) {
+		if(SqlType.SELECT.equals(type)) {
 			buffer.append("SELECT ");
 			
 			// 查询字段处理
@@ -638,7 +636,7 @@ public class DataBaseDao {
 				buffer.append(sqlEntity.getSchema()).append(".");
 			}
 			buffer.append(sqlEntity.getTable()).append(" ");
-		}else if("COUNT".equalsIgnoreCase(type.value())) {
+		}else if(SqlType.COUNT.equals(type)) {
 			buffer.append("SELECT COUNT(*) FROM ");
 			if(!StringUtils.isEmpty(sqlEntity.getSchema())) {
 				buffer.append(sqlEntity.getSchema()).append(".");
@@ -685,8 +683,12 @@ public class DataBaseDao {
 		// where 条件处理
 		if(!StringUtils.isEmpty(sqlEntity.getWhere())) {
 			buffer.append(sqlEntity.getWhere());
-		}else {
-			
+		}else if(!sqlEntity.getConditions().isEmpty()){
+			buffer.append("\n-- @sqlWhere(){\n");
+			sqlEntity.getConditions().stream().forEach(con->{
+				con.toSql(buffer);
+			});
+			buffer.append("-- @}\n");
 		}
 		
 		return buffer.toString();

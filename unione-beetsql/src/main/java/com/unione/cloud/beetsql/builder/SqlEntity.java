@@ -1,7 +1,6 @@
 package com.unione.cloud.beetsql.builder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +22,11 @@ public class SqlEntity {
 	 * table or view name
 	 */
 	private String table;
+	
+	/**
+	 * 	主键字段
+	 */
+	private SqlField pkField;
 	
 	/**
 	 * 	查询字段列表，为空则是 *
@@ -62,17 +66,19 @@ public class SqlEntity {
 	 * @return
 	 */
 	public SqlField getPkField() {
-		SqlField field=null;
+		if(this.pkField!=null) {
+			return this.pkField;
+		}
 		
 		for(int i=0;i<this.fields.size();i++) {
 			SqlField tmp=this.fields.get(i);
 			if(tmp.isPk()) {
-				field=tmp;
+				this.pkField=tmp;
 				break;
 			}
 		}
 		
-		return field;
+		return this.pkField;
 	}
 	
 	

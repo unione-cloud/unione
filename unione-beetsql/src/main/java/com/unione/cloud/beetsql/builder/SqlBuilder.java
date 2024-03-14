@@ -43,7 +43,6 @@ public class SqlBuilder<T> {
 
 	private SQLManager sqlManager;
 	private String nameSpace;
-	private String key;
 	
 	private SqlEntity entity=new SqlEntity();
 	private String where;			// 数据过滤条件定义
@@ -168,7 +167,7 @@ public class SqlBuilder<T> {
 	}
 	
 	
-	public SqlEntity resolve(SQLManager sqlManager) {
+	public void init(SQLManager sqlManager) {
 		this.sqlManager=sqlManager;
 		if(StringUtils.isEmpty(this.tableName)) {
 			this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
@@ -176,9 +175,41 @@ public class SqlBuilder<T> {
 		AssertUtil.service().notNull(this.tableName, "table name不能为空");
 		this.entity.setTable(tableName);
 		
+		SqlField pkField=this.entity.getPkField();
+		if(pkField==null) {
+			TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
+			String idn = tableDesc.getIdNames().iterator().next();
+			pkField=new SqlField();
+			pkField.setAlias(idn);
+			this.entity.setPkField(pkField);
+		}
+	}
+	
+	public SqlEntity resolve() {
 		TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 		ClassDesc classDesc=null;
 		if(!(this.data instanceof Map)) {
+			
+			List<String> fieldLists=new ArrayList<>();
+			if(this.fieldList!=null && this.fieldList.length>0) {
+				String[] list=this.fieldList;
+				if(fieldList.length==1 && fieldList[0].indexOf(",")>0) {
+					list=fieldList[0].split(",");
+				}
+				for(int i=0;i<list.length;i++) {
+					String column=list[i].trim(); 
+					Integer asIndex = column.toUpperCase().indexOf(" AS ");
+					if(asIndex > 0) {
+						String alias = column.substring(asIndex+4);
+						column=column.substring(0, asIndex);
+						fieldLists.add(alias);
+						fieldLists.add(column);
+					}else {
+						fieldLists.add(column);
+					}
+				}
+			}
+			
 			// 如果是model sql操作
 			classDesc = tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
 			List<String> idCols = classDesc.getIdCols();
@@ -191,10 +222,23 @@ public class SqlBuilder<T> {
 				if(idCols.contains(field.getColumn())) {
 					field.setPk(true);
 					this.pkField=field.getColumn();
+				}else if(StringUtils.isEmpty(this.pkField)) {
+					if(ObjectUtil.equal(this.pkField, field.getColumn()) || 
+							ObjectUtil.equal(this.pkField, field.getAlias())) {
+						field.setPk(true);
+					}
 				}
+				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
 				field.setType(pd.getPropertyType().getSimpleName());
-				this.entity.getFields().add(field);
+				
+				if(!fieldLists.isEmpty()) {
+					if(field.isPk() || fieldLists.contains(field.getAlias()) || fieldLists.contains(field.getColumn())) {
+						this.entity.getFields().add(field);
+					}
+				}else {
+					this.entity.getFields().add(field);
+				}
 			}
 			
 		}else {
@@ -214,7 +258,8 @@ public class SqlBuilder<T> {
 						field.setAlias(alias);
 					}
 					field.setColumn(column);
-					if(ObjectUtil.equal(this.pkField, column)) {
+					if(ObjectUtil.equal(this.pkField, field.getColumn()) || 
+							ObjectUtil.equal(this.pkField, field.getAlias())) {
 						field.setPk(true);
 					}
 					this.entity.getFields().add(field);
@@ -323,14 +368,10 @@ public class SqlBuilder<T> {
 		return this.nameSpace;
 	}
 	
-	public String key(SqlType type) {
-		if(!StringUtils.isEmpty(this.key)) {
-			return this.key;
-		}
+	public String sqlId(SqlType type) {
 		StackTraceElement stes[]=ThreadUtil.getStackTrace();
 		StackTraceElement ste=stes[5];
-		this.key=String.format("%s.%s.%s",ste.getMethodName(),type,ste.getLineNumber());
-		return this.key;
+		return String.format("%s.%s.%s",ste.getMethodName(),type,ste.getLineNumber());
 	}
 	
 	public Map<String, Object> toParams(){
