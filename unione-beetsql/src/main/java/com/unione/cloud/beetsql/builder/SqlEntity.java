@@ -49,17 +49,17 @@ public class SqlEntity {
 	private String where;
 	
 	
-	public List<String> getFieldList(){
-		if(this.fields==null || this.fields.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return this.fields.stream().map(field->{
-			if(StringUtils.isEmpty(field.getAlias())) {
-				return StringUtils.trim(field.getColumn());
-			}
-			return String.format("%s AS %s", StringUtils.trim(field.getColumn()),StringUtils.trim(field.getAlias()));
-		}).collect(Collectors.toList());
-	}
+//	public List<String> getFieldList(){
+//		if(this.fields==null || this.fields.isEmpty()) {
+//			return new ArrayList<>();
+//		}
+//		return this.fields.stream().map(field->{
+//			if(StringUtils.isEmpty(field.getAlias())) {
+//				return StringUtils.trim(field.getColumn());
+//			}
+//			return String.format("%s AS %s", StringUtils.trim(field.getColumn()),StringUtils.trim(field.getAlias()));
+//		}).collect(Collectors.toList());
+//	}
 	
 	/**
 	 * 	获取主键字段

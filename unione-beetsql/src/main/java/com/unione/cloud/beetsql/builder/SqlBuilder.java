@@ -25,6 +25,7 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.BaseField;
+import com.unione.cloud.core.model.BaseField.StsField;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -82,6 +83,7 @@ public class SqlBuilder<T> {
 	private Pattern inRegix=Pattern.compile("(^IN$)|(^NOT IN$)",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	
+	private boolean initComplete;
 	
 	private SqlBuilder() {}
 	
@@ -183,9 +185,14 @@ public class SqlBuilder<T> {
 			pkField.setAlias(idn);
 			this.entity.setPkField(pkField);
 		}
+		
+		if(!this.initComplete) {
+			this.initComplete=true;
+			this.resolve();
+		}
 	}
 	
-	public SqlEntity resolve() {
+	private void resolve() {
 		TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 		ClassDesc classDesc=null;
 		if(!(this.data instanceof Map)) {
@@ -228,6 +235,9 @@ public class SqlBuilder<T> {
 						field.setPk(true);
 					}
 				}
+				
+				StsField stsField=BaseField.isBaseColume(field.getColumn());
+				field.setStsField(stsField);
 				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
 				field.setType(pd.getPropertyType().getSimpleName());
@@ -347,10 +357,95 @@ public class SqlBuilder<T> {
 			this.entity.getConditions().addAll(normalConditions);
 		}
 		
-		return entity;
 	}
 	
-	
+	public String toSql(SqlType type) {
+		
+		if(!StringUtils.isEmpty(this.entity.getSql())) {
+			return this.entity.getSql();
+		}
+		boolean isJavaBean=!(this.data instanceof Map);
+		
+		StringBuffer buffer=new StringBuffer();
+		if(SqlType.SELECT.equals(type)) {
+			buffer.append("SELECT ");
+			
+			// 查询字段处理
+			StringBuffer fieldBuf=new StringBuffer();
+			this.entity.getFields().stream().forEach(field->{
+				fieldBuf.append(",").append(field.getColumn());
+				if(!isJavaBean && !StringUtils.isEmpty(field.getAlias())) {
+					fieldBuf.append(" AS ").append(field.getAlias());
+				}
+			});
+			if(fieldBuf.length()==0) {
+				buffer.append("* FROM ");
+			}else {
+				buffer.append(fieldBuf.substring(1)).append(" FROM ");
+			}
+			
+			// 查询表名称处理
+			if(!StringUtils.isEmpty(this.entity.getSchema())) {
+				buffer.append(this.entity.getSchema()).append(".");
+			}
+			buffer.append(this.entity.getTable()).append(" ");
+		}else if(SqlType.COUNT.equals(type)) {
+			buffer.append("SELECT COUNT(*) FROM ");
+			if(!StringUtils.isEmpty(this.entity.getSchema())) {
+				buffer.append(this.entity.getSchema()).append(".");
+			}
+			buffer.append(this.entity.getTable()).append(" ");
+		}else if("UPDATE".equalsIgnoreCase(type.value())) {
+			buffer.append("UPDATE ");
+			if(!StringUtils.isEmpty(this.entity.getSchema())) {
+				buffer.append(this.entity.getSchema()).append(".");
+			}
+			buffer.append(this.entity.getTable()).append(" SET \n")
+			.append("-- @sqlTrim(){\n");
+			
+			this.entity.getFields().stream().forEach(field->{
+				if(field.getStsField()!=null && (BaseField.LAST_UPDATED.name().equals(field.getStsField().name()) || 
+						BaseField.LAST_UPDATED_BY.name().equals(field.getStsField().name()))) {
+					return;
+				}
+				buffer.append("-- @if(isNotEmpty(fields.").append(field.getAlias()).append(")){\n")
+				      .append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("},\n")
+				      .append("-- @}\n");
+			});
+			
+			StringBuffer lastUpBuf=new StringBuffer();
+			this.entity.getBaseFields().stream().forEach(field->{
+				if(BaseField.LAST_UPDATED.name().equals(field.getStsField().name()) || 
+						BaseField.LAST_UPDATED_BY.name().equals(field.getStsField().name())) {
+					lastUpBuf.append(",").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n");
+				}
+			});
+			if(lastUpBuf.length()>0) {
+				buffer.append(lastUpBuf.substring(1));
+			}
+			
+			buffer.append("-- @}\n");
+		}else if("DELETE".equalsIgnoreCase(type.value())) {
+			buffer.append("DELETE FROM ");
+			if(!StringUtils.isEmpty(this.entity.getSchema())) {
+				buffer.append(this.entity.getSchema()).append(".");
+			}
+			buffer.append(this.entity.getTable()).append(" ");
+		}
+		
+		// where 条件处理
+		if(!StringUtils.isEmpty(this.entity.getWhere())) {
+			buffer.append(this.entity.getWhere());
+		}else if(!this.entity.getConditions().isEmpty()){
+			buffer.append("\n-- @sqlWhere(){\n");
+			this.entity.getConditions().stream().forEach(con->{
+				con.toSql(buffer);
+			});
+			buffer.append("-- @}\n");
+		}
+		
+		return buffer.toString();
+	}
 	
 	public Class<?> targetClass(){
 		return this.data.getClass();

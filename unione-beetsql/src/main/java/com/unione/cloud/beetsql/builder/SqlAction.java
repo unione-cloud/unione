@@ -1,27 +1,31 @@
 package com.unione.cloud.beetsql.builder;
 
 public enum SqlAction {
-	EQ(" = ","#{%s}"),NEQ("!=","#{params.%s}"),
-	LT(" < ","#{%s}"),LTE("<=","#{params.%s}"),
-	GT(" > ","#{%s}"),GTE(">=","#{params.%s}"),
-	IN(" IN ","(#{join(params.%s)})"),
-	NIN(" NOT IN ","(#{join(params.%s)})"),
-	LIKE(" LIKE ","#{'%'+params.%s+'%'}"),
-	LIKER(" LIKE ","#{params.%s+'%'}"),
-	LIKEL(" LIKE ","#{'%'+params.%s}");
+	EQ(" = ","#{params.","}"),NEQ("!=","#{params.","}"),
+	LT(" < ","#{params.","}"),LTE("<=","#{params.","}"),
+	GT(" > ","#{params.","}"),GTE(">=","#{params.","}"),
+	IN(" IN ","(#{join(params.",")})"),
+	NIN(" NOT IN ","(#{join(params.",")})"),
+	LIKE(" LIKE ","#{'%'+params.","+'%'}"),
+	LIKER(" LIKE ","#{params.","+'%'}"),
+	LIKEL(" LIKE ","#{'%'+params.","}");
 	
-	private SqlAction(String action,String express) {
+	private SqlAction(String action,String prefix,String sufix) {
 		this.action=action;
-		this.express=express;
+		this.prefix=prefix;
+		this.sufix=sufix;
 	}
 	
 	private String action;
-	private String express;
+	private String prefix;
+	private String sufix;
 	
 	public String getAction() {
 		return action;
 	}
 	public String express(String field) {
-		return String.format(express, field);
+		return String.format("%s%s%s",prefix, field,sufix);
 	}
+	
+	
 }
