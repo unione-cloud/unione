@@ -37,7 +37,7 @@ public class SqlCondition {
 		if(this.childrens==null || this.childrens.isEmpty()) {
 			buffer.append("-- @if(varNotNull(params.").append(this.name).append(")){\n")
 				  .append(this.fun.name()).append(" ")
-				  .append(this.column).append(this.action.express(this.name)).append("\n")
+				  .append(this.column).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
 				  .append("-- @}\n");
 		}else {
 			buffer.append("-- @sqlTrim(){\n")

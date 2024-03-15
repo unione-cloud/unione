@@ -45,8 +45,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		LogsUtil.set(LogType.Query, "查询系统用户列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(params);
-		Results<List<SysUser>> results = dataBaseDao.findPages(sqlBuilder);
+		Results<List<SysUser>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 				
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());

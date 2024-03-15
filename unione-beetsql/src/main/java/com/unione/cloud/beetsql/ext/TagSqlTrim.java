@@ -20,6 +20,10 @@ public class TagSqlTrim extends TrimTag {
 				if(this.isSqlBlank(sql)) {
 					return;
 				}
+				String tmp=sql.replaceAll("\\s", "");
+				if("AND()".equalsIgnoreCase(tmp) || "OR()".equalsIgnoreCase(tmp)) {
+					return;
+				}
 				
 				String prefix="",suffix="";
 				if(sql.startsWith("(") && sql.endsWith(")")) {

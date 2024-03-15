@@ -137,7 +137,7 @@ public class SqlBuilder<T> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(Params<T> params) {
 		SqlBuilder<T> buildr=new SqlBuilder(params.getBody());
-		buildr.page(params.getPage()).pageSize(params.getPageSize());
+		buildr.page(params.getPage()).pageSize(params.getPageSize()).needCount(params.isNeedCount());
 		return buildr;
 	}
 	
