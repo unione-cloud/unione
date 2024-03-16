@@ -5,25 +5,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.redis.UniOneJedisConnectionConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.UniOneLettuceConnectionConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.JedisClientConfigurationBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisSentinelConfiguration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -44,7 +31,6 @@ import com.unione.cloud.core.exception.ServiceException;
  * @version 1.0.0
  */
 @Configuration
-@EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfig {
 
 	private Logger log = LoggerFactory.getLogger(RedisConfig.class);
@@ -61,26 +47,8 @@ public class RedisConfig {
 	@SuppressWarnings("rawtypes")
 	private RedisTemplate redisTemplate;
 
-	@Autowired
-	private RedisProperties redisProperties;
 	
-	@Value("${spring.redis.client-type:lettuce}")
-	private String redisClientType;
-	
-	@Autowired
-	private ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider;
-	@Autowired
-	private ObjectProvider<RedisSentinelConfiguration> sentinelConfiguration;
-	@Autowired
-	private ObjectProvider<RedisClusterConfiguration> clusterConfiguration;
-	@Autowired
-	private ObjectProvider<ClientResourcesBuilderCustomizer> customizers;
-	@Autowired
-	private ObjectProvider<LettuceClientConfigurationBuilderCustomizer> builderCustomizers;
-	@Autowired
-	private ObjectProvider<JedisClientConfigurationBuilderCustomizer> jedisBuilderCustomizers;
-	
-	@SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "deprecation", "unchecked", "null" })
 	@PostConstruct
 	public void postConstruct() {
 		// 默认redis库处理
@@ -109,6 +77,7 @@ public class RedisConfig {
 		
 	}
 
+	@SuppressWarnings("null")
 	@Bean(destroyMethod = "destroy")
 	public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -138,7 +107,7 @@ public class RedisConfig {
 	 * @param db
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation", "null" })
 	public RedisTemplate<String, Object> getRedisTmpls(int db) {
 		try {
 			if (redisTmplMap.get(db) != null) {
@@ -146,22 +115,21 @@ public class RedisConfig {
 			}
 
 			synchronized (redisTmplMap) {
-				RedisProperties props = new RedisProperties();
-				BeanUtils.copyProperties(props,redisProperties);
-				props.setDatabase(db);
-				
 				RedisTemplate<String, Object> tmpls = new RedisTemplate<>();
-				
-				if("lettuce".equalsIgnoreCase(redisClientType)) {
-					UniOneLettuceConnectionConfiguration config = new UniOneLettuceConnectionConfiguration(props,
-							standaloneConfigurationProvider, sentinelConfiguration, clusterConfiguration);
-					RedisConnectionFactory redisConnectionFactory = config.redisConnectionFactory(builderCustomizers,customizers);
-					tmpls.setConnectionFactory(redisConnectionFactory);
-				}else {
-					UniOneJedisConnectionConfiguration config = new UniOneJedisConnectionConfiguration(props,
-							standaloneConfigurationProvider, sentinelConfiguration, clusterConfiguration);
-					RedisConnectionFactory redisConnectionFactory = config.redisConnectionFactory(jedisBuilderCustomizers);
-					tmpls.setConnectionFactory(redisConnectionFactory);
+				RedisConnectionFactory connectionFactory = redisTemplate.getConnectionFactory();
+				if(connectionFactory instanceof LettuceConnectionFactory){
+					LettuceConnectionFactory lettuceConnectionFactory=(LettuceConnectionFactory)connectionFactory;
+					LettuceConnectionFactory newConnectionFactory=null;
+					if(lettuceConnectionFactory.getClusterConfiguration()!=null){
+						newConnectionFactory=new LettuceConnectionFactory(lettuceConnectionFactory.getClusterConfiguration());
+					}else{
+						newConnectionFactory=new LettuceConnectionFactory(lettuceConnectionFactory.getStandaloneConfiguration());
+					}
+					newConnectionFactory.setDatabase(db);
+					newConnectionFactory.afterPropertiesSet();
+					tmpls.setConnectionFactory(newConnectionFactory);
+				}else{
+					throw new ServiceException("当前版本不支持Jedis");
 				}
 				
 				RedisSerializer<String> stringSerializer = new StringRedisSerializer();
@@ -193,13 +161,17 @@ public class RedisConfig {
 	 * @param db
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public RedisMessageListenerContainer getRedisMessageListener(int db) {
 		if(redisListenerMap.get(db)!=null) {
 			return redisListenerMap.get(db);
 		}
 		synchronized(redisListenerMap) {
+			if(getRedisTmpls(db)==null){
+				throw new ServiceException(String.format("RedistTemplate获取失败,db:%s", db));
+			}
 			RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-			container.setConnectionFactory((RedisConnectionFactory)getRedisTmpls(db));
+			container.setConnectionFactory(getRedisTmpls(db).getConnectionFactory());
 			redisListenerMap.put(db, container);
 			return container;
 		}

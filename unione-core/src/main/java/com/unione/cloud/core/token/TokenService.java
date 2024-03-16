@@ -52,14 +52,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RefreshScope
 public class TokenService{
-	
+
 	/**
 	 * 	请求信息token名称
 	 */
 	@Value("${security.jwt.token:token}")
 	private String REQUEST_TOKEN;
 	
-	@Value("${security.jwt.secret:com.unione.cloud.token}")
+	@Value("${security.jwt.secret:com.aifa.mins.token}")
     private String JWT_SECRET;
 
     @Value("${security.jwt.expires:3600}")
@@ -72,21 +72,15 @@ public class TokenService{
     private Integer JWT_ISSUED_OFFSET;
     
 
-    @Value("${security.jwt.issuer:unione-cloud}")
+    @Value("${security.jwt.issuer:mins-token}")
     private String JWT_ISSUER;
-    
-    /**
-     * 	自动刷新开关（统一在gateway中开启，其他服务中关闭）
-     */
-    @Value("${security.jwt.autoEnable:true}")
-    private boolean autoEnable;
-    
-    /**
-     * 	token自动续期时间（默认：token过期前10分钟）
-     */
-    @Value("${security.jwt.autoTime:10}")
-    private int autoLiteTime;
 
+    /**
+	 * 	Token Center Manage 令牌中心化管理:开关，默认关闭
+	 */
+    @Value("${security.tcm.enable:false}")
+	private boolean tcmEnable;
+    
     /**
      * 	Token Center Manage 令牌中心化管理，redis 数据库，默认：10
      */
@@ -99,24 +93,35 @@ public class TokenService{
     @Value("${security.tcm.key:TOKEN}")
     private String tcmKey;
     
+    /**
+     * 	Token Center Manage 令牌中心化管理，自动刷新（统一在gateway中开启，其他服务中关闭）
+     */
+    @Value("${security.tcm.autoEnable:false}")
+    private boolean tcmAutoEnable;
+    
+    /**
+     * 	Token Center Manage 令牌中心化管理，token自动续期时间（默认：token过期前10分钟）
+     */
+    @Value("${security.tcm.lifetime:10}")
+    private int tcmAutoLiteTime;
+    
     
     /**
      * Redis 服务
      */
-    @Autowired
+    @Autowired(required=false)
     private RedisService redisService;
     
     private JWTVerifier jwtv;
-    
     
     private SM4 sm4;
     @Value("${security.sm4.key:hTXU0apMnNy38q1zb65FlQ==}")
     public void setKey(String key) {
     	sm4=SmUtil.sm4(Base64.decode(key.getBytes()));
     }
-    
-    
+	
     /**
+     * 	
      * @param principal
      * @return
      */
@@ -148,7 +153,7 @@ public class TokenService{
 			
 			return builder.sign(algorithm);
 		} catch (Exception e) {
-			log.error("token生成失败,user name:{},sid:{}",principal.getUsername(),principal.getId(),e);
+			log.error("token生成失败,user name:{},id:{}",principal.getUsername(),principal.getId(),e);
 			throw new ServiceException("token生成失败",e);
 		}
     }
@@ -204,8 +209,8 @@ public class TokenService{
 				response.addCookie(ck);
 			}
 		}
-          	
-    	log.debug("退出服务:根据 principal 生成token,principal:{},token:{}",principal,token);
+    	
+    	log.debug("退出服务:根据 principal 生成token,tcmEnable:{},principal:{},token:{}",tcmEnable,principal,token);
     	return token;
     }
     
@@ -240,8 +245,7 @@ public class TokenService{
 		}
     }
     
-    
-	/**
+    /**
      * 	获取有效的认证token
      * @param token
      * @return	
@@ -264,7 +268,6 @@ public class TokenService{
 		}
     	return token;
     }
-    
     
     /**
      * 	判断token是否为中心化管理令牌
@@ -346,7 +349,7 @@ public class TokenService{
     	UserPrincipal principal=null;
     	String origToken=token;
     	
-		// token中心化管理，token长度大于120则是未进行token签名的原生jwt令牌
+		// token中心化管理，token长度大于100则是未进行token签名的原生jwt令牌
     	if(token.length()<120){
     		try {
 				String username=sm4.decryptStr(token).split("@")[0];
@@ -368,6 +371,7 @@ public class TokenService{
 	    		jwtv = JWT.require(Algorithm.HMAC256(JWT_SECRET)).build();
 	    	}
 	        DecodedJWT jwt = null;
+	
 	        try {
 	            jwt=jwtv.verify(token);
 	        } catch (Exception e) {
@@ -382,11 +386,11 @@ public class TokenService{
 	            log.error("token验证失败，uri:{},token:{}",uri,token,e);
 	            return null;
 	        }
-	       
+	        
 	        // 解析payload
 	        String payload = jwt.getPayload();
 	        if(StringUtils.isEmpty(payload)){
-	            log.error("token信息异常，payload不能为空,token:{}",token);
+	            log.error("用户信息不能为空,token:{}",token);
 	            return null;
 			}
 			
@@ -404,9 +408,9 @@ public class TokenService{
             principal=mapper.readValue(map.get("principal").toString(), UserPrincipal.class);
             
             // 如果是开启了自动续期，则在token过期前自动续期
-            if(autoEnable){
+            if(tcmAutoEnable){
             	long timelife = jwt.getExpiresAt().getTime()-System.currentTimeMillis();
-            	if(timelife<=(autoLiteTime*60*1000)) {
+            	if(timelife<=(tcmAutoLiteTime*60*1000)) {
             		String newToken=transform(principal);
             		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
             		TcmEntry tcm=TcmEntry.builder()
@@ -429,14 +433,17 @@ public class TokenService{
 
         return principal;
     }
-    
-    
+
+    /**
+     * token MD5签名
+     * @param token
+     * @return
+     */
     private String signature(String username,String token) {
     	token=String.format("%s@%s",username,DigestUtil.md5Hex(token));
     	return sm4.encryptBase64(token);
     }
-
-    
+        
     @Data
     @Builder
     @NoArgsConstructor
@@ -464,7 +471,4 @@ public class TokenService{
     	 */
     	private Long   times;
     }
-    
-    
-    
 }
