@@ -13,7 +13,6 @@ local.properties
 .project
 .class
 target
-.vscode
 
 # External tool builders
 .externalToolBuilders/
