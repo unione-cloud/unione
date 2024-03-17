@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Data;
 
 /**
@@ -61,17 +59,13 @@ public class UserPrincipal implements Serializable {
 	 */
 	private String aliasName;
 	/**
-	 * 头像
-	 */
-	private String avatar;
-	/**
 	 * 用户类型
 	 */
 	private Integer userType;
-	/**
-	 * 用户状态
-	 */
-	private Integer status;
+	// /**
+	//  * 用户状态
+	//  */
+	// private Integer status;
 	/**
 	 * 上次登录IP
 	 */

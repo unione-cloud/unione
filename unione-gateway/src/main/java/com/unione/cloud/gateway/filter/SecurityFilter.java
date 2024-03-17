@@ -146,6 +146,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 		super(Config.class);
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public GatewayFilter apply(Config config) {
 		return ($exchange, chain) -> {
@@ -221,7 +222,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 							log.error("token签名验证失败,signature input:{},sign:{}",principal.getAttr().get("signature"),signature);
 							log.error("token info username:{},ip:{}",principal.getUsername(),ip);
 							
-							SessionHolder.setToken(tokenService.getAuthToken(token));
+							SessionHolder.setToken(token);
 							LogsUtil.set(LogType.Token, "token签名验证失败");
 							LogsUtil.setTarget(principal.getId());
 							LogsUtil.setIp(ip);
@@ -229,7 +230,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 							LogsUtil.add("token签名验证失败，用户username:%s,的token被非法获取并使用,非法使用ip:%s",principal.getUsername(),ip);
 							LogsUtil.add("当前请求url：%s",requestUri);
 							LogsUtil.add("当前请求token：%s",token);
-							LogsUtil.add("当前请求reale token：%s",tokenService.getAuthToken(token));
+							LogsUtil.add("当前请求reale token：%s",token);
 							LogsUtil.add("当前请求signature：%s",signature);
 							LogsUtil.add("当前请求isFeignReq：%s",isFeignReq);
 							LogsUtil.failure();
@@ -267,7 +268,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 						// 成功获取到authCode，则必定成功获取principal对象，否则第三方认证对接失败
 						principal=realm.doGetAuthentication(authCode,request,response);
 						if(principal!=null) {
-							token = tokenService.build4auth(principal);
+							token = tokenService.build4auth(principal,authCode);
 							log.debug("第三方认证接入，首次进行认证，realm name:{},auth code:{},认证成功,token:{}",rlName,authCode,token);
 							
 							// 添加token到header
@@ -294,7 +295,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 						}
 					}
 				}
-			}else if(!StringUtils.isEmpty(realmName) && config.thirdRealms.size()>0){
+			}else if(principal!=null && !StringUtils.isEmpty(realmName) && config.thirdRealms.size()>0){
 				// 根据 realmName 获得 realm 实例
 				AbstractAuthRealm realm=SpringCtxUtil.getBean(realmName);
 				String authCode = realm.getAuthCode(request,response);
@@ -303,7 +304,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 					log.warn("当前用户的第三方授权code和当前请求的授权code不一致，则使用当前授权code重现认证,realm name:{},current auth code:{},new auth code:{}");
 					principal=realm.doGetAuthentication(authCode,request,response);
 					if(principal!=null) {
-						token = tokenService.build4auth(principal);
+						token = tokenService.build4auth(principal,authCode);
 						log.warn("使用当前授权code重现认证成功,token:{}",token);
 						
 						// 添加token到header
@@ -413,6 +414,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 * @param exchange
 	 * @param config
 	 */
+	@SuppressWarnings("null")
 	protected void after(ServerWebExchange exchange,Config config) {
 		HttpStatus httpStatus=exchange.getResponse().getStatusCode();
 		if (!exchange.getResponse().isCommitted()&& httpStatus.isError()) {
@@ -442,6 +444,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 * @param config
 	 * @param token
 	 */
+	@SuppressWarnings("null")
 	protected void afterThirdAuth(ServerWebExchange exchange,Config config,String token) {
 		ServerHttpResponse response = exchange.getResponse();
 		// 设置 token cookie
@@ -467,6 +470,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 * @param result
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	protected Mono<Void> writeResult(ServerHttpResponse response, Results<?> result) {
 		// 设置状态码
 		response.setStatusCode(HttpStatus.valueOf(result.getCode()));
@@ -491,6 +495,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 * @param token
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	protected Mono<Void> writePrincipal(Config config,ServerHttpResponse response,UserPrincipal principle,String token){
       
             HashMap<String, Object> result = new HashMap<>();
@@ -521,11 +526,12 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 * @param remoteAddress
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	protected ServerWebExchange setRequestHeader(ServerWebExchange exchange,Config config, String token,
 			String remoteAddress) {
 		// 添加当前用户信息到header
 		Builder reqBuilder = exchange.getRequest().mutate()
-				.header(config.getTokenName(), tokenService.getAuthToken(token))
+				.header(config.getTokenName(), tokenService.getTcm(token).getToken())
 				.header("RemoteAddress", remoteAddress);
 		return exchange.mutate().request(reqBuilder.build()).build();
 	}

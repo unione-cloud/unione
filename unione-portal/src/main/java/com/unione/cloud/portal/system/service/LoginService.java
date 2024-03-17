@@ -53,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
  * @日期	2023年9月23日 下午11:29:27
  * @版本	1.0.0
  */
+@SuppressWarnings("deprecation")
 @Slf4j
 @Service
 @RefreshScope
@@ -202,7 +203,6 @@ public class LoginService {
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	public Date getLimitTime(String username) {
 		Long limit=null;
 		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
@@ -249,6 +249,7 @@ public class LoginService {
 	 * @param username
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	private int incFailure(String username) {
 		LogsUtil.add("认证失败，累计该帐号失败次数,username:%s",username);
 		
@@ -296,6 +297,7 @@ public class LoginService {
 	 * @param param
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public LoginResult doLogin(LoginParam param) {
 		log.info("进入：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s",param.getUsername(),param.getCaptcha());
@@ -386,7 +388,6 @@ public class LoginService {
 		// 实例化用户认证对象
 		UserPrincipal principal=new UserPrincipal();
 		BeanUtil.copyProperties(user, principal);
-		principal.setAvatar(user.getPortrait());
 		
 		// 加载用户角色
 		SysRole role=new SysRole();
@@ -407,7 +408,7 @@ public class LoginService {
 		LogsUtil.add("更新用户登录信息,user id:%s,len:%s",user.getId(),len);
 		
 		LogsUtil.add("生成认证令牌并返回结果");
-		String token=tokenService.build4auth(principal);
+		String token=tokenService.build4auth(principal,user.getPwdText());
 		return LoginResult.success(token, principal);
 	}
 	

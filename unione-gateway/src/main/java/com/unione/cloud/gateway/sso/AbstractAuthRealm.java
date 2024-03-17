@@ -82,6 +82,7 @@ public abstract class AbstractAuthRealm {
 	 * @param response
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public UserPrincipal doGetAuthentication(String authCode,ServerHttpRequest request, ServerHttpResponse response) {
 		// 获得当前请求用户授权code
 		String realmName = this.getRealmName();

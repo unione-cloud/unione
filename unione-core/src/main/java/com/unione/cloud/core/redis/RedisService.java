@@ -62,14 +62,14 @@ public class RedisService {
 	 * @param key
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void put(String key,Object value) {
 		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		valueOps.set(key, value);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void put(int db, String key,Object value) {
 		log.debug("设置Object数据，db:{},Key:{},value:{}",db,key,value);
 		
@@ -84,13 +84,13 @@ public class RedisService {
 	 * @param value
 	 * @param timeout
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void put(String key,Object value,Duration timeout) {
 		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		valueOps.set(key, value,timeout);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void put(int db, String key,Object value,Duration timeout) {
 		log.debug("设置Object数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -106,13 +106,13 @@ public class RedisService {
 	 * @param timeout
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public boolean putIfAbsent(String key,Object value,Duration timeout) {
 		log.debug("设置Object数据，Key:{}",key);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		return valueOps.setIfAbsent(key, value,timeout);
 	}
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked", "null" })
 	public boolean putIfAbsent(int db, String key,Object value,Duration timeout) {
 		log.debug("设置Object数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -126,13 +126,13 @@ public class RedisService {
 	 * @param key
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putMap(String key,Map<String, ?> value) {
 		log.debug("设置Map数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.putAll(key, value);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putMap(int db, String key,Map<String, ?> value) {
 		log.debug("设置Map数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -146,13 +146,13 @@ public class RedisService {
 	 * @param hashKey
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putMap(String key,String hashKey,Object value) {
 		log.debug("设置Map数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.put(key, hashKey, value);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putMap(int db, String key,String hashKey,Object value) {
 		log.debug("设置Map数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -165,13 +165,13 @@ public class RedisService {
 	 * @param key
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putSet(String key,Object... values) {
 		log.debug("设置set数据，Key:{}",key);
 		SetOperations<String, Object> setOps=redisTemplate.opsForSet();
 		setOps.add(key, values);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putSet(int db, String key,Object... values) {
 		log.debug("设置set数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -185,13 +185,13 @@ public class RedisService {
 	 * @param key
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putList(String key,List<?> value) {
 		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPushAll(key, value);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putList(int db, String key,List<?> value) {
 		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -205,13 +205,13 @@ public class RedisService {
 	 * @param key
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putListValue(String key,Object value) {
 		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.rightPush(key, value);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putListValue(int db, String key,Object value) {
 		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -225,13 +225,14 @@ public class RedisService {
 	 * @param index
 	 * @param value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void putListValue(String key,int index,Object value) {
 		log.debug("设置List数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		listOps.set(key, index, value);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void putListValue(int db, String key,int index,Object value) {
 		log.debug("设置List数据，db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -262,11 +263,11 @@ public class RedisService {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public Long getExpire(String key) {
 		return redisTemplate.getExpire(key);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" , "null"})
 	public Long getExpire(int db,String key) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		return redisTemplate.getExpire(key);
@@ -278,12 +279,12 @@ public class RedisService {
 	 * @param t
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T getObj(String key) {
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
 		return (T)valueOps.get(key);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> T getObj(int db,String key) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
@@ -310,7 +311,7 @@ public class RedisService {
 	 * @param t
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> List<T> getList(String key) {
 		log.debug("获得数据，Key:{}",key);
 		if(redisTemplate!=null) {
@@ -330,13 +331,13 @@ public class RedisService {
 	 * @param index
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T getListValue(String key,int index) {
 		log.debug("获得数据，Key:{}",key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
 		return (T)listOps.index(key, index);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> T getListValue(int db ,String key,int index) {
 		log.debug("获得数据，Key:{}",key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -363,13 +364,13 @@ public class RedisService {
 	 * @param key
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> Map<String, T> getMap(String key) {
 		log.debug("获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (Map<String, T>)hashOps.entries(key);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> Map<String, T> getMap(int db,String key) {
 		log.debug("获得数据，db:{},Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -383,13 +384,13 @@ public class RedisService {
 	 * @param hashKey
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T getMap(String key,String hashKey) {
 		log.debug("获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		return (T)hashOps.get(key, hashKey);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" , "null"})
 	public <T> T getMap(int db,String key,String hashKey) {
 		log.debug("获得数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -403,14 +404,14 @@ public class RedisService {
 	 * @param hashKey
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> List<T> getMap(String key,Set<String> hashKeys) {
 		log.debug("批量获得数据，Key:{}",key);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		List<T> list = (List<T>)hashOps.multiGet(key, hashKeys);
 		return list.stream().filter(item->item!=null).collect(Collectors.toList());
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> List<T> getMap(int db,String key,Set<String> hashKeys) {
 		log.debug("批量获得数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -439,12 +440,12 @@ public class RedisService {
 	 * @param key
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> Set<T> getSet(String key) {
 		SetOperations<String, T> setOps=redisTemplate.opsForSet();
 		return setOps.members(key);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> Set<T> getSet(int db,String key) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		SetOperations<String, T> setOps=redisTemplate.opsForSet();
@@ -456,12 +457,12 @@ public class RedisService {
 	 * @删除数据
 	 * @param key
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void delete(String key) {
 		log.debug("删除数据，Key:{}",key);
 		redisTemplate.delete(key);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void delete(int db,String key) {
 		log.debug("删除数据,db:{}，Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -473,13 +474,13 @@ public class RedisService {
 	 * @param key
 	 * @param hashKey
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void deleteMapHash(String key,String hashKey) {
 		log.debug("删除map hashKey，Key:{},hashKey:{}",key,hashKey);
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 		hashOps.delete(key, hashKey);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public void deleteMapHash(int db,String key,String hashKey) {
 		log.debug("删除map hashKey,db:{}，Key:{},hashKey:{}",db,key,hashKey);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -492,12 +493,12 @@ public class RedisService {
 	 * @param key
 	 * @param values
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public void deleteSetValue(String key,Object ...values) {
 		SetOperations<String, Object> setOps=redisTemplate.opsForSet();
 		setOps.remove(key, values);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" , "null"})
 	public void deleteSetValue(int db,String key,Object ...values) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		SetOperations<String, Object> setOps=redisTemplate.opsForSet();
@@ -509,10 +510,13 @@ public class RedisService {
 	 * @param key
 	 * @param listener
 	 */
+	@SuppressWarnings("null")
 	public void subscribe(String key,MessageListener listener) {
 		log.debug("订阅消息，Key:{}",key);
 		redisMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
 	}
+
+	@SuppressWarnings("null")
 	public void subscribe(int db,String key,MessageListener listener) {
 		log.debug("订阅消息，db:{},Key:{}",db,key);
 		redisConfig.getRedisMessageListener(db).addMessageListener(listener, new ChannelTopic(key));
@@ -523,11 +527,12 @@ public class RedisService {
 	 * @param key
 	 * @param message
 	 */
+	@SuppressWarnings("null")
 	public void publish(String key,Object message) {
 		log.debug("发布消息，Key:{}",key);
 		redisTemplate.convertAndSend(key, message);
 	}
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "null" })
 	public void publish(int db,String key,Object message) {
 		log.debug("发布消息，db:{},Key:{}",db,key);
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
@@ -580,47 +585,47 @@ public class RedisService {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T execute(RedisCallback<T> action) {
 		return (T)redisTemplate.execute(action);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" , "null"})
 	public <T> T execute(int db, RedisCallback<T> action) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		return (T)redisTemplate.execute(action);
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T execute(SessionCallback<T> action) {
 		return (T)redisTemplate.execute(action);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> T execute(int db, SessionCallback<T> action) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		return (T)redisTemplate.execute(action);
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T executePipelined(RedisCallback<T> action) {
 		return (T)redisTemplate.executePipelined(action);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public <T> T executePipelined(int db, RedisCallback<T> action) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		return (T)redisTemplate.executePipelined(action);
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public <T> T executePipelined(SessionCallback<T> action) {
 		return (T)redisTemplate.executePipelined(action);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null", "rawtypes" })
 	public <T> T executePipelined(int db, SessionCallback<T> action) {
 		RedisTemplate redisTemplate=redisConfig.getRedisTmpls(db);
 		return (T)redisTemplate.executePipelined(action);

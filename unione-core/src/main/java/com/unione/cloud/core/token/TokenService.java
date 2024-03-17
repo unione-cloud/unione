@@ -32,6 +32,7 @@ import com.unione.cloud.core.security.UserPrincipal;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.crypto.symmetric.SM4;
@@ -59,9 +60,6 @@ public class TokenService{
 	@Value("${security.jwt.token:token}")
 	private String REQUEST_TOKEN;
 	
-	@Value("${security.jwt.secret:com.aifa.mins.token}")
-    private String JWT_SECRET;
-
     @Value("${security.jwt.expires:3600}")
     private Integer JWT_EXPIRES;
     
@@ -75,12 +73,6 @@ public class TokenService{
     @Value("${security.jwt.issuer:mins-token}")
     private String JWT_ISSUER;
 
-    /**
-	 * 	Token Center Manage 令牌中心化管理:开关，默认关闭
-	 */
-    @Value("${security.tcm.enable:false}")
-	private boolean tcmEnable;
-    
     /**
      * 	Token Center Manage 令牌中心化管理，redis 数据库，默认：10
      */
@@ -105,14 +97,11 @@ public class TokenService{
     @Value("${security.tcm.lifetime:10}")
     private int tcmAutoLiteTime;
     
-    
     /**
      * Redis 服务
      */
     @Autowired(required=false)
     private RedisService redisService;
-    
-    private JWTVerifier jwtv;
     
     private SM4 sm4;
     @Value("${security.sm4.key:hTXU0apMnNy38q1zb65FlQ==}")
@@ -125,9 +114,9 @@ public class TokenService{
      * @param principal
      * @return
      */
-    public String transform(UserPrincipal principal) {
+    public String transform(UserPrincipal principal,String password) {
     	try {
-			Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
+			Algorithm algorithm = Algorithm.HMAC256(password);
 			Map<String, Object> header=new HashMap<>();
 			header.put("typ", "JWT");
 			header.put("alg", "HS256");
@@ -165,12 +154,8 @@ public class TokenService{
      * @return
      */
     public String build(UserPrincipal principal) {
-		String token=this.transform(principal);
-		
-		SessionHolder.setUserPrincipal(principal);
-		SessionHolder.setToken(token);
-		
-		return token;
+		String password=RandomUtil.randomString(20);
+		return this.build4auth(principal, password);
     }
     
     
@@ -179,17 +164,20 @@ public class TokenService{
      * @param principal
      * @return
      */
-    public String build4auth(UserPrincipal principal) {
+    public String build4auth(UserPrincipal principal,String password) {
     	log.debug("进入服务:根据 principal 生成token,principal:{}",principal);
 		// 生成token
-    	String token = this.build(principal);
+		String token=this.transform(principal,password);
 		
 		// redis 存放token
     	TcmEntry tcm=TcmEntry.builder()
     			.token(token)
+				.type("user")
     			.tenantId(principal.getTenantId())
+				.orgId(principal.getOrgId())
     			.userId(principal.getId())
     			.userName(principal.getUsername())
+				.password(password)
     			.times(DateUtil.current())
     			.build();
     	
@@ -198,7 +186,8 @@ public class TokenService{
     	
         this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
         SessionHolder.setToken(token);
-        
+        SessionHolder.setUserPrincipal(principal);
+		
         // 设置cookie
 		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		if(attributes!=null) {
@@ -210,7 +199,7 @@ public class TokenService{
 			}
 		}
     	
-    	log.debug("退出服务:根据 principal 生成token,tcmEnable:{},principal:{},token:{}",tcmEnable,principal,token);
+    	log.debug("退出服务:根据 principal 生成token,principal:{},token:{}",principal,token);
     	return token;
     }
     
@@ -221,15 +210,13 @@ public class TokenService{
     public void clean4auth(String token) {
     	log.debug("用户注销，清理token:{}",token);
     	if(!StringUtils.isEmpty(token)){
-    		if(token.length()<=120) {
-    			try {
-					String username=sm4.decryptStr(token).split("@")[0];
-					log.debug("中心化管理token，从redis中删除，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
-					this.redisService.delete(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
-				} catch (Exception e) {
-					log.error("用户注销异常，token非法",e);
-				}
-    		}
+			try {
+				String username=sm4.decryptStr(token).split("@")[0];
+				log.debug("中心化管理token，从redis中删除，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
+				this.redisService.delete(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
+			} catch (Exception e) {
+				log.error("用户注销异常，token非法",e);
+			}
 		}
     	
     	// 清空cookie
@@ -246,50 +233,22 @@ public class TokenService{
     }
     
     /**
-     * 	获取有效的认证token
+     * 	获取当前用户tcm对象
      * @param token
      * @return	
      */
-    public String getAuthToken(String token) {
-    	if(!StringUtils.isEmpty(token) && token.length()<120){
+    public TcmEntry getTcm(String token) {
+    	if(!StringUtils.isEmpty(token)){
     		try {
 				String username=sm4.decryptStr(token).split("@")[0];
 				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
 				TcmEntry tcm=this.redisService.getObj(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
-				if(tcm!=null) {
-					token = tcm.getToken();
-				}else {
-					log.info("中心化管理token,当前token已失效或者注销:{}",token);
-					return null;
-				}
+				return tcm;
 			} catch (Exception e) {
-				log.error("	获取有效的认证token失败，token非法",e);
+				log.error("	获取当前用户tcm对象失败,token:{}",token,e);
 			}
 		}
-    	return token;
-    }
-    
-    /**
-     * 	判断token是否为中心化管理令牌
-     * @param token
-     * @return
-     */
-    public boolean isAuthToken(String token) {
-    	if(!StringUtils.isEmpty(token) && token.length()<120){
-    		try {
-				String username=sm4.decryptStr(token).split("@")[0];
-				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}",tcmDb,tcmKey,username,token);
-				TcmEntry tcm=this.redisService.getObj(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
-				if(tcm!=null) {
-					return true;
-				}else {
-					log.info("中心化管理token,当前token已失效或者注销:{}",token);
-				}
-			} catch (Exception e) {
-				log.error("判断token是否为中心化管理令牌失败，token非法",e);
-			}
-		}
-    	return false;
+    	return null;
     }
     
     
@@ -302,40 +261,38 @@ public class TokenService{
     	log.debug("进入服务:刷新token,token:{}",token);
     	String newToken=null;
     	
+		// 获取tcm对象
+		TcmEntry tcm=this.getTcm(token);
+		if(tcm==null){
+			return null;
+		}
+
 		// 1、验证token
-		UserPrincipal principal=this.toPrincipal(token);
+		UserPrincipal principal=this.toPrincipal(token,tcm);
 		
 		// 2、生成token
 		if(principal!=null) {
-			newToken=this.build(principal);
-			//token中心化管理
-			TcmEntry tcm=TcmEntry.builder()
-					.token(newToken)
-					.tenantId(principal.getTenantId())
-					.userId(principal.getId())
-					.userName(principal.getUsername())
-					.times(DateUtil.current())
-					.build();
-			
-			this.redisService.delete(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),token));			
-			newToken = this.signature(principal.getUsername(), newToken);
-            this.redisService.put(tcmDb,String.format("%s:%s:%s",tcmKey,principal.getUsername(),newToken),tcm,Duration.ofSeconds(JWT_EXPIRES-30));
-			
-			// 设置cookie
-			ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-			if(attributes!=null) {
-				HttpServletResponse response = attributes.getResponse();
-				if(response!=null) {
-					Cookie ck=new Cookie(REQUEST_TOKEN, newToken);
-					ck.setPath("/");
-					response.addCookie(ck);
-				}
-			}
+			newToken=this.build4auth(principal,tcm.getPassword());
 		}
     	
     	log.debug("进入服务:刷新token,token:{},newToken:{}",token,newToken);
     	return newToken;
     }
+
+
+	/**
+	 * 验证token并获取UserPrincipal信息
+	 * @param token
+	 * @return
+	 */
+	public UserPrincipal toPrincipal(String token) {
+		TcmEntry tcm=this.getTcm(token);
+		if(tcm==null){
+			log.info("当前令牌非法或已失效,token:{}",token);
+			return null;
+		}
+		return this.toPrincipal(token, tcm);
+	}
     
 	/**
 	 * 	验证token并获取UserPrincipal信息
@@ -343,33 +300,15 @@ public class TokenService{
 	 * @return
 	 */
     @SuppressWarnings("unchecked")
-	public UserPrincipal toPrincipal(String token) {
+	public UserPrincipal toPrincipal(String token,TcmEntry tcm) {
     	log.debug("进入服务:验证token并获取UserPrincipal信息,token:{}",token);
-    	AssertUtil.service().notNull(token, "token不能为空");
+    	AssertUtil.service().notNull(token, "token不能为空")
+			.notNull(tcm, "tcm对象为空");
     	UserPrincipal principal=null;
     	String origToken=token;
-    	
-		// token中心化管理，token长度大于100则是未进行token签名的原生jwt令牌
-    	if(token.length()<120){
-    		try {
-				String username=sm4.decryptStr(token).split("@")[0];
-				TcmEntry tcm=this.redisService.getObj(tcmDb,String.format("%s:%s:%s",tcmKey,username,token));
-				if(tcm!=null) {
-					token = tcm.getToken();
-				}else {
-					log.info("中心化管理token,当前token已失效或者注销:{}",token);
-					return null;
-				}
-				log.debug("开启token中心化管理，真实token:{}",token);
-			} catch (Exception e) {
-				log.error("验证token并获取UserPrincipal信息失败，token非法,token:{}",token,e);
-			}
-		}
 		
     	try {
-	    	if(jwtv==null) {
-	    		jwtv = JWT.require(Algorithm.HMAC256(JWT_SECRET)).build();
-	    	}
+	    	JWTVerifier	jwtv = JWT.require(Algorithm.HMAC256(tcm.getPassword())).build();
 	        DecodedJWT jwt = null;
 	
 	        try {
@@ -411,9 +350,9 @@ public class TokenService{
             if(tcmAutoEnable){
             	long timelife = jwt.getExpiresAt().getTime()-System.currentTimeMillis();
             	if(timelife<=(tcmAutoLiteTime*60*1000)) {
-            		String newToken=transform(principal);
+            		String newToken=transform(principal,tcm.getPassword());
             		log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期",timelife);
-            		TcmEntry tcm=TcmEntry.builder()
+            		tcm=TcmEntry.builder()
     	        			.token(newToken)
     	        			.tenantId(principal.getTenantId())
     	        			.userId(principal.getId())
@@ -450,6 +389,10 @@ public class TokenService{
     @AllArgsConstructor
     @Accessors(chain = true)
     public static class TcmEntry{
+		/**
+		 * 令牌类型：user:用户令牌,server:服务令牌
+		 */
+		private String type;
     	/**
     	 * 真实令牌
     	 */
@@ -458,6 +401,10 @@ public class TokenService{
     	 * 租户id
     	 */
     	private Long   tenantId;
+		/**
+		 * 机构id
+		 */
+		private Long   orgId;
     	/**
     	 * 用户id
     	 */
@@ -470,5 +417,9 @@ public class TokenService{
     	 * 创建时间：毫秒
     	 */
     	private Long   times;
+		/**
+		 * 用户密码（加密）
+		 */
+		private String password;
     }
 }
