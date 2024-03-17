@@ -31,4 +31,9 @@ public class SqlField {
 	 * 	是否为基础字段，baseField!=null 是，baseField==null 否
 	 */
 	private StsField stsField;
+
+	/**
+	 * 字段脱敏
+	 */
+	private SqlSensitive sensitive;
 }
