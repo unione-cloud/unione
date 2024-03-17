@@ -291,7 +291,7 @@ public class TokenService{
 			log.info("当前令牌非法或已失效,token:{}",token);
 			return null;
 		}
-		return this.toPrincipal(token, tcm);
+		return this.toPrincipal(tcm.getToken(), tcm);
 	}
     
 	/**
