@@ -1,4 +1,4 @@
-package com.unione.cloud.portal.system.api;
+package com.unione.cloud.portal.common.api;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @Api(tags = "基础服务：操作日志 管理服务",description="SysLogs")
-@RequestMapping("/api/logs")
+@RequestMapping("/api/common/logs")
 public class SysLogsController implements FeignSave<SysLogs>,FeignFind<SysLogs>,FeignDetail<SysLogs>{
 	/**
 	 * 数据访问对象

@@ -1,4 +1,4 @@
-package com.unione.cloud.portal.system.api;
+package com.unione.cloud.portal.security.api;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,9 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@Api(tags = "基础服务：安全服务")
-@RequestMapping("/security")
-public class SysSecurityController {
+@Api(tags = "安全服务：安全认证")
+@RequestMapping("/api/security")
+public class SecurityController {
 	
 	@Autowired
 	private HttpServletResponse response;

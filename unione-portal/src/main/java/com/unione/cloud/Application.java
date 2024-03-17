@@ -1,4 +1,4 @@
-package com.unione.cloud.portal;
+package com.unione.cloud;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

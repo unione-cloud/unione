@@ -14,7 +14,7 @@
             "type": "java",
             "name": "UnionePortalApplication",
             "request": "launch",
-            "mainClass": "com.unione.cloud.portal.Application",
+            "mainClass": "com.unione.cloud.Application",
             "projectName": "unione-portal"
         }
     ]

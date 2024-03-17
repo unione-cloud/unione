@@ -51,7 +51,7 @@ public class SecretService {
 		}
 		AssertUtil.service().notNull(data, "需要加密的数据不能为空");
 		
-		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretInterface", ENCRYPTION), SecretInterface.class);
+		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretService", ENCRYPTION), SecretInterface.class);
 		AssertUtil.service().notNull(smi, String.format("[%s]加密服务未找到", ENCRYPTION));
 		
 		String result=null;
@@ -82,7 +82,7 @@ public class SecretService {
 		}
 		AssertUtil.service().notNull(data, "需要解密的数据不能为空");
 		
-		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretInterface", ENCRYPTION), SecretInterface.class);
+		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretService", ENCRYPTION), SecretInterface.class);
 		AssertUtil.service().notNull(smi, String.format("[%s]加密服务未找到", ENCRYPTION));
 		
 		String result=null;
@@ -108,7 +108,7 @@ public class SecretService {
 		log.debug("进入:哈希计算方法");
 		AssertUtil.service().notNull(data, "需要哈希计算的数据不能为空");
 		
-		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretInterface", ENCRYPTION), SecretInterface.class);
+		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretService", ENCRYPTION), SecretInterface.class);
 		AssertUtil.service().notNull(smi, String.format("[%s]加密服务未找到", ENCRYPTION));
 		
 		String result=null;

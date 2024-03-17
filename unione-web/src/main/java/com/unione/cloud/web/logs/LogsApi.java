@@ -11,7 +11,7 @@ import com.unione.cloud.web.logs.model.SysLogs;
 	name = "${unione.cloud.portal:unione-portal}",
 	contextId = "SysLogs",
 	url = "${unione.cloud.ip:}${unione.cloud.portal:}",
-	path = "/api/logs"
+	path = "/api/common/logs"
 )
 public interface LogsApi {
 
