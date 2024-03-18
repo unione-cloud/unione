@@ -117,7 +117,9 @@ public class LogsUtil {
 	// 操作类型
 	public static enum LogType{
 		Query("query"),Insert("insert"),Modify("modify"),Delete("delete"),
-		Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd");
+		Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd"),
+		Sensitive("sensitive"),
+		Other("other");
 		
 		private String value;
 		LogType(String value){

@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserPrincipal;
+import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.core.token.TokenService;
 import com.unione.cloud.portal.system.dto.LoginParam;
 import com.unione.cloud.portal.system.dto.LoginResult;
@@ -52,6 +54,9 @@ public class SecurityController {
 	@Autowired
 	private TokenService tokenService;
 	
+	@Autowired
+	private SecretService secretService;
+	
 	/**
 	 * 生成验证码图片
 	 */
@@ -83,6 +88,10 @@ public class SecurityController {
 		log.info("用户登录，usrename:{}",param.getUsername());
 		LogsUtil.set(LogType.Login, "用户登录");
 		LogsUtil.setCreator(param.getUsername());
+		AssertUtil.service()
+			.notNull(param, new String[] {"username","password"},"请求参数%s不能为空");
+		// 密码解密处理
+		param.setPassword(secretService.decrypt(param.getPassword()));
 		
 		// 执行登录
 		LoginResult result = loginService.doLogin(param);

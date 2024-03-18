@@ -18,9 +18,11 @@ import org.beetl.sql.core.SQLManager;
 
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataSensitive;
 import com.unione.cloud.beetsql.annotation.UniQueryAction;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.utils.SensitiveUtil;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
@@ -236,11 +238,18 @@ public class SqlBuilder<T> {
 					}
 				}
 				
+				// 判断是否为基础字段
 				StsField stsField=BaseField.isBaseColume(field.getColumn());
 				field.setStsField(stsField);
 				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
 				field.setType(pd.getPropertyType().getSimpleName());
+				
+				// 如果设置了数据脱敏
+				UniDataSensitive dataSensitive=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniDataSensitive.class);
+				if(dataSensitive!=null && "String".contentEquals(field.getType())) {
+					field.setSensitive(SqlSensitive.build(dataSensitive));
+				}
 				
 				if(!fieldLists.isEmpty()) {
 					if(field.isPk() || fieldLists.contains(field.getAlias()) || fieldLists.contains(field.getColumn())) {
@@ -320,6 +329,18 @@ public class SqlBuilder<T> {
 					normalConditions.add(orgCode);
 					return;
 				}
+
+				// 如果是区域编码，则使用右模糊查询
+				if(field.getColumn().equals(BaseField.AREA_CODE.column())) {
+					SqlCondition areaCode=new SqlCondition();
+					areaCode.setFun(SqlFun.AND);
+					areaCode.setColumn(field.getColumn());
+					areaCode.setName(field.getAlias());
+					areaCode.setAction(SqlAction.LIKER);
+					normalConditions.add(areaCode);
+					return;
+				}
+				
 				
 				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryIgnore.class);
 				if(ignorQuery!=null) {
@@ -471,9 +492,19 @@ public class SqlBuilder<T> {
 	
 	public Map<String, Object> toParams(){
 		Map<String, Object> params=new HashMap<String, Object>();
+		
 		Map<String, String> fields=new HashMap<>();
 		this.entity.getFields().stream().forEach(field->{
 			fields.put(field.getAlias(), field.getColumn());
+			
+			// 数据脱敏处理
+			if(field.getSensitive()!=null) {
+				Object value=BeanUtil.getFieldValue(this.data, field.getAlias());
+				if(value!=null && value instanceof String) {
+					String sensitiveValue=SensitiveUtil.process(value.toString(), field.getSensitive());
+					BeanUtil.setFieldValue(this.data, field.getAlias(), sensitiveValue);
+				}
+			}
 		});
 		
 		SqlField pkField=this.entity.getPkField();
@@ -487,6 +518,8 @@ public class SqlBuilder<T> {
 		params.put("id", id);
 		params.put("ids", BeanUtil.getFieldValue(this.params, "ids"));
 		
+		
+		// 数据权限处理
 		DataPermis dataPermis=this.loadDataPermis();
 		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
 			SessionService sessionService=SessionHolder.build();
@@ -500,11 +533,16 @@ public class SqlBuilder<T> {
 			case ORGANCODE:
 				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_CODE.name(), sessionService.getOrgLvsn());
 				break;		
+			case AREACODE:
+				BeanUtils.setDefaultValue(this.params, BaseField.AREA_CODE.name(), sessionService.getAreaCode());
+				break;		
 			default:
 				BeanUtils.setDefaultValue(this.params, BaseField.USER_ID.name(), sessionService.getUserId());
 				break;
 			}
 		}
+		
+		
 		return params;
 	}
 	
@@ -530,16 +568,19 @@ public class SqlBuilder<T> {
 		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
 			switch (dataPermis) {
 			case TENANTID:
-				whereSql=String.format("%s AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.column(),BaseField.TENANT_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.column(),BaseField.TENANT_ID.name());
 				break;
 			case ORGANID:
-				whereSql=String.format("%s AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.column(),BaseField.ORGAN_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.column(),BaseField.ORGAN_ID.name());
 				break;	
 			case ORGANCODE:
-				whereSql=String.format("%s AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.ORGAN_CODE.column(),BaseField.ORGAN_CODE.name());
-				break;		
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.ORGAN_CODE.column(),BaseField.ORGAN_CODE.name());
+				break;	
+			case AREACODE:
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.AREA_CODE.column(),BaseField.AREA_CODE.name());
+				break;	
 			default:
-				whereSql=String.format("%s AND %s = #{params.%s}", whereSql,BaseField.USER_ID.column(),BaseField.USER_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.USER_ID.column(),BaseField.USER_ID.name());
 				break;
 			}
 		}

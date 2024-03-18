@@ -14,6 +14,7 @@ public interface BaseField {
 	public static StsField TENANT_ID=new StsField("tenantId","TENANT_ID");
 	public static StsField ORGAN_ID=new StsField("orgId","ORG_ID");
 	public static StsField ORGAN_CODE=new StsField("orgCode","ORG_CODE");
+	public static StsField AREA_CODE=new StsField("areaCode","AREA_CODE");
 	public static StsField USER_ID=new StsField("userId","USER_ID");
 	
 	public static StsField CREATED=new StsField("created","CREATED");

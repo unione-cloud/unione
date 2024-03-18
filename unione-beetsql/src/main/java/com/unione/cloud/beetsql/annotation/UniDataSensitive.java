@@ -5,6 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
+/**
+ *	数据脱敏注解：只对字符类型字段进行脱敏
+ * @author Jeking 杨
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
 public @interface UniDataSensitive {
@@ -35,6 +40,9 @@ public @interface UniDataSensitive {
 		// 预设方式，身份证：idcard		
 		IDCARD("^(.{6})(?:\\d+).(.{4})$","$1****$2"),		
 		UNAME,		// 预设方式，姓名：uname
+		CARLICENSE,	// 中国大陆车牌，包含普通车辆、新能源车辆
+		BANKCARD,	// 银行卡号
+		ADDRESS,	// 地址
 		ENCRYPT;	// 数据加密：使用平台加解密服务SecretInterface完成
 
 		private String express;
