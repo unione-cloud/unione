@@ -22,6 +22,7 @@ import org.beetl.sql.gen.simple.MDDocBuilder;
 import org.beetl.sql.gen.simple.MDSourceBuilder;
 import org.beetl.sql.gen.simple.MapperSourceBuilder;
 
+import com.unione.cloud.beetsql.ext.FunIsBaseField;
 import com.unione.cloud.portal.codegen.BuilderFactory;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -72,9 +73,11 @@ public class CodeBuilderFactoryTest {
 
 		BuilderFactory factory = new BuilderFactory(sqlManager,sourceBuilder);
 		factory.setEntityParentClass("Pojo");
+		
 		//如果有错误，抛出异常而不是继续运行1
-		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler() );
-
+		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
+		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
+		
 		ConsoleOnlyProject project = new ConsoleOnlyProject();
 		String tableName = "sys_user";
 		//可以在控制台看到生成的所有代码

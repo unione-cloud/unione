@@ -16,7 +16,6 @@ import com.unione.cloud.core.model.Pojo;
 * ${comment}
 * gen by unione cloud ${date(),"yyyy-MM-dd"}
 */
-
 @Data
 @Builder
 @NoArgsConstructor

@@ -43,7 +43,7 @@ public interface BaseField {
 				if(Modifier.isStatic(fd.getModifiers())) {
 					fd.setAccessible(true);
 					Object value=fd.get(null);
-					if(value!=null && value instanceof Field) {
+					if(value!=null && value instanceof StsField) {
 						StsField sfd=(StsField)value;
 						if(StringUtils.isEmpty(type) || "prop".equals(type)) {
 							if(sfd.name().equals(field)) {
