@@ -8,7 +8,7 @@ import lombok.Data;
 public class PojoAttribute extends Attribute {
 
 	/**
-	 * 数据库列，数据长度
+	 * 	数据库列，数据长度
 	 */
 	private Integer colSize;
 	

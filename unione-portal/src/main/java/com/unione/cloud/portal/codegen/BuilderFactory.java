@@ -1,19 +1,17 @@
 package com.unione.cloud.portal.codegen;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.beetl.sql.clazz.ColDesc;
 import org.beetl.sql.clazz.TableDesc;
-import org.beetl.sql.clazz.kit.CaseInsensitiveHashMap;
 import org.beetl.sql.clazz.kit.JavaType;
 import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.gen.Attribute;
-import org.beetl.sql.gen.Entity;
 import org.beetl.sql.gen.PackageList;
 import org.beetl.sql.gen.SourceBuilder;
 import org.beetl.sql.gen.SourceConfig;
+
+import com.unione.cloud.core.model.BaseField;
 
 public class BuilderFactory extends SourceConfig {
 	

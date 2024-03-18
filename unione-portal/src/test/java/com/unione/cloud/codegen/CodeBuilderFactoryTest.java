@@ -71,7 +71,7 @@ public class CodeBuilderFactoryTest {
 //		sourceBuilder.add(mdocBuilder);
 
 		BuilderFactory factory = new BuilderFactory(sqlManager,sourceBuilder);
-		factory.setEntityParentClass("com.unione.cloud.core.model.Pojo");
+		factory.setEntityParentClass("Pojo");
 		//如果有错误，抛出异常而不是继续运行1
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler() );
 
