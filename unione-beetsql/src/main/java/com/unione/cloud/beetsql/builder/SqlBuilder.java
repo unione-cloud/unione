@@ -320,7 +320,7 @@ public class SqlBuilder<T> {
 				}
 				
 				// 如果是机构编码，则使用右模糊查询
-				if(field.getColumn().equals(BaseField.ORGAN_CODE.column())) {
+				if(field.getColumn().equals(BaseField.ORGAN_CODE.getColumn())) {
 					SqlCondition orgCode=new SqlCondition();
 					orgCode.setFun(SqlFun.AND);
 					orgCode.setColumn(field.getColumn());
@@ -331,7 +331,7 @@ public class SqlBuilder<T> {
 				}
 
 				// 如果是区域编码，则使用右模糊查询
-				if(field.getColumn().equals(BaseField.AREA_CODE.column())) {
+				if(field.getColumn().equals(BaseField.AREA_CODE.getColumn())) {
 					SqlCondition areaCode=new SqlCondition();
 					areaCode.setFun(SqlFun.AND);
 					areaCode.setColumn(field.getColumn());
@@ -425,8 +425,8 @@ public class SqlBuilder<T> {
 			.append("-- @sqlTrim(){\n");
 			
 			this.entity.getFields().stream().forEach(field->{
-				if(field.getStsField()!=null && (BaseField.LAST_UPDATED.name().equals(field.getStsField().name()) || 
-						BaseField.LAST_UPDATED_BY.name().equals(field.getStsField().name()))) {
+				if(field.getStsField()!=null && (BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) || 
+						BaseField.LAST_UPDATED_BY.getName().equals(field.getStsField().getName()))) {
 					return;
 				}
 				buffer.append("-- @if(isNotEmpty(fields.").append(field.getAlias()).append(")){\n")
@@ -436,8 +436,8 @@ public class SqlBuilder<T> {
 			
 			StringBuffer lastUpBuf=new StringBuffer();
 			this.entity.getBaseFields().stream().forEach(field->{
-				if(BaseField.LAST_UPDATED.name().equals(field.getStsField().name()) || 
-						BaseField.LAST_UPDATED_BY.name().equals(field.getStsField().name())) {
+				if(BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) || 
+						BaseField.LAST_UPDATED_BY.getName().equals(field.getStsField().getName())) {
 					lastUpBuf.append(",").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n");
 				}
 			});
@@ -525,19 +525,19 @@ public class SqlBuilder<T> {
 			SessionService sessionService=SessionHolder.build();
 			switch (dataPermis) {
 			case TENANTID:
-				BeanUtils.setDefaultValue(this.params, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+				BeanUtils.setDefaultValue(this.params, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 				break;
 			case ORGANID:
-				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 				break;	
 			case ORGANCODE:
-				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_CODE.name(), sessionService.getOrgLvsn());
+				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_CODE.getName(), sessionService.getOrgLvsn());
 				break;		
 			case AREACODE:
-				BeanUtils.setDefaultValue(this.params, BaseField.AREA_CODE.name(), sessionService.getAreaCode());
+				BeanUtils.setDefaultValue(this.params, BaseField.AREA_CODE.getName(), sessionService.getAreaCode());
 				break;		
 			default:
-				BeanUtils.setDefaultValue(this.params, BaseField.USER_ID.name(), sessionService.getUserId());
+				BeanUtils.setDefaultValue(this.params, BaseField.USER_ID.getName(), sessionService.getUserId());
 				break;
 			}
 		}
@@ -568,19 +568,19 @@ public class SqlBuilder<T> {
 		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
 			switch (dataPermis) {
 			case TENANTID:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.column(),BaseField.TENANT_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
 				break;
 			case ORGANID:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.column(),BaseField.ORGAN_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
 				break;	
 			case ORGANCODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.ORGAN_CODE.column(),BaseField.ORGAN_CODE.name());
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
 				break;	
 			case AREACODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.AREA_CODE.column(),BaseField.AREA_CODE.name());
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
 				break;	
 			default:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.USER_ID.column(),BaseField.USER_ID.name());
+				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());
 				break;
 			}
 		}

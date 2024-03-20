@@ -15,15 +15,14 @@ import org.beetl.sql.core.UnderlinedNameConversion;
 import org.beetl.sql.core.db.MySqlStyle;
 import org.beetl.sql.ext.DebugInterceptor;
 import org.beetl.sql.gen.SourceBuilder;
-import org.beetl.sql.gen.SourceConfig;
 import org.beetl.sql.gen.simple.ConsoleOnlyProject;
 import org.beetl.sql.gen.simple.EntitySourceBuilder;
-import org.beetl.sql.gen.simple.MDDocBuilder;
-import org.beetl.sql.gen.simple.MDSourceBuilder;
-import org.beetl.sql.gen.simple.MapperSourceBuilder;
+import org.beetl.sql.gen.simple.SimpleMavenProject;
 
 import com.unione.cloud.beetsql.ext.FunIsBaseField;
+import com.unione.cloud.portal.codegen.ApiSourceBuilder;
 import com.unione.cloud.portal.codegen.BuilderFactory;
+import com.unione.cloud.portal.codegen.SqlMdSourceBuilder;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class CodeBuilderFactoryTest {
@@ -62,14 +61,12 @@ public class CodeBuilderFactoryTest {
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
 		SourceBuilder entityBuilder = new EntitySourceBuilder();
-		SourceBuilder mapperBuilder = new MapperSourceBuilder();
-		SourceBuilder mdBuilder = new MDSourceBuilder();
-		SourceBuilder mdocBuilder = new MDDocBuilder();
+		SourceBuilder mdBuilder = new SqlMdSourceBuilder();
+		SourceBuilder apiBuilder = new ApiSourceBuilder();
 
 		sourceBuilder.add(entityBuilder);
-//		sourceBuilder.add(mapperBuilder);
-//		sourceBuilder.add(mdBuilder);
-//		sourceBuilder.add(mdocBuilder);
+		sourceBuilder.add(mdBuilder);
+		sourceBuilder.add(apiBuilder);
 
 		BuilderFactory factory = new BuilderFactory(sqlManager,sourceBuilder);
 		factory.setEntityParentClass("Pojo");
@@ -79,9 +76,12 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
 		ConsoleOnlyProject project = new ConsoleOnlyProject();
+		SimpleMavenProject mavenProject = new SimpleMavenProject("com.unione.cloud.portal");
+		mavenProject.setRoot("d://codegen");
+		
 		String tableName = "sys_user";
 		//可以在控制台看到生成的所有代码
-		factory.gen(tableName,project);
+		factory.gen(tableName,mavenProject);
 		
 	}
 

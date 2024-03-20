@@ -17,6 +17,8 @@ public interface BaseField {
 	public static StsField AREA_CODE=new StsField("areaCode","AREA_CODE");
 	public static StsField USER_ID=new StsField("userId","USER_ID");
 	
+	public static StsField DEL_FLAG=new StsField("delFlag","DEL_FLAG");
+	
 	public static StsField CREATED=new StsField("created","CREATED");
 	public static StsField CREATED_BY=new StsField("createdBy","CREATED_BY");
 	public static StsField LAST_UPDATED=new StsField("lastUpdated","LAST_UPDATED");
@@ -46,12 +48,12 @@ public interface BaseField {
 					if(value!=null && value instanceof StsField) {
 						StsField sfd=(StsField)value;
 						if(StringUtils.isEmpty(type) || "prop".equals(type)) {
-							if(sfd.name().equals(field)) {
+							if(sfd.getName().equals(field)) {
 								return sfd;
 							}
 						}
 						if(StringUtils.isEmpty(type) || "column".equals(type)) {
-							if(sfd.column().equals(field)) {
+							if(sfd.getColumn().equals(field)) {
 								return sfd;
 							}
 						}
@@ -72,10 +74,10 @@ public interface BaseField {
 		private String name;
 		private String column;
 		
-		public String name() {
+		public String getName() {
 			return this.name;
 		}
-		public String column() {
+		public String getColumn() {
 			return this.column;
 		}
 	}

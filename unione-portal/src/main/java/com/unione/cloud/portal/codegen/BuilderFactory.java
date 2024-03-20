@@ -11,8 +11,6 @@ import org.beetl.sql.gen.PackageList;
 import org.beetl.sql.gen.SourceBuilder;
 import org.beetl.sql.gen.SourceConfig;
 
-import com.unione.cloud.core.model.BaseField;
-
 public class BuilderFactory extends SourceConfig {
 	
 	private SQLManager sqlManager;

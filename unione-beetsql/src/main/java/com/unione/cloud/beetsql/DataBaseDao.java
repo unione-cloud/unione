@@ -54,17 +54,17 @@ public class DataBaseDao {
 	 */
 	public <T> int insert(T entity) {
 		SessionService sessionService=SessionHolder.build();
-		PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.name());
+		PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.getName());
 		if(Long.class.equals(idProp.getPropertyType())) {
 			BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
 		}
-		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
-		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
-		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
+		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
+		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
@@ -77,13 +77,13 @@ public class DataBaseDao {
 	 */
 	public <T> int insertWithId(T entity) {
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
-		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
-		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
+		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
+		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
 
@@ -96,17 +96,17 @@ public class DataBaseDao {
 	public <T> int[] insertBatch(List<T> list) {
 		SessionService sessionService=SessionHolder.build();
 		list.stream().forEach(entity->{
-			PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.name());
+			PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.getName());
 			if(Long.class.equals(idProp.getPropertyType())) {
 				BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
 			}
-			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
-			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
-			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
+			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
+			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -121,13 +121,13 @@ public class DataBaseDao {
 	public <T> int[] insertBatchWithId(List<T> list) {
 		SessionService sessionService=SessionHolder.build();
 		list.stream().forEach(entity->{
-			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.name(), sessionService.getTenantId());
-			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
-			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.name(), sessionService.getUserId());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED.name(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.name(), sessionService.getUsername());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.name(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
+			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
+			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -143,8 +143,8 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
@@ -159,8 +159,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
@@ -174,8 +174,8 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
@@ -191,8 +191,8 @@ public class DataBaseDao {
 	public <T> int updateById(T params) {
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.updateById(params);
 	}
@@ -207,8 +207,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
@@ -224,8 +224,8 @@ public class DataBaseDao {
 		map.put("params", params);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		this.setDataPermis(params);
 		return this.sqlManager.update(sqlId, map);
@@ -241,8 +241,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -268,12 +268,77 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.name(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.name(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
 	
+	/**
+	 * 	逻辑删除
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogic(T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogic");
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		
+		return this.sqlManager.update(sqlId, map);
+	}
+	
+	/**
+	 * 	逻辑删除(根据id或ids集合删除数据)
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogicById(T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogicById");
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		
+		return this.sqlManager.update(sqlId, map);
+	}
+	
+	/**
+	 * 	逻辑删除
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogic(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
+
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		
+		return this.sqlManager.update(sqlId, builder.toParams());
+	}
+	
+	/**
+	 * 	逻辑删除(根据id或ids集合删除数据)
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogicById(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
+
+		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		
+		return this.sqlManager.update(sqlId, builder.toParams());
+	}
 	
 	/**
 	 * 	统计数量
@@ -389,14 +454,14 @@ public class DataBaseDao {
 	
 	
 	/**
-	 * 	查询列表(根据ids集合加载数据),使用sql查询{ResoruceName}.findByIds
+	 * 	查询列表(根据ids集合加载数据),使用sql查询{ResoruceName}.findById
 	 * @param params
 	 * @param sort
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(T params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findByIds");
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findById");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
@@ -509,7 +574,7 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> Results<List<T>> findPages(Params<T> params,Sort ...sort){
 		Results<List<T>> results=Results.success();
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findList");
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findPages");
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
@@ -566,16 +631,16 @@ public class DataBaseDao {
 			SessionService sessionService=SessionHolder.build();
 			switch (dataPermis.value()) {
 			case TENANTID:
-				BeanUtils.setDefaultValue(obj, BaseField.TENANT_ID.name(), sessionService.getTenantId());
+				BeanUtils.setDefaultValue(obj, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 				break;
 			case ORGANID:
-				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_ID.name(), sessionService.getOrgId());
+				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 				break;	
 			case ORGANCODE:
-				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_CODE.name(), sessionService.getOrgLvsn());
+				BeanUtils.setDefaultValue(obj, BaseField.ORGAN_CODE.getName(), sessionService.getOrgLvsn());
 				break;		
 			default:
-				BeanUtils.setDefaultValue(obj, BaseField.USER_ID.name(), sessionService.getUserId());
+				BeanUtils.setDefaultValue(obj, BaseField.USER_ID.getName(), sessionService.getUserId());
 				break;
 			}
 		}

@@ -1,0 +1,143 @@
+
+tableColumn
+===
+```
+<%
+for(col in cols){
+   var colName=col+(colLP.last?"":",");
+print(colName);
+}
+print("\n");
+%> 
+```
+
+updateCloume
+===
+```
+<%
+for(col in cols){
+  var colName=col;
+  var attr = @nc.getPropertyName(col);
+%>
+${SS}if(!isNotEmpty(fields.${attr})){${SE}
+   ${colName}=${PS}params.${attr}${PE}${colLP.last?"":","}
+${SS}}${SE}
+<%}%>
+```
+
+
+whereCondition
+===
+```
+<%
+for(col in cols){
+  var colName=col;
+  var attr = @nc.getPropertyName(col);
+%>
+${SS}if(!isEmpty(params.${attr})){${SE}
+  AND ${colName}=${PS}params.${attr}${PE}
+${SS}}${SE}
+<%}%>
+```
+
+
+byIdCondition
+===
+```
+${SS}if(isEmpty(params.${idAttr.name}) && isEmpty(params.ids)){
+  AND 1=2
+${SS}}
+${SS}if(isNotEmpty(params.${idAttr.name})){
+  AND ${idAttr.colName} = params.${idAttr.name};
+${SS}}
+${SS}if(isNotEmpty(params.ids)){
+  AND ${idAttr.colName} IN ( ${PS}join(params.ids)${PE} )
+${SS}}
+${SS}if(isNotEmpty(params.${tenantId.name})){
+  AND ${tenantId.column} = params.${tenantId.name}
+${SS}}
+${SS}if(isNotEmpty(params.${orgId.name})){
+  AND ${orgId.column} = params.${orgId.name}
+${SS}}
+```
+
+
+update
+===
+```sql
+UPDATE ${tableName} SET ${PS}use("updateCloume")${PE} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+updateById
+===
+```sql
+UPDATE ${tableName} SET ${PS}use("updateCloume")${PE} WHERE 1=1 ${PS}use("byIdCondition")${PE}
+```
+
+delete
+===
+```sql
+DELETE FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+deleteById
+===
+```sql
+DELETE FROM ${tableName} WHERE 1=1 ${PS}use("byIdCondition")${PE}
+```
+
+deleteLogic
+===
+```sql
+UPDATE ${tableName}
+SET ${delFlag.column}=1,${lastUpdate.column} = ${PS}params.${lastUpdate.name}${PE},${lastUpdateBy.column} = ${PS}params.${lastUpdateBy.name}${PE}
+WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+deleteLogicById
+===
+```sql
+UPDATE ${tableName}
+SET ${delFlag.column}=1,${lastUpdate.column} = ${PS}params.${lastUpdate.name}${PE},${lastUpdateBy.column} = ${PS}params.${lastUpdateBy.name}${PE}
+WHERE 1=1 ${PS}use("byIdCondition")${PE}
+```
+
+
+count
+===
+```sql
+SELECT COUNT(*) FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+findUnique
+===
+```sql
+SELECT ${PS}use("tableColumn")${PE} FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+findOne
+===
+```sql
+SELECT ${PS}use("tableColumn")${PE} FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+findById
+===
+```sql
+SELECT ${PS}use("tableColumn")${PE} FROM ${tableName} WHERE 1=1 ${PS}use("byIdCondition")${PE}
+```
+
+findList
+===
+```sql
+SELECT ${PS}use("tableColumn")${PE} FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+findPages
+===
+```sql
+SELECT ${PS}page('*')${PE} FROM ${tableName} WHERE 1=1 ${PS}use("whereCondition")${PE}
+```
+
+
+
