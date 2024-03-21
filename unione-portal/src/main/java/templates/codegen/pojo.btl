@@ -2,6 +2,7 @@ package ${package};
 <%for(impCls in imports){%>
 import ${impCls};
 <%}%>
+import org.beetl.sql.mapper.annotation.SqlResource;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import com.unione.cloud.core.model.Pojo;
 */
 @Data
 @Builder
+@SqlResource("${sqlResource}")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)

@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.beetl.sql.annotation.entity.LogicDelete;
 import org.beetl.sql.annotation.entity.Table;
+import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -71,6 +72,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="SYS_USER")
+@SqlResource("SysUser")
 @UniDataPermis(DataPermis.TENANTID)
 public class SysUser extends Pojo{
 	/**

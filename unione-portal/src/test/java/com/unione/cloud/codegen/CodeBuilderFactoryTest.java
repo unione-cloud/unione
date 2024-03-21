@@ -15,13 +15,13 @@ import org.beetl.sql.core.UnderlinedNameConversion;
 import org.beetl.sql.core.db.MySqlStyle;
 import org.beetl.sql.ext.DebugInterceptor;
 import org.beetl.sql.gen.SourceBuilder;
-import org.beetl.sql.gen.simple.ConsoleOnlyProject;
 import org.beetl.sql.gen.simple.EntitySourceBuilder;
-import org.beetl.sql.gen.simple.SimpleMavenProject;
 
 import com.unione.cloud.beetsql.ext.FunIsBaseField;
 import com.unione.cloud.portal.codegen.ApiSourceBuilder;
 import com.unione.cloud.portal.codegen.BuilderFactory;
+import com.unione.cloud.portal.codegen.PojoSourceBuilder;
+import com.unione.cloud.portal.codegen.SimpleUnioneProject;
 import com.unione.cloud.portal.codegen.SqlMdSourceBuilder;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -60,9 +60,9 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new EntitySourceBuilder();
-		SourceBuilder mdBuilder = new SqlMdSourceBuilder();
-		SourceBuilder apiBuilder = new ApiSourceBuilder();
+		SourceBuilder entityBuilder = new PojoSourceBuilder("system");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("system");
+		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
 		sourceBuilder.add(mdBuilder);
@@ -75,8 +75,7 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
-		ConsoleOnlyProject project = new ConsoleOnlyProject();
-		SimpleMavenProject mavenProject = new SimpleMavenProject("com.unione.cloud.portal");
+		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.portal");
 		mavenProject.setRoot("d://codegen");
 		
 		String tableName = "sys_user";

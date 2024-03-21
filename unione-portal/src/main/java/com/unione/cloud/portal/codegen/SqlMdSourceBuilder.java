@@ -1,9 +1,11 @@
 package com.unione.cloud.portal.codegen;
 
+import java.io.File;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.beetl.core.Template;
 import org.beetl.sql.clazz.kit.StringKit;
 import org.beetl.sql.core.engine.template.Beetl;
@@ -18,6 +20,18 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.BaseField;
 
 public class SqlMdSourceBuilder extends MDSourceBuilder {
+	public static  String mapperTemplate=String.format("codegen%smd.btl", File.separator);
+	
+	public SqlMdSourceBuilder() {
+		super();
+		this.name="";
+	}
+	
+	public SqlMdSourceBuilder(String name) {
+		super();
+		this.name=name;
+	}
+	
 
 	@Override
 	public void generate(BaseProject project, SourceConfig config, Entity entity) {
@@ -40,14 +54,18 @@ public class SqlMdSourceBuilder extends MDSourceBuilder {
 		template.binding("delFlag", BaseField.DEL_FLAG);
 		template.binding("lastUpdate", BaseField.LAST_UPDATED);
 		template.binding("lastUpdateBy", BaseField.LAST_UPDATED_BY);
-		
+				
 		template.binding("nc", config.getSqlManager().getNc());
 		template.binding("PS", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_START"));
 		template.binding("PE", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_END"));
 		template.binding("SS", beetl.getPs().getProperty("DELIMITER_STATEMENT_START"));
 		template.binding("SE", beetl.getPs().getProperty("DELIMITER_STATEMENT_END"));
 		String mdFileName = StringKit.toLowerCaseFirstOne(entity.getName())+".md";
-		Writer writer = project.getWriterByName(this.name,mdFileName);
+		String rsName="resources.sql";
+		if(!StringUtils.isEmpty(this.name)) {
+			rsName=String.format("%s.%s", rsName,this.name);
+		}
+		Writer writer = project.getWriterByName(rsName,mdFileName);
 		template.renderTo(writer);
 	}
 

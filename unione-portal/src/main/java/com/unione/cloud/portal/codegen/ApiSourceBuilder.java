@@ -1,7 +1,9 @@
 package com.unione.cloud.portal.codegen;
 
+import java.io.File;
 import java.io.Writer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.beetl.core.Template;
 import org.beetl.sql.clazz.kit.StringKit;
 import org.beetl.sql.core.engine.template.Beetl;
@@ -12,15 +14,17 @@ import org.beetl.sql.gen.SourceConfig;
 import org.beetl.sql.gen.simple.BaseTemplateSourceBuilder;
 
 public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
-	public static  String mapperTemplate="api.btl";
-	
-	private String packageName="com.unione.cloud";
-	
+	public static  String mapperTemplate=String.format("codegen%sapi.btl", File.separator);
 	
 	public ApiSourceBuilder() {
-		super("api");
+		super("");
+		this.name="";
 	}
 	
+	public ApiSourceBuilder(String name) {
+		super("");
+		this.name=name;
+	}
 	
 
 	@Override
@@ -31,14 +35,26 @@ public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
 		Template template = groupTemplate.getTemplate(mapperTemplate);
 		template.binding("entity", entity);
 		template.binding("tableName", entity.getTableName());
-		template.binding("cols", entity.getCols());
+		template.binding("table", entity.getTableName());
+		template.binding("comment", entity.getComment());
+		
+		template.binding("basepkg",project.getBasePackage(null));
+		template.binding("package", project.getBasePackage(this.name));
+		template.binding("className", entity.getName());
+		
 		template.binding("nc", config.getSqlManager().getNc());
 		template.binding("PS", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_START"));
 		template.binding("PE", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_END"));
 		template.binding("SS", beetl.getPs().getProperty("DELIMITER_STATEMENT_START"));
 		template.binding("SE", beetl.getPs().getProperty("DELIMITER_STATEMENT_END"));
 		String apiFileName = StringKit.toLowerCaseFirstOne(entity.getName())+"Controller.java";
-		Writer writer = project.getWriterByName(this.name,apiFileName);
+		
+		String rsName="api";
+		if(!StringUtils.isEmpty(this.name)) {
+			rsName=String.format("%s.%s",this.name,rsName);
+		}
+		
+		Writer writer = project.getWriterByName(rsName,apiFileName);
 		template.renderTo(writer);
 	}
 
