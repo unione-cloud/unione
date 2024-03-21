@@ -8,7 +8,11 @@ public enum SqlAction {
 	NIN(" NOT IN ","(#{join(params.",")})"),
 	LIKE(" LIKE ","#{'%'+params.","+'%'}"),
 	LIKER(" LIKE ","#{params.","+'%'}"),
-	LIKEL(" LIKE ","#{'%'+params.","}");
+	LIKEL(" LIKE ","#{'%'+params.","}"),
+	
+	ID(" = ","#{query.","}"),
+	IDS(" IN ","(#{join(query.",")})"),
+	KEYWORD(" LIKE ","#{'%'+query.","+'%'}");
 	
 	private SqlAction(String action,String prefix,String sufix) {
 		this.action=action;

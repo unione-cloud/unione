@@ -31,6 +31,7 @@ import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 
 /**
@@ -517,6 +518,13 @@ public class DataBaseDao {
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", BeanUtil.getFieldValue(params, "keywords"));
+		query.put("id", BeanUtil.getFieldValue(params, "id"));
+		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
+		map.put("query", query);
+		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
@@ -561,6 +569,13 @@ public class DataBaseDao {
 		}
 		
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", params.getKeywords());
+		query.put("id", params.getId());
+		query.put("ids", params.getIds());
+		map.put("query", query);
+		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
 	}
@@ -600,6 +615,13 @@ public class DataBaseDao {
 		}
 		
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", params.getKeywords());
+		query.put("id", params.getId());
+		query.put("ids", params.getIds());
+		map.put("query", query);
+		
 		List<T> rows = (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
 		
 		return results.setBody(rows);

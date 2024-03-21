@@ -1,5 +1,6 @@
 package com.unione.cloud.portal.system.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -98,7 +99,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		List<SysUser> rows = dataBaseDao.findByIds(SqlBuilder.build(SysUser.class,ids));
+		List<SysUser> rows = dataBaseDao.findByIds(SqlBuilder.build(SysUser.class,new ArrayList<>(ids)));
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		LogsUtil.success();

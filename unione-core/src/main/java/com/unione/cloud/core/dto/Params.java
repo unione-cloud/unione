@@ -1,6 +1,7 @@
 package com.unione.cloud.core.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,18 +29,42 @@ public class Params<T> implements Serializable {
 	 * 序列化编号.
 	 */
 	private static final long serialVersionUID = 3885702483311119528L;
+	
+	/**
+	 * 	主键id查询
+	 */
+	@ApiModelProperty(value="主键id",hidden = true)
+	private Long id;
+	
+	/**
+	 * 	主键id集合查询
+	 */
+	@ApiModelProperty(value="主键id集合",hidden = true)
+	private List<Long> ids;
+	
+	/**
+	 * 	关键字查询
+	 */
+	@ApiModelProperty(value="关键字查询",hidden = true)
+	private String keywords;
 
+	/**
+	 * 	分页大小
+	 */
 	@ApiModelProperty(value = "分页大小",notes = "默认每页10条记录", example = "10")
 	private int pageSize = 10;
 
 	/**
-	 * 总记录数
+	 * 	分页页码
+	 */
+	@ApiModelProperty(value = "当前页", example = "1")
+	private int page = 1;
+	
+	/**
+	 *	总记录数
 	 */
 	@ApiModelProperty(hidden=true)
 	private long total;
-
-	@ApiModelProperty(value = "当前页", example = "1")
-	private int page = 1;
 
 	/**
 	 * 当前页第一条数据在List中的位置,从0开始
@@ -49,7 +74,7 @@ public class Params<T> implements Serializable {
 	private int start;
 	
 	/**
-	 * 当前页结束条数据在List中的位置,从0开始
+	 * 	当前页结束条数据在List中的位置,从0开始
 	 */
 	@JsonIgnore
 	@ApiModelProperty(hidden=true)
@@ -58,13 +83,6 @@ public class Params<T> implements Serializable {
 	@ApiModelProperty(value="是否需要count统计",notes = "前端查询条件无变化时，可以传入false，减少count统计时间消耗")
 	private boolean needCount=true;
 	
-	/**
-	 * 	查询操作数据权限开关，根据业务场景进行设置，默认关闭
-	 */
-	@JsonIgnore
-	@ApiModelProperty(hidden=true)
-	private boolean dtps;
-
 	@ApiModelProperty(value = "排序字段", example = "id")
 	private String sortName = "ID";
 

@@ -38,20 +38,25 @@ ${SS}if(!isEmpty(params.${attr})){${SE}
   AND ${colName}=${PS}params.${attr}${PE}
 ${SS}}${SE}
 <%}%>
+
+*关键字搜索，自行根据需要开启
+*${SS}if(!isEmpty(query.keywords)){${SE}
+* AND (FIELD1 LIKE ${PS}'%'+query.keywords+'%'${PE} OR FIELD2 LIKE ${PS}'%'+query.keywords+'%'${PE})
+*${SS}}${SE}
 ```
 
 
 byIdCondition
 ===
 ```
-${SS}if(isEmpty(params.${idAttr.name}) && isEmpty(params.ids)){
+${SS}if(isEmpty(query.id) && isEmpty(query.ids)){
   AND 1=2
 ${SS}}
-${SS}if(isNotEmpty(params.${idAttr.name})){
-  AND ${idAttr.colName} = params.${idAttr.name};
+${SS}if(isNotEmpty(query.id)){
+  AND ${idAttr.colName} = query.id;
 ${SS}}
-${SS}if(isNotEmpty(params.ids)){
-  AND ${idAttr.colName} IN ( ${PS}join(params.ids)${PE} )
+${SS}if(isNotEmpty(query.ids)){
+  AND ${idAttr.colName} IN ( ${PS}join(query.ids)${PE} )
 ${SS}}
 ${SS}if(isNotEmpty(params.${tenantId.name})){
   AND ${tenantId.column} = params.${tenantId.name}

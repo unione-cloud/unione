@@ -1,4 +1,4 @@
-package ${package};
+package ${package}.model;
 <%for(impCls in imports){%>
 import ${impCls};
 <%}%>
@@ -13,10 +13,13 @@ import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
 
-/*
-* ${comment}
-* gen by unione cloud ${date(),"yyyy-MM-dd"}
-*/
+/**
+ * @标题 	${className} Entity
+ * @描述	${comment}
+ * @作者	Unione Cloud CodeGen
+ * @日期	${date(),"yyyy-MM-dd HH:mm:ss"}
+ * @版本	1.0.0
+ **/
 @Data
 @Builder
 @SqlResource("${sqlResource}")

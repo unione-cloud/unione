@@ -32,6 +32,7 @@ public class TagSqlTrim extends TrimTag {
 					sql=sql.substring(1,sql.length()-1).trim();
 				}
 				
+				
 				// AND OR , 处理
 				if (sql.toUpperCase().startsWith("AND ")) {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(4, sql.length()),suffix));

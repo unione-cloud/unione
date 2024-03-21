@@ -1,6 +1,7 @@
 package com.unione.cloud.codegen;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -24,6 +25,8 @@ import com.unione.cloud.portal.codegen.PojoSourceBuilder;
 import com.unione.cloud.portal.codegen.SimpleUnioneProject;
 import com.unione.cloud.portal.codegen.SqlMdSourceBuilder;
 import com.zaxxer.hikari.HikariDataSource;
+
+import cn.hutool.core.date.DateUtil;
 
 public class CodeBuilderFactoryTest {
 	
@@ -76,9 +79,9 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
 		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.portal");
-		mavenProject.setRoot("d://codegen");
+		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 		
-		String tableName = "sys_user";
+		String tableName = "sys_organ";
 		//可以在控制台看到生成的所有代码
 		factory.gen(tableName,mavenProject);
 		

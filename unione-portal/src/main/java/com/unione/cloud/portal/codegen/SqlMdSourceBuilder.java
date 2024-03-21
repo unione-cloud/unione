@@ -60,7 +60,7 @@ public class SqlMdSourceBuilder extends MDSourceBuilder {
 		template.binding("PE", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_END"));
 		template.binding("SS", beetl.getPs().getProperty("DELIMITER_STATEMENT_START"));
 		template.binding("SE", beetl.getPs().getProperty("DELIMITER_STATEMENT_END"));
-		String mdFileName = StringKit.toLowerCaseFirstOne(entity.getName())+".md";
+		String mdFileName = entity.getName()+".md";
 		String rsName="resources.sql";
 		if(!StringUtils.isEmpty(this.name)) {
 			rsName=String.format("%s.%s", rsName,this.name);

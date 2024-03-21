@@ -26,7 +26,7 @@ public class SqlEntity {
 	/**
 	 * 	主键字段
 	 */
-	private SqlField pkField;
+	private SqlField keyField;
 	
 	/**
 	 * 	查询字段列表，为空则是 *
@@ -49,36 +49,24 @@ public class SqlEntity {
 	private String where;
 	
 	
-//	public List<String> getFieldList(){
-//		if(this.fields==null || this.fields.isEmpty()) {
-//			return new ArrayList<>();
-//		}
-//		return this.fields.stream().map(field->{
-//			if(StringUtils.isEmpty(field.getAlias())) {
-//				return StringUtils.trim(field.getColumn());
-//			}
-//			return String.format("%s AS %s", StringUtils.trim(field.getColumn()),StringUtils.trim(field.getAlias()));
-//		}).collect(Collectors.toList());
-//	}
-	
 	/**
 	 * 	获取主键字段
 	 * @return
 	 */
-	public SqlField getPkField() {
-		if(this.pkField!=null) {
-			return this.pkField;
+	public SqlField getKeyField() {
+		if(this.keyField!=null) {
+			return this.keyField;
 		}
 		
 		for(int i=0;i<this.fields.size();i++) {
 			SqlField tmp=this.fields.get(i);
 			if(tmp.isPk()) {
-				this.pkField=tmp;
+				this.keyField=tmp;
 				break;
 			}
 		}
 		
-		return this.pkField;
+		return this.keyField;
 	}
 	
 	

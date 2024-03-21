@@ -51,8 +51,8 @@ public class PojoSourceBuilder extends BaseTemplateSourceBuilder {
 		}
 		
 		String sqlResource=entity.getName();
-		if(this.name.contains(".")) {
-			sqlResource=String.format("%s.%s", this.name.substring(0, this.name.lastIndexOf(".")),entity.getName());
+		if(!StringUtils.isEmpty(this.name)) {
+			sqlResource=String.format("%s.%s", this.name,entity.getName());
 		}
 		template.binding("sqlResource", sqlResource);
 
@@ -60,7 +60,7 @@ public class PojoSourceBuilder extends BaseTemplateSourceBuilder {
 		template.binding("imports", entity.getImportPackage());
 		template.binding("comment", entity.getComment());
 
-		String rsName="entity";
+		String rsName="model";
 		if(!StringUtils.isEmpty(this.name)) {
 			rsName=String.format("%s.%s",this.name,rsName);
 		}

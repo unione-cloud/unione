@@ -50,7 +50,7 @@ public class SqlBuilder<T> {
 	private SqlEntity entity=new SqlEntity();
 	private String where;			// 数据过滤条件定义
 	private String[] fieldList;		// 数据查询/更新字段
-	private String pkField;			// 主键字段名称
+	private String keyField;		// 主键字段名称
 	/**
 	 * 	更新操作的数据对象
 	 */
@@ -61,14 +61,19 @@ public class SqlBuilder<T> {
 	 */
 	@Getter
 	private T params;
+	
+	private String tableName;	// 数据表名称
+	private DataPermis dataPermis;
+	
 	/**
 	 * 	查询关键字
 	 */
 	private String keywords;
 	
-	private String tableName;	// 数据表名称
-	private DataPermis dataPermis;
+	private Long id;
+	private List<Long> ids;
 	
+	private Sort sort[];
 	
 	@Getter
 	private boolean needCount=true;
@@ -139,7 +144,23 @@ public class SqlBuilder<T> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(Params<T> params) {
 		SqlBuilder<T> buildr=new SqlBuilder(params.getBody());
-		buildr.page(params.getPage()).pageSize(params.getPageSize()).needCount(params.isNeedCount());
+		buildr.page(params.getPage())
+			  .pageSize(params.getPageSize())
+			  .needCount(params.isNeedCount())
+			  .keywords(params.getKeywords());
+		if(!StringUtils.isEmpty(params.getSortName())) {
+			String stns[]=params.getSortName().split(",");
+			String sons[]=null;
+			if(!StringUtils.isEmpty(params.getSortOrder())) {
+				sons=params.getSortOrder().split(",");
+			}
+			Sort sort[]=new Sort[stns.length];
+			for(int i=0;i<stns.length;i++) {
+				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
+				sort[i]=Sort.build(stns[i], so);
+			}
+			buildr.sort(sort);
+		}
 		return buildr;
 	}
 	
@@ -156,14 +177,24 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(Class<T> cls,Object id) {
+	public static <T> SqlBuilder<T> build(Class<T> cls,Long id) {
 		try {
-			if(id instanceof Set) {
-				return build(cls,(Set<Object>)id);
-			}
 			T obj=BeanKit.newInstance(cls);
 			SqlBuilder<T> buildr=new SqlBuilder(obj);
-			buildr.setId(id);
+			buildr.id(id);
+			return buildr;
+		} catch (Exception e) {
+			throw new DataBaseException("构建SqlBuilder实例失败",e);
+		}
+	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(Class<T> cls,List<Long> ids) {
+		try {
+			T obj=BeanKit.newInstance(cls);
+			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			buildr.ids(ids);
 			return buildr;
 		} catch (Exception e) {
 			throw new DataBaseException("构建SqlBuilder实例失败",e);
@@ -179,13 +210,13 @@ public class SqlBuilder<T> {
 		AssertUtil.service().notNull(this.tableName, "table name不能为空");
 		this.entity.setTable(tableName);
 		
-		SqlField pkField=this.entity.getPkField();
+		SqlField pkField=this.entity.getKeyField();
 		if(pkField==null) {
 			TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 			String idn = tableDesc.getIdNames().iterator().next();
 			pkField=new SqlField();
 			pkField.setAlias(idn);
-			this.entity.setPkField(pkField);
+			this.entity.setKeyField(pkField);
 		}
 		
 		if(!this.initComplete) {
@@ -230,10 +261,10 @@ public class SqlBuilder<T> {
 				field.setColumn(cols.next());
 				if(idCols.contains(field.getColumn())) {
 					field.setPk(true);
-					this.pkField=field.getColumn();
-				}else if(StringUtils.isEmpty(this.pkField)) {
-					if(ObjectUtil.equal(this.pkField, field.getColumn()) || 
-							ObjectUtil.equal(this.pkField, field.getAlias())) {
+					this.keyField=field.getColumn();
+				}else if(StringUtils.isEmpty(this.keyField)) {
+					if(ObjectUtil.equal(this.keyField, field.getColumn()) || 
+							ObjectUtil.equal(this.keyField, field.getAlias())) {
 						field.setPk(true);
 					}
 				}
@@ -277,8 +308,8 @@ public class SqlBuilder<T> {
 						field.setAlias(alias);
 					}
 					field.setColumn(column);
-					if(ObjectUtil.equal(this.pkField, field.getColumn()) || 
-							ObjectUtil.equal(this.pkField, field.getAlias())) {
+					if(ObjectUtil.equal(this.keyField, field.getColumn()) || 
+							ObjectUtil.equal(this.keyField, field.getAlias())) {
 						field.setPk(true);
 					}
 					this.entity.getFields().add(field);
@@ -308,12 +339,12 @@ public class SqlBuilder<T> {
 					ideq.setFun(SqlFun.OR);
 					ideq.setColumn(field.getColumn());
 					ideq.setName(field.getAlias());
-					ideq.setAction(SqlAction.EQ);
+					ideq.setAction(SqlAction.ID);
 					SqlCondition idin=new SqlCondition();
 					idin.setFun(SqlFun.OR);
 					idin.setColumn(field.getColumn());
 					idin.setName("ids");
-					idin.setAction(SqlAction.IN);
+					idin.setAction(SqlAction.IDS);
 					idsCondition.getChildrens().add(ideq);
 					idsCondition.getChildrens().add(idin);
 					return;
@@ -355,7 +386,7 @@ public class SqlBuilder<T> {
 					keyword.setFun(SqlFun.OR);
 					keyword.setColumn(field.getColumn());
 					keyword.setName(field.getAlias());
-					keyword.setAction(SqlAction.LIKE);
+					keyword.setAction(SqlAction.KEYWORD);
 					keyWordCondition.getChildrens().add(keyword);
 				}
 				
@@ -373,9 +404,15 @@ public class SqlBuilder<T> {
 				normalConditions.add(normal);
 			});
 			
-			this.entity.getConditions().add(keyWordCondition);
-			this.entity.getConditions().add(idsCondition);
-			this.entity.getConditions().addAll(normalConditions);
+			if(!keyWordCondition.getChildrens().isEmpty()) {
+				this.entity.getConditions().add(keyWordCondition);
+			}
+			if(!idsCondition.getChildrens().isEmpty()) {
+				this.entity.getConditions().add(idsCondition);
+			}
+			if(!normalConditions.isEmpty()) {
+				this.entity.getConditions().addAll(normalConditions);
+			}
 		}
 		
 	}
@@ -465,6 +502,13 @@ public class SqlBuilder<T> {
 			buffer.append("-- @}\n");
 		}
 		
+		// sort 排序处理
+		if(SqlType.SELECT.equals(type)) {
+			buffer.append("-- @if(!isEmpty(sorts)){\n")
+			      .append("ORDER BY #{text(sorts)}\n")
+			      .append("-- @}");
+		}
+		
 		return buffer.toString();
 	}
 	
@@ -507,17 +551,29 @@ public class SqlBuilder<T> {
 			}
 		});
 		
-		SqlField pkField=this.entity.getPkField();
-		AssertUtil.database().notNull(pkField, "主键字段不能为空");
-		Object id = BeanUtil.getFieldValue(this.params, pkField.getAlias());
 		
 		params.put("data", this.data);
 		params.put("params", this.params);
 		params.put("fields", fields);
-		params.put("keywords", this.keywords);
-		params.put("id", id);
-		params.put("ids", BeanUtil.getFieldValue(this.params, "ids"));
+		if(this.sort!=null && this.sort.length>0) {
+			params.put("sorts", Sort.use(this.sort));
+		}
 		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", this.keywords);
+		query.put("id", this.id);
+		if(id==null) {
+			String keyField=this.keyField;
+			if(StringUtils.isEmpty(keyField)) {
+				SqlField pkField=this.entity.getKeyField();
+				if(pkField!=null) {
+					keyField=pkField.getAlias();
+				}
+			}
+			query.put("id", BeanUtil.getFieldValue(this.params, keyField));
+		}
+		query.put("ids", this.ids);
+		params.put("query", query);
 		
 		// 数据权限处理
 		DataPermis dataPermis=this.loadDataPermis();
@@ -541,7 +597,6 @@ public class SqlBuilder<T> {
 				break;
 			}
 		}
-		
 		
 		return params;
 	}
@@ -679,6 +734,16 @@ public class SqlBuilder<T> {
 		return this;
 	}
 	
+	public SqlBuilder<T> id(Long id){
+		this.id=id;
+		return this;
+	}
+	
+	public SqlBuilder<T> ids(List<Long> ids){
+		this.ids=ids;
+		return this;
+	}
+	
 	public SqlBuilder<T> query(String sql){
 		this.entity.setSql(sql);
 		return this;
@@ -689,8 +754,13 @@ public class SqlBuilder<T> {
 		return this;
 	}
 	
-	public SqlBuilder<T> pkField(String pkField){
-		this.pkField=pkField;
+	public SqlBuilder<T> sort(Sort ...sort){
+		this.sort=sort;
+		return this;
+	}
+	
+	public SqlBuilder<T> key(String keyField){
+		this.keyField=keyField;
 		return this;
 	}
 	
@@ -699,12 +769,12 @@ public class SqlBuilder<T> {
 		return this;
 	} 
 	
-	public SqlBuilder<T> setId(Object id) {
-		SqlField pkField=this.entity.getPkField();
-		AssertUtil.database().notNull(pkField, "主键字段不能为空");
-		BeanUtil.setFieldValue(this.params, pkField.getAlias(),id);
-		return this;
-	}
+//	public SqlBuilder<T> setId(Object id) {
+//		SqlField pkField=this.entity.getPkField();
+//		AssertUtil.database().notNull(pkField, "主键字段不能为空");
+//		BeanUtil.setFieldValue(this.params, pkField.getAlias(),id);
+//		return this;
+//	}
 	
 	public SqlBuilder<T> page(long page){
 		this.page=page;

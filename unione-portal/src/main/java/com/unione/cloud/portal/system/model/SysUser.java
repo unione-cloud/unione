@@ -206,8 +206,6 @@ public class SysUser extends Pojo{
 	/**
 	 * 非持久化属性
 	 */
-	@ApiModelProperty("主键集合")
-	private List<Long> ids;
 	@ApiModelProperty("搜索关键字")
 	private String keywords;
 	private String areaCode;

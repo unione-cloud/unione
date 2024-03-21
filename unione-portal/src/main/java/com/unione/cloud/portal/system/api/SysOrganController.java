@@ -1,4 +1,4 @@
-package ${package}.api;
+package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
-import ${entityName};
+import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
@@ -25,59 +25,59 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @标题 	${className} Controller 服务
+ * @标题 	SysOrgan Controller 服务
  * @作者	Unione Cloud CodeGen
- * @日期	${date(),"yyyy-MM-dd HH:mm:ss"}
+ * @日期	2024-03-21 23:12:15
  * @版本	1.0.0
  **/
 @Slf4j
 @RestController
-@Api(tags = "${className} ${modelName}管理：${comment}",description="${className}")
-@RequestMapping("/api/${requestMapping}")	 //TreeFeignApi
-public class ${className}Controller implements PojoFeignApi<${className}>{
+@Api(tags = "SysOrgan sys_organ管理：系统管理：机构信息",description="SysOrgan")
+@RequestMapping("/api/system/sysOrgan")	 //TreeFeignApi
+public class SysOrganController implements PojoFeignApi<SysOrgan>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
 	
 	
 	@Override
-	public Results<List<${className}>> find(Params<${className}> params) {
-		log.debug("进入:查询${modelName}列表方法,params:{}",params);
-		LogsUtil.set(LogType.Query, "查询${modelName}列表");
+	public Results<List<SysOrgan>> find(Params<SysOrgan> params) {
+		log.debug("进入:查询sys_organ列表方法,params:{}",params);
+		LogsUtil.set(LogType.Query, "查询sys_organ列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<${className}>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<SysOrgan>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
 		LogsUtil.success();
-		log.debug("退出:查询${modelName}列表方法,params:{},result:{}",params,results.isSuccess());
+		log.debug("退出:查询sys_organ列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
 	}
 
 
 	@Override
-	public Results<Long> save(@Validated(Validator.save.class) ${className} entity) {
-		log.debug("进入:新增${modelName}信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增${modelName}");
+	public Results<Long> save(@Validated(Validator.save.class) SysOrgan entity) {
+		log.debug("进入:新增sys_organ信息.entity:{}",entity);
+		LogsUtil.set(LogType.Insert, "新增sys_organ");
 		// 参数处理
 		dataBaseDao.insert(entity);
 		
 		LogsUtil.success(entity.getId());
-		log.debug("退出:新增${modelName}信息.entity:{},result:true",entity);
+		log.debug("退出:新增sys_organ信息.entity:{},result:true",entity);
 		return Results.success(entity.getId());
 	}
 
 
 	@Override
-	public Results<Long> update(@Validated(Validator.update.class) ${className} entity) {
-		log.debug("进入:修改${modelName}信息方法，entity:{}",entity);
+	public Results<Long> update(@Validated(Validator.update.class) SysOrgan entity) {
+		log.debug("进入:修改sys_organ信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改${modelName}",entity.getId());
+		LogsUtil.set(LogType.Modify, "修改sys_organ",entity.getId());
 		
 		String[] fields = {"userType","realName","aliasName","portrait","birthday","sex","email","qq","tel","securityQuestion","sucurityMfa","lastLoginTime","lastLoginIp","descs"};
-		SqlBuilder<${className}> sqlBuilder=SqlBuilder.build(entity).field(fields);
+		SqlBuilder<SysOrgan> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);
 		
@@ -86,57 +86,57 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 		results.setMessage(len>0?"操作成功":"操作失败");
 		LogsUtil.save(len>0, entity.getId());
 
-		log.debug("退出:修改${modelName}信息方法，entity:{},result:{}",entity,results.isSuccess());
+		log.debug("退出:修改sys_organ信息方法，entity:{},result:{}",entity,results.isSuccess());
 		return results;
 	}
 
 
 
 	@Override
-	public Results<List<${className}>> findByIds(Set<Long> ids) {
-		log.debug("进入:批量查询${modelName}信息方法，ids:{}",ids);
-		LogsUtil.set(LogType.Query, "批量查询${modelName}");
+	public Results<List<SysOrgan>> findByIds(Set<Long> ids) {
+		log.debug("进入:批量查询sys_organ信息方法，ids:{}",ids);
+		LogsUtil.set(LogType.Query, "批量查询sys_organ");
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		List<${className}> rows = dataBaseDao.findByIds(SqlBuilder.build(${className}.class,new ArrayList<>(ids)));
+		List<SysOrgan> rows = dataBaseDao.findByIds(SqlBuilder.build(SysOrgan.class,new ArrayList<>(ids)));
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		LogsUtil.success();
-		log.debug("退出:批量查询${modelName}信息方法，ids:{},result:true",ids);
+		log.debug("退出:批量查询sys_organ信息方法，ids:{},result:true",ids);
 		return Results.success(rows);
 	}
 
 
 	@Override
-	public Results<${className}> detail(Long id) {
-		log.debug("进入:查看${modelName}详细信息方法，id:{}",id);
-		LogsUtil.set(LogType.Query, "查看${modelName}详细",id);
+	public Results<SysOrgan> detail(Long id) {
+		log.debug("进入:查看sys_organ详细信息方法，id:{}",id);
+		LogsUtil.set(LogType.Query, "查看sys_organ详细",id);
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
 		LogsUtil.add("查找记录");
-		${className} tmp = dataBaseDao.findById(SqlBuilder.build(${className}.class,id));
+		SysOrgan tmp = dataBaseDao.findById(SqlBuilder.build(SysOrgan.class,id));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		LogsUtil.success(tmp.getId());
-		log.debug("退出:查看${modelName}详细信息方法，id:{},result:true",id);
+		log.debug("退出:查看sys_organ详细信息方法，id:{},result:true",id);
 		return Results.success(tmp);
 	}
 	
 
 	@Override
 	public Results<Long> delete(Set<Long> ids){
-		log.debug("进入:删除${modelName}信息方法，ids:{}",ids);
+		log.debug("进入:删除sys_organ信息方法，ids:{}",ids);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Delete, "删除${modelName}");
+		LogsUtil.set(LogType.Delete, "删除sys_organ");
 		
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(${className}.class,ids));
+		int count = dataBaseDao.delete(SqlBuilder.build(SysOrgan.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
@@ -144,28 +144,28 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 		results.setBody((long)count);
 		LogsUtil.save(count>0);
 
-		log.debug("退出:删除${modelName}信息方法，ids:{},result:{}",ids,results.isSuccess());
+		log.debug("退出:删除sys_organ信息方法，ids:{},result:{}",ids,results.isSuccess());
 		return results;
 	}
 
 
 //	@Override
-//	public Results<List<${className}>> children(Long sid){
-//		log.debug("进入:加载下级${modelName}信息,sid:{}",sid);
-//		LogsUtil.set(LogType.Query, "加载下级${modelName}信息",sid);
+//	public Results<List<SysOrgan>> children(Long sid){
+//		log.debug("进入:加载下级sys_organ信息,sid:{}",sid);
+//		LogsUtil.set(LogType.Query, "加载下级sys_organ信息",sid);
 //		 //参数处理
 //		AssertUtil.service().notNull(sid, "参数sid不能为空");
 //		
 //		// 执行查询
-//		${className} params = new ${className}();
+//		SysOrgan params = new SysOrgan();
 //		params.setParentId(sid);
 //		LogsUtil.add("parentId:%s",sid);
 //	
-//		List<${className}> rows = dataBaseDao.findList(SqlBuilder.build(params));
-//		LogsUtil.add("下级${modelName}记录数量:"+rows.size());
+//		List<SysOrgan> rows = dataBaseDao.findList(SqlBuilder.build(params));
+//		LogsUtil.add("下级sys_organ记录数量:"+rows.size());
 //		
 //		LogsUtil.success();
-//		log.debug("退出:加载下级${modelName}信息,sid:{},result:true",sid);
+//		log.debug("退出:加载下级sys_organ信息,sid:{},result:true",sid);
 //		return Results.success(rows);
 //	}
 
