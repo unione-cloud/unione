@@ -15,13 +15,16 @@ updateCloume
 ===
 ```
 <%
-for(col in cols){
-  var colName=col;
-  var attr = @nc.getPropertyName(col);
+for(col in updateCols){
 %>
-${SS}if(!isNotEmpty(fields.${attr})){${SE}
-   ${colName}=${PS}params.${attr}${PE}${colLP.last?"":","}
+${SS}if(!isNotEmpty(fields.${col.name})){${SE}
+   ${col.colName}=${PS}params.${col.name}${PE}${colLP.last?"":","}
 ${SS}}${SE}
+<%}%>
+<%
+for(col in lastUpdateCols){
+%>
+ ,${col.colName}=${PS}params.${col.name}${PE}
 <%}%>
 ```
 

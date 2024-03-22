@@ -13,6 +13,8 @@ import org.beetl.sql.gen.Entity;
 import org.beetl.sql.gen.SourceConfig;
 import org.beetl.sql.gen.simple.BaseTemplateSourceBuilder;
 
+import com.unione.cloud.core.model.BaseField;
+
 public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
 	public static  String mapperTemplate=String.format("codegen%sapi.btl", File.separator);
 	
@@ -44,6 +46,23 @@ public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
 		template.binding("entityName", String.format("%s.model.%s",project.getBasePackage(null), entity.getName()));
 		template.binding("requestMapping",StringKit.toLowerCaseFirstOne(entity.getName()));
 		
+		StringBuffer updateField=new StringBuffer();
+		entity.getList().stream()
+			.filter(attr->!attr.isId())
+			.filter(attr->!BaseField.TENANT_ID.getName().equals(attr.getName()))
+			.filter(attr->!BaseField.TENANT_ID.getColumn().equals(attr.getColName()))
+			.filter(attr->!BaseField.CREATED.getName().equals(attr.getName()))
+			.filter(attr->!BaseField.CREATED.getColumn().equals(attr.getColName()))
+			.filter(attr->!BaseField.CREATED_BY.getName().equals(attr.getName()))
+			.filter(attr->!BaseField.CREATED_BY.getColumn().equals(attr.getColName()))
+			.filter(attr->!BaseField.LAST_UPDATED.getName().equals(attr.getName()))
+			.filter(attr->!BaseField.LAST_UPDATED.getColumn().equals(attr.getColName()))
+			.filter(attr->!BaseField.LAST_UPDATED_BY.getName().equals(attr.getName()))
+			.filter(attr->!BaseField.LAST_UPDATED_BY.getColumn().equals(attr.getColName()))
+			.forEach(attr->{
+				updateField.append("\"").append(attr.getName()).append("\",");
+			});
+		template.binding("updateField", updateField.subSequence(0, updateField.length()-1));
 		
 		template.binding("nc", config.getSqlManager().getNc());
 		template.binding("PS", beetl.getPs().getProperty("DELIMITER_PLACEHOLDER_START"));

@@ -29,13 +29,14 @@ public interface BaseField {
 		return isBase(field, null);
 	}
 	
-	public static StsField isBaseColume(String field) {
+	public static StsField isBaseColumn(String field) {
 		return isBase(field, "column");
 	}
 	
 	public static StsField isBaseProp(String field) {
 		return isBase(field, "prop");
 	}
+	
 	
 	static StsField isBase(String field,String type) {
 		Field fields[]=ReflectUtil.getFields(BaseField.class);

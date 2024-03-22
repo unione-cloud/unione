@@ -16,7 +16,7 @@ public class FunIsBaseField implements Function {
 		if(ObjectUtil.isEmpty(field)) {
 			return false;
 		}
-		return BaseField.isBaseColume(field.toString())!=null;
+		return BaseField.isBaseColumn(field.toString())!=null;
 	}
 
 }

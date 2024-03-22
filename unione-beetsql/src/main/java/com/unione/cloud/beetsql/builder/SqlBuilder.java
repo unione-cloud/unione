@@ -16,6 +16,7 @@ import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.SQLManager;
 
+import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataSensitive;
@@ -270,7 +271,7 @@ public class SqlBuilder<T> {
 				}
 				
 				// 判断是否为基础字段
-				StsField stsField=BaseField.isBaseColume(field.getColumn());
+				StsField stsField=BaseField.isBaseColumn(field.getColumn());
 				field.setStsField(stsField);
 				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
@@ -461,8 +462,13 @@ public class SqlBuilder<T> {
 			buffer.append(this.entity.getTable()).append(" SET \n")
 			.append("-- @sqlTrim(){\n");
 			
-			this.entity.getFields().stream().forEach(field->{
-				if(field.getStsField()!=null && (BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) || 
+			this.entity.getFields().stream().filter(field->!field.isPk()).forEach(field->{
+				if(field.getStsField()!=null && (
+						BaseField.ID.getName().equals(field.getStsField().getName()) || 
+						BaseField.TENANT_ID.getName().equals(field.getStsField().getName()) ||
+						BaseField.CREATED.getName().equals(field.getStsField().getName()) ||
+						BaseField.CREATED_BY.getName().equals(field.getStsField().getName()) ||
+						BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) ||
 						BaseField.LAST_UPDATED_BY.getName().equals(field.getStsField().getName()))) {
 					return;
 				}

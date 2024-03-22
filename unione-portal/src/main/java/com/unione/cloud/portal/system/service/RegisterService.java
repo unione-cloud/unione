@@ -14,6 +14,7 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.portal.security.service.CaptchaService;
 import com.unione.cloud.portal.system.dto.UserRegister;
 import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.portal.system.model.SysUserRole;

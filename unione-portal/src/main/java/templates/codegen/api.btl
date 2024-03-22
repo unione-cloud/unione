@@ -76,7 +76,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改${modelName}",entity.getId());
 		
-		String[] fields = {"userType","realName","aliasName","portrait","birthday","sex","email","qq","tel","securityQuestion","sucurityMfa","lastLoginTime","lastLoginIp","descs"};
+		String[] fields = {${updateField}};
 		SqlBuilder<${className}> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

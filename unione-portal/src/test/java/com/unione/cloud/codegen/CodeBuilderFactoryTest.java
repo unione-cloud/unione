@@ -68,7 +68,7 @@ public class CodeBuilderFactoryTest {
 		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
-		sourceBuilder.add(mdBuilder);
+//		sourceBuilder.add(mdBuilder);
 		sourceBuilder.add(apiBuilder);
 
 		BuilderFactory factory = new BuilderFactory(sqlManager,sourceBuilder);
@@ -83,8 +83,8 @@ public class CodeBuilderFactoryTest {
 		
 		String tableName = "sys_organ";
 		//可以在控制台看到生成的所有代码
-		factory.gen(tableName,mavenProject);
-		
+//		factory.gen(tableName,mavenProject);
+		factory.genAll(mavenProject);
 	}
 
 }

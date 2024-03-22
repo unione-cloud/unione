@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysOrgan Entity
  * @描述	系统管理：机构信息
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-21 23:12:15
+ * @日期	2024-03-22 08:03:37
  * @版本	1.0.0
  **/
 @Data
