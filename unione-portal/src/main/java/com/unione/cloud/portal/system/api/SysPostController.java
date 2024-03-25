@@ -76,7 +76,7 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改岗位信息",entity.getId());
 		
-		String[] fields = {"orgId","parentId","name","sn","lvsn","level","types","iconFont","iconPic","duty","descs","isLeaf","ordered","status","delFlag"};
+		String[] fields = {"orgId","parentId","name","sn","types","iconFont","iconPic","duty","descs","isLeaf","ordered","status"};
 		SqlBuilder<SysPost> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysPost Entity
  * @描述	岗位信息，岗位对应的行政区划信息直接存储在数据权限：岗位权限表中。一个岗位可以有多个行政区划，但都是当前用户所属机构关联
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -37,20 +37,10 @@ public class SysPost extends Pojo {
 	@ApiModelProperty(value="岗位名称",notes="长度为：200")
 	private String name;
 	/**
-	* 岗位编码
+	* 岗位编码，携带层级的岗位编码
 	*/
-	@ApiModelProperty(value="岗位编码",notes="长度为：30")
+	@ApiModelProperty(value="岗位编码，携带层级的岗位编码",notes="长度为：50")
 	private String sn;
-	/**
-	* 层级编码
-	*/
-	@ApiModelProperty(value="层级编码",notes="长度为：40")
-	private String lvsn;
-	/**
-	* 所在层级
-	*/
-	@ApiModelProperty(value="所在层级",notes="长度为：10")
-	private Integer level;
 	/**
 	* 岗位类型，字典POSTTYPES 9其他
 	*/

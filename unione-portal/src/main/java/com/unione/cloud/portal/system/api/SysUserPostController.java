@@ -76,7 +76,7 @@ public class SysUserPostController implements PojoFeignApi<SysUserPost>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改用户岗位",entity.getId());
 		
-		String[] fields = {"postId","userId","userOrgId","userOrgName","name","timeJoin","timeLeave","status","ordered","descs","delFlag"};
+		String[] fields = {"postId","userId","userOrgId","userOrgName","name","timeJoin","timeLeave","status","ordered","descs"};
 		SqlBuilder<SysUserPost> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

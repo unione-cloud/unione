@@ -12,40 +12,50 @@ import lombok.experimental.Accessors;
 import com.unione.cloud.core.model.Pojo;
 
 /**
- * @标题 	SysUserPost Entity
- * @描述	系统管理：用户岗位
+ * @标题 	SysGroupMember Entity
+ * @描述	系统管理：分组成员
  * @作者	Unione Cloud CodeGen
  * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
 @Builder
-@SqlResource("system.SysUserPost")
+@SqlResource("system.SysGroupMember")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@Table(name="sys_user_post")
-public class SysUserPost extends Pojo {
+@Table(name="sys_group_member")
+public class SysGroupMember extends Pojo {
 	/**
-	* 岗位ID
+	* 分组ID
 	*/
-	@ApiModelProperty(value="岗位ID",notes="长度为：19")
-	private Long postId;
+	@ApiModelProperty(value="分组ID",notes="长度为：19")
+	private Long groupId;
 	/**
-	* 用户所属机构ID
+	* 成员类型，字典GROUPTYPES 1用户分组，9其他
 	*/
-	@ApiModelProperty(value="用户所属机构ID",notes="长度为：19")
-	private Long userOrgId;
+	@ApiModelProperty(value="成员类型，字典GROUPTYPES 1用户分组，9其他",notes="长度为：10")
+	private Integer mbType;
 	/**
-	* 用户所属机构名称
+	* 成员ID
 	*/
-	@ApiModelProperty(value="用户所属机构名称",notes="长度为：255")
-	private String userOrgName;
+	@ApiModelProperty(value="成员ID",notes="长度为：19")
+	private Long mbId;
 	/**
-	* 成员姓名
+	* 成员机构名称
 	*/
-	@ApiModelProperty(value="成员姓名",notes="长度为：100")
+	@ApiModelProperty(value="成员机构名称",notes="长度为：255")
+	private String orgName;
+	/**
+	* 成员标题
+	*/
+	@ApiModelProperty(value="成员标题",notes="长度为：100")
 	private String name;
+	/**
+	* 成员编码
+	*/
+	@ApiModelProperty(value="成员编码",notes="长度为：20")
+	private String sn;
 	/**
 	* 加入时间
 	*/

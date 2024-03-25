@@ -76,7 +76,7 @@ public class SysGroupController implements TreeFeignApi<SysGroup>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改分组",entity.getId());
 		
-		String[] fields = {"orgId","parentId","name","sn","lvsn","level","types","iconFont","iconPic","descs","isLeaf","ordered","status","delFlag"};
+		String[] fields = {"parentId","name","sn","level","types","iconFont","iconPic","descs","isLeaf","ordered","status"};
 		SqlBuilder<SysGroup> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

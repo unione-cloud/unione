@@ -76,7 +76,7 @@ public class SysApiInfoController implements TreeFeignApi<SysApiInfo>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改接口信息",entity.getId());
 		
-		String[] fields = {"parentId","name","title","url","method","params","response","isLeaf","isNeedPermis","ordered","status","descs","docBody"};
+		String[] fields = {"appId","parentId","name","title","url","method","params","response","isLeaf","isNeedPermis","ordered","status","descs","docBody"};
 		SqlBuilder<SysApiInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

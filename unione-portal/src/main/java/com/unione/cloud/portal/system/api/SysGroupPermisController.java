@@ -76,7 +76,7 @@ public class SysGroupPermisController implements PojoFeignApi<SysGroupPermis>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改分组权限",entity.getId());
 		
-		String[] fields = {"ugroupId","appId","resId","resType","enDilivery"};
+		String[] fields = {"groupId","appId","resId","resType","enDilivery"};
 		SqlBuilder<SysGroupPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

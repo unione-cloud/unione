@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysTenant Entity
  * @描述	系统管理：租户信息
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:38
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data

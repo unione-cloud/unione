@@ -76,7 +76,7 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改角色",entity.getId());
 		
-		String[] fields = {"orgId","name","codes","types","status","descs"};
+		String[] fields = {"orgId","name","sn","types","status","descs"};
 		SqlBuilder<SysRole> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

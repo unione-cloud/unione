@@ -39,7 +39,6 @@ import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -351,7 +350,7 @@ public class LoginService {
 		}
 		
 		LogsUtil.add("使用用户密码盐对输入密码进行加密并判断和密码是否一致");
-		String pwd = SmUtil.sm4(Base64.decode(user.getPwdSalt())).encryptHex(param.getPassword());
+		String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(param.getPassword());
 		if(ObjectUtil.notEqual(pwd, user.getPwdText())) {
 			LogsUtil.add("认证失败：密码不正确");
 			return this.loginFailure(param.getUsername());
@@ -393,9 +392,9 @@ public class LoginService {
 		SysRole role=new SysRole();
 		role.setUserId(user.getId());
 		SqlBuilder<SysRole> loadUserRole=SqlBuilder
-				.build(role).query("SELECT r.CODES FROM SYS_USER_ROLE ur LEFT JOIN SYS_ROLE r ON ur.ROLE_ID=r.ID WHERE r.STATUS=1 AND ur.USER_ID=#{params.userId}");
+				.build(role).query("SELECT r.SN FROM SYS_USER_ROLE ur LEFT JOIN SYS_ROLE r ON ur.ROLE_ID=r.ID WHERE r.STATUS=1 AND ur.USER_ID=#{params.userId}");
 		List<SysRole> roles = dataBaseDao.findList(loadUserRole);
-		Set<String> roleCodes = roles.stream().map(row->row.getCodes()).filter(row->row!=null).collect(Collectors.toSet());
+		Set<String> roleCodes = roles.stream().map(row->row.getSn()).filter(row->row!=null).collect(Collectors.toSet());
 		principal.setUserRoles(new ArrayList<>(roleCodes));
 		LogsUtil.add("加载用户角色,role list:%s",roleCodes);
 		

@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysAppInfo Entity
  * @描述	系统管理：应用信息
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -32,10 +32,10 @@ public class SysAppInfo extends Pojo {
 	@ApiModelProperty(value="应用名称",notes="长度为：100")
 	private String name;
 	/**
-	* 应用编码
+	* 应用编码，唯一
 	*/
-	@ApiModelProperty(value="应用编码",notes="长度为：50")
-	private String codes;
+	@ApiModelProperty(value="应用编码，唯一",notes="长度为：50")
+	private String sn;
 	/**
 	* 是否微应用
 	*/
@@ -86,6 +86,11 @@ public class SysAppInfo extends Pojo {
 	*/
 	@ApiModelProperty(value="显示顺序",notes="长度为：10")
 	private Integer ordered;
+	/**
+	* 是否平台应用，字典 TUREORFALSE 1是，0否
+	*/
+	@ApiModelProperty(value="是否平台应用，字典 TUREORFALSE 1是，0否",notes="长度为：10")
+	private Integer isPlatform;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用
 	*/

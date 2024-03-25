@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysResource Entity
  * @描述	系统管理：系统资源
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -37,9 +37,9 @@ public class SysResource extends Pojo {
 	@ApiModelProperty(value="上级菜单ID(根节点为-1)",notes="长度为：19")
 	private Long parentId;
 	/**
-	* 资源名称，唯一
+	* 资源名称/编码，唯一
 	*/
-	@ApiModelProperty(value="资源名称，唯一",notes="长度为：100")
+	@ApiModelProperty(value="资源名称/编码，唯一",notes="长度为：100")
 	private String name;
 	/**
 	* 资源标题
@@ -87,6 +87,11 @@ public class SysResource extends Pojo {
 	@ApiModelProperty(value="是否需要授权，字典 TUREORFALSE 1是，0否",notes="长度为：10")
 	private Integer isNeedPermis;
 	/**
+	* 是否平台资源，字典 TUREORFALSE 1是，0否
+	*/
+	@ApiModelProperty(value="是否平台资源，字典 TUREORFALSE 1是，0否",notes="长度为：10")
+	private Integer isPlatform;
+	/**
 	* 图标（字体图标）
 	*/
 	@ApiModelProperty(value="图标（字体图标）",notes="长度为：100")
@@ -122,9 +127,9 @@ public class SysResource extends Pojo {
 	@ApiModelProperty(value="描述",notes="长度为：500")
 	private String descs;
 	/**
-	* 资源设置,JSON存储
+	* 资源设置,JSON存储{}
 	*/
-	@ApiModelProperty(value="资源设置,JSON存储",notes="长度为：1000")
+	@ApiModelProperty(value="资源设置,JSON存储{}",notes="长度为：1000")
 	private String configs;
 
 }

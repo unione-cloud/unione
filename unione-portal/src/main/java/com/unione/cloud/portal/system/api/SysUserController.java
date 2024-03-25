@@ -16,10 +16,15 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SmUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +43,9 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+	
+	@Autowired
+	private SecretService secretService;
 	
 	
 	@Override
@@ -61,6 +69,12 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	public Results<Long> save(@Validated(Validator.save.class) SysUser entity) {
 		log.debug("进入控制:新增系统用户信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增系统用户");
+		
+		entity.setPwdSalt(RandomUtil.randomString(16));
+		entity.setPwdText(secretService.decrypt(entity.getPwdText()));
+		String pwd = SmUtil.sm4(entity.getPwdSalt().getBytes()).encryptHex(entity.getPwdText());
+		entity.setPwdText(pwd);
+		
 		// 参数处理
 		dataBaseDao.insert(entity);
 		
@@ -76,7 +90,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改系统用户",entity.getId());
 		
-		String[] fields = {"userType","realName","aliasName","portrait","birthday","sex","email","qq","tel","securityQuestion","sucurityMfa","lastLoginTime","lastLoginIp","descs"};
+		String[] fields = {"orgId","userType","username","realName","aliasName","avatar","birthday","sex","email","qq","tel","status","lockTime","descs"};
 		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

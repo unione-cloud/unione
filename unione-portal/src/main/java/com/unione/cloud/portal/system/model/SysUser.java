@@ -1,20 +1,13 @@
 package com.unione.cloud.portal.system.model;
-
-import java.util.Date;
-import java.util.List;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.beetl.sql.annotation.entity.LogicDelete;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
@@ -26,189 +19,143 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-
 /**
- * @类名 <p>SysUser
- * 
- * @描述 SysUser类属性
- * 		<p>1.Long sid		
- * 		<p>2.Long tenantId		租户ID
- * 		<p>3.Long orgId		机构ID，用户默认机构
- * 		<p>4.Integer userType		用户类型，字典USERTYPE 1管理员，2普通用户，9其他
- * 		<p>5.String username		登录帐号
- * 		<p>6.String pwdText		用户密码
- * 		<p>7.String pwdSalt		密码加密盐
- * 		<p>8.String realName		真实姓名
- * 		<p>9.String aliasName		别名
- * 		<p>10.String portrait		头像
- * 		<p>11.Date birthday		生日
- * 		<p>12.Integer sex		性别，字典SEX 1女，2男
- * 		<p>13.String email		邮箱
- * 		<p>14.String qq		联系qq
- * 		<p>15.String tel		联系电话
- * 		<p>16.String securityQuestion		密保问题
- * 		<p>17.String sucurityMfa		MFA设备标识
- * 		<p>18.Date lastLoginTime		上次登录时间
- * 		<p>19.String lastLoginIp		上次登录ip
- * 		<p>20.Integer status		用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
- * 		<p>21.Date lockTime		锁定时间，锁定时间后才能继续登录
- * 		<p>22.String descs		描述
- * 		<p>23.Date created		
- * 		<p>24.Long createdBy		
- * 		<p>25.Date lastUpdated		
- * 		<p>26.Long lastUpdatedBy		
- *      
- * @数据库表名称:		SYS_USER
- * @数据库表备注:	 	系统管理：用户信息
- * 
- * @作者	Jeking Yang
- * @日期	2023-8-31 0:00:33
+ * @标题 	SysUser Entity
+ * @描述	系统管理：用户信息
+ * @作者	Unione Cloud CodeGen
+ * @日期	2024-03-25 21:18:03
  * @版本	1.0.0
- *
- */
+ **/
 @Data
 @Builder
+@SqlResource("system.SysUser")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@Table(name="SYS_USER")
-@SqlResource("SysUser")
-@UniDataPermis(DataPermis.TENANTID)
-public class SysUser extends Pojo{
+@Table(name="sys_user")
+public class SysUser extends Pojo {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2229114793507234711L;
-	// fields start
-	/**
-	 * 用户类型，字典USERTYPE 1管理员，2普通用户，9其他
-	 */
+	* 用户类型，字典USERTYPE 1管理员，2普通用户，9其他
+	*/
 	@NotNull(message = "用户类型不能为空",groups = {Validator.save.class,Validator.update.class})
-	@ApiModelProperty(value="用户类型，字典USERTYPE 1管理员，2普通用户，9其他",notes="字符长度为：10")
+	@ApiModelProperty(value="用户类型，字典USERTYPE 1管理员，2普通用户，9其他",notes="长度为：10")
 	private Integer userType;
 	/**
-	 * 登录帐号
-	 */
+	* 登录帐号
+	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="登录帐号",notes="字符长度为：250")
+	@ApiModelProperty(value="登录帐号",notes="长度为：100")
 	@NotNull(message = "登录帐号不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "登录帐号不能为空",groups = {Validator.save.class})
 	private String username;
 	/**
-	 * 用户密码
-	 */
+	* 用户密码
+	*/
 	@JsonIgnore
-	@ApiModelProperty(value="用户密码",notes="字符长度为：250")
+	@ApiModelProperty(value="用户密码",notes="长度为：200")
 	@NotNull(message = "用户密码不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
 	private String pwdText;
 	/**
-	 * 密码加密盐
-	 */
+	* 密码加密盐
+	*/
 	@JsonIgnore
-	@ApiModelProperty(value="密码加密盐",notes="字符长度为：50")
+	@ApiModelProperty(value="密码加密盐",notes="长度为：50")
 	private String pwdSalt;
 	/**
-	 * 真实姓名
-	 */
+	* 真实姓名
+	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="真实姓名",notes="字符长度为：50")
+	@ApiModelProperty(value="真实姓名",notes="长度为：50")
 	private String realName;
 	/**
-	 * 别名
-	 */
+	* 别名
+	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="别名",notes="字符长度为：50")
+	@ApiModelProperty(value="别名",notes="长度为：50")
 	private String aliasName;
 	/**
-	 * 头像
-	 */
-	@ApiModelProperty(value="头像",notes="字符长度为：500")
-	private String portrait;
+	* 头像
+	*/
+	@ApiModelProperty(value="头像",notes="长度为：300")
+	private String avatar;
 	/**
-	 * 生日
-	 */
-	@ApiModelProperty(value="生日",notes="字符长度为：10")
+	* 生日，YYYY-MM-DD
+	*/
+	@ApiModelProperty(value="生日，YYYY-MM-DD",notes="长度为：10")
 	@JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date birthday;
+	private String birthday;
 	/**
-	 * 性别，字典SEX 1女，2男
-	 */
-	@ApiModelProperty(value="性别，字典SEX 1女，2男",notes="字符长度为：10")
+	* 性别，字典SEX 1女，2男
+	*/
+	@ApiModelProperty(value="性别，字典SEX 1女，2男",notes="长度为：10")
 	private Integer sex;
 	/**
-	 * 邮箱
-	 */
-	@UniQueryKeyWord
-	@ApiModelProperty(value="邮箱",notes="字符长度为：250")
+	* 邮箱
+	*/
+	@ApiModelProperty(value="邮箱",notes="长度为：200")
 	private String email;
 	/**
-	 * 联系qq
-	 */
-	@UniQueryKeyWord
-	@ApiModelProperty(value="联系qq",notes="字符长度为：50")
+	* 联系qq
+	*/
+	@ApiModelProperty(value="联系qq",notes="长度为：50")
 	private String qq;
 	/**
-	 * 联系电话
-	 */
+	* 联系电话
+	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="联系电话",notes="字符长度为：30")
+	@ApiModelProperty(value="联系电话",notes="长度为：30")
 	private String tel;
 	/**
-	 * 密保问题
-	 */
-	@ApiModelProperty(value="密保问题",notes="字符长度为：250")
+	* 密保问题
+	*/
+	@ApiModelProperty(value="密保问题",notes="长度为：200")
 	private String securityQuestion;
 	/**
-	 * MFA设备标识
-	 */
-	@ApiModelProperty(value="MFA设备标识",notes="字符长度为：100")
+	* MFA设备标识
+	*/
+	@ApiModelProperty(value="MFA设备标识",notes="长度为：100")
 	private String sucurityMfa;
 	/**
-	 * 上次登录时间
-	 */
-	@ApiModelProperty(value="上次登录时间",notes="字符长度为：26")
+	* 上次登录时间
+	*/
+	@ApiModelProperty(value="上次登录时间",notes="长度为：19")
 	private Long lastLoginTime;
 	/**
-	 * 上次登录ip
-	 */
-	@ApiModelProperty(value="上次登录ip",notes="字符长度为：30")
+	* 上次登录ip
+	*/
+	@ApiModelProperty(value="上次登录ip",notes="长度为：30")
 	private String lastLoginIp;
 	/**
-	 * 用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
-	 */
-	@ApiModelProperty(value="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",notes="字符长度为：10")
+	* 累计成功登陆次数
+	*/
+	@ApiModelProperty(value="累计成功登陆次数",notes="长度为：19")
+	private Long totalLoginSuccess;
+	/**
+	* 累计失败登陆次数
+	*/
+	@ApiModelProperty(value="累计失败登陆次数",notes="长度为：19")
+	private Long totalLoginFailue;
+	/**
+	* 用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定
+	*/
+	@ApiModelProperty(value="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",notes="长度为：10")
 	private Integer status;
 	/**
-	 * 删除标记，0:正常,1:已删除
-	 */
-	@LogicDelete(1)
-	@ApiModelProperty(value="删除标记，0:正常,1:已删除",notes="字符长度为：10")
-	private Integer delFlag;
-	/**
-	 * 审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过
-	 */
-	@ApiModelProperty(value="审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过",notes="字符长度为：10")
+	* 审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过
+	*/
+	@ApiModelProperty(value="审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过",notes="长度为：10")
 	private Integer auditSts;
 	/**
-	 * 锁定时间，锁定时间后才能继续登录
-	 */
-	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="字符长度为：26")
+	* 锁定时间，锁定时间后才能继续登录
+	*/
+	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="长度为：19")
 	private Long lockTime;
 	/**
-	 * 描述
-	 */
-	@ApiModelProperty(value="描述",notes="字符长度为：500")
+	* 描述
+	*/
+	@ApiModelProperty(value="描述",notes="长度为：400")
 	private String descs;
-	// fields end
 
-	/**
-	 * 非持久化属性
-	 */
-	@ApiModelProperty("搜索关键字")
-	private String keywords;
-	private String areaCode;
-	private String orgName;
-	private String orgLvsn;
 }

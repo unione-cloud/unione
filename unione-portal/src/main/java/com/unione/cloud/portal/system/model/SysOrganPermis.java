@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysOrganPermis Entity
  * @描述	机构权限
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data

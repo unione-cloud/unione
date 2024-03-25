@@ -49,7 +49,7 @@ public class LogsUtil {
 	}
 	
 	@Value("${spring.application.name}")
-	public void setAppCode(String appCode) {
+	public void setAppSn(String appCode) {
 		LogsUtil.appCode=appCode;
 	}
 	
@@ -218,7 +218,7 @@ public class LogsUtil {
 		if(ent==null) {
 			contents.set(null);
 			ent=new SysLogs();
-			ent.setAppCode(appCode);
+			ent.setAppSn(appCode);
 			ent.setCreated(DateUtil.current());
 			ent.setStartTime(DateUtil.current());
 			if(sessionService.getPrincipal()!=null) {

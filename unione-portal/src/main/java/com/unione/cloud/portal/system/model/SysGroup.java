@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysGroup Entity
  * @描述	系统管理：分组，分组对应的行政区划信息直接存储在数据权限：行政区划权限表中。一个分组可以有多个行政区划，但都是当前用户所
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -37,24 +37,19 @@ public class SysGroup extends Pojo {
 	@ApiModelProperty(value="分组名称",notes="长度为：200")
 	private String name;
 	/**
-	* 分组编码
+	* 分组编码，携带层级的编码
 	*/
-	@ApiModelProperty(value="分组编码",notes="长度为：30")
+	@ApiModelProperty(value="分组编码，携带层级的编码",notes="长度为：30")
 	private String sn;
-	/**
-	* 层级编码
-	*/
-	@ApiModelProperty(value="层级编码",notes="长度为：40")
-	private String lvsn;
 	/**
 	* 所在层级
 	*/
 	@ApiModelProperty(value="所在层级",notes="长度为：10")
 	private Integer level;
 	/**
-	* 分组类型，字典UGROUPTYPES 9其他
+	* 分组类型，字典GROUPTYPES 1用户分组，9其他
 	*/
-	@ApiModelProperty(value="分组类型，字典UGROUPTYPES 9其他",notes="长度为：10")
+	@ApiModelProperty(value="分组类型，字典GROUPTYPES 1用户分组，9其他",notes="长度为：10")
 	private Integer types;
 	/**
 	* 分组图标

@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysRole Entity
  * @描述	系统管理：角色信息
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:38
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -34,12 +34,12 @@ public class SysRole extends Pojo {
 	/**
 	* 编码
 	*/
-	@ApiModelProperty(value="编码",notes="长度为：50")
-	private String codes;
+	@ApiModelProperty(value="编码",notes="长度为：20")
+	private String sn;
 	/**
-	* 类型，字典ROLETYPE 
+	* 类型，字典ROLETYPE 9其他
 	*/
-	@ApiModelProperty(value="类型，字典ROLETYPE ",notes="长度为：10")
+	@ApiModelProperty(value="类型，字典ROLETYPE 9其他",notes="长度为：10")
 	private Integer types;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用

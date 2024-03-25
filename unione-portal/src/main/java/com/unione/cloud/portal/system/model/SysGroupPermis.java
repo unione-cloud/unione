@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysGroupPermis Entity
  * @描述	系统管理：分组权限
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -27,10 +27,10 @@ import com.unione.cloud.core.model.Pojo;
 @Table(name="sys_group_permis")
 public class SysGroupPermis extends Pojo {
 	/**
-	* 用户分组ID
+	* 分组ID
 	*/
-	@ApiModelProperty(value="用户分组ID",notes="长度为：19")
-	private Long ugroupId;
+	@ApiModelProperty(value="分组ID",notes="长度为：19")
+	private Long groupId;
 	/**
 	* 应用ID
 	*/

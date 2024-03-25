@@ -41,6 +41,11 @@ public class Pojo implements Serializable {
 	 */
 	@ApiModelProperty("用户ID")
 	private Long userId;
+	/**
+	 * 删除标记，0:正常,1:已删除
+	 */
+	@ApiModelProperty(value="删除标记，0:正常,1:已删除",notes="字符长度为：10")
+	private Integer delFlag;
 	
 	/**
 	 * 创建时间

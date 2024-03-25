@@ -15,7 +15,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysOrgan Entity
  * @描述	系统管理：机构信息
  * @作者	Unione Cloud CodeGen
- * @日期	2024-03-22 08:03:37
+ * @日期	2024-03-25 20:34:17
  * @版本	1.0.0
  **/
 @Data
@@ -32,11 +32,6 @@ public class SysOrgan extends Pojo {
 	@ApiModelProperty(value="上级ID",notes="长度为：19")
 	private Long parentId;
 	/**
-	* 区域label，eg：广州市->天河区
-	*/
-	@ApiModelProperty(value="区域label，eg：广州市->天河区",notes="长度为：200")
-	private String areaLabel;
-	/**
 	* 企业/机构名称
 	*/
 	@ApiModelProperty(value="企业/机构名称",notes="长度为：250")
@@ -47,15 +42,25 @@ public class SysOrgan extends Pojo {
 	@ApiModelProperty(value="企业/机构别名",notes="长度为：250")
 	private String alias;
 	/**
-	* 编码
-	*/
-	@ApiModelProperty(value="编码",notes="长度为：100")
-	private String codes;
-	/**
 	* 类型：字典ORGTYPES 1企业，2机构，3部门
 	*/
 	@ApiModelProperty(value="类型：字典ORGTYPES 1企业，2机构，3部门",notes="长度为：10")
 	private Integer types;
+	/**
+	* 区域label，eg：广州市->天河区
+	*/
+	@ApiModelProperty(value="区域label，eg：广州市->天河区",notes="长度为：200")
+	private String areaLabel;
+	/**
+	* 编码，携带层级属性的机构编码，不能为空，唯一
+	*/
+	@ApiModelProperty(value="编码，携带层级属性的机构编码，不能为空，唯一",notes="长度为：100")
+	private String sn;
+	/**
+	* 所在层级
+	*/
+	@ApiModelProperty(value="所在层级",notes="长度为：10")
+	private Integer level;
 	/**
 	* 主营业务
 	*/

@@ -76,7 +76,7 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改租户信息",entity.getId());
 		
-		String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","status","delFlag","descs"};
+		String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","status","descs"};
 		SqlBuilder<SysTenant> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);
