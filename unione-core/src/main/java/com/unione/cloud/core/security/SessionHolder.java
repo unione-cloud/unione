@@ -10,6 +10,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.stereotype.Service;
 
+import com.unione.cloud.core.security.UserRoles.Roles;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -164,6 +166,17 @@ public class SessionHolder implements SessionService {
 	@Override
 	public boolean isAdmin() {
 		return administrator!=null && administrator.equals(this.getUsername());
+	}
+	
+	@Override
+	public boolean hasRole(Roles... roles) {
+		List<String> list=this.getUserRoles();
+		for(Roles role:roles) {
+			if(list.contains(role.code())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 

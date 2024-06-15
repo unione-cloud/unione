@@ -3,6 +3,8 @@ package com.unione.cloud.core.security;
 import java.util.List;
 import java.util.Map;
 
+import com.unione.cloud.core.security.UserRoles.Roles;
+
 /**
  * @描述 <p>用户会话接口
  * <p>1.获得用户ID				String getUserId()
@@ -135,5 +137,13 @@ public interface SessionService{
 	 * @return
 	 */
 	public boolean isAdmin();
+	
+	/**
+	 * 验证当前帐号是否有指定的角色
+	 * @param role
+	 * @return 如果拥有其中一个角色，则返回true
+	 */
+	public boolean hasRole(Roles ...role);
+	
 
 }

@@ -45,6 +45,18 @@ public class AssertUtil {
 		return this;
 	}
 	
+	public AssertUtil notNull(Object value,String errMsg,String errCode) {
+		if(value==null) {
+			buildExpception(errMsg,errCode);
+		}
+		if (value instanceof CharSequence) {
+			if(value.toString().trim().length()==0) {
+				buildExpception(errMsg,errCode);
+			}
+		}
+		return this;
+	}
+	
 	public AssertUtil notNull(Object object,String props[],String message) {
 		if(object==null) {
 			buildExpception("对象不能为空");
@@ -70,6 +82,16 @@ public class AssertUtil {
 		}
 		if(target!=null && !target.equals(object)) {
 			buildExpception(message);
+		}
+		return this;
+	}
+	
+	public AssertUtil notEq(Object object,Object target,String errMsg,String errCode) {
+		if(object!=null && !object.equals(target)) {
+			buildExpception(errMsg,errCode);
+		}
+		if(target!=null && !target.equals(object)) {
+			buildExpception(errMsg,errCode);
 		}
 		return this;
 	}
@@ -163,6 +185,13 @@ public class AssertUtil {
 	public AssertUtil isTrue(boolean expression, String message) {
 		if (!expression) {
 			buildExpception(message);
+		}
+		return this;
+	}
+	
+	public AssertUtil isTrue(boolean expression, String errMsg,String errCode) {
+		if (!expression) {
+			buildExpception(errMsg,errCode);
 		}
 		return this;
 	}
@@ -292,6 +321,21 @@ public class AssertUtil {
 			throw new RemoteException(message);
 		case "database":
 			throw new DataBaseException(message);
+		}
+	}
+	
+	/**
+	 * 构建异常信息
+	 * @param message
+	 */
+	private void buildExpception(String message,String errCode) {
+		switch (type) {
+		case "service":
+			throw new ServiceException(errCode,message);
+		case "remote":
+			throw new RemoteException(errCode,message);
+		case "database":
+			throw new DataBaseException(errCode,message);
 		}
 	}
 	

@@ -18,6 +18,12 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>unione.cloud</groupId>
+			<artifactId>unione-form</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>

@@ -14,8 +14,10 @@ import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLManagerBuilder;
 import org.beetl.sql.core.UnderlinedNameConversion;
 import org.beetl.sql.core.db.MySqlStyle;
+import org.beetl.sql.core.meta.MetadataManager;
 import org.beetl.sql.ext.DebugInterceptor;
 import org.beetl.sql.gen.SourceBuilder;
+import org.beetl.sql.gen.SourceFilter;
 import org.beetl.sql.gen.simple.EntitySourceBuilder;
 
 import com.unione.cloud.beetsql.ext.FunIsBaseField;
@@ -63,9 +65,9 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("system");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("system");
-		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("page");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("page");
+		SourceBuilder mdBuilder = new SqlMdSourceBuilder("page");
 
 		sourceBuilder.add(entityBuilder);
 //		sourceBuilder.add(mdBuilder);
@@ -78,13 +80,20 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
-		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.portal");
+		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.form");
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 		
-		String tableName = "sys_organ";
 		//可以在控制台看到生成的所有代码
-//		factory.gen(tableName,mavenProject);
-		factory.genAll(mavenProject);
+//		factory.genAll(mavenProject, new SourceFilter() {
+//			@Override
+//			public boolean accept(MetadataManager metadataManager, String tableName) {
+//				return tableName.startsWith("sys_data");
+//			}
+//		});
+		
+		factory.gen("sys_page_widget",mavenProject);
+		factory.gen("sys_page_portlet",mavenProject);
+//		factory.genAll(mavenProject);
 	}
 
 }
