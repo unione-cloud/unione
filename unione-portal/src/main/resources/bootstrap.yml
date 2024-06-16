@@ -6,8 +6,7 @@
 server:
    port: 8080
    servlet:
-      session:
-         timeout: 36000
+      context-path: /portal
    tomcat:
       uri-encoding: UTF-8
 
@@ -62,7 +61,7 @@ security:
    enabled: true
    filter:
       includes: /**
-      executions: /,/api/security/login,/api/security/captcha,/api/security/register,/api/security/secret/encrypt,/swagger-ui.html/**,/webjars/**,/swagger-resources/**,/v2/api-docs,/doc.html/**,/druid/**
+      executions: /portal/,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/api/security/secret/encrypt,/portal/api/security/secret/pubkey,/portal/swagger-ui.html/**,/portal/webjars/**,/portal/swagger-resources/**,/portal/v2/api-docs,/portal/doc.html/**,/portal/druid/**
 
 
 

@@ -25,5 +25,10 @@ public interface SecretInterface {
 	 */
 	public String hash(String data);
 	
+	/**
+	 * 获得公钥
+	 * @return
+	 */
+	public String getPubKey();
 	
 }

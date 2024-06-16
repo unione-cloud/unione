@@ -126,6 +126,14 @@ public class SecretService {
 		return result;
 	}
 	
-	
+	/**
+	 * 获得公钥
+	 * @return
+	 */
+	public String getPubKey() {
+		SecretInterface smi=SpringCtxUtil.getBean(String.format("%sSecretService", ENCRYPTION), SecretInterface.class);
+		AssertUtil.service().notNull(smi, String.format("[%s]加密服务未找到", ENCRYPTION));
+		return smi.getPubKey();
+	}
 	
 }

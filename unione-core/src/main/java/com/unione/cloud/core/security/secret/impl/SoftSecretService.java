@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 public class SoftSecretService implements SecretInterface {
 	
+	private String sm2PubKey;
 	private SM2 sm2;
 	private HMac hmac;
 	
@@ -34,7 +35,20 @@ public class SoftSecretService implements SecretInterface {
 			String tmps[]=keys.trim().split("@");
 			AssertUtil.service().isTrue(tmps.length==2, "秘钥服务配置错误，secret.soft.sm2keys配置方式为： {priKey}@{pubKey}");
 			sm2=SmUtil.sm2(tmps[0], tmps[1]);
+			sm2PubKey=tmps[1];
 		}
+	}
+	
+	/**
+	 * 获取公钥
+	 * @return
+	 */
+	@Override
+	public String getPubKey() {
+		if(!StringUtils.isEmpty(sm2PubKey)) {
+			return sm2PubKey;
+		}
+		return null;
 	}
 	
 	@Value("${secret.soft.hmackey:DmiaqxvLEIL8xIYFvYa2}")
