@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,13 +22,11 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.page.model.SysPageDefine;
-import com.unione.cloud.form.page.model.SysPageHis;
 import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -74,7 +73,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 
 	@PostMapping(value="/save")
 	@ApiOperation(value="保存页面配置")
-	public Results<SysPageDefine> save(@Validated(Validator.save.class) SysPageDefine entity) {
+	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody SysPageDefine entity) {
 		log.debug("进入:新增页面定义信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增页面定义");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
