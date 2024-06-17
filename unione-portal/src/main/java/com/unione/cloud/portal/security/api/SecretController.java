@@ -116,14 +116,5 @@ public class SecretController {
 	}
 	
 	
-	/**
-	 * 获取公钥
-	 * @return
-	 */
-	@PostMapping("/pubkey")
-	@ApiOperation("获取公钥")
-	public Results<String> getPubKey(){
-		return Results.success(secretService.getPubKey());
-	}
 	
 }
