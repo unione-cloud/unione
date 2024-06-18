@@ -11,6 +11,9 @@ public class LoginParam {
 	@ApiModelProperty("帐号")
 	private String username;
 	
+	@ApiModelProperty("手机号")
+	private String userphone;
+	
 	@ApiModelProperty("密码")
 	private String password;
 	

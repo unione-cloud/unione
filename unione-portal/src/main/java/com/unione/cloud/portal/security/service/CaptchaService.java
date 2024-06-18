@@ -160,7 +160,7 @@ public class CaptchaService {
 	public boolean validate(String captcha) {
 		log.debug("进入->匹配验证码,code:{}",captcha);
 		if(!ENABLE) {
-			log.warn("验证码状态未开启，如需开启请修改配置,captcha.enable=true");
+			log.warn("验证码状态未开启，如需开启请修改配置,security.captcha.enable=true");
 			return true;
 		}
 		
