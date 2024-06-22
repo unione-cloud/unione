@@ -1,0 +1,31 @@
+version: '3.3'
+services:
+   unione-gateway:
+    image: "unione.cloud/gateway:1.0.0"
+    working_dir: /usr/local
+    networks:
+     - net
+    ports:
+     - "8080:8080"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        
+   unione-portal:
+    image: "unione.cloud/portal:1.0.0"
+    networks:
+     - net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 10.27.0.0/16
+
+
+
