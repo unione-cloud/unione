@@ -82,7 +82,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		
 		if(entity.getSid()!=null) {
 			// 更新
-			String[] fields = {"title","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};
+			String[] fields = {"title","component","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};
 			SqlBuilder<SysPageDefine> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			int len = dataBaseDao.updateById(sqlBuilder);
 			LogsUtil.add("保存数据,len:"+len);

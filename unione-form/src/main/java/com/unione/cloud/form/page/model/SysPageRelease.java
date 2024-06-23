@@ -1,5 +1,9 @@
 package com.unione.cloud.form.page.model;
 import java.util.Date;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
@@ -11,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	SysPageRelease Entity
@@ -40,9 +45,14 @@ public class SysPageRelease extends Pojo {
 	@ApiModelProperty(value="模版ID",notes="长度为：19")
 	private Long tmplId;
 	/**
-	* 标题
+	* 页面组件
 	*/
-	@ApiModelProperty(value="标题",notes="长度为：100")
+	@ApiModelProperty(value="页面组件",notes="长度为：100")
+	private String component;
+	/**
+	* 页面标题
+	*/
+	@ApiModelProperty(value="页面标题",notes="长度为：100")
 	private String title;
 	/**
 	* 页面编码，唯一

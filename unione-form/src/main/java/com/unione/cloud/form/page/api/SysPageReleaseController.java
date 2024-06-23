@@ -76,7 +76,7 @@ public class SysPageReleaseController implements PojoFeignApi<SysPageRelease>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Modify, "修改页面发布",entity.getId());
 		
-		String[] fields = {"appId","tmplId","title","sn","vers","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","status","descs"};
+		String[] fields = {"appId","tmplId","component","title","sn","vers","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","status","descs"};
 		SqlBuilder<SysPageRelease> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

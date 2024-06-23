@@ -1,7 +1,9 @@
 package com.unione.cloud.form.page.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.AssignID;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+
+import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,8 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	SysPageHis Entity
@@ -40,9 +40,14 @@ public class SysPageHis extends Pojo {
 	@ApiModelProperty(value="页面ID",notes="长度为：19")
 	private Long pageId;
 	/**
-	* 标题
+	* 页面组件
 	*/
-	@ApiModelProperty(value="标题",notes="长度为：100")
+	@ApiModelProperty(value="页面组件",notes="长度为：100")
+	private String component;
+	/**
+	* 页面标题
+	*/
+	@ApiModelProperty(value="页面标题",notes="长度为：100")
 	private String title;
 	/**
 	* 页面编码，唯一

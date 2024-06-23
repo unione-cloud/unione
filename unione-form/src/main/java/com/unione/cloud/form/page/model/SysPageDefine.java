@@ -50,11 +50,18 @@ public class SysPageDefine extends Pojo {
 	@ApiModelProperty(value="模版ID",notes="长度为：19")
 	private Long tmplId;
 	/**
-	* 标题
+	* 页面组件
 	*/
-	@ApiModelProperty(value="标题",notes="长度为：100")
-	@NotNull(message="标题不能为空",groups = {Validator.save.class,Validator.update.class})
-	@NotEmpty(message="标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@ApiModelProperty(value="页面组件",notes="长度为：100")
+	@NotNull(message="页面组件不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotEmpty(message="页面组件不能为空",groups = {Validator.save.class,Validator.update.class})
+	private String component;
+	/**
+	* 页面标题
+	*/
+	@ApiModelProperty(value="页面标题",notes="长度为：100")
+	@NotNull(message="页面标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotEmpty(message="页面标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String title;
 	/**
 	* 页面编码，唯一
