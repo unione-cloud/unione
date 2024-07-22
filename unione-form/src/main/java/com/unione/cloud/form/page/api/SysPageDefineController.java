@@ -3,6 +3,7 @@ package com.unione.cloud.form.page.api;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,8 +80,16 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
 				UserFormRoles.FORM_CONFIG,
 				UserFormRoles.FORM_DEV), "当前帐号无权限");
+		if("new_".equals(entity.getSn())) {
+			entity.setSn(null);
+		}
 		
-		if(entity.getSid()!=null) {
+		if(!StringUtils.isEmpty(entity.getSn())) {
+			SysPageDefine param=SysPageDefine.builder().sn(entity.getSn()).build();
+			param.setTenantId(sessionService.getTenantId());
+			SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+			AssertUtil.service().notNull(tmp, "页面定义对象未找到");
+			
 			// 更新
 			String[] fields = {"title","component","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};
 			SqlBuilder<SysPageDefine> sqlBuilder=SqlBuilder.build(entity).field(fields);
@@ -90,7 +99,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			// 新增
 			
 			// 参数处理
-			BeanUtils.setDefaultValue(entity, "sn",RandomUtil.randomString(20));
+			entity.setSn(RandomUtil.randomString(20));
 			BeanUtils.setDefaultValue(entity, "isTmpl",0);
 			BeanUtils.setDefaultValue(entity, "isGlobal",0);
 			BeanUtils.setDefaultValue(entity, "status",1);
@@ -98,7 +107,12 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			
 			// 验证页面编码是否存在
 			SysPageDefine param=SysPageDefine.builder().sn(entity.getSn()).build();
+			param.setTenantId(sessionService.getTenantId());
 			SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+			if(tmp!=null) {
+				entity.setSn(RandomUtil.randomString(20));
+				tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+			}
 			AssertUtil.service().isTrue(tmp==null, "页面编码已存在","PAGE-SN-EXIST");
 			
 			int len = dataBaseDao.insert(entity);
@@ -124,7 +138,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		SysPageDefine param=SysPageDefine.builder().sn(sn).build();
 		SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
 		AssertUtil.service().notNull(tmp, "页面信息未找到","404");
-		LogsUtil.setTarget(tmp.getSid());
+		LogsUtil.setTarget(tmp.getId());
 		
 		LogsUtil.success(tmp.getId());
 		log.debug("退出:加载页面信息方法，sn:{},result:true",sn);

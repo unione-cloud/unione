@@ -27,8 +27,10 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="sys_page_portlet")
 public class SysPagePortlet extends Pojo {
-	@AssignID
-	private Long sid;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1199033771607257590L;
 	/**
 	* 标题
 	*/

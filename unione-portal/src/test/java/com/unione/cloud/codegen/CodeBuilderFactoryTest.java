@@ -91,8 +91,7 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("sys_page_widget",mavenProject);
-		factory.gen("sys_page_portlet",mavenProject);
+		factory.gen("sys_page_ref",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

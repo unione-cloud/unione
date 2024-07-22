@@ -28,11 +28,9 @@ import com.unione.cloud.core.model.Pojo;
 @Table(name="sys_data_field")
 public class SysDataField extends Pojo {
 	/**
-	* 主键
-	*/
-	@AssignID
-	@ApiModelProperty(value="主键",notes="长度为：19")
-	private Long sid;
+	 * 
+	 */
+	private static final long serialVersionUID = -1857506753714091544L;
 	/**
 	* 数据模型ID
 	*/

@@ -32,8 +32,10 @@ import com.unione.cloud.core.model.Validator;
 @Accessors(chain = true)
 @Table(name="sys_page_release")
 public class SysPageRelease extends Pojo {
-	@AssignID
-	private Long sid;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6393555894966621876L;
 	/**
 	* 应用ID
 	*/

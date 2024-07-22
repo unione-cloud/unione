@@ -27,8 +27,10 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="sys_page_mine")
 public class SysPageMine extends Pojo {
-	@AssignID
-	private Long sid;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3656715671161863908L;
 	/**
 	* 页面ID
 	*/

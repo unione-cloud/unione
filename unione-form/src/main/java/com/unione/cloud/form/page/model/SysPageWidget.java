@@ -27,8 +27,10 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="sys_page_widget")
 public class SysPageWidget extends Pojo {
-	@AssignID
-	private Long sid;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 591425380605644471L;
 	/**
 	* 标题
 	*/

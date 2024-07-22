@@ -36,8 +36,6 @@ public class SysPageDefine extends Pojo {
 	 * 
 	 */
 	private static final long serialVersionUID = -3564319336714244891L;
-	@AssignID
-	private Long sid;
 	/**
 	* 应用ID
 	*/

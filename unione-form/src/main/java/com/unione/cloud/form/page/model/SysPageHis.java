@@ -27,8 +27,10 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="sys_page_his")
 public class SysPageHis extends Pojo {
-	@AssignID
-	private Long sid;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2018034272566825608L;
 	/**
 	* 模版ID
 	*/

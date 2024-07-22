@@ -1,7 +1,8 @@
 package com.unione.cloud.form.data.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+
+import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	SysDataAuth Entity
@@ -28,11 +27,9 @@ import com.unione.cloud.core.model.Pojo;
 @Table(name="sys_data_auth")
 public class SysDataAuth extends Pojo {
 	/**
-	* 主键
-	*/
-	@AssignID
-	@ApiModelProperty(value="主键",notes="长度为：19")
-	private Long sid;
+	 * 
+	 */
+	private static final long serialVersionUID = 8536381881140054070L;
 	/**
 	* 数据模型ID
 	*/
