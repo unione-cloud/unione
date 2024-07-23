@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
+@RefreshScope
 @RestController
 @Api(tags = "页面管理：页面定义",description="SysPageDefine")
 @RequestMapping("/api/page/define")	 //TreeFeignApi
@@ -50,6 +53,9 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 	
 	@Autowired
 	private SessionService sessionService;
+	
+	@Value("${form.page.default.appid:1000}")
+	private Long DEFAULT_APP_ID;
 	
 	
 	@Override
@@ -100,6 +106,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			
 			// 参数处理
 			entity.setSn(RandomUtil.randomString(20));
+			BeanUtils.setDefaultValue(entity, "appId", DEFAULT_APP_ID);
 			BeanUtils.setDefaultValue(entity, "isTmpl",0);
 			BeanUtils.setDefaultValue(entity, "isGlobal",0);
 			BeanUtils.setDefaultValue(entity, "status",1);
