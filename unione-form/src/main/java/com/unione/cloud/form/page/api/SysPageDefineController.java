@@ -95,6 +95,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			param.setTenantId(sessionService.getTenantId());
 			SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
 			AssertUtil.service().notNull(tmp, "页面定义对象未找到");
+			entity.setId(tmp.getId());
 			
 			// 更新
 			String[] fields = {"title","component","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};

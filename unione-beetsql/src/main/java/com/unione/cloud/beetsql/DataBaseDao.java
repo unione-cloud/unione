@@ -206,8 +206,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
+		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
