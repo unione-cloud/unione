@@ -8,37 +8,49 @@ import org.apache.commons.lang3.StringUtils;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.log.Log;
 
-public interface BaseField {
+public enum BaseField {
 	
-	public static StsField ID=new StsField("id","ID");
-	public static StsField TENANT_ID=new StsField("tenantId","TENANT_ID");
-	public static StsField ORGAN_ID=new StsField("orgId","ORG_ID");
-	public static StsField ORGAN_CODE=new StsField("orgCode","ORG_CODE");
-	public static StsField AREA_CODE=new StsField("areaCode","AREA_CODE");
-	public static StsField USER_ID=new StsField("userId","USER_ID");
+	ID("id","ID"),
+	TENANT_ID("tenantId","TENANT_ID"),
+	ORGAN_ID("orgId","ORG_ID"),
+	ORGAN_CODE("orgCode","ORG_CODE"),
+	AREA_CODE("areaCode","AREA_CODE"),
+	USER_ID("userId","USER_ID"),
+	DEL_FLAG("delFlag","DEL_FLAG"),
+	CREATED("created","CREATED"),
+	CREATED_BY("createdBy","CREATED_BY"),
+	LAST_UPDATED("lastUpdated","LAST_UPDATED"),
+	LAST_UPDATED_BY("lastUpdatedBy","LAST_UPDATED_BY");
 	
-	public static StsField DEL_FLAG=new StsField("delFlag","DEL_FLAG");
+	private String name;
+	private String column;
 	
-	public static StsField CREATED=new StsField("created","CREATED");
-	public static StsField CREATED_BY=new StsField("createdBy","CREATED_BY");
-	public static StsField LAST_UPDATED=new StsField("lastUpdated","LAST_UPDATED");
-	public static StsField LAST_UPDATED_BY=new StsField("lastUpdatedBy","LAST_UPDATED_BY");
+	private BaseField(String name,String column) {
+		this.name=name;
+		this.column=column;
+	}
 	
-	
-	public static StsField isBase(String field) {
+	public String getName() {
+		return name;
+	}
+	public String getColumn() {
+		return column;
+	}
+
+	public static BaseField isBase(String field) {
 		return isBase(field, null);
 	}
 	
-	public static StsField isBaseColumn(String field) {
+	public static BaseField isBaseColumn(String field) {
 		return isBase(field, "column");
 	}
 	
-	public static StsField isBaseProp(String field) {
+	public static BaseField isBaseProp(String field) {
 		return isBase(field, "prop");
 	}
 	
 	
-	static StsField isBase(String field,String type) {
+	static BaseField isBase(String field,String type) {
 		Field fields[]=ReflectUtil.getFields(BaseField.class);
 		try {
 			for(int i=0;i<fields.length;i++) {
@@ -46,8 +58,8 @@ public interface BaseField {
 				if(Modifier.isStatic(fd.getModifiers())) {
 					fd.setAccessible(true);
 					Object value=fd.get(null);
-					if(value!=null && value instanceof StsField) {
-						StsField sfd=(StsField)value;
+					if(value!=null && value instanceof BaseField) {
+						BaseField sfd=(BaseField)value;
 						if(StringUtils.isEmpty(type) || "prop".equals(type)) {
 							if(sfd.getName().equals(field)) {
 								return sfd;
@@ -67,19 +79,4 @@ public interface BaseField {
 		return null;
 	}
 	
-	public static class StsField {
-		private StsField(String name,String column) {
-			this.name=name;
-			this.column=column;
-		}
-		private String name;
-		private String column;
-		
-		public String getName() {
-			return this.name;
-		}
-		public String getColumn() {
-			return this.column;
-		}
-	}
 }

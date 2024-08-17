@@ -28,7 +28,6 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.BaseField;
-import com.unione.cloud.core.model.BaseField.StsField;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -211,14 +210,14 @@ public class SqlBuilder<T> {
 		AssertUtil.service().notNull(this.tableName, "table name不能为空");
 		this.entity.setTable(tableName);
 		
-		SqlField pkField=this.entity.getKeyField();
-		if(pkField==null) {
-			TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
-			String idn = tableDesc.getIdNames().iterator().next();
-			pkField=new SqlField();
-			pkField.setAlias(idn);
-			this.entity.setKeyField(pkField);
-		}
+//		SqlField pkField=this.entity.getKeyField();
+//		if(pkField==null) {
+//			TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
+//			String idn = tableDesc.getIdNames().iterator().next();
+//			pkField=new SqlField();
+//			pkField.setAlias(idn);
+//			this.entity.setKeyField(pkField);
+//		}
 		
 		if(!this.initComplete) {
 			this.initComplete=true;
@@ -271,7 +270,7 @@ public class SqlBuilder<T> {
 				}
 				
 				// 判断是否为基础字段
-				StsField stsField=BaseField.isBaseColumn(field.getColumn());
+				BaseField stsField=BaseField.isBaseColumn(field.getColumn());
 				field.setStsField(stsField);
 				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
@@ -323,33 +322,13 @@ public class SqlBuilder<T> {
 			this.processCondition();
 		}else if(classDesc!=null){
 			// Model 数据库操作，解析通用过滤条件，包括：关键字查询，id查询，常规查询
-			
 			// 关键字查询
 			SqlCondition keyWordCondition=new SqlCondition();
-			// id 查询
-			SqlCondition idsCondition=new SqlCondition();
 			// 常规查询
 			List<SqlCondition> normalConditions=new ArrayList<>();
 			
 			// 迭代字段集合
 			this.entity.getFields().stream().forEach(field->{
-				
-				// 主键查询解析
-				if(field.isPk()) {
-					SqlCondition ideq=new SqlCondition();
-					ideq.setFun(SqlFun.OR);
-					ideq.setColumn(field.getColumn());
-					ideq.setName(field.getAlias());
-					ideq.setAction(SqlAction.ID);
-					SqlCondition idin=new SqlCondition();
-					idin.setFun(SqlFun.OR);
-					idin.setColumn(field.getColumn());
-					idin.setName("ids");
-					idin.setAction(SqlAction.IDS);
-					idsCondition.getChildrens().add(ideq);
-					idsCondition.getChildrens().add(idin);
-					return;
-				}
 				
 				// 如果是机构编码，则使用右模糊查询
 				if(field.getColumn().equals(BaseField.ORGAN_CODE.getColumn())) {
@@ -408,9 +387,6 @@ public class SqlBuilder<T> {
 			if(!keyWordCondition.getChildrens().isEmpty()) {
 				this.entity.getConditions().add(keyWordCondition);
 			}
-			if(!idsCondition.getChildrens().isEmpty()) {
-				this.entity.getConditions().add(idsCondition);
-			}
 			if(!normalConditions.isEmpty()) {
 				this.entity.getConditions().addAll(normalConditions);
 			}
@@ -426,9 +402,8 @@ public class SqlBuilder<T> {
 		boolean isJavaBean=!(this.data instanceof Map);
 		
 		StringBuffer buffer=new StringBuffer();
-		if(SqlType.SELECT.equals(type)) {
+		if("SELECT".equalsIgnoreCase(type.value())) {
 			buffer.append("SELECT ");
-			
 			// 查询字段处理
 			StringBuffer fieldBuf=new StringBuffer();
 			this.entity.getFields().stream().forEach(field->{
@@ -448,7 +423,7 @@ public class SqlBuilder<T> {
 				buffer.append(this.entity.getSchema()).append(".");
 			}
 			buffer.append(this.entity.getTable()).append(" ");
-		}else if(SqlType.COUNT.equals(type)) {
+		}else if("COUNT".equalsIgnoreCase(type.value())) {
 			buffer.append("SELECT COUNT(*) FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
 				buffer.append(this.entity.getSchema()).append(".");
@@ -478,23 +453,54 @@ public class SqlBuilder<T> {
 			});
 			
 			StringBuffer lastUpBuf=new StringBuffer();
-			this.entity.getBaseFields().stream().forEach(field->{
-				if(BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) || 
-						BaseField.LAST_UPDATED_BY.getName().equals(field.getStsField().getName())) {
+			this.entity.getStsFields(BaseField.LAST_UPDATED,BaseField.LAST_UPDATED_BY)
+				.stream().forEach(field->{
 					lastUpBuf.append(",").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n");
-				}
-			});
+				});
 			if(lastUpBuf.length()>0) {
 				buffer.append(lastUpBuf.substring(1));
 			}
 			
 			buffer.append("-- @}\n");
+			
 		}else if("DELETE".equalsIgnoreCase(type.value())) {
 			buffer.append("DELETE FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
 				buffer.append(this.entity.getSchema()).append(".");
 			}
 			buffer.append(this.entity.getTable()).append(" ");
+		}
+		
+		// 如果是findById,updateById,deleteById并且未设置查询条件，生成更新条件
+		if(StringUtils.isEmpty(this.entity.getWhere()) && 
+				(SqlType.UPDATE_BYID.equals(type) || SqlType.DELETE_BYID.equals(type) || SqlType.SELECT_BYID.equals(type))) {
+			SqlField idField=this.entity.getKeyField();
+			AssertUtil.service().notNull(idField,"主键字段不能为空");
+			StringBuffer where=new StringBuffer();
+			where.append("\n-- @sqlWhere(){\n");
+			
+			where.append("-- @if(varNotNull(params.id) || varNotNull(params.ids)){\n");
+			where.append("-- @if(varNotNull(params.id) && !varNotNull(params.ids)){\n")
+		      .append(idField.getColumn()).append(" = #{params.id}\n")
+		      .append("-- @}\n");
+			where.append("-- @if(!varNotNull(params.id) && varNotNull(params.ids)){\n")
+		      .append(idField.getColumn()).append(" IN (#{join(params.ids)})\n")
+		      .append("-- @}\n");
+			
+			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID).stream().forEach(field->{
+				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
+			      .append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("},\n")
+			      .append("-- @}\n");
+			});
+			this.entity.getStsFields(BaseField.ORGAN_CODE).stream().forEach(field->{
+				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
+			      .append(" AND ").append(field.getColumn()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'},\n")
+			      .append("-- @}\n");
+			});
+			
+			where.append("-- @}\n");
+			where.append("-- @}\n");
+			this.entity.setWhere(where.toString());
 		}
 		
 		// where 条件处理

@@ -1,6 +1,7 @@
 package com.unione.cloud.core.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -71,4 +72,12 @@ public class Pojo implements Serializable {
 	@ApiModelProperty("修改人")
 	private String lastUpdatedBy;
     	
+	
+	////////非持久化属性
+	/**
+	 * 主键ID
+	 */
+	@ApiModelProperty("主键ID集合")
+	private List<Long> ids;
+	
 }

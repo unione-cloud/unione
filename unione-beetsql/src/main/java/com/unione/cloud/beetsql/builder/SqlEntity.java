@@ -1,10 +1,11 @@
 package com.unione.cloud.beetsql.builder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import com.unione.cloud.core.model.BaseField;
 
 import lombok.Data;
 
@@ -34,15 +35,15 @@ public class SqlEntity {
 	private List<SqlField> fields=new ArrayList<>();
 	
 	/**
-	 * 	当前table拥有的集成字段名称集合
-	 */
-	private List<SqlField> baseFields=new ArrayList<>();
-	
-	/**
 	 * 	查询条件集合
 	 */
 	private List<SqlCondition> conditions=new ArrayList<>();
 	
+//	/**
+//	 * 	id查询条件集合
+//	 */
+//	private List<SqlCondition> idsConditions=new ArrayList<>();
+//	
 	/**
 	 * 	查询条件
 	 */
@@ -69,5 +70,40 @@ public class SqlEntity {
 		return this.keyField;
 	}
 	
+	/**
+	 * 获取指定标准字段
+	 * @param stsField
+	 * @return
+	 */
+	public SqlField getStsField(BaseField stsField) {
+		for(int i=0;i<this.fields.size();i++) {
+			SqlField field=this.fields.get(i);
+			if(stsField.equals(field.getStsField())) {
+				return field;
+			}
+		}
+		return null;
+	}
+	
+	
+	public List<SqlField> getStsFields(BaseField... stsFields) {
+		List<SqlField> list=new ArrayList<>();
+		if(stsFields.length>0) {
+			Map<BaseField,SqlField> map=new HashMap<>();
+			for(int i=0;i<this.fields.size();i++) {
+				SqlField field=this.fields.get(i);
+				if(field.getStsField()!=null) {
+					map.put(field.getStsField(), field);
+				}
+			}
+			for(BaseField stsField:stsFields) {
+				SqlField field=map.get(stsField);
+				if(field!=null) {
+					list.add(field);
+				}
+			}
+		}
+		return list;
+	}
 	
 }
