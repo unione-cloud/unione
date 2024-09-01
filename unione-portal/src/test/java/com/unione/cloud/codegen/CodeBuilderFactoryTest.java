@@ -65,9 +65,9 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("page");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("page");
-		SourceBuilder mdBuilder = new SqlMdSourceBuilder("page");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("data");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("data");
+		SourceBuilder mdBuilder = new SqlMdSourceBuilder("data");
 
 		sourceBuilder.add(entityBuilder);
 //		sourceBuilder.add(mdBuilder);
@@ -91,7 +91,9 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("sys_page_ref",mavenProject);
+		factory.gen("sys_data_model",mavenProject);
+		factory.gen("sys_data_model_his",mavenProject);
+		factory.gen("sys_data_model_release",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

@@ -16,7 +16,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysDataModelRelease Entity
  * @描述	系统管理：数据模型发布
  * @作者	Unione Cloud CodeGen
- * @日期	2024-06-15 07:47:11
+ * @日期	2024-09-01 22:38:24
  * @版本	1.0.0
  **/
 @Data
@@ -28,9 +28,11 @@ import com.unione.cloud.core.model.Pojo;
 @Table(name="sys_data_model_release")
 public class SysDataModelRelease extends Pojo {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3226170743781514968L;
+	* 主键
+	*/
+	@AssignID
+	@ApiModelProperty(value="主键",notes="长度为：19")
+	private Long sid;
 	/**
 	* 目录ID
 	*/
@@ -41,6 +43,11 @@ public class SysDataModelRelease extends Pojo {
 	*/
 	@ApiModelProperty(value="数据源ID",notes="长度为：19")
 	private Long dsId;
+	/**
+	* 编码，唯一
+	*/
+	@ApiModelProperty(value="编码，唯一",notes="长度为：50")
+	private String sn;
 	/**
 	* 数据标题
 	*/
@@ -56,6 +63,11 @@ public class SysDataModelRelease extends Pojo {
 	*/
 	@ApiModelProperty(value="版本号",notes="长度为：10")
 	private Integer vers;
+	/**
+	* 类型，字典DMSDATACATEGORY jdbc：数据库，api：Rest接口
+	*/
+	@ApiModelProperty(value="类型，字典DMSDATACATEGORY jdbc：数据库，api：Rest接口",notes="长度为：20")
+	private String category;
 	/**
 	* 发布日期
 	*/
@@ -82,42 +94,25 @@ public class SysDataModelRelease extends Pojo {
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
 	private String sqlDelete;
 	/**
+	* URL，/ 开头接口
+	*/
+	@ApiModelProperty(value="URL，/ 开头接口",notes="长度为：250")
+	private String url;
+	/**
 	* 同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否
 	*/
 	@ApiModelProperty(value="同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否",notes="长度为：10")
 	private Integer syncFlag;
 	/**
-	* 表单模版，字典DMPSFORMTMPL normal：常规
+	* 字段集合,json存储,[]
 	*/
-	@ApiModelProperty(value="表单模版，字典DMPSFORMTMPL normal：常规",notes="长度为：50")
-	private String formTmpl;
+	@ApiModelProperty(value="字段集合,json存储,[]",notes="长度为：2147483647")
+	private String fields;
 	/**
-	* 表单类型，字典DMSFORMTYPE 1：单表，2：主表，3附表
+	* 数据设置，json存储,{}
 	*/
-	@ApiModelProperty(value="表单类型，字典DMSFORMTYPE 1：单表，2：主表，3附表",notes="长度为：10")
-	private Integer formType;
-	/**
-	* 显示方式，字典DMSDATASHOWTTYPE table：表格，tabletree：表格树
-	*/
-	@ApiModelProperty(value="显示方式，字典DMSDATASHOWTTYPE table：表格，tabletree：表格树",notes="长度为：20")
-	private String showType;
-	/**
-	* 数据配置，json存储,{}
-            {
-                list:{列表页面配置},
-                form:{表单页面配置},
-                view:{浏览页面配置},
-                api:{接口配置}
-            }
-	*/
-	@ApiModelProperty(value="数据配置，json存储,{}"+
-            "{"+
-            "    list:{列表页面配置},"+
-            "    form:{表单页面配置},"+
-            "    view:{浏览页面配置},"+
-            "    api:{接口配置}"+
-            "}",notes="长度为：2147483647")
-	private String configs;
+	@ApiModelProperty(value="数据设置，json存储,{}",notes="长度为：65535")
+	private String settings;
 	/**
 	* 显示顺序
 	*/

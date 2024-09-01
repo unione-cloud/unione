@@ -32,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataModel sys_data_model管理：系统管理：数据模型",description="SysDataModel")
-@RequestMapping("/api/data/sysDataModel")	 //TreeFeignApi
+@Api(tags = "SysDataModel 数据模型管理管理：系统管理：数据模型",description="SysDataModel")
+@RequestMapping("/api/data/model")	 //TreeFeignApi
 public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 	
 	@Autowired
@@ -42,8 +42,8 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 	
 	@Override
 	public Results<List<SysDataModel>> find(Params<SysDataModel> params) {
-		log.debug("进入:查询sys_data_model列表方法,params:{}",params);
-		LogsUtil.set(LogType.Query, "查询sys_data_model列表");
+		log.debug("进入:查询数据模型管理列表方法,params:{}",params);
+		LogsUtil.set(LogType.Query, "查询数据模型管理列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
 		Results<List<SysDataModel>> results = dataBaseDao.findPages(SqlBuilder.build(params));
@@ -52,31 +52,31 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
 		LogsUtil.success();
-		log.debug("退出:查询sys_data_model列表方法,params:{},result:{}",params,results.isSuccess());
+		log.debug("退出:查询数据模型管理列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
 	}
 
 
 	@Override
 	public Results<Long> save(@Validated(Validator.save.class) SysDataModel entity) {
-		log.debug("进入:新增sys_data_model信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增sys_data_model");
+		log.debug("进入:新增数据模型管理信息.entity:{}",entity);
+		LogsUtil.set(LogType.Insert, "新增数据模型管理");
 		// 参数处理
 		dataBaseDao.insert(entity);
 		
 		LogsUtil.success(entity.getId());
-		log.debug("退出:新增sys_data_model信息.entity:{},result:true",entity);
+		log.debug("退出:新增数据模型管理信息.entity:{},result:true",entity);
 		return Results.success(entity.getId());
 	}
 
 
 	@Override
 	public Results<Long> update(@Validated(Validator.update.class) SysDataModel entity) {
-		log.debug("进入:修改sys_data_model信息方法，entity:{}",entity);
+		log.debug("进入:修改数据模型管理信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_model",entity.getId());
+		LogsUtil.set(LogType.Modify, "修改数据模型管理",entity.getId());
 		
-		String[] fields = {"dirId","dsId","title","name","vers","publishDate","sqlFind","sqlInsert","sqlUpdate","sqlDelete","syncFlag","formTmpl","formType","showType","configs","ordered","status","skitsFlag","delFlag","descs"};
+		String[] fields = {"dirId","dsId","sn","title","name","category","publishDate","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
 		SqlBuilder<SysDataModel> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);
@@ -86,7 +86,7 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 		results.setMessage(len>0?"操作成功":"操作失败");
 		LogsUtil.save(len>0, entity.getId());
 
-		log.debug("退出:修改sys_data_model信息方法，entity:{},result:{}",entity,results.isSuccess());
+		log.debug("退出:修改数据模型管理信息方法，entity:{},result:{}",entity,results.isSuccess());
 		return results;
 	}
 
@@ -94,8 +94,8 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 
 	@Override
 	public Results<List<SysDataModel>> findByIds(Set<Long> ids) {
-		log.debug("进入:批量查询sys_data_model信息方法，ids:{}",ids);
-		LogsUtil.set(LogType.Query, "批量查询sys_data_model");
+		log.debug("进入:批量查询数据模型管理信息方法，ids:{}",ids);
+		LogsUtil.set(LogType.Query, "批量查询数据模型管理");
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
@@ -103,15 +103,15 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		LogsUtil.success();
-		log.debug("退出:批量查询sys_data_model信息方法，ids:{},result:true",ids);
+		log.debug("退出:批量查询数据模型管理信息方法，ids:{},result:true",ids);
 		return Results.success(rows);
 	}
 
 
 	@Override
 	public Results<SysDataModel> detail(Long id) {
-		log.debug("进入:查看sys_data_model详细信息方法，id:{}",id);
-		LogsUtil.set(LogType.Query, "查看sys_data_model详细",id);
+		log.debug("进入:查看数据模型管理详细信息方法，id:{}",id);
+		LogsUtil.set(LogType.Query, "查看数据模型管理详细",id);
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
@@ -120,16 +120,16 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		LogsUtil.success(tmp.getId());
-		log.debug("退出:查看sys_data_model详细信息方法，id:{},result:true",id);
+		log.debug("退出:查看数据模型管理详细信息方法，id:{},result:true",id);
 		return Results.success(tmp);
 	}
 	
 
 	@Override
 	public Results<Long> delete(Set<Long> ids){
-		log.debug("进入:删除sys_data_model信息方法，ids:{}",ids);
+		log.debug("进入:删除数据模型管理信息方法，ids:{}",ids);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Delete, "删除sys_data_model");
+		LogsUtil.set(LogType.Delete, "删除数据模型管理");
 		
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
@@ -144,29 +144,9 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 		results.setBody((long)count);
 		LogsUtil.save(count>0);
 
-		log.debug("退出:删除sys_data_model信息方法，ids:{},result:{}",ids,results.isSuccess());
+		log.debug("退出:删除数据模型管理信息方法，ids:{},result:{}",ids,results.isSuccess());
 		return results;
 	}
 
-
-//	@Override
-//	public Results<List<SysDataModel>> children(Long sid){
-//		log.debug("进入:加载下级sys_data_model信息,sid:{}",sid);
-//		LogsUtil.set(LogType.Query, "加载下级sys_data_model信息",sid);
-//		 //参数处理
-//		AssertUtil.service().notNull(sid, "参数sid不能为空");
-//		
-//		// 执行查询
-//		SysDataModel params = new SysDataModel();
-//		params.setParentId(sid);
-//		LogsUtil.add("parentId:%s",sid);
-//	
-//		List<SysDataModel> rows = dataBaseDao.findList(SqlBuilder.build(params));
-//		LogsUtil.add("下级sys_data_model记录数量:"+rows.size());
-//		
-//		LogsUtil.success();
-//		log.debug("退出:加载下级sys_data_model信息,sid:{},result:true",sid);
-//		return Results.success(rows);
-//	}
 
 }
