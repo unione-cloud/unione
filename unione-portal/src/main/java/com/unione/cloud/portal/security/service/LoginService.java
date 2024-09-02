@@ -10,14 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ehcache.Cache;
-import org.ehcache.CacheManager;
-import org.ehcache.ValueSupplier;
-import org.ehcache.config.CacheConfiguration;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.ExpiryPolicyBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.units.MemoryUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -26,6 +18,10 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
+import com.alicp.jetcache.Cache;
+import com.alicp.jetcache.CacheManager;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -52,7 +48,6 @@ import lombok.extern.slf4j.Slf4j;
  * @日期	2023年9月23日 下午11:29:27
  * @版本	1.0.0
  */
-@SuppressWarnings("deprecation")
 @Slf4j
 @Service
 @RefreshScope
@@ -73,24 +68,6 @@ public class LoginService {
 	@Autowired
 	private CaptchaService captchaService;	
 	
-	
-	/**
-	 * 	缓存类型： ehcache/redis
-	 */
-	@Value("${security.cache.type:ehcache}")
-	private String CACHE_TYPE;
-	
-	/**
-	 * 缓存名称
-	 */
-	@Value("${security.login.cache.name:security-login-cache}")
-	private String CACHE_NAME;
-	
-	/**
-	 * 缓存内存大小：单位M，默认20M
-	 */
-	@Value("${security.login.cache.memory:20}")
-	private int    CACHE_MEMORY;
 	
 	/**
 	 * 缓存时间：单位秒，默认7200秒
@@ -181,48 +158,49 @@ public class LoginService {
 	
 	
 	/**
-	 * 	获得缓存对象 ehcache
+	 * 	获得登录失败次数缓存对象 ehcache
 	 * @return
 	 */
-	private Cache<String,Integer> getCache() {
-		Cache<String,Integer> cache=cacheManager.getCache(CACHE_NAME,String.class,Integer.class);
-		if(cache==null) {
-			CacheConfiguration<String,Integer> config=CacheConfigurationBuilder.newCacheConfigurationBuilder(
-					 String.class,
-					 Integer.class,
-					 ResourcePoolsBuilder.newResourcePoolsBuilder()
-                     // 磁盘存储,记得添加true，才能正常的持久化，并且序列化以及反序列化
-                     .disk(CACHE_MEMORY,MemoryUnit.MB, true)
-                     .build())
-					 .withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(CACHE_TIME)))
-					 .build();
-			cache=cacheManager.createCache(CACHE_NAME,config);
-		}
-		return cache;
+	private Cache<String,Integer> getFailureCache() {
+		QuickConfig config = QuickConfig.newBuilder("SYS:SECURITY:LOGIN:FAILURE:")
+		    .expire(Duration.ofSeconds(CACHE_TIME))
+		    .cacheType(CacheType.REMOTE)
+		    .build();
+		return cacheManager.getOrCreateCache(config);
 	}
 	
 	
+	/**
+	 * 	获得登录失败限制缓存对象 ehcache
+	 * @return
+	 */
+	private Cache<String,Date> getLimitCache() {
+		QuickConfig config = QuickConfig.newBuilder("SYS:SECURITY:LOGIN:LIMIT:")
+		    .expire(Duration.ofSeconds(CACHE_TIME))
+		    .cacheType(CacheType.REMOTE)
+		    .build();
+		return cacheManager.getOrCreateCache(config);
+	}
+	
+	
+	/**
+	 * 	获得登录限制时间
+	 * @param username
+	 * @return
+	 */
 	public Date getLimitTime(String username) {
-		Long limit=null;
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,Integer> cache=this.getCache();
-			Integer count=cache.get(username);
-			org.ehcache.expiry.Duration duration = cache.getRuntimeConfiguration().getExpiry().getExpiryForAccess(username, new ValueSupplier<Integer>() {
-				@Override
-				public Integer value() {
-					return count;
-				}
-			});
-			if(duration!=null) {
-				limit=duration.getLength();
-			}
-		}else {
-			limit=redisService.getExpire(String.format("%s-%s", CACHE_NAME,username));
-		}
-		if(limit!=null) {
-			return DateUtil.date().offset(DateField.SECOND, limit.intValue());
-		}
-		return null;
+		Cache<String,Date> cache=this.getLimitCache();
+		return cache.get(username);
+	}
+	
+	/**
+	 * 	设置登录限制时间
+	 * @param username
+	 * @param date
+	 */
+	public void setLimitTime(String username,Date date) {
+		Cache<String,Date> cache=this.getLimitCache();
+		cache.put(username, date);
 	}
 	
 	/**
@@ -231,13 +209,8 @@ public class LoginService {
 	 * @return
 	 */
 	public int getFailure(String username) {
-		Integer count=null;
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,Integer> cache=this.getCache();
-			count=cache.get(username);
-		}else {
-			count=redisService.getObj(String.format("%s-%s", CACHE_NAME,username));
-		}
+		Cache<String,Integer> cache=this.getFailureCache();
+		Integer count=cache.get(username);
 		return count!=null?count:0;
 	}
 	
@@ -248,31 +221,30 @@ public class LoginService {
 	 * @param username
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	private int incFailure(String username) {
 		LogsUtil.add("认证失败，累计该帐号失败次数,username:%s",username);
 		
-		Integer count=null;
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,Integer> cache=this.getCache();
-			count=cache.get(username);
-			if(count==null) {
-				count=0;
-			}
-			count=count+1;
-			cache.put(username, count);
-		}else {
-			Long value=redisService.getObjOps().increment(String.format("%s-%s", CACHE_NAME,username));
-			count=value.intValue();
+		Cache<String,Integer> cache=this.getFailureCache();
+		Integer count=cache.get(username);
+		if(count==null) {
+			count=0;
 		}
+		count=count+1;
+		cache.put(username, count);
+		
 		// 如果已经超过阀值，则更新用户锁定时间
 		if(count>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
-			Long lockTime=DateUtil.date().offset(DateField.SECOND, CACHE_TIME).getTime();
-			SysUser user=SysUser.builder().username(username).lockTime(lockTime).build();
-			SqlBuilder<SysUser> builder=SqlBuilder
-					.build(user).field("lockTime").where("username=?");
-			int len = dataBaseDao.update(builder);
-			LogsUtil.add("更新用户锁定时间，username:%s,len:%s",username,len);
+			Date lockDate=this.getLimitTime(username);
+			if(lockDate==null) {
+				lockDate=DateUtil.date().offset(DateField.SECOND, CACHE_TIME);
+				this.setLimitTime(username, lockDate);
+				Long lockTime=lockDate.getTime();
+				SysUser user=SysUser.builder().username(username).lockTime(lockTime).build();
+				SqlBuilder<SysUser> builder=SqlBuilder
+						.build(user).field("lockTime").where("username=?");
+				int len = dataBaseDao.update(builder);
+				LogsUtil.add("更新用户锁定时间，username:%s,len:%s",username,len);
+			}
 		}
 		return count;
 	}
@@ -283,12 +255,8 @@ public class LoginService {
 	 */
 	public void cleanFailure(String username) {
 		LogsUtil.add("清空登录错误次数,username:%s",username);
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,Integer> cache=this.getCache();
-			cache.remove(username);
-		}else {
-			redisService.delete(String.format("%s-%s", CACHE_NAME,username));
-		}
+		Cache<String,Integer> cache=this.getFailureCache();
+		cache.remove(username);
 	}
 	
 	/**
@@ -296,7 +264,6 @@ public class LoginService {
 	 * @param param
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	public LoginResult doLogin(LoginParam param) {
 		log.info("进入：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s",param.getUsername(),param.getCaptcha());
@@ -363,7 +330,8 @@ public class LoginService {
 		if(LOGIN_SINGLELIMIT) {
 			// 如果开启了单设备登录
 			boolean flag = redisService.execute(tcmDb,(RedisCallback<Boolean>) action->{
-				ScanOptions options = ScanOptions.scanOptions().match(String.format("%s:%s:*",tcmKey,param.getUsername())).build();
+				ScanOptions options = ScanOptions.scanOptions()
+						.match(String.format("%s:%s:*",tcmKey,param.getUsername())).build();
 				Cursor<byte[]> cursor = action.scan(options);
 				return cursor.hasNext();
 			});

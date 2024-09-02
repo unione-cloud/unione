@@ -81,9 +81,5 @@ public class Sort implements Serializable{
 		return buf.toString();
 	}
 	
-//	public static void main(String[] args) {
-//		String name="USER_NAME";
-//		System.out.println("匹配结果："+name.matches("[a-z\\_A-Z]*$"));
-//	}
 	
 }

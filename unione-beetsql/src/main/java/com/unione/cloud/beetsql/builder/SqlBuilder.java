@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.ClassDesc;
@@ -148,18 +149,14 @@ public class SqlBuilder<T> {
 			  .pageSize(params.getPageSize())
 			  .needCount(params.isNeedCount())
 			  .keywords(params.getKeywords());
-		if(!StringUtils.isEmpty(params.getSortName())) {
-			String stns[]=params.getSortName().split(",");
-			String sons[]=null;
-			if(!StringUtils.isEmpty(params.getSortOrder())) {
-				sons=params.getSortOrder().split(",");
+		if(!ObjectUtil.isEmpty(params.getSorts())) {
+			List<Sort> sorts = params.getSorts().stream()
+				.filter(s->s!=null)
+				.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
+				.collect(Collectors.toList());
+			if(!sorts.isEmpty()) {
+				buildr.sort(sorts.toArray(new Sort[] {}));
 			}
-			Sort sort[]=new Sort[stns.length];
-			for(int i=0;i<stns.length;i++) {
-				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
-				sort[i]=Sort.build(stns[i], so);
-			}
-			buildr.sort(sort);
 		}
 		return buildr;
 	}

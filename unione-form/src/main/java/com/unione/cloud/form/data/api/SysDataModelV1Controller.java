@@ -2,6 +2,7 @@ package com.unione.cloud.form.data.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.form.core.storage.dto.DataCommit;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,11 +54,50 @@ public class SysDataModelV1Controller{
 	 * @return
 	 */
 	@PostMapping("/{psn}/save")
-    @ApiOperation(value = "数据查询")
-	public Results<List<Map<String, Object>>> save(@PathVariable("psn") String psn, @RequestBody Map<String, Object> params){
+    @ApiOperation(value = "数据保存",notes = "有主键进行更新，主键为空则新增")
+	public Results<Map<String, Object>> save(@PathVariable("psn") String psn, @RequestBody DataCommit commit){
+		
+		
+		
 		
 		return Results.failure();
 	}
+	
+	
+	
+	@PostMapping("/{psn}/detail")
+	@ApiOperation(value = "数据详情",notes = "根据主键加载数据对象")
+	public Results<Map<String, Object>> detail(@PathVariable("psn") String psn, @RequestBody Long id) {
+		
+		return Results.failure();
+	}
+	
+	
+	
+	
+	@PostMapping("/{psn}/loadByIds")
+    @ApiOperation(value = "数据列表",notes = "根据主键集合加载数据列表")
+	public Results<List<Map<String, Object>>> loadByIds(@PathVariable("psn") String psn, @RequestBody Set<Long> ids) {
+		
+		
+		return Results.failure();
+	}
+	
+	
+	
+	
+	@PostMapping("/{psn}/delete")
+    @ApiOperation(value = "删除数据",notes = "根据主键集合删除数据")
+	public Results<Integer> delete(@PathVariable("psn") String psn, @RequestBody Set<Long> ids){
+		
+		
+		
+		return Results.failure();
+	}
+	
+	
+	
+	
 	
 	
 	

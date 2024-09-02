@@ -64,6 +64,34 @@ spring:
 
 
 
+#============================================
+#
+# jetcache Config
+#
+#============================================
+jetcache:
+   statIntervalMinutes: 15
+   areaInCacheName: false
+   local:
+      default:
+         type: linkedhashmap
+         keyConvertor: fastjson
+         limit: 1000
+         expireAfterWriteInMillis: 600000
+         expireAfterAccessInMillis: 300000
+   remote:
+      default:
+         type: redis
+         keyConvertor: fastjson
+         valueEncoder: java
+         valueDecoder: java
+         poolConfig:
+            minIdle: 5
+            maxIdle: 20
+            maxTotal: 50
+         host: ${spring.redis.host}
+         port: ${spring.redis.port}
+         password: ${spring.redis.password}
 
       
 #============================================

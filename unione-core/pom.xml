@@ -338,12 +338,11 @@
 		</dependency>
 		<!-- jackson END-->
 		
-		
-		<!-- ehcache:配置依赖信息 -->
+		<!-- jetcache:配置依赖信息 -->
 		<dependency>
-			<groupId>org.ehcache</groupId>
-		    <artifactId>ehcache</artifactId>
-			<version>${ehcache.version}</version>
+		  <groupId>com.alicp.jetcache</groupId>
+		  <artifactId>jetcache-starter-redis</artifactId>
+		  <version>${spring.boot.version}</version>
 		</dependency>
 		
 		

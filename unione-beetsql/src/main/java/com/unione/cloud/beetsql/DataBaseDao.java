@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.SQLType;
 import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.ExecuteContext;
@@ -31,6 +31,7 @@ import com.unione.cloud.core.util.BeanUtils;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 	数据库操作Dao基础接口
@@ -553,16 +554,13 @@ public class DataBaseDao {
 		map.put("params", params.getBody());
 		
 		// 如果未手动设置排序，则从params中获取排序
-		if(sort.length==0 && !StringUtils.isEmpty(params.getSortName())) {
-			String stns[]=params.getSortName().split(",");
-			String sons[]=null;
-			if(!StringUtils.isEmpty(params.getSortOrder())) {
-				sons=params.getSortOrder().split(",");
-			}
-			sort=new Sort[stns.length];
-			for(int i=0;i<stns.length;i++) {
-				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
-				sort[i]=Sort.build(stns[i], so);
+		if(sort.length==0 && !ObjectUtil.isEmpty(params.getSorts())) {
+			List<Sort> sorts = params.getSorts().stream()
+				.filter(s->s!=null)
+				.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
+				.collect(Collectors.toList());
+			if(!sorts.isEmpty()) {
+				sort=sorts.toArray(new Sort[] {});
 			}
 		}
 		
@@ -599,16 +597,13 @@ public class DataBaseDao {
 		}
 		
 		// 如果未手动设置排序，则从params中获取排序
-		if(sort.length==0 && !StringUtils.isEmpty(params.getSortName())) {
-			String stns[]=params.getSortName().split(",");
-			String sons[]=null;
-			if(!StringUtils.isEmpty(params.getSortOrder())) {
-				sons=params.getSortOrder().split(",");
-			}
-			sort=new Sort[stns.length];
-			for(int i=0;i<stns.length;i++) {
-				String so=(sons!=null&&(i<sons.length)?sons[i]:"asc");
-				sort[i]=Sort.build(stns[i], so);
+		if(sort.length==0 && !ObjectUtil.isEmpty(params.getSorts())) {
+			List<Sort> sorts = params.getSorts().stream()
+				.filter(s->s!=null)
+				.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
+				.collect(Collectors.toList());
+			if(!sorts.isEmpty()) {
+				sort=sorts.toArray(new Sort[] {});
 			}
 		}
 		

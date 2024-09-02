@@ -1,9 +1,8 @@
 package com.unione.cloud.core.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,10 +11,7 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @描述
- *     <p>
- *     系统请求DTO
- * 
+ * @描述 系统请求DTO
  * @author Jeking Yang
  * @since 1.0.0
  */
@@ -64,30 +60,13 @@ public class Params<T> implements Serializable {
 	 *	总记录数
 	 */
 	@ApiModelProperty(hidden=true)
-	private long total;
+	private Long total;
 
-	/**
-	 * 当前页第一条数据在List中的位置,从0开始
-	 */
-	@JsonIgnore
-	@ApiModelProperty(hidden=true)
-	private int start;
-	
-	/**
-	 * 	当前页结束条数据在List中的位置,从0开始
-	 */
-	@JsonIgnore
-	@ApiModelProperty(hidden=true)
-	private int limit;
-	
 	@ApiModelProperty(value="是否需要count统计",notes = "前端查询条件无变化时，可以传入false，减少count统计时间消耗")
 	private boolean needCount=true;
 	
-	@ApiModelProperty(value = "排序字段", example = "id")
-	private String sortName = "ID";
-
-	@ApiModelProperty(value = "排序方式", example = "desc")
-	private String sortOrder = "DESC";
+	@ApiModelProperty("排序方式")
+	private List<Sort> sorts=new ArrayList<>();
 
 	@ApiModelProperty("请求参数")
 	private T body;
@@ -126,34 +105,39 @@ public class Params<T> implements Serializable {
 	 * @return the start
 	 */
 	public int getStart() {
-		this.start = (page - 1) * pageSize;
-		return this.start;
+		return (page - 1) * pageSize;
 	}
 	
-
+	
 	/**
-	 * @return the limit
+	 * 添加排序
+	 * @param name
+	 * @param asc
 	 */
-	public int getLimit() {
-		this.limit = pageSize;
-		return this.limit;
+	public void addSort(String name,boolean asc) {
+		Sort sort=new Sort();
+		sort.setAsc(asc);
+		sort.setName(name);
+		sorts.add(sort);
 	}
 	
-	public void setSortName(String sortName) {
-		if(sortName!=null && sortName.matches("[a-zA-Z,]*[^,]$")) {
-			if(sortName.matches("[A-Z,]*[^,]$")) {
-				this.sortName=sortName;
-			}else {
-				this.sortName=sortName.replaceAll("[A-Z]", "_$0").toUpperCase();
+	@Data
+	public static class Sort{
+		@ApiModelProperty(value="排序字段名称",notes = "字段名称eq匹配，不匹配的排序忽略")
+		private String name;
+		@ApiModelProperty("是否升序排序")
+		private boolean asc;
+		
+		public String getName() {
+			if(name!=null && name.matches("[a-zA-Z0-9]*")) {
+				return name;
 			}
+			return null;
+		}
+		
+		public String toString() {
+			return String.format("%s %s", this.getName(), asc?"asc":"desc");
 		}
 	}
-	
-	public void setSortOrder(String sortOrder) {
-		if(sortOrder!=null && sortOrder.matches("^(?i)(desc|asc|,)$")) {
-			this.sortOrder=sortOrder.toUpperCase();
-		}
-	}
-	
 	
 }

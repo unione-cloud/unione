@@ -7,20 +7,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ehcache.Cache;
-import org.ehcache.CacheManager;
-import org.ehcache.config.CacheConfiguration;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.ExpiryPolicyBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.units.MemoryUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
+import com.alicp.jetcache.Cache;
+import com.alicp.jetcache.CacheManager;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.redis.RedisService;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.captcha.CaptchaUtil;
@@ -42,9 +38,6 @@ public class CaptchaService {
 	
 	@Autowired
 	private CacheManager cacheManager;
-	
-	@Autowired
-	private RedisService redisService;
 	
 	@Autowired
 	private HttpServletResponse response;
@@ -76,23 +69,6 @@ public class CaptchaService {
 	@Value("${security.captcha.enable:true}")
 	private boolean ENABLE;
 	
-	/**
-	 * 	缓存类型： ehcache/redis
-	 */
-	@Value("${security.captcha.cache.type:ehcache}")
-	private String CACHE_TYPE;
-	
-	/**
-	 * 缓存名称
-	 */
-	@Value("${security.captcha.cache.name:captcha-cache}")
-	private String CACHE_NAME;
-	
-	/**
-	 * 缓存内存大小：单位M，默认10M
-	 */
-	@Value("${security.captcha.cache.memory:10}")
-	private int    CACHE_MEMORY;
 	
 	/**
 	 * 缓存时间：单位秒，默认300秒
@@ -104,24 +80,15 @@ public class CaptchaService {
 	
 	
 	/**
-	 * 	获得缓存对象 ehcache
+	 * 	获得缓存对象 
 	 * @return
 	 */
 	private Cache<String,String> getCache() {
-		Cache<String,String> cache=cacheManager.getCache(CACHE_NAME,String.class,String.class);
-		if(cache==null) {
-			CacheConfiguration<String,String> config=CacheConfigurationBuilder.newCacheConfigurationBuilder(
-					 String.class,
-					 String.class,
-					 ResourcePoolsBuilder.newResourcePoolsBuilder()
-                     // 磁盘存储,记得添加true，才能正常的持久化，并且序列化以及反序列化
-                     .disk(CACHE_MEMORY,MemoryUnit.MB, true)
-                     .build())
-					 .withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(CACHE_TIME)))
-					 .build();
-			cache=cacheManager.createCache(CACHE_NAME,config);
-		}
-		return cache;
+		QuickConfig config = QuickConfig.newBuilder("SYS:SECURITY:CAPTCHA:")
+		    .expire(Duration.ofSeconds(CACHE_TIME))
+		    .cacheType(CacheType.REMOTE)
+		    .build();
+		return cacheManager.getOrCreateCache(config);
 	}
 	
 	
@@ -141,12 +108,8 @@ public class CaptchaService {
 		ck.setHttpOnly(true);
 		response.addCookie(ck);
 		
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,String> cache=this.getCache();
-			cache.put(captchaid, captcha.getCode());
-		}else {
-			redisService.put(String.format("%s-%s", CACHE_NAME,captchaid), captcha.getCode(), Duration.ofSeconds(CACHE_TIME));
-		}
+		Cache<String,String> cache=this.getCache();
+		cache.put(captchaid, captcha.getCode());
 		
 		return captcha;
 	}
@@ -181,17 +144,9 @@ public class CaptchaService {
 		}
 		AssertUtil.service().notNull(captchaid, "请求参数不完整，请重新获取验证码");
 		
-		String code=null;
-		if("ehcache".equalsIgnoreCase(CACHE_TYPE)) {
-			Cache<String,String> cache=this.getCache();
-			code=cache.get(captchaid);
-			cache.remove(captchaid);
-		}else {
-			code=redisService.getObj(String.format("%s-%s", CACHE_NAME,captchaid));
-			if(!StringUtils.isEmpty(code)) {
-				redisService.delete(String.format("%s-%s", CACHE_NAME,captchaid));
-			}
-		}
+		Cache<String,String> cache=this.getCache();
+		String code=cache.get(captchaid);
+		cache.remove(captchaid);
 		
 		// 删除cookie中
 		Cookie ck=new Cookie("CAPTCHAID","");
