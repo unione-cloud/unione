@@ -1,4 +1,4 @@
-package com.unione.cloud.form.core.storage.dto;
+package com.unione.cloud.form.data.storage.dto;
 
 import java.util.List;
 import java.util.Map;

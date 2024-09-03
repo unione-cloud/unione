@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.core.dto.Params;
-import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.form.core.storage.dto.DataCommit;
+import com.unione.cloud.form.data.storage.dto.DataCommit;
+import com.unione.cloud.form.data.storage.dto.DataFind;
+import com.unione.cloud.form.data.storage.dto.DataResult;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,9 +42,10 @@ public class SysDataModelV1Controller{
 	 */
 	@PostMapping("/{psn}/find")
     @ApiOperation(value = "数据查询")
-	public Results<List<Map<String, Object>>> find(@PathVariable("psn") String psn, @RequestBody Params<Map<String, Object>> params){
+	public DataResult<List<Map<String, Object>>> find(@PathVariable("psn") String psn, @RequestBody DataFind<Map<String, Object>> params){
 		
-		return Results.failure();
+		
+		return DataResult.failure();
 	}
 	
 	
@@ -55,21 +56,21 @@ public class SysDataModelV1Controller{
 	 */
 	@PostMapping("/{psn}/save")
     @ApiOperation(value = "数据保存",notes = "有主键进行更新，主键为空则新增")
-	public Results<Map<String, Object>> save(@PathVariable("psn") String psn, @RequestBody DataCommit commit){
+	public DataResult<Map<String, Object>> save(@PathVariable("psn") String psn, @RequestBody DataCommit commit){
 		
 		
 		
 		
-		return Results.failure();
+		return DataResult.failure();
 	}
 	
 	
 	
 	@PostMapping("/{psn}/detail")
 	@ApiOperation(value = "数据详情",notes = "根据主键加载数据对象")
-	public Results<Map<String, Object>> detail(@PathVariable("psn") String psn, @RequestBody Long id) {
+	public DataResult<Map<String, Object>> detail(@PathVariable("psn") String psn, @RequestBody Long id) {
 		
-		return Results.failure();
+		return DataResult.failure();
 	}
 	
 	
@@ -77,10 +78,10 @@ public class SysDataModelV1Controller{
 	
 	@PostMapping("/{psn}/loadByIds")
     @ApiOperation(value = "数据列表",notes = "根据主键集合加载数据列表")
-	public Results<List<Map<String, Object>>> loadByIds(@PathVariable("psn") String psn, @RequestBody Set<Long> ids) {
+	public DataResult<List<Map<String, Object>>> loadByIds(@PathVariable("psn") String psn, @RequestBody Set<Long> ids) {
 		
 		
-		return Results.failure();
+		return DataResult.failure();
 	}
 	
 	
@@ -88,11 +89,11 @@ public class SysDataModelV1Controller{
 	
 	@PostMapping("/{psn}/delete")
     @ApiOperation(value = "删除数据",notes = "根据主键集合删除数据")
-	public Results<Integer> delete(@PathVariable("psn") String psn, @RequestBody Set<Long> ids){
+	public DataResult<Integer> delete(@PathVariable("psn") String psn, @RequestBody Set<Long> ids){
 		
 		
 		
-		return Results.failure();
+		return DataResult.failure();
 	}
 	
 	

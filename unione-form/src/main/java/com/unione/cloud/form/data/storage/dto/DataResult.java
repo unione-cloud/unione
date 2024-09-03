@@ -1,83 +1,21 @@
-package com.unione.cloud.core.dto;
+package com.unione.cloud.form.data.storage.dto;
 
-import java.io.Serializable;
+import com.unione.cloud.core.dto.Results;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-/**
- * @描述 <p>分页数据响应DTO
- * 
- * @author Jeking Yang
- * @since 1.0.0
- */
-@Data
-@Accessors(chain = true)
-@ApiModel(description = "系统响应DTO[分页]")
-public class Results<T> implements Serializable {
+public class DataResult<T> extends Results<T> {
 	/**
-	 *
+	 * 
 	 */
-	private static final long serialVersionUID = -625603360696666874L;
+	private static final long serialVersionUID = 7550726584804583822L;
 
-	/**
-	 * 操作结果
-	 */
-	@ApiModelProperty("操作结果")
-	private boolean success;
-
-	/**
-	 * 结果编码
-	 */
-	@ApiModelProperty("结果编码")
-	private Integer code;
-
-	/**
-	 * 响应消息
-	 */
-	@ApiModelProperty("响应消息")
-	private String message;
-
-	/**
-	 * 响应数据
-	 */
-	@ApiModelProperty("响应数据")
-	private T body;
-	
-	/**
-	 * 分页大小
-	 */
-	@ApiModelProperty("分页大小")
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Integer pageSize;
-
-	/**
-	 * 记录总数
-	 */
-	@ApiModelProperty("记录总数")
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Long total;
-
-	/**
-	 * 当前页
-	 */
-	@ApiModelProperty("当前页")
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Integer page;
-	
-	
 	/**
 	 * 	构建响应
 	 * @param <T>
 	 * @param isSuccess
 	 * @return
 	 */
-	public static <T> Results<T> build(boolean isSuccess){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> build(boolean isSuccess){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(isSuccess);
 		result.setMessage(isSuccess?"操作成功":"操作失败");
 		result.setCode(200);
@@ -90,8 +28,8 @@ public class Results<T> implements Serializable {
 	 * @param isSuccess
 	 * @return
 	 */
-	public static <T> Results<T> build(boolean isSuccess, T body){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> build(boolean isSuccess, T body){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(isSuccess);
 		result.setBody(isSuccess?body:null);
 		result.setMessage(isSuccess?"操作成功":"操作失败");
@@ -106,8 +44,8 @@ public class Results<T> implements Serializable {
 	 * @param message
 	 * @return
 	 */
-	public static <T> Results<T> success(T body,String message){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> success(T body,String message){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(true);
 		result.setMessage(message);
@@ -121,8 +59,8 @@ public class Results<T> implements Serializable {
 	 * @param body
 	 * @return
 	 */
-	public static <T> Results<T> success(T body){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> success(T body){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(true);
 		result.setMessage("操作成功");
@@ -135,8 +73,8 @@ public class Results<T> implements Serializable {
 	 * @param <T>
 	 * @return
 	 */
-	public static <T> Results<T> success(){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> success(){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(true);
 		result.setMessage("操作成功");
 		result.setCode(200);
@@ -149,8 +87,8 @@ public class Results<T> implements Serializable {
 	 * @param body
 	 * @return
 	 */
-	public static <T> Results<T> failure(T body){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> failure(T body){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(false);
 		result.setMessage("操作失败");
@@ -165,8 +103,8 @@ public class Results<T> implements Serializable {
 	 * @param message
 	 * @return
 	 */
-	public static <T> Results<T> failure(T body,String message){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> failure(T body,String message){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(false);
 		result.setMessage(message);
@@ -179,8 +117,8 @@ public class Results<T> implements Serializable {
 	 * @param message
 	 * @return
 	 */
-	public static <T> Results<T> failure(String message){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> failure(String message){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(false);
 		result.setMessage(message);
 		result.setCode(200);
@@ -192,8 +130,8 @@ public class Results<T> implements Serializable {
 	 * @param <T>
 	 * @return
 	 */
-	public static <T> Results<T> failure(){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> failure(){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(false);
 		result.setMessage("操作失败");
 		result.setCode(200);
@@ -206,8 +144,8 @@ public class Results<T> implements Serializable {
 	 * @param body
 	 * @return
 	 */
-	public static <T> Results<T> error(T body){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> error(T body){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(false);
 		result.setMessage("系统异常");
@@ -222,8 +160,8 @@ public class Results<T> implements Serializable {
 	 * @param message
 	 * @return
 	 */
-	public static <T> Results<T> error(T body,String message){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> error(T body,String message){
+		DataResult<T> result=new DataResult<>();
 		result.setBody(body);
 		result.setSuccess(false);
 		result.setMessage(message);
@@ -237,8 +175,8 @@ public class Results<T> implements Serializable {
 	 * @param body
 	 * @return
 	 */
-	public static <T> Results<T> error(String message){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> error(String message){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(false);
 		result.setMessage(message);
 		result.setCode(500);
@@ -250,8 +188,8 @@ public class Results<T> implements Serializable {
 	 * @param <T>
 	 * @return
 	 */
-	public static <T> Results<T> error(){
-		Results<T> result=new Results<>();
+	public static <T> DataResult<T> error(){
+		DataResult<T> result=new DataResult<>();
 		result.setSuccess(false);
 		result.setMessage("系统异常");
 		result.setCode(500);
@@ -263,8 +201,8 @@ public class Results<T> implements Serializable {
 	 * @param message
 	 * @return
 	 */
-	public Results<T> setMessage(String message){
-		this.message=message;
+	public DataResult<T> setMessage(String message){
+		this.setMessage(message);
 		return this;
 	}
 	

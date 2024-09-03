@@ -1,4 +1,4 @@
-package com.unione.cloud.form.core.storage.format;
+package com.unione.cloud.form.data.storage.format;
 
 import java.io.Reader;
 import java.sql.Clob;

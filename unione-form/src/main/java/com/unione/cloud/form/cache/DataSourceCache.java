@@ -1,4 +1,4 @@
-package com.unione.cloud.form.core.cache;
+package com.unione.cloud.form.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
