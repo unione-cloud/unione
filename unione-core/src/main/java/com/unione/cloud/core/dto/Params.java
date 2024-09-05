@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -108,6 +110,17 @@ public class Params<T> implements Serializable {
 		return (page - 1) * pageSize;
 	}
 	
+	@JsonIgnore
+	public String getSortText() {
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < sorts.size(); ++i) {
+			buf.append(sorts.get(i));
+			if (i < sorts.size() - 1) {
+				buf.append(",");
+			}
+		}
+		return buf.toString();
+	}
 	
 	/**
 	 * 添加排序

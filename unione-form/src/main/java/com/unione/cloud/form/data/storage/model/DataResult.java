@@ -1,4 +1,4 @@
-package com.unione.cloud.form.data.storage.dto;
+package com.unione.cloud.form.data.storage.model;
 
 import com.unione.cloud.core.dto.Results;
 

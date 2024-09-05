@@ -24,7 +24,7 @@ public class DataSourceCache {
 	 * @param id
 	 * @return
 	 */
-	@Cached(name="sys:ds:",key = "#id",expire = 3600,cacheType = CacheType.BOTH,cacheNullValue = true)
+	@Cached(name="SYS:DATA:SOURCE:",key = "#id",expire = 600,cacheType = CacheType.LOCAL,cacheNullValue = true)
 	public SysDataSource load(Long id) {
 		log.info("进入：从db加载数据源方法,id:{}",id);
 		SysDataSource dataSource = dataBaseDao.findById(SysDataSource.class, id);
@@ -36,7 +36,7 @@ public class DataSourceCache {
 	 * 	清空缓存
 	 * @param id
 	 */
-	@CacheInvalidate(name = "sys:ds:", key = "#id")
+	@CacheInvalidate(name = "SYS:DATA:SOURCE:", key = "#id")
 	public void clear(Long id) {}
 	
 

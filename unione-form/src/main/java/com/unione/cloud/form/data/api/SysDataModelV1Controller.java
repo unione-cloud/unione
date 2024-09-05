@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.form.data.storage.dto.DataCommit;
-import com.unione.cloud.form.data.storage.dto.DataFind;
-import com.unione.cloud.form.data.storage.dto.DataResult;
+import com.unione.cloud.form.data.storage.model.DataCommit;
+import com.unione.cloud.form.data.storage.model.DataFind;
+import com.unione.cloud.form.data.storage.model.DataResult;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,7 +42,7 @@ public class SysDataModelV1Controller{
 	 */
 	@PostMapping("/{psn}/find")
     @ApiOperation(value = "数据查询")
-	public DataResult<List<Map<String, Object>>> find(@PathVariable("psn") String psn, @RequestBody DataFind<Map<String, Object>> params){
+	public DataResult<List<Map<String, Object>>> find(@PathVariable("psn") String psn, @RequestBody DataFind params){
 		
 		
 		return DataResult.failure();

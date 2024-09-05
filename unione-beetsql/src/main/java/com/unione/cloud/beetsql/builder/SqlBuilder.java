@@ -207,15 +207,6 @@ public class SqlBuilder<T> {
 		AssertUtil.service().notNull(this.tableName, "table name不能为空");
 		this.entity.setTable(tableName);
 		
-//		SqlField pkField=this.entity.getKeyField();
-//		if(pkField==null) {
-//			TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
-//			String idn = tableDesc.getIdNames().iterator().next();
-//			pkField=new SqlField();
-//			pkField.setAlias(idn);
-//			this.entity.setKeyField(pkField);
-//		}
-		
 		if(!this.initComplete) {
 			this.initComplete=true;
 			this.resolve();

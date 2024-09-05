@@ -1,11 +1,13 @@
-package com.unione.cloud.form.data.storage.dto;
+package com.unione.cloud.form.data.storage.model;
+
+import java.util.Map;
 
 import com.unione.cloud.core.dto.Params;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DataFind<T> extends Params<T> {
+public class DataFind extends Params<Map<String,Object>> {
 
 	/**
 	 * 

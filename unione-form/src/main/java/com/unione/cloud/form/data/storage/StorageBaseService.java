@@ -43,10 +43,10 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.form.cache.DataSourceCache;
-import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.form.data.model.SysDataSource;
 import com.unione.cloud.form.data.storage.format.BlobFormat;
 import com.unione.cloud.form.data.storage.format.ClobFormat;
+import com.unione.cloud.form.data.storage.model.DataField;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -211,7 +211,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked"})
-    public Map<String, Object> findOne(Long dsId,String sql,Map<String, Object> params,List<SysDataField> fields){
+    public Map<String, Object> findOne(Long dsId,String sql,Map<String, Object> params,List<DataField> fields){
         log.debug("进入->执行findOne方法,dsId:{},sql:{},params:{}",dsId,sql,params);
         SQLManager sqlManager=this.getSQLManager(dsId);
         SqlId sqlId = sqlManager.getSqlIdFactory().buildTemplate(sql);
@@ -285,7 +285,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "rawtypes" })
-    public List<Map<String, Object>> findList(Long dsId,String sql,Map<String, Object> params,List<SysDataField> fields){
+    public List<Map<String, Object>> findList(Long dsId,String sql,Map<String, Object> params,List<DataField> fields){
         log.debug("进入->执行findList方法,dsId:{},sql:{},params:{}",dsId,sql,params);
 
         List<Map> result = this.getSQLManager(dsId).execute(sql, Map.class, params);
@@ -353,6 +353,7 @@ public class StorageBaseService {
         return result;
     }
     
+    
     /**
      *	 分页查询数据列表，未分页，指定存储
      * @param dsId
@@ -392,7 +393,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Results<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<SysDataField> fields){
+    public Results<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
         log.debug("进入->执行findListPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
         Results<List<Map<String, Object>>> result=Results.success();
         
@@ -418,7 +419,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-	public List<Map<String, Object>> findListForPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<SysDataField> fields){
+	public List<Map<String, Object>> findListForPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
         log.debug("进入->执行findListForPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
         
         PageRequest request = DefaultPageRequest.of(page,size,false);
@@ -437,15 +438,15 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public List<Map<String, Object>> rowMapper(List<Map> rows,List<SysDataField> fields){
+    public List<Map<String, Object>> rowMapper(List<Map> rows,List<DataField> fields){
         if(rows==null || rows.isEmpty()) {
             return new ArrayList<>();
         }
 
         // 字段转换处理
         Map<String, Format> formatMap=new HashMap<>();
-        Map<String, SysDataField> fieldMap=new HashMap<>();
-        for(SysDataField field:fields) {
+        Map<String, DataField> fieldMap=new HashMap<>();
+        for(DataField field:fields) {
             // 数据格式化处理
             if(!StringUtils.isEmpty(field.getDataFormat())) {
                 String formate = StringUtils.trim(field.getDataFormat());
@@ -483,7 +484,7 @@ public class StorageBaseService {
             				try {
 								value = format.format(value);
 							} catch (Exception e) {
-								SysDataField field = fieldMap.get(key);
+								DataField field = fieldMap.get(key);
 								log.error("field value format 格式失败,data model id:{},field:{},value:{},format:{}",field.getModelId(),key,value,field.getDataFormat(),e);
 							}
             			}
@@ -526,18 +527,4 @@ public class StorageBaseService {
         }
     }
 
-    private String tohump(String name) {
-        if(name==null)return null;
-        String ns[] = name.toLowerCase().split("_");
-        String tmp = ns[0];
-        for(int index = 1; index < ns.length; index++){
-            if(ns[index].length() > 0){
-                tmp += (ns[index].charAt(0) + "").toUpperCase();
-                if(ns[index].length() > 1){
-                    tmp += ns[index].substring(1, ns[index].length());
-                }
-            }
-        }
-        return tmp;
-    }
 }
