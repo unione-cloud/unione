@@ -41,6 +41,10 @@ public class DataModelCache {
 	public DataModel load(String sn) {
 		log.info("进入：从db加载数据模型【发布】方法,sn:{}",sn);
 		SysDataModelRelease tmp = new SysDataModelRelease();
+		if(sn.indexOf("@")>0) {
+			sn=sn.substring(0, sn.indexOf("@"));
+			tmp.setVers(Integer.parseInt(sn.substring(sn.indexOf("@")+1)));
+		}
 		tmp.setSn(sn);
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【发布】方法,sn:{},data model:{}",sn,tmp);
@@ -122,6 +126,9 @@ public class DataModelCache {
 	public DataModel load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
 		SysDataModel tmp = new SysDataModel();
+		if(sn.indexOf("@")>0) {
+			sn=sn.substring(0, sn.indexOf("@"));
+		}
 		tmp.setSn(sn);
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);

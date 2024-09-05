@@ -16,7 +16,7 @@ import com.unione.cloud.core.model.Pojo;
  * @标题 	SysDataModelHis Entity
  * @描述	系统管理：数据模型历史
  * @作者	Unione Cloud CodeGen
- * @日期	2024-09-01 22:38:24
+ * @日期	2024-09-05 23:35:09
  * @版本	1.0.0
  **/
 @Data
@@ -27,12 +27,6 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="sys_data_model_his")
 public class SysDataModelHis extends Pojo {
-	/**
-	* 主键
-	*/
-	@AssignID
-	@ApiModelProperty(value="主键",notes="长度为：19")
-	private Long sid;
 	/**
 	* 目录ID
 	*/
@@ -49,11 +43,6 @@ public class SysDataModelHis extends Pojo {
 	@ApiModelProperty(value="数据模型ID",notes="长度为：19")
 	private Long modelId;
 	/**
-	* 编码，唯一
-	*/
-	@ApiModelProperty(value="编码，唯一",notes="长度为：50")
-	private String sn;
-	/**
 	* 数据标题
 	*/
 	@ApiModelProperty(value="数据标题",notes="长度为：100")
@@ -64,15 +53,25 @@ public class SysDataModelHis extends Pojo {
 	@ApiModelProperty(value="数据名称，对应数据库表名称",notes="长度为：100")
 	private String name;
 	/**
+	* 数据编码
+	*/
+	@ApiModelProperty(value="数据编码",notes="长度为：50")
+	private String sn;
+	/**
 	* 版本号
 	*/
 	@ApiModelProperty(value="版本号",notes="长度为：10")
 	private Integer vers;
 	/**
-	* 类型，字典DMSDATACATEGORY jdbc：数据库，api：Rest接口
+	* 类别，sql：关系型存储，nosql：非关系型存储，api：接口存储
 	*/
-	@ApiModelProperty(value="类型，字典DMSDATACATEGORY jdbc：数据库，api：Rest接口",notes="长度为：20")
+	@ApiModelProperty(value="类别，sql：关系型存储，nosql：非关系型存储，api：接口存储",notes="长度为：10")
 	private String category;
+	/**
+	* 自定义，字典TUREORFALSE 1是，0否
+	*/
+	@ApiModelProperty(value="自定义，字典TUREORFALSE 1是，0否",notes="长度为：10")
+	private Integer isCustom;
 	/**
 	* 发布日期
 	*/
@@ -99,25 +98,20 @@ public class SysDataModelHis extends Pojo {
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
 	private String sqlDelete;
 	/**
-	* URL，/ 开头接口
-	*/
-	@ApiModelProperty(value="URL，/ 开头接口",notes="长度为：250")
-	private String url;
-	/**
 	* 同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否
 	*/
 	@ApiModelProperty(value="同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否",notes="长度为：10")
 	private Integer syncFlag;
 	/**
-	* 字段集合,json存储,[]
+	* 数据字段，json存储,{}
 	*/
-	@ApiModelProperty(value="字段集合,json存储,[]",notes="长度为：2147483647")
+	@ApiModelProperty(value="数据字段，json存储,{}",notes="长度为：2147483647")
 	private String fields;
 	/**
 	* 数据设置，json存储,{}
 	*/
 	@ApiModelProperty(value="数据设置，json存储,{}",notes="长度为：65535")
-	private String settings;
+	private String setting;
 	/**
 	* 显示顺序
 	*/
@@ -128,11 +122,6 @@ public class SysDataModelHis extends Pojo {
 	*/
 	@ApiModelProperty(value="发布状态，字典PUBLISHSTATUS 0新建，1提交，2发布，3撤回",notes="长度为：10")
 	private Integer status;
-	/**
-	* 是否演练模式，字典TUREORFALSE 1是，0否
-	*/
-	@ApiModelProperty(value="是否演练模式，字典TUREORFALSE 1是，0否",notes="长度为：10")
-	private Integer skitsFlag;
 	/**
 	* 说明
 	*/
