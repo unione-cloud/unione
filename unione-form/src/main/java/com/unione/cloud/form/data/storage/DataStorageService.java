@@ -428,7 +428,7 @@ public class DataStorageService {
 		
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
-		params.put(idField!=null?idField.getAlias():"sid", load.getIds());
+		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"),load.getIds());
 		paramObj.put("params", params);
 		
 		processFindDefaultParams(dataModel, params);
