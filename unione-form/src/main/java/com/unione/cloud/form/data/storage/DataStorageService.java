@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.generator.SidGenHolder;
 import com.unione.cloud.core.model.BaseField;
@@ -22,7 +21,9 @@ import com.unione.cloud.form.data.storage.model.DataCommit;
 import com.unione.cloud.form.data.storage.model.DataField;
 import com.unione.cloud.form.data.storage.model.DataFieldConfig;
 import com.unione.cloud.form.data.storage.model.DataFind;
+import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataModel;
+import com.unione.cloud.form.data.storage.model.DataResult;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -309,11 +310,11 @@ public class DataStorageService {
 	/**
 	 * 	删除数据:物理/逻辑删除
 	 * @param dataModel
-	 * @param params
+	 * @param ids
 	 * @return
 	 */
-	public int deleteByIds(DataModel dataModel,DataCommit commit) {
-		return deleteByIds(dataModel.getDsId(),dataModel, commit);
+	public int deleteByIds(DataModel dataModel,Set<Long> ids) {
+		return deleteByIds(dataModel.getDsId(),dataModel, ids);
 	}
 	
 	
@@ -323,9 +324,10 @@ public class DataStorageService {
 	 * @param params
 	 * @return
 	 */
-	public int deleteByIds(Long dsId,DataModel dataModel,DataCommit commit) {
+	public int deleteByIds(Long dsId,DataModel dataModel,Set<Long> ids) {
 		DataField delFlagField=dataModel.getStsField(BaseField.DEL_FLAG);
-		AssertUtil.service().notEmpty(commit.getIds(), "主键集合不能为空");
+		DataField idField=dataModel.getStsField(BaseField.ID);
+		AssertUtil.service().notEmpty(ids, "主键集合不能为空");
 		Map<String, Object> data=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		Map<String, Object> fieldMap=new HashMap<>();
@@ -334,7 +336,7 @@ public class DataStorageService {
 		paramObj.put("params", params);
 		paramObj.put("fields", fieldMap);
 		
-		params.put("dsIds", commit.getIds());
+		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"), ids);
 		data.put(delFlagField.getName(), 1);
 		for(String field:data.keySet()) {
 			fieldMap.put(field, true);
@@ -374,6 +376,65 @@ public class DataStorageService {
 		return storageBaseService.findOne(dsId, sql, paramObj,dataModel.getFields());
 	}
 	
+	/**
+	 * 	根据主键查询数据
+	 * @param dataModel
+	 * @param load
+	 * @return
+	 */
+	public Map<String, Object> findById(DataModel dataModel,DataLoad load) {
+		return findById(dataModel.getDsId(),dataModel, load);
+	}
+	
+	/**
+	 * 	根据主键查询数据
+	 * @param dataModel
+	 * @param load
+	 * @return
+	 */
+	public Map<String, Object> findById(Long dsId,DataModel dataModel,DataLoad load) {
+		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
+		DataField idField = dataModel.getStsField(BaseField.ID);
+		
+		Map<String, Object> paramObj=new HashMap<>();
+		Map<String, Object> params=new HashMap<>();
+		params.put(idField!=null?idField.getAlias():"id", load.getId());
+		paramObj.put("params", params);
+		
+		processFindDefaultParams(dataModel, params);
+		
+		return storageBaseService.findOne(dsId, sql, paramObj,dataModel.getFields());
+	}
+	
+	/**
+	 * 	根据主键查询数据
+	 * @param dataModel
+	 * @param load
+	 * @return
+	 */
+	public List<Map<String, Object>> findByIds(DataModel dataModel,DataLoad load) {
+		return findByIds(dataModel.getDsId(),dataModel, load);
+	}
+	
+	/**
+	 * 	根据主键查询数据
+	 * @param dataModel
+	 * @param load
+	 * @return
+	 */
+	public List<Map<String, Object>> findByIds(Long dsId,DataModel dataModel,DataLoad load) {
+		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
+		DataField idField = dataModel.getStsField(BaseField.ID);
+		
+		Map<String, Object> paramObj=new HashMap<>();
+		Map<String, Object> params=new HashMap<>();
+		params.put(idField!=null?idField.getAlias():"sid", load.getIds());
+		paramObj.put("params", params);
+		
+		processFindDefaultParams(dataModel, params);
+		
+		return storageBaseService.findList(dsId, sql, paramObj,dataModel.getFields());
+	}
 	
 	/**
 	 * 	根据主键查询数据
@@ -381,7 +442,7 @@ public class DataStorageService {
 	 * @param id
 	 * @return
 	 */
-	public Map<String, Object> findById(DataModel dataModel,Object id) {
+	public Map<String, Object> findById(DataModel dataModel,Long id) {
 		return findById(dataModel.getDsId(),dataModel, id);
 	}
 	
@@ -392,7 +453,7 @@ public class DataStorageService {
 	 * @param id
 	 * @return
 	 */
-	public Map<String, Object> findById(Long dsId,DataModel dataModel,Object id) {
+	public Map<String, Object> findById(Long dsId,DataModel dataModel,Long id) {
 		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
 		DataField idField = dataModel.getStsField(BaseField.ID);
 		
@@ -414,7 +475,7 @@ public class DataStorageService {
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(DataModel dataModel,Set<Object> ids) {
+	public List<Map<String, Object>> findByIds(DataModel dataModel,Set<Long> ids) {
 		return findByIds(dataModel.getDsId(),dataModel, ids);
 	}
 	
@@ -425,7 +486,7 @@ public class DataStorageService {
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(Long dsId,DataModel dataModel,Set<Object> ids) {
+	public List<Map<String, Object>> findByIds(Long dsId,DataModel dataModel,Set<Long> ids) {
 		AssertUtil.service().notEmpty(ids, "主键不能为空");
 		DataField idField = dataModel.getStsField(BaseField.ID);
 		
@@ -476,7 +537,7 @@ public class DataStorageService {
 	 * @param size
 	 * @return
 	 */
-	public Results<List<Map<String, Object>>> findListPage(DataModel dataModel, Map<String, Object> params,
+	public DataResult<List<Map<String, Object>>> findListPage(DataModel dataModel, Map<String, Object> params,
 			int page, int size) {
 		return findListPage(dataModel.getDsId(), dataModel, params, page, size);
 	}
@@ -489,7 +550,7 @@ public class DataStorageService {
 	 * @param size
 	 * @return
 	 */
-	public Results<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,
+	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,
 			Map<String, Object> params, int page, int size) {
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
@@ -506,7 +567,7 @@ public class DataStorageService {
 	 * @param find
 	 * @return
 	 */
-	public Results<List<Map<String, Object>>> findListPage(DataModel dataModel,DataFind find) {
+	public DataResult<List<Map<String, Object>>> findListPage(DataModel dataModel,DataFind find) {
 		return findListPage(dataModel.getDsId(),dataModel, find);
 	}
 
@@ -517,7 +578,7 @@ public class DataStorageService {
 	 * @param find
 	 * @return
 	 */
-	public Results<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,DataFind find) {
+	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,DataFind find) {
 		Map<String, Object> paramObj=new HashMap<>();
 		
 		String keywords=StringUtils.trimToNull(find.getKeywords());
@@ -610,8 +671,9 @@ public class DataStorageService {
 	
 	/**
 	 * 	加载外键数据集合
-	 * @param dataModel
-	 * @param rows
+	 * @param dataModel	数据模型
+	 * @param rows		数据记录集合
+	 * @param fkeys		外键字段，为空则是所有
 	 */
 	public void loadFkeyEntrys(Long dsId,DataModel dataModel,List<Map<String, Object>> rows,String... fkeys) {
 		log.debug("进入：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataModel.getId(),fkeys,rows.size());

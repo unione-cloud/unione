@@ -74,7 +74,7 @@ public class SysDataPermisController implements PojoFeignApi<SysDataPermis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataPermis entity) {
 		log.debug("进入:修改sys_data_permis信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_permis",entity.getId());
+		LogsUtil.set(LogType.Update, "修改sys_data_permis",entity.getId());
 		
 		String[] fields = {"modelId","name","needAuth","express","configs","descs","status","delFlag"};
 		SqlBuilder<SysDataPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);

@@ -74,7 +74,7 @@ public class SysUserOrganController implements PojoFeignApi<SysUserOrgan>{
 	public Results<Long> update(@Validated(Validator.update.class) SysUserOrgan entity) {
 		log.debug("进入:修改用户机构信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改用户机构",entity.getId());
+		LogsUtil.set(LogType.Update, "修改用户机构",entity.getId());
 		
 		String[] fields = {"orgId","userId","timeJoin","timeLeave","status","ordered"};
 		SqlBuilder<SysUserOrgan> sqlBuilder=SqlBuilder.build(entity).field(fields);

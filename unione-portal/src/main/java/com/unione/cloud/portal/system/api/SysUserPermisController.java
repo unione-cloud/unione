@@ -74,7 +74,7 @@ public class SysUserPermisController implements PojoFeignApi<SysUserPermis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysUserPermis entity) {
 		log.debug("进入:修改用户权限信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改用户权限",entity.getId());
+		LogsUtil.set(LogType.Update, "修改用户权限",entity.getId());
 		
 		String[] fields = {"userId","appId","resId","resType","enDilivery"};
 		SqlBuilder<SysUserPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);

@@ -74,7 +74,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	public Results<Long> update(@Validated(Validator.update.class) SysAppInfo entity) {
 		log.debug("进入:修改应用信息信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改应用信息",entity.getId());
+		LogsUtil.set(LogType.Update, "修改应用信息",entity.getId());
 		
 		String[] fields = {"name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","isPlatform","status","descs"};
 		SqlBuilder<SysAppInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);

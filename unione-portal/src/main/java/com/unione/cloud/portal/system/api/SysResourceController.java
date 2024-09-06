@@ -74,7 +74,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	public Results<Long> update(@Validated(Validator.update.class) SysResource entity) {
 		log.debug("进入:修改系统资源信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改系统资源",entity.getId());
+		LogsUtil.set(LogType.Update, "修改系统资源",entity.getId());
 		
 		String[] fields = {"appId","parentId","name","title","alias","types","url","isIframe","isExternal","isHide","isLeaf","isNeedPermis","isPlatform","icon","picMax","picMid","picMix","ordered","status","descs","configs"};
 		SqlBuilder<SysResource> sqlBuilder=SqlBuilder.build(entity).field(fields);

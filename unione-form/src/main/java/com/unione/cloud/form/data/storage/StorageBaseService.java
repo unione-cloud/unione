@@ -38,7 +38,6 @@ import org.beetl.sql.ext.DebugInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.security.secret.SecretService;
@@ -47,6 +46,7 @@ import com.unione.cloud.form.data.model.SysDataSource;
 import com.unione.cloud.form.data.storage.format.BlobFormat;
 import com.unione.cloud.form.data.storage.format.ClobFormat;
 import com.unione.cloud.form.data.storage.model.DataField;
+import com.unione.cloud.form.data.storage.model.DataResult;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -332,9 +332,9 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Results<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size){
+    public DataResult<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size){
         log.debug("进入->执行findListPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
-        Results<List<Map<String, Object>>> result=Results.success();
+        DataResult<List<Map<String, Object>>> result=DataResult.success();
         
         PageRequest request = DefaultPageRequest.of(page,size);
         DefaultPageResult<Map> pageResult = (DefaultPageResult<Map>)this.getSQLManager(dsId).executePageQuery(sql, Map.class, params,request);
@@ -393,9 +393,9 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Results<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
+    public DataResult<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
         log.debug("进入->执行findListPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
-        Results<List<Map<String, Object>>> result=Results.success();
+        DataResult<List<Map<String, Object>>> result=DataResult.success();
         
         PageRequest request = DefaultPageRequest.of(page,size);
         DefaultPageResult<Map> pageResult = (DefaultPageResult<Map>)this.getSQLManager(dsId).executePageQuery(sql, Map.class, params,request);

@@ -74,7 +74,7 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataModel entity) {
 		log.debug("进入:修改数据模型管理信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改数据模型管理",entity.getId());
+		LogsUtil.set(LogType.Update, "修改数据模型管理",entity.getId());
 		
 		String[] fields = {"dirId","dsId","sn","title","name","sn","isCustom","category","publishDate","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
 		SqlBuilder<SysDataModel> sqlBuilder=SqlBuilder.build(entity).field(fields);

@@ -73,7 +73,7 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 	public Results<Long> update(@Validated(Validator.update.class) SysOrgan entity) {
 		log.debug("进入:修改机构信息信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改机构信息",entity.getId());
+		LogsUtil.set(LogType.Update, "修改机构信息",entity.getId());
 		
 		String[] fields = {"parentId","name","alias","types","areaCode","areaLabel","sn","level","busiMain","busiScop","addr","tel","levels","isLeaf","ordered","status","descs"};
 		SqlBuilder<SysOrgan> sqlBuilder=SqlBuilder.build(entity).field(fields);

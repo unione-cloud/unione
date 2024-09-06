@@ -74,7 +74,7 @@ public class SysPageReleaseController implements PojoFeignApi<SysPageRelease>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPageRelease entity) {
 		log.debug("进入:修改页面发布信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改页面发布",entity.getId());
+		LogsUtil.set(LogType.Update, "修改页面发布",entity.getId());
 		
 		String[] fields = {"appId","tmplId","component","title","sn","vers","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","status","descs"};
 		SqlBuilder<SysPageRelease> sqlBuilder=SqlBuilder.build(entity).field(fields);

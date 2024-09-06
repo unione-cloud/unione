@@ -116,7 +116,7 @@ public class LogsUtil {
 	
 	// 操作类型
 	public static enum LogType{
-		Query("query"),Insert("insert"),Modify("modify"),Delete("delete"),
+		Query("query"),Insert("insert"),Update("update"),Delete("delete"),
 		Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd"),
 		Sensitive("sensitive"),
 		Other("other");
@@ -323,9 +323,12 @@ public class LogsUtil {
 	 * @param targetId			目标ID
 	 * @param targetTitle		目标标题
 	 */
-	public static void setTarget(Long targetId) {
+	public static void setTarget(Long targetId,String... targetTitle) {
 		SysLogs log=getEntry();
 		log.setTargetId(targetId);
+		if(targetTitle.length>0) {
+			log.setTargetTitle(targetTitle[0]);
+		}
 	}
 	
 	/**

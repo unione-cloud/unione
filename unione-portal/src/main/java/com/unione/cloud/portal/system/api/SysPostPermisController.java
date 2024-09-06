@@ -74,7 +74,7 @@ public class SysPostPermisController implements PojoFeignApi<SysPostPermis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPostPermis entity) {
 		log.debug("进入:修改岗位权限信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改岗位权限",entity.getId());
+		LogsUtil.set(LogType.Update, "修改岗位权限",entity.getId());
 		
 		String[] fields = {"postId","appId","resId","resType","enDilivery"};
 		SqlBuilder<SysPostPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);

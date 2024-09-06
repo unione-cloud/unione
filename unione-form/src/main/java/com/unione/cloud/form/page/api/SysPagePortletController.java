@@ -74,7 +74,7 @@ public class SysPagePortletController implements PojoFeignApi<SysPagePortlet>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPagePortlet entity) {
 		log.debug("进入:修改信息组件信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改信息组件",entity.getId());
+		LogsUtil.set(LogType.Update, "修改信息组件",entity.getId());
 		
 		String[] fields = {"title","widget","reviewPic","icon","picMax","picMid","picMix","ordered","trades","status","configs","descs"};
 		SqlBuilder<SysPagePortlet> sqlBuilder=SqlBuilder.build(entity).field(fields);

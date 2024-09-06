@@ -74,7 +74,7 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataDir entity) {
 		log.debug("进入:修改sys_data_dir信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_dir",entity.getId());
+		LogsUtil.set(LogType.Update, "修改sys_data_dir",entity.getId());
 		
 		String[] fields = {"parentId","title","icon","iconPic","lvsn","level","status","ordered","descs","delFlag"};
 		SqlBuilder<SysDataDir> sqlBuilder=SqlBuilder.build(entity).field(fields);

@@ -74,7 +74,7 @@ public class SysDataSourceController implements PojoFeignApi<SysDataSource>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataSource entity) {
 		log.debug("进入:修改数据源信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改数据源",entity.getId());
+		LogsUtil.set(LogType.Update, "修改数据源",entity.getId());
 		
 		String[] fields = {"title","name","category","dsType","ip","port","url","authType","authOpts","driverName","username","password","configs","useSts","onlineSts","skitsFlag","descs"};
 		SqlBuilder<SysDataSource> sqlBuilder=SqlBuilder.build(entity).field(fields);

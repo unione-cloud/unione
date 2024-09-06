@@ -74,7 +74,7 @@ public class SysDataFieldController implements PojoFeignApi<SysDataField>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataField entity) {
 		log.debug("进入:修改sys_data_field信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_field",entity.getId());
+		LogsUtil.set(LogType.Update, "修改sys_data_field",entity.getId());
 		
 		String[] fields = {"modelId","title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isFk","fkType","fkTableId","fkTableName","fkFieldId","fkFieldName","fkLabelName","fkRefWay","isNull","isUnique","widgetName","isQuery","queryDefault","queryType","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","delFlag","descs"};
 		SqlBuilder<SysDataField> sqlBuilder=SqlBuilder.build(entity).field(fields);

@@ -74,7 +74,7 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 	public Results<Long> update(@Validated(Validator.update.class) SysGroupMember entity) {
 		log.debug("进入:修改分组成员信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改分组成员",entity.getId());
+		LogsUtil.set(LogType.Update, "修改分组成员",entity.getId());
 		
 		String[] fields = {"groupId","mbType","mbId","orgId","orgName","name","sn","timeJoin","timeLeave","status","ordered","descs"};
 		SqlBuilder<SysGroupMember> sqlBuilder=SqlBuilder.build(entity).field(fields);

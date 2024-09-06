@@ -74,7 +74,7 @@ public class SysPageMineController implements PojoFeignApi<SysPageMine>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPageMine entity) {
 		log.debug("进入:修改我的页面信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改我的页面",entity.getId());
+		LogsUtil.set(LogType.Update, "修改我的页面",entity.getId());
 		
 		String[] fields = {"userId","pageId","configs","descs"};
 		SqlBuilder<SysPageMine> sqlBuilder=SqlBuilder.build(entity).field(fields);

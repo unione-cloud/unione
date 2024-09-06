@@ -74,7 +74,7 @@ public class SysGroupController implements TreeFeignApi<SysGroup>{
 	public Results<Long> update(@Validated(Validator.update.class) SysGroup entity) {
 		log.debug("进入:修改分组信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改分组",entity.getId());
+		LogsUtil.set(LogType.Update, "修改分组",entity.getId());
 		
 		String[] fields = {"parentId","name","sn","level","types","iconFont","iconPic","descs","isLeaf","ordered","status"};
 		SqlBuilder<SysGroup> sqlBuilder=SqlBuilder.build(entity).field(fields);

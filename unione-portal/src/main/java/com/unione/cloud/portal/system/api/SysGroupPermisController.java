@@ -74,7 +74,7 @@ public class SysGroupPermisController implements PojoFeignApi<SysGroupPermis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysGroupPermis entity) {
 		log.debug("进入:修改分组权限信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改分组权限",entity.getId());
+		LogsUtil.set(LogType.Update, "修改分组权限",entity.getId());
 		
 		String[] fields = {"groupId","appId","resId","resType","enDilivery"};
 		SqlBuilder<SysGroupPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);

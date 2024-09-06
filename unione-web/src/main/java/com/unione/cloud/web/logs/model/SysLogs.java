@@ -27,6 +27,10 @@ import com.unione.cloud.core.model.Pojo;
 @Table(name="sys_logs")
 public class SysLogs extends Pojo {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1061181560553691314L;
+	/**
 	* 应用编码
 	*/
 	@ApiModelProperty(value="应用编码",notes="长度为：50")
@@ -76,6 +80,11 @@ public class SysLogs extends Pojo {
 	*/
 	@ApiModelProperty(value="目标ID",notes="长度为：19")
 	private Long targetId;
+	/**
+	* 目标标题
+	*/
+	@ApiModelProperty(value="目标标题",notes="长度为：19")
+	private String targetTitle;
 	/**
 	* 开始时间
 	*/

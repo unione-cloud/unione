@@ -12,6 +12,7 @@ import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.form.data.model.SysDataFieldRelease;
 import com.unione.cloud.form.data.model.SysDataModel;
@@ -33,13 +34,28 @@ public class DataModelCache {
 	
 	
 	/**
+	 * 	加载数据模型
+	 * @param sn
+	 * @return
+	 */
+	public DataModel load(String sn) {
+		log.debug("进入：加载数据模型方法,sn:{}",sn);
+		if(sn.endsWith("@dev")) {
+			return load4Dev(sn.substring(0,sn.length()-4));
+		}
+		return loadRelease(sn);
+	}
+	
+	
+	/**
 	 * 	加载数据模型【发布】
 	 * @param sn
 	 * @return
 	 */
 	@Cached(name="SYS:DATA:MODEL:",key = "#sn",expire = 3600,localExpire = 180,cacheType = CacheType.BOTH,cacheNullValue = true)
-	public DataModel load(String sn) {
+	public DataModel loadRelease(String sn) {
 		log.info("进入：从db加载数据模型【发布】方法,sn:{}",sn);
+		DataModel model=null;
 		SysDataModelRelease tmp = new SysDataModelRelease();
 		if(sn.indexOf("@")>0) {
 			sn=sn.substring(0, sn.indexOf("@"));
@@ -49,7 +65,7 @@ public class DataModelCache {
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【发布】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
-			DataModel model=new DataModel();
+			model=new DataModel();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
@@ -65,10 +81,12 @@ public class DataModelCache {
 			}).collect(Collectors.toList());
 			
 			model.setFields(fields);
-			return model;
 		}
-		return null;
+		
+		AssertUtil.service().notNull(model, "数据模型未找到");
+		return model;
 	}
+	
 	
 	/**
 	 * 	加载数据模型【发布】
@@ -78,10 +96,11 @@ public class DataModelCache {
 	@Cached(name="SYS:DATA:MODEL:",key = "#id",expire = 3600,localExpire = 180,cacheType = CacheType.BOTH,cacheNullValue = true)
 	public DataModel load(Long id) {
 		log.info("进入：从db加载数据模型【发布】方法,id:{}",id);
+		DataModel model=null;
 		SysDataModelRelease tmp = dataBaseDao.findById(SysDataModelRelease.class, id);
 		log.info("退出：从db加载数据模型【发布】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
-			DataModel model=new DataModel();
+			model=new DataModel();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
@@ -98,9 +117,10 @@ public class DataModelCache {
 			
 			model.setFields(fields);
 			
-			return model;
 		}
-		return null;
+		
+		AssertUtil.service().notNull(model, "数据模型未找到");
+		return model;
 	}
 	
 	/**
@@ -125,15 +145,13 @@ public class DataModelCache {
 	 */
 	public DataModel load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
+		DataModel model=null;
 		SysDataModel tmp = new SysDataModel();
-		if(sn.indexOf("@")>0) {
-			sn=sn.substring(0, sn.indexOf("@"));
-		}
 		tmp.setSn(sn);
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
-			DataModel model=new DataModel();
+			model=new DataModel();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataField sdfr=new SysDataField();
@@ -149,9 +167,10 @@ public class DataModelCache {
 			}).collect(Collectors.toList());
 			
 			model.setFields(fields);
-			return model;
 		}
-		return null;
+		
+		AssertUtil.service().notNull(model, "数据模型未找到");
+		return model;
 	}
 	
 	/**
@@ -161,10 +180,11 @@ public class DataModelCache {
 	 */
 	public DataModel load4Dev(Long id) {
 		log.info("进入：从db加载数据模型【dev】方法,id:{}",id);
+		DataModel model=null;
 		SysDataModel tmp = dataBaseDao.findById(SysDataModel.class, id);
 		log.info("退出：从db加载数据模型【dev】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
-			DataModel model=new DataModel();
+			model=new DataModel();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataField sdfr=new SysDataField();
@@ -182,7 +202,9 @@ public class DataModelCache {
 			model.setFields(fields);
 			return model;
 		}
-		return null;
+		
+		AssertUtil.service().notNull(model, "数据模型未找到");
+		return model;
 	}
 	
 

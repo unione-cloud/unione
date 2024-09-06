@@ -74,7 +74,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 	public Results<Long> update(@Validated(Validator.update.class) ${className} entity) {
 		log.debug("进入:修改${modelName}信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改${modelName}",entity.getId());
+		LogsUtil.set(LogType.Update, "修改${modelName}",entity.getId());
 		
 		String[] fields = {${updateField}};
 		SqlBuilder<${className}> sqlBuilder=SqlBuilder.build(entity).field(fields);

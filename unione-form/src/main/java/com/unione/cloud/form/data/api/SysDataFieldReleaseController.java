@@ -74,7 +74,7 @@ public class SysDataFieldReleaseController implements PojoFeignApi<SysDataFieldR
 	public Results<Long> update(@Validated(Validator.update.class) SysDataFieldRelease entity) {
 		log.debug("进入:修改sys_data_field_release信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_field_release",entity.getId());
+		LogsUtil.set(LogType.Update, "修改sys_data_field_release",entity.getId());
 		
 		String[] fields = {"modelId","title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isFk","fkType","fkTableId","fkTableName","fkFieldId","fkFieldName","fkLabelName","fkRefWay","isNull","isUnique","widgetName","isQuery","queryDefault","queryType","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","delFlag","descs"};
 		SqlBuilder<SysDataFieldRelease> sqlBuilder=SqlBuilder.build(entity).field(fields);

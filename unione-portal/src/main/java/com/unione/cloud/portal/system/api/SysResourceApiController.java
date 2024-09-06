@@ -74,7 +74,7 @@ public class SysResourceApiController implements PojoFeignApi<SysResourceApi>{
 	public Results<Long> update(@Validated(Validator.update.class) SysResourceApi entity) {
 		log.debug("进入:修改资源接口信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改资源接口",entity.getId());
+		LogsUtil.set(LogType.Update, "修改资源接口",entity.getId());
 		
 		String[] fields = {"appId","resId","resType","apiId","status"};
 		SqlBuilder<SysResourceApi> sqlBuilder=SqlBuilder.build(entity).field(fields);

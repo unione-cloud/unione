@@ -74,7 +74,7 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 	public Results<Long> update(@Validated(Validator.update.class) SysRole entity) {
 		log.debug("进入:修改角色信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改角色",entity.getId());
+		LogsUtil.set(LogType.Update, "修改角色",entity.getId());
 		
 		String[] fields = {"orgId","name","sn","types","status","descs"};
 		SqlBuilder<SysRole> sqlBuilder=SqlBuilder.build(entity).field(fields);

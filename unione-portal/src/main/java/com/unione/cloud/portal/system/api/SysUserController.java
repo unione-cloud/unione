@@ -88,7 +88,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	public Results<Long> update(@Validated(Validator.update.class) SysUser entity) {
 		log.debug("进入控制:修改系统用户信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改系统用户",entity.getId());
+		LogsUtil.set(LogType.Update, "修改系统用户",entity.getId());
 		
 		String[] fields = {"orgId","userType","username","realName","aliasName","avatar","birthday","sex","email","qq","tel","status","lockTime","descs"};
 		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(entity).field(fields);

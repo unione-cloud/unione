@@ -74,7 +74,7 @@ public class SysDataAuthController implements PojoFeignApi<SysDataAuth>{
 	public Results<Long> update(@Validated(Validator.update.class) SysDataAuth entity) {
 		log.debug("进入:修改sys_data_auth信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改sys_data_auth",entity.getId());
+		LogsUtil.set(LogType.Update, "修改sys_data_auth",entity.getId());
 		
 		String[] fields = {"modelId","permisId","targetType","targetId","status","delFlag"};
 		SqlBuilder<SysDataAuth> sqlBuilder=SqlBuilder.build(entity).field(fields);

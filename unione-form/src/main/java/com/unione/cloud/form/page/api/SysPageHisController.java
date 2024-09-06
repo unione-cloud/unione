@@ -74,7 +74,7 @@ public class SysPageHisController implements PojoFeignApi<SysPageHis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPageHis entity) {
 		log.debug("进入:修改页面历史信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改页面历史",entity.getId());
+		LogsUtil.set(LogType.Update, "修改页面历史",entity.getId());
 		
 		String[] fields = {"tmplId","pageId","component","title","sn","vers","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","status","descs"};
 		SqlBuilder<SysPageHis> sqlBuilder=SqlBuilder.build(entity).field(fields);

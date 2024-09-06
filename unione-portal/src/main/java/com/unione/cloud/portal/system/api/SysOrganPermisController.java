@@ -74,7 +74,7 @@ public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
 	public Results<Long> update(@Validated(Validator.update.class) SysOrganPermis entity) {
 		log.debug("进入:修改机构权限信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改机构权限",entity.getId());
+		LogsUtil.set(LogType.Update, "修改机构权限",entity.getId());
 		
 		String[] fields = {"orgId","appId","resId","resType","enDilivery"};
 		SqlBuilder<SysOrganPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);

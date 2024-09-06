@@ -74,7 +74,7 @@ public class SysPageWidgetController implements PojoFeignApi<SysPageWidget>{
 	public Results<Long> update(@Validated(Validator.update.class) SysPageWidget entity) {
 		log.debug("进入:修改页面组件信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Modify, "修改页面组件",entity.getId());
+		LogsUtil.set(LogType.Update, "修改页面组件",entity.getId());
 		
 		String[] fields = {"title","name","types","reviewPic","icon","picMax","picMid","picMix","ordered","isBase","trades","status","configs","props","descs"};
 		SqlBuilder<SysPageWidget> sqlBuilder=SqlBuilder.build(entity).field(fields);
