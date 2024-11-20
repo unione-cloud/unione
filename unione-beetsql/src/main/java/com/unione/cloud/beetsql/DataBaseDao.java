@@ -61,10 +61,10 @@ public class DataBaseDao {
 		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
@@ -80,10 +80,10 @@ public class DataBaseDao {
 		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUserId());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
 
@@ -103,10 +103,10 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.date());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -124,10 +124,10 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUsername());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED.getName(), DateUtil.date());
+			BeanUtils.setDefaultValue(entity, BaseField.CREATED_BY.getName(), sessionService.getUserId());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+			BeanUtils.setDefaultValue(entity, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -143,8 +143,8 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
@@ -159,8 +159,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE);
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
@@ -174,8 +174,8 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
@@ -191,8 +191,8 @@ public class DataBaseDao {
 	public <T> int updateById(T params) {
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.updateById(params);
 	}
@@ -207,8 +207,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.UPDATE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setFieldValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
@@ -224,8 +224,8 @@ public class DataBaseDao {
 		map.put("params", params);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		this.setDataPermis(params);
 		return this.sqlManager.update(sqlId, map);
@@ -241,8 +241,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -268,8 +268,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
@@ -286,8 +286,8 @@ public class DataBaseDao {
 		map.put("params", params);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, map);
 	}
@@ -304,8 +304,8 @@ public class DataBaseDao {
 		map.put("params", params);
 		
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(params, BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, map);
 	}
@@ -319,8 +319,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
@@ -334,8 +334,8 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
 
 		SessionService sessionService=SessionHolder.build();
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.current());
-		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUsername());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
+		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
