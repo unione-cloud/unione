@@ -6,20 +6,20 @@ import org.springframework.stereotype.Service;
 import com.unione.cloud.core.exception.AssertUtil;
 
 @Service
-public class SidGenHolder {
+public class IdGenHolder {
 
-	private static SidGenerator sidGenerator;
+	private static IdGenerator sidGenerator;
 	
 	@Autowired(required=false)
-	public void setSidGenerator(SidGenerator sidGenerator) {
-		SidGenHolder.sidGenerator=sidGenerator;
+	public void setSidGenerator(IdGenerator sidGenerator) {
+		IdGenHolder.sidGenerator=sidGenerator;
 	}
 	
 	/**
 	 * 	获得SidGenerator实例
 	 * @return
 	 */
-	public static SidGenerator get() {
+	public static IdGenerator get() {
 		return sidGenerator;
 	}
 	
@@ -28,8 +28,8 @@ public class SidGenHolder {
 	 * @return
 	 */
 	public static long generate() {
-		AssertUtil.service().notNull(SidGenHolder.sidGenerator, "sidGenerator服务异常");
-		return SidGenHolder.sidGenerator.generate();
+		AssertUtil.service().notNull(IdGenHolder.sidGenerator, "sidGenerator服务异常");
+		return IdGenHolder.sidGenerator.generate();
 	}
 	
 }

@@ -87,7 +87,7 @@ public class SecurityController {
 	public LoginResult login(@RequestBody LoginParam param) {
 		log.info("用户登录，usrename:{}",param.getUsername());
 		LogsUtil.set(LogType.Login, "用户登录");
-		LogsUtil.setCreator(param.getUsername());
+		LogsUtil.setUsername(param.getUsername());
 		AssertUtil.service()
 			.notNull(param, new String[] {"username","password"},"请求参数%s不能为空");
 		// 密码解密处理
@@ -129,7 +129,7 @@ public class SecurityController {
 	public Results<Void> register(@RequestBody UserRegister param){
 		log.info("用户注册：usrename:{}",param.getUsername());
 		LogsUtil.set(LogType.Register, "用户注册");
-		LogsUtil.setCreator(param.getUsername());
+		LogsUtil.setUsername(param.getUsername());
 		
 		Results<Void> result=registerService.doRegister(param);
 		

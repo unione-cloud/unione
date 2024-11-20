@@ -13,6 +13,7 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.security.service.CaptchaService;
 import com.unione.cloud.portal.system.dto.UserRegister;
@@ -102,8 +103,10 @@ public class RegisterService {
 			//TODO 手机短信验证码接入逻辑
 		}
 		
+		Long userId = IdGenHolder.generate();
 		SysUser user=new SysUser();
 		BeanUtils.copyProperties(param, user);
+		user.setId(userId);
 		
 		LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());
 		SqlBuilder<SysUser> untelBuilder=SqlBuilder.build(user).field("id,username,tel").where("username=? or tel=?");
@@ -117,8 +120,8 @@ public class RegisterService {
 		LogsUtil.add("设置默认属性");
 		user.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
 		user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
-		user.setCreatedBy(param.getUsername());
-		user.setLastUpdatedBy(param.getUsername());	
+		user.setCreatedBy(userId);
+		user.setLastUpdatedBy(userId);	
 		BeanUtils.setDefaultValue(user, "userType", 2);	//用户类型，字典USERTYPE 1管理员，2普通用户，9其他	
 		BeanUtils.setDefaultValue(user, REGISGER_DEFAULT_INFO);	
 		
@@ -127,7 +130,7 @@ public class RegisterService {
 		String pwd = SmUtil.sm4(Base64.decode(user.getPwdSalt())).encryptHex(user.getPwdText());
 		user.setPwdText(pwd);
 		LogsUtil.add("保存用户信息");
-		dataBaseDao.insert(user);
+		dataBaseDao.insertWithId(user);
 		
 		List<Long> roles=REGISGER_DEFAULT_ROLES.get(user.getUserType());
 		LogsUtil.add("分配用户角色,roles:%s",roles);
@@ -136,8 +139,8 @@ public class RegisterService {
 				SysUserRole ur=new SysUserRole();
 				ur.setRoleId(roleId);			
 				ur.setUserId(user.getId());
-				ur.setCreatedBy(param.getUsername());
-				ur.setLastUpdatedBy(param.getUsername());
+				ur.setCreatedBy(user.getId());
+				ur.setLastUpdatedBy(user.getId());
 				return ur;
 			}).collect(Collectors.toList());
 			dataBaseDao.insertBatch(userRoles);

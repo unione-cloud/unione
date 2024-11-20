@@ -23,7 +23,7 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.beetsql.builder.SqlType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.generator.SidGenHolder;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
@@ -56,7 +56,7 @@ public class DataBaseDao {
 		SessionService sessionService=SessionHolder.build();
 		PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.getName());
 		if(Long.class.equals(idProp.getPropertyType())) {
-			BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
+			BeanKit.setBeanProperty(entity, IdGenHolder.generate(), idProp.getName());
 		}
 		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
@@ -98,7 +98,7 @@ public class DataBaseDao {
 		list.stream().forEach(entity->{
 			PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.getName());
 			if(Long.class.equals(idProp.getPropertyType())) {
-				BeanKit.setBeanProperty(entity, SidGenHolder.generate(), idProp.getName());
+				BeanKit.setBeanProperty(entity, IdGenHolder.generate(), idProp.getName());
 			}
 			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());

@@ -1,6 +1,12 @@
 package com.unione.cloud.web.logs.model;
-import org.beetl.sql.annotation.entity.*;
+import java.util.Date;
+
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -8,8 +14,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	SysLogs Entity
@@ -89,12 +93,16 @@ public class SysLogs extends Pojo {
 	* 开始时间
 	*/
 	@ApiModelProperty(value="开始时间",notes="长度为：19")
-	private Long startTime;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date startTime;
 	/**
 	* 完成时间
 	*/
 	@ApiModelProperty(value="完成时间",notes="长度为：19")
-	private Long endTime;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date endTime;
 	/**
 	* 操作IP
 	*/

@@ -5,7 +5,7 @@ package com.unione.cloud.core.generator;
  * @作者 Jeking Yang
  * @版本 1.0.0
  */
-public interface SidGenerator {
+public interface IdGenerator {
 	/**
 	 * 生成sid
 	 * @return

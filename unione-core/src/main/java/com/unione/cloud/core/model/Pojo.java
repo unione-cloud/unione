@@ -1,9 +1,13 @@
 package com.unione.cloud.core.model;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Date;
 
 import javax.validation.constraints.NotNull;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -52,32 +56,28 @@ public class Pojo implements Serializable {
 	 * 创建时间
 	 */
 	@ApiModelProperty(value="创建时间",notes = "时间格式:yyyy-MM-dd HH:mm:ss")
-	private Long created;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date created;
 	
 	/**
 	 * 创建人（账号）
 	 */
 	@ApiModelProperty("创建人")
-	private String createdBy;
+	private Long createdBy;
 	
 	/**
 	 * 修改时间
 	 */
 	@ApiModelProperty(value="修改时间",notes = "时间格式:yyyy-MM-dd HH:mm:ss")
-	private Long lastUpdated;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date lastUpdated;
 	
 	/**
 	 * 修改人（账号）
 	 */
 	@ApiModelProperty("修改人")
-	private String lastUpdatedBy;
-    	
-	
-	////////非持久化属性
-	/**
-	 * 主键ID
-	 */
-	@ApiModelProperty("主键ID集合")
-	private List<Long> ids;
+	private Long lastUpdatedBy;
 	
 }

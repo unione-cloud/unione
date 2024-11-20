@@ -24,7 +24,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;
 import com.unione.cloud.core.exception.ServiceException;
-import com.unione.cloud.core.generator.SidGenHolder;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.web.logs.model.SysLogs;
@@ -219,15 +219,15 @@ public class LogsUtil {
 			contents.set(null);
 			ent=new SysLogs();
 			ent.setAppSn(appCode);
-			ent.setCreated(DateUtil.current());
-			ent.setStartTime(DateUtil.current());
+			ent.setCreated(DateUtil.date());
+			ent.setStartTime(DateUtil.date());
 			if(sessionService.getPrincipal()!=null) {
 				ent.setTenantId(sessionService.getTenantId());
 				ent.setOrgId(sessionService.getOrgId());
 				ent.setUserId(sessionService.getUserId());
 				ent.setUserName(sessionService.getRealname());
-				ent.setCreatedBy(sessionService.getUsername());
-				ent.setLastUpdatedBy(sessionService.getUsername());
+				ent.setCreatedBy(sessionService.getUserId());
+				ent.setLastUpdatedBy(sessionService.getUserId());
 			}
 			entry.set(ent);
 			
@@ -241,7 +241,7 @@ public class LogsUtil {
 				if(!StringUtils.isEmpty(actionid)) {
 					ent.setActionId(Long.parseLong(actionid));
 				}else {
-					ent.setActionId(SidGenHolder.generate());
+					ent.setActionId(IdGenHolder.generate());
 				}
 				setCookie("_unione_actionid", ent.getActionId()+"");
 				
@@ -252,11 +252,11 @@ public class LogsUtil {
 				if(!StringUtils.isEmpty(requestid)) {
 					ent.setPrequestId(Long.parseLong(requestid));
 				}
-				ent.setRequestId(SidGenHolder.generate());
+				ent.setRequestId(IdGenHolder.generate());
 				setCookie("_unione_requestid", ent.getRequestId()+"");
 			}else {
-				ent.setRequestId(SidGenHolder.generate());
-				ent.setActionId(SidGenHolder.generate());
+				ent.setRequestId(IdGenHolder.generate());
+				ent.setActionId(IdGenHolder.generate());
 			}
 			
 			// 保存请求信息到session
@@ -302,10 +302,9 @@ public class LogsUtil {
 		setTarget(targetId);
 	}
 	
-	public static void setCreator(String username) {
+	public static void setUsername(String username) {
 		SysLogs log=getEntry();
-		log.setCreatedBy(username);
-		log.setLastUpdatedBy(username);
+		log.setUserName(username);
 	}
 	
 	/**
@@ -382,7 +381,7 @@ public class LogsUtil {
 	public static void save(boolean isSuccess) {
 		SysLogs log=getEntry();
 		log.setStatus(isSuccess?1:2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -396,7 +395,7 @@ public class LogsUtil {
 		SysLogs log=getEntry();
 		setTarget(targetId);
 		log.setStatus(isSuccess?1:2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -406,7 +405,7 @@ public class LogsUtil {
 	public static void success() {
 		SysLogs log=getEntry();
 		log.setStatus(1);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -418,7 +417,7 @@ public class LogsUtil {
 		SysLogs log=getEntry();
 		setTarget(targetId);
 		log.setStatus(1);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -430,7 +429,7 @@ public class LogsUtil {
 		add(e.getMessage());
 		SysLogs logs=getEntry();
 		logs.setStatus(2);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -456,7 +455,7 @@ public class LogsUtil {
 		SysLogs logs=getEntry();
 		logs.setErrorMessage(errorMessage);
 		logs.setStatus(2);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -479,7 +478,7 @@ public class LogsUtil {
 	public static void failure(String errorCode,String errorMessage) {
 		SysLogs log=getEntry();
 		log.setStatus(2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		log.setErrorCode(errorCode);
 		log.setErrorMessage(errorMessage);
 		doSave(log);
@@ -494,7 +493,7 @@ public class LogsUtil {
 	public static void error(String errorCode,String errorMessage) {
 		SysLogs log=getEntry();
 		log.setStatus(3);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		log.setErrorCode(errorCode);
 		log.setErrorMessage(errorMessage);
 		doSave(log);
@@ -508,7 +507,7 @@ public class LogsUtil {
 		add(e.getMessage());
 		SysLogs logs=getEntry();
 		logs.setStatus(3);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -541,7 +540,7 @@ public class LogsUtil {
 		add(errorMessage);
 		SysLogs logs=getEntry();
 		logs.setStatus(3);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -588,6 +587,10 @@ public class LogsUtil {
 		}
 		if(StringUtils.isEmpty(logs.getIp())) {
 			log.warn("保存日志信息：操作IP为空");
+		}
+		if(logs.getUserId()==null) {
+			logs.setUserId(sessionService.getUserId());
+			logs.setUserName(sessionService.getUsername());
 		}
 		
 		// 异步保存日志

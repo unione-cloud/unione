@@ -14,13 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * @描述 Sid默认生成器
+ * @描述 Id默认生成器
  * @作者 Jeking Yang
  * @版本 1.0.0
  */
 @Slf4j
 @Service
-public class DefaultSidGenerator implements SidGenerator {
+public class DefaultIdGenerator implements IdGenerator {
     
     private static Snowflake snowflake;
     

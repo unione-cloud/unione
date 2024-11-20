@@ -13,7 +13,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.generator.SidGenHolder;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.form.cache.DataModelCache;
@@ -119,7 +119,7 @@ public class DataStorageService {
 		log.debug("新增操作默认数据处理,dsId:{},data model id:{}",dataModel.getDsId(),dataModel.getId());
 		DataField idField = dataModel.getStsField(BaseField.ID);
 		if (idField != null && data.get(idField.getAlias())==null) {
-			data.put(idField.getAlias(), SidGenHolder.generate());
+			data.put(idField.getAlias(), IdGenHolder.generate());
 		}
 		DataField tenantIdField = dataModel.getStsField(BaseField.TENANT_ID);
 		if (tenantIdField != null) {

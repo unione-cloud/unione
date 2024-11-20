@@ -95,8 +95,8 @@ public class LogsUtil {
 		if(ent==null) {
 			contents.set(null);
 			ent=new UniOneLogs();
-			ent.setCreated(DateUtil.current());
-			ent.setStartTime(DateUtil.current());
+			ent.setCreated(DateUtil.date());
+			ent.setStartTime(DateUtil.date());
 			entry.set(ent);
 		}
 		return ent;
@@ -112,8 +112,8 @@ public class LogsUtil {
 		ent.setOrgId(principal.getOrgId());
 		ent.setUserId(principal.getId());
 		ent.setUserName(principal.getRealName());
-		ent.setCreatedBy(principal.getUsername());
-		ent.setLastUpdatedBy(principal.getUsername());
+		ent.setCreatedBy(principal.getId());
+		ent.setLastUpdatedBy(principal.getId());
 	}
 	
 	/**
@@ -242,7 +242,7 @@ public class LogsUtil {
 	public static void save(boolean isSuccess) {
 		UniOneLogs log=getEntry();
 		log.setStatus(isSuccess?1:2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -256,7 +256,7 @@ public class LogsUtil {
 		UniOneLogs log=getEntry();
 		setTarget(targetId);
 		log.setStatus(isSuccess?1:2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -266,7 +266,7 @@ public class LogsUtil {
 	public static void success() {
 		UniOneLogs log=getEntry();
 		log.setStatus(1);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -279,7 +279,7 @@ public class LogsUtil {
 		UniOneLogs log=getEntry();
 		setTarget(targetId);
 		log.setStatus(1);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		doSave(log);
 	}
 	
@@ -291,7 +291,7 @@ public class LogsUtil {
 		add(e.getMessage());
 		UniOneLogs logs=getEntry();
 		logs.setStatus(2);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -313,7 +313,7 @@ public class LogsUtil {
 	public static void failure() {
 		UniOneLogs logs=getEntry();
 		logs.setStatus(2);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		doSave(logs);
 	}
 	
@@ -327,7 +327,7 @@ public class LogsUtil {
 		UniOneLogs logs=getEntry();
 		logs.setErrorMessage(errorMessage);
 		logs.setStatus(2);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -350,7 +350,7 @@ public class LogsUtil {
 	public static void failure(String errorCode,String errorMessage) {
 		UniOneLogs log=getEntry();
 		log.setStatus(2);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		log.setErrorCode(errorCode);
 		log.setErrorMessage(errorMessage);
 		doSave(log);
@@ -365,7 +365,7 @@ public class LogsUtil {
 	public static void error(String errorCode,String errorMessage) {
 		UniOneLogs log=getEntry();
 		log.setStatus(3);
-		log.setEndTime(DateUtil.current());
+		log.setEndTime(DateUtil.date());
 		log.setErrorCode(errorCode);
 		log.setErrorMessage(errorMessage);
 		doSave(log);
@@ -379,7 +379,7 @@ public class LogsUtil {
 		add(e.getMessage());
 		UniOneLogs logs=getEntry();
 		logs.setStatus(3);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
@@ -412,7 +412,7 @@ public class LogsUtil {
 		add(errorMessage);
 		UniOneLogs logs=getEntry();
 		logs.setStatus(3);
-		logs.setEndTime(DateUtil.current());
+		logs.setEndTime(DateUtil.date());
 		if(e instanceof ServiceException) {
 			ServiceException ee=(ServiceException)e;
 			logs.setErrorCode(ee.getErrorCode());
