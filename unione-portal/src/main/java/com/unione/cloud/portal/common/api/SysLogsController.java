@@ -46,7 +46,7 @@ public class SysLogsController implements FeignSave<SysLogs>,FeignFind<SysLogs>,
 		
 		// 构造sql
 		SqlBuilder<SysLogs> builder=SqlBuilder.build(params)
-			.where("appCode=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
+			.where("appSn=? AND actionId=? AND requestId=? AND userName like [%?%] AND "
 					+ "title like [%?%] AND types=? AND targetId=? AND status=? AND "
 					+ "startTime>[timeBegin] AND startTime<=[timeEnd]");
 		

@@ -390,7 +390,7 @@ public class SqlBuilder<T> {
 		boolean isJavaBean=!(this.data instanceof Map);
 		
 		StringBuffer buffer=new StringBuffer();
-		if("SELECT".equalsIgnoreCase(type.value())) {
+		if(SqlType.SELECT.equals(type)||SqlType.SELECT_BYID.equals(type)) {
 			buffer.append("SELECT ");
 			// 查询字段处理
 			StringBuffer fieldBuf=new StringBuffer();
@@ -411,13 +411,14 @@ public class SqlBuilder<T> {
 				buffer.append(this.entity.getSchema()).append(".");
 			}
 			buffer.append(this.entity.getTable()).append(" ");
-		}else if("COUNT".equalsIgnoreCase(type.value())) {
+		}else if(SqlType.COUNT.equals(type)) {
 			buffer.append("SELECT COUNT(*) FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
 				buffer.append(this.entity.getSchema()).append(".");
 			}
 			buffer.append(this.entity.getTable()).append(" ");
-		}else if("UPDATE".equalsIgnoreCase(type.value())) {
+		}else if(SqlType.UPDATE.equals(type) || SqlType.UPDATE_BYID.equals(type) ||
+				SqlType.DELETE_LOGIC.equals(type) || SqlType.DELETE_LOGIC_BYID.equals(type)) {
 			buffer.append("UPDATE ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
 				buffer.append(this.entity.getSchema()).append(".");
@@ -451,7 +452,7 @@ public class SqlBuilder<T> {
 			
 			buffer.append("-- @}\n");
 			
-		}else if("DELETE".equalsIgnoreCase(type.value())) {
+		}else if(SqlType.DELETE.equals(type) || SqlType.DELETE_BYID.equals(type)) {
 			buffer.append("DELETE FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
 				buffer.append(this.entity.getSchema()).append(".");

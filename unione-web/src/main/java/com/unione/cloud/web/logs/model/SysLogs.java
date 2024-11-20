@@ -124,4 +124,17 @@ public class SysLogs extends Pojo {
 	@ApiModelProperty(value="异常代码",notes="长度为：10")
 	private String errorCode;
 
+	
+	///////////////
+	// 非持久化属性
+	@ApiModelProperty(value="开始时间",notes="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date timeBegin;
+	
+	@ApiModelProperty(value="截止时间",notes="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date timeEnd;
+	
 }
