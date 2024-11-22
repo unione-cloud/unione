@@ -62,10 +62,10 @@ public class UserPrincipal implements Serializable {
 	 * 用户类型
 	 */
 	private Integer userType;
-	// /**
-	//  * 用户状态
-	//  */
-	// private Integer status;
+	 /**
+	  * 头像
+	  */
+	private String avatar;
 	/**
 	 * 上次登录IP
 	 */
