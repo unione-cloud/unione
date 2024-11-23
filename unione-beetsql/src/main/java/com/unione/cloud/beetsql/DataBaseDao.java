@@ -58,6 +58,7 @@ public class DataBaseDao {
 		if(Long.class.equals(idProp.getPropertyType())) {
 			BeanKit.setBeanProperty(entity, IdGenHolder.generate(), idProp.getName());
 		}
+		BeanUtils.setDefaultValue(entity, BaseField.DEL_FLAG.getName(),0);
 		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
@@ -77,6 +78,7 @@ public class DataBaseDao {
 	 */
 	public <T> int insertWithId(T entity) {
 		SessionService sessionService=SessionHolder.build();
+		BeanUtils.setDefaultValue(entity, BaseField.DEL_FLAG.getName(),0);
 		BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 		BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 		BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
@@ -100,6 +102,7 @@ public class DataBaseDao {
 			if(Long.class.equals(idProp.getPropertyType())) {
 				BeanKit.setBeanProperty(entity, IdGenHolder.generate(), idProp.getName());
 			}
+			BeanUtils.setDefaultValue(entity, BaseField.DEL_FLAG.getName(),0);
 			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());
@@ -121,6 +124,7 @@ public class DataBaseDao {
 	public <T> int[] insertBatchWithId(List<T> list) {
 		SessionService sessionService=SessionHolder.build();
 		list.stream().forEach(entity->{
+			BeanUtils.setDefaultValue(entity, BaseField.DEL_FLAG.getName(),0);
 			BeanUtils.setDefaultValue(entity, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 			BeanUtils.setDefaultValue(entity, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 			BeanUtils.setDefaultValue(entity, BaseField.USER_ID.getName(), sessionService.getUserId());

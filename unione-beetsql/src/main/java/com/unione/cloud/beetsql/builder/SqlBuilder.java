@@ -90,6 +90,7 @@ public class SqlBuilder<T> {
 	private Pattern funRegix=Pattern.compile("[\\s]+(AND|OR)[\\s]+",Pattern.CASE_INSENSITIVE);
 	private Pattern inRegix=Pattern.compile("(^IN$)|(^NOT IN$)",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?[\\s]*\\])",Pattern.CASE_INSENSITIVE);
+	private Pattern humpFieldRegix=Pattern.compile("([a-z]+[0-9]*[A-Z]+[\\w]*|[a-z0-9]+)[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))");
 	
 	private boolean initComplete;
 	
@@ -159,6 +160,17 @@ public class SqlBuilder<T> {
 			}
 		}
 		return buildr;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <T> SqlBuilder<T> build(Class<T> cls) {
+		try {
+			T obj=BeanKit.newInstance(cls);
+			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			return buildr;
+		} catch (Exception e) {
+			throw new DataBaseException("构建SqlBuilder实例失败",e);
+		}
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -620,6 +632,14 @@ public class SqlBuilder<T> {
 			String condition=matcher.group();
 			whereSql=whereSql.replace(condition, whereCondition(condition));
 		}
+		
+		// 静态参数字段名称处理
+		matcher=humpFieldRegix.matcher(whereSql);
+		while(matcher.find()) {
+			String condition=matcher.group();
+			whereSql=whereSql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
+		}
+		
 		DataPermis dataPermis=this.loadDataPermis();
 		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
 			switch (dataPermis) {
@@ -752,6 +772,11 @@ public class SqlBuilder<T> {
 	
 	public SqlBuilder<T> where(String where){
 		this.where=where;
+		return this;
+	}
+	
+	public SqlBuilder<T> params(String name,Object value){
+		BeanUtils.setFieldValue(this.params, name, value);
 		return this;
 	}
 	

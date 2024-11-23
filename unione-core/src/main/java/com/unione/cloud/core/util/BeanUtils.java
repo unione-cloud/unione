@@ -13,6 +13,21 @@ public class BeanUtils extends BeanUtil{
 
 	
 	/**
+	 * 复制对象
+	 */
+	public static void copy(Object from,Object to,String ...fields) {
+		if(fields==null || fields.length==0) {
+			BeanUtils.copyProperties(from, to);
+		}else {
+			for(String field:fields) {
+				Object value=BeanUtil.getProperty(from, field);
+				BeanUtil.setProperty(to, field, value);
+			}
+		}
+	}
+	
+	
+	/**
 	 * 设置默认值
 	 * @param bean
 	 * @param fieldName
