@@ -174,11 +174,11 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(Class<T> cls,Set<Object> ids) {
+	public static <T> SqlBuilder<T> build(Class<T> cls,Set<Long> ids) {
 		try {
 			T obj=cls.newInstance();
-			BeanUtil.setFieldValue(obj,"ids", new ArrayList(ids));
 			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			buildr.ids=new ArrayList<>(ids);
 			return buildr;
 		} catch (Exception e) {
 			throw new DataBaseException("构建SqlBuilder实例失败",e);
@@ -626,7 +626,7 @@ public class SqlBuilder<T> {
 		// where条件处理
 		Matcher matcher=conditionRegix.matcher(this.where);
 		String whereSql=this.where.replaceAll("\\(", "\r\n-- @SQLTRIM_{\r\n(")
-				.replaceAll("\\)", ")\r\n-- @}\r\n")
+				.replaceAll("\\)", ")\r\n-- @}\n")
 				.replaceAll("@SQLTRIM_", "@sqlTrim()");
 		while(matcher.find()) {
 			String condition=matcher.group();
@@ -766,6 +766,24 @@ public class SqlBuilder<T> {
 	}
 	
 	public SqlBuilder<T> query(String sql){
+		this.entity.setSql(sql);
+		return this;
+	}
+	
+	public SqlBuilder<T> sql(String sql){
+		// 动态条件处理
+		Matcher matcher=conditionRegix.matcher(sql);
+		while(matcher.find()) {
+			String condition=matcher.group();
+			sql=sql.replace(condition, whereCondition(condition));
+		}
+		
+		// 静态参数字段名称处理
+		matcher=humpFieldRegix.matcher(sql);
+		while(matcher.find()) {
+			String condition=matcher.group();
+			sql=sql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
+		}
 		this.entity.setSql(sql);
 		return this;
 	}

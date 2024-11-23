@@ -349,6 +349,17 @@ public class DataBaseDao {
 	 * @param params
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
+	public <T> Map<String, Object> countSql(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
+		return this.sqlManager.selectUnique(sqlId, builder.toParams(),Map.class);
+	}
+	
+	/**
+	 * 	统计数量
+	 * @param params
+	 * @return
+	 */
 	public <T> long count(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
 		return (long) this.sqlManager.selectUnique(sqlId, builder.toParams(),Long.class);
