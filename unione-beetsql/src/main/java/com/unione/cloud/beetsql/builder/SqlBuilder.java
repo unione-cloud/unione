@@ -133,7 +133,7 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(T data,T params) {
+	public static <T> SqlBuilder<T> build(T data,Object params) {
 		return new SqlBuilder(data,params);
 	}
 	
