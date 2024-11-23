@@ -324,6 +324,7 @@
 		<module>unione-form</module>
 		<module>unione-portal</module>
 		<module>unione-util</module>
+		<module>unione-start</module>
 	</modules>
 	
 </project>

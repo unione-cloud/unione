@@ -1,4 +1,4 @@
-package com.unione.cloud.codegen;
+package com.unione.cloud;
 
 import java.util.ArrayList;
 import java.util.Date;
