@@ -483,7 +483,7 @@ public class DocStoreController{
 				//entity.getPermisOwners().addAll(sessionService.getUserRoles());
 			}
 		}
-		DocFile tmp=dataBaseDao.findOne(entity);
+		DocFile tmp=dataBaseDao.findOne(SqlBuilder.build(entity));
 		AssertUtil.service().notNull(tmp, "文件记录未找到").notNull(tmp.getPath(), "文件存储path为空");
 		LogsUtil.setTarget(tmp.getId(), tmp.getTitle());
 		
