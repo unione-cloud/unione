@@ -435,7 +435,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findById(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_BYID);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -501,7 +501,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_BYID);
 		return (List<T>) this.sqlManager.select(sqlId, builder.targetClass(), builder.toParams());
 	}
 	
