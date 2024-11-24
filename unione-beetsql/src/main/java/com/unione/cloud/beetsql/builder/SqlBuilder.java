@@ -480,12 +480,15 @@ public class SqlBuilder<T> {
 			StringBuffer where=new StringBuffer();
 			where.append("\n-- @sqlWhere(){\n");
 			
-			where.append("-- @if(varNotNull(params.id) || varNotNull(params.ids)){\n");
-			where.append("-- @if(varNotNull(params.id) && !varNotNull(params.ids)){\n")
+			where.append("-- @if(varNotNull(params.id) || varNotNull(query.id) || varNotNull(query.ids)){\n");
+			where.append("-- @if(varNotNull(params.id) && !varNotNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" = #{params.id}\n")
 		      .append("-- @}\n");
-			where.append("-- @if(!varNotNull(params.id) && varNotNull(params.ids)){\n")
-		      .append(idField.getColumn()).append(" IN (#{join(params.ids)})\n")
+			where.append("-- @if(varNotNull(query.id) && !varNotNull(query.ids)){\n")
+		      .append(idField.getColumn()).append(" = #{query.id}\n")
+		      .append("-- @}\n");
+			where.append("-- @if(!varNotNull(params.id) && !varNotNull(query.id) && varNotNull(query.ids)){\n")
+		      .append(idField.getColumn()).append(" IN (#{join(query.ids)})\n")
 		      .append("-- @}\n");
 			
 			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID).stream().forEach(field->{
