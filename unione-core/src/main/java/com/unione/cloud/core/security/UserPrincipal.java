@@ -2,9 +2,14 @@ package com.unione.cloud.core.security;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -73,7 +78,9 @@ public class UserPrincipal implements Serializable {
 	/**
 	 * 上次登录时间：时间戳
 	 */
-	private Long lastLoginTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date lastLoginTime;
 
 	/**
 	 * 用户角色列表(编码)

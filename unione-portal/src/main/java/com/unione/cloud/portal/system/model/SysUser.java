@@ -1,4 +1,6 @@
 package com.unione.cloud.portal.system.model;
+import java.util.Date;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -85,7 +87,7 @@ public class SysUser extends Pojo {
 	@ApiModelProperty(value="生日，YYYY-MM-DD",notes="长度为：10")
 	@JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private String birthday;
+	private Date birthday;
 	/**
 	* 性别，字典SEX 1女，2男
 	*/
@@ -120,8 +122,10 @@ public class SysUser extends Pojo {
 	/**
 	* 上次登录时间
 	*/
-	@ApiModelProperty(value="上次登录时间",notes="长度为：19")
-	private Long lastLoginTime;
+	@ApiModelProperty(value="上次登录时间",notes="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date lastLoginTime;
 	/**
 	* 上次登录ip
 	*/
@@ -150,8 +154,10 @@ public class SysUser extends Pojo {
 	/**
 	* 锁定时间，锁定时间后才能继续登录
 	*/
-	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="长度为：19")
-	private Long lockTime;
+	@ApiModelProperty(value="锁定时间，锁定时间后才能继续登录",notes="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date lockTime;
 	/**
 	* 描述
 	*/

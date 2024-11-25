@@ -238,8 +238,7 @@ public class LoginService {
 			if(lockDate==null) {
 				lockDate=DateUtil.date().offset(DateField.SECOND, CACHE_TIME);
 				this.setLimitTime(username, lockDate);
-				Long lockTime=lockDate.getTime();
-				SysUser user=SysUser.builder().username(username).lockTime(lockTime).build();
+				SysUser user=SysUser.builder().username(username).lockTime(lockDate).build();
 				SqlBuilder<SysUser> builder=SqlBuilder
 						.build(user).field("lockTime").where("username=?");
 				int len = dataBaseDao.update(builder);
@@ -368,7 +367,7 @@ public class LoginService {
 		
 		// 更新用户登录信息
 		user.setLastLoginIp(LogsUtil.getClientIp());
-		user.setLastLoginTime(DateUtil.date().getTime());
+		user.setLastLoginTime(DateUtil.date());
 		SqlBuilder<SysUser> updater=SqlBuilder
 				.build(user).field("lastLoginTime,lastLoginIp").where("id=?");
 		int len = dataBaseDao.update(updater);
