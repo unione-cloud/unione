@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,14 +18,21 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.data.model.SysDataModel;
+import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,13 +43,18 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataModel 数据模型管理管理：系统管理：数据模型",description="SysDataModel")
+@Api(tags = "数据模型管理：数据模型",description="SysDataModel")
 @RequestMapping("/api/data/model")	 //TreeFeignApi
-public class SysDataModelController implements PojoFeignApi<SysDataModel>{
+public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFind<SysDataModel>,FeignFindById<SysDataModel>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
 	
+	@Autowired
+	private SessionService sessionService;
+	
+	@Value("${form.page.default.appid:1000}")
+	private Long DEFAULT_APP_ID;
 	
 	@Override
 	public Results<List<SysDataModel>> find(Params<SysDataModel> params) {
@@ -57,39 +73,52 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 	}
 
 
-	@Override
-	public Results<Long> save(@Validated(Validator.save.class) SysDataModel entity) {
+	
+	@PostMapping(value="/save")
+	@ApiOperation(value="保存数据模型")
+	public Results<SysDataModel> save(@Validated(Validator.save.class) SysDataModel entity) {
 		log.debug("进入:新增数据模型管理信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增数据模型管理");
-		// 参数处理
-		dataBaseDao.insert(entity);
+		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
+				UserFormRoles.FORM_CONFIG,
+				UserFormRoles.FORM_DEV), "当前帐号无权限");
+		if("new_".equals(entity.getSn())) {
+			entity.setSn(null);
+		}
+		
+		SysDataModel tmp = null;
+		if(!StringUtils.isEmpty(entity.getSn())) {
+			SysDataModel param=SysDataModel.builder().sn(entity.getSn()).build();
+			param.setTenantId(sessionService.getTenantId());
+			tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+		}
+		
+		if(tmp!=null) {
+			entity.setId(tmp.getId());
+			// 更新
+			String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
+			SqlBuilder<SysDataModel> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			int len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("保存数据,len:"+len);
+		}else {
+			// 新增
+			// 参数处理
+			if(StringUtils.isEmpty(entity.getSn())) {
+				entity.setSn(RandomUtil.randomString(20));
+			}
+			BeanUtils.setDefaultValue(entity, "appId", DEFAULT_APP_ID);
+			BeanUtils.setDefaultValue(entity, "syncFlag",0);
+			BeanUtils.setDefaultValue(entity, "status",1);
+			entity.setVers(1);
+			
+			int len = dataBaseDao.insert(entity);
+			AssertUtil.service().isTrue(len>0, "页面保存失败");
+		}
 		
 		LogsUtil.success(entity.getId());
 		log.debug("退出:新增数据模型管理信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
+		return Results.success(entity);
 	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysDataModel entity) {
-		log.debug("进入:修改数据模型管理信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改数据模型管理",entity.getId());
-		
-		String[] fields = {"dirId","dsId","sn","title","name","sn","isCustom","category","publishDate","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
-		SqlBuilder<SysDataModel> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改数据模型管理信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
-	}
-
 
 
 	@Override
@@ -108,19 +137,23 @@ public class SysDataModelController implements PojoFeignApi<SysDataModel>{
 	}
 
 
-	@Override
-	public Results<SysDataModel> detail(Long id) {
-		log.debug("进入:查看数据模型管理详细信息方法，id:{}",id);
-		LogsUtil.set(LogType.Query, "查看数据模型管理详细",id);
+	@PostMapping(value="/load/{sn}")
+	@ApiOperation(value="加载数据模型")
+	public Results<SysDataModel> load(@PathVariable("sn") String sn) {
+		log.debug("进入:加载数据模型方法，sn:{}",sn);
+		LogsUtil.set(LogType.Query, "加载数据模型");
 		// 参数处理
-		AssertUtil.service().notNull(id,"参数id不能为空");
+		AssertUtil.service().notNull(sn,"参数sn不能为空");
+		LogsUtil.setExtData(sn);
 		
 		LogsUtil.add("查找记录");
-		SysDataModel tmp = dataBaseDao.findById(SqlBuilder.build(SysDataModel.class,id));
-		AssertUtil.service().notNull(tmp, "记录未找到");
+		SysDataModel param=SysDataModel.builder().sn(sn).build();
+		SysDataModel tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+		AssertUtil.service().notNull(tmp, "页面信息未找到","404");
+		LogsUtil.setTarget(tmp.getId());
 		
 		LogsUtil.success(tmp.getId());
-		log.debug("退出:查看数据模型管理详细信息方法，id:{},result:true",id);
+		log.debug("退出:加载数据模型方法，sn:{},result:true",sn);
 		return Results.success(tmp);
 	}
 	
