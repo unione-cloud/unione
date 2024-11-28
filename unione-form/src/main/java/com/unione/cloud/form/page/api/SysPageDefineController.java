@@ -90,13 +90,15 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			entity.setSn(null);
 		}
 		
+		SysPageDefine tmp = null;
 		if(!StringUtils.isEmpty(entity.getSn())) {
 			SysPageDefine param=SysPageDefine.builder().sn(entity.getSn()).build();
 			param.setTenantId(sessionService.getTenantId());
-			SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-			AssertUtil.service().notNull(tmp, "页面定义对象未找到");
+			tmp = dataBaseDao.findOne(SqlBuilder.build(param));
+		}
+		
+		if(tmp!=null) {
 			entity.setId(tmp.getId());
-			
 			// 更新
 			String[] fields = {"title","component","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};
 			SqlBuilder<SysPageDefine> sqlBuilder=SqlBuilder.build(entity).field(fields);
@@ -104,24 +106,15 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 			LogsUtil.add("保存数据,len:"+len);
 		}else {
 			// 新增
-			
 			// 参数处理
-			entity.setSn(RandomUtil.randomString(20));
+			if(StringUtils.isEmpty(entity.getSn())) {
+				entity.setSn(RandomUtil.randomString(20));
+			}
 			BeanUtils.setDefaultValue(entity, "appId", DEFAULT_APP_ID);
 			BeanUtils.setDefaultValue(entity, "isTmpl",0);
 			BeanUtils.setDefaultValue(entity, "isGlobal",0);
 			BeanUtils.setDefaultValue(entity, "status",1);
 			entity.setVers(1);
-			
-			// 验证页面编码是否存在
-			SysPageDefine param=SysPageDefine.builder().sn(entity.getSn()).build();
-			param.setTenantId(sessionService.getTenantId());
-			SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-			if(tmp!=null) {
-				entity.setSn(RandomUtil.randomString(20));
-				tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-			}
-			AssertUtil.service().isTrue(tmp==null, "页面编码已存在","PAGE-SN-EXIST");
 			
 			int len = dataBaseDao.insert(entity);
 			AssertUtil.service().isTrue(len>0, "页面保存失败");
