@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "数据模型管理：数据模型",description="SysDataModel")
+@Api(tags = "数据管理：数据模型管理",description="SysDataModel")
 @RequestMapping("/api/data/model")	 //TreeFeignApi
 public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFind<SysDataModel>,FeignFindById<SysDataModel>{
 	
@@ -55,6 +56,7 @@ public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFi
 	
 	@Value("${form.page.default.appid:1000}")
 	private Long DEFAULT_APP_ID;
+	
 	
 	@Override
 	public Results<List<SysDataModel>> find(Params<SysDataModel> params) {
@@ -76,7 +78,7 @@ public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFi
 	
 	@PostMapping(value="/save")
 	@ApiOperation(value="保存数据模型")
-	public Results<SysDataModel> save(@Validated(Validator.save.class) SysDataModel entity) {
+	public Results<SysDataModel> save(@Validated(Validator.save.class) @RequestBody SysDataModel entity) {
 		log.debug("进入:新增数据模型管理信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增数据模型管理");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
@@ -99,7 +101,7 @@ public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFi
 			String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
 			SqlBuilder<SysDataModel> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			int len = dataBaseDao.updateById(sqlBuilder);
-			LogsUtil.add("保存数据,len:"+len);
+			AssertUtil.service().isTrue(len>0, "数据模型保存失败");
 		}else {
 			// 新增
 			// 参数处理
@@ -108,11 +110,14 @@ public class SysDataModelController implements FeignDelete<SysDataModel>,FeignFi
 			}
 			BeanUtils.setDefaultValue(entity, "appId", DEFAULT_APP_ID);
 			BeanUtils.setDefaultValue(entity, "syncFlag",0);
+			BeanUtils.setDefaultValue(entity, "syncFlag",0);
 			BeanUtils.setDefaultValue(entity, "status",1);
+			BeanUtils.setDefaultValue(entity, "ordered",0);
+			BeanUtils.setDefaultValue(entity, "setting","{}");
 			entity.setVers(1);
 			
 			int len = dataBaseDao.insert(entity);
-			AssertUtil.service().isTrue(len>0, "页面保存失败");
+			AssertUtil.service().isTrue(len>0, "数据模型保存失败");
 		}
 		
 		LogsUtil.success(entity.getId());

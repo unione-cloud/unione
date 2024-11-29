@@ -1,5 +1,8 @@
 package com.unione.cloud.form.data.model;
 import java.util.Date;
+
+import javax.validation.constraints.NotNull;
+
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
@@ -11,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	SysDataModelRelease Entity
@@ -27,6 +31,16 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="sys_data_model_release")
 public class SysDataModelRelease extends Pojo {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4825993495959160118L;
+	/**
+	* 应用ID
+	*/
+	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
+	private Long appId;
 	/**
 	* 目录ID
 	*/

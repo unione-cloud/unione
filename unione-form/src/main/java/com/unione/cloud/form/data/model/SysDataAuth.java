@@ -1,8 +1,11 @@
 package com.unione.cloud.form.data.model;
+import javax.validation.constraints.NotNull;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -30,6 +33,12 @@ public class SysDataAuth extends Pojo {
 	 * 
 	 */
 	private static final long serialVersionUID = 8536381881140054070L;
+	/**
+	* 应用ID
+	*/
+	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
+	private Long appId;
 	/**
 	* 数据模型ID
 	*/

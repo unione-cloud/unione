@@ -1,4 +1,4 @@
-package com.unione.cloud.form.page.dto;
+package com.unione.cloud.form.data.dto;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;

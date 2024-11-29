@@ -13,8 +13,8 @@ public class PageConfigsDto {
 	@ApiModelProperty("页面组件集合")
 	private List<WidgetModelDto> widgetList;
 	
-	@ApiModelProperty("数据模型集合")
-	private List<DataModelDto> dataModels;
+	@ApiModelProperty("数据模型sn集合")
+	private List<String> dsnList;
 	
 	@ApiModelProperty("页面样式定义")
 	private String css;
