@@ -2,6 +2,8 @@ package com.unione.cloud.form.page.dto;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import cn.hutool.core.bean.BeanUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,9 +38,11 @@ public class WidgetModelDto {
 	 * @param cla
 	 * @return
 	 */
+	@JsonIgnore
 	public <T> T transform(Class<T> cla) {
 		return BeanUtil.toBean(configs, cla);
 	}
+	
 	
 	
 	
