@@ -1,7 +1,9 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
+import com.unione.cloud.form.data.dto.DataDefineDto.DataRuleDto;
 import com.unione.cloud.form.page.dto.ButtonDefineDto.EventDefineDto;
 import com.unione.cloud.form.page.dto.FormItemDto.FormItemConfigDto;
 
@@ -44,8 +46,12 @@ public class FormItemDto extends WidgetDefineDto<FormItemConfigDto> {
 	
 	@Data
 	@ApiModel("表单项事件Dto")
-	public static class FormItemEventDto {
-		
+	public static class FormItemEventDto implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6780968062940236797L;
+
 		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
 		private EventDefineDto click;
 		
@@ -63,36 +69,27 @@ public class FormItemDto extends WidgetDefineDto<FormItemConfigDto> {
 	
 	@Data
 	@ApiModel("规则Dto")
-	public static class FormRuleDto{
+	public static class FormRuleDto extends DataRuleDto{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2149358082168501860L;
 		
 		@ApiModelProperty(value="触发事件",notes = "change,blur")
 		private String trigger;
 		
-		@ApiModelProperty(value="是否忽略空格",notes = "必填验证开启时，是否忽略空格")
-		private Boolean whitespace;
-		
-		@ApiModelProperty(value="预设规则名称",notes = "手机号：tel，邮箱：email，身份证号：idcard等等")
-		private String  advance;
-		
-		@ApiModelProperty(value="最小值")
-		private Integer rangeMin;
-		
-		@ApiModelProperty(value="最大值")
-		private Integer rangeMax;
-		
-		@ApiModelProperty(value="正则表达式")
-		private String regExpress;
-		
-		@ApiModelProperty(value="正则表达式验证失败消息")
-		private String regMessage;
 		
 	}
 	
 	
 	@Data
 	@ApiModel("表单项配置  DTO")
-	public static class FormItemConfigDto{
-		
+	public static class FormItemConfigDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2367848605872325522L;
+
 		@ApiModelProperty(value="是否必填")
 		private Boolean required;
 		

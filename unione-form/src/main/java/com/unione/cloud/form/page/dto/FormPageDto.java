@@ -1,5 +1,6 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.unione.cloud.form.page.dto.ButtonDefineDto.EventDefineDto;
@@ -23,8 +24,12 @@ public class FormPageDto extends PageDefineDto<FormPageConfigDto>{
 	
 	@Data
 	@ApiModel("表单事件Dto")
-	public static class FormEventDto {
-		
+	public static class FormEventDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8532953889812739800L;
+
 		@ApiModelProperty(value="表单验证事件",notes = "自定义表单验证逻辑")
 		private EventDefineDto onValidate;
 		

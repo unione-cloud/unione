@@ -17,7 +17,10 @@ public class TablePageDto extends PageDefineDto<TablePageConfigDto>{
 	
 	@Data
 	@ApiModel("列表页面配置DTO")
-	public static class TablePageConfigDto extends PageConfigDto{
+	public static class TablePageConfigDto extends PageConfigDto{/**
+		 * 
+		 */
+		private static final long serialVersionUID = -9100323130881893188L;
 		
 		
 		

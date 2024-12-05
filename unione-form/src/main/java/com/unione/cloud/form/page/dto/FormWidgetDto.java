@@ -1,5 +1,6 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.unione.cloud.form.page.dto.FormWidgetDto.FormWidgetConfig;
@@ -28,7 +29,11 @@ public class FormWidgetDto extends WidgetDefineDto<FormWidgetConfig> {
 	
 	@Data
 	@ApiModel("表单组件配置DTo")
-	public static class FormWidgetConfig{
+	public static class FormWidgetConfig implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5448771098453865691L;
 		
 		@ApiModelProperty(value="表单显示列数",notes = "表单显示列数，默认3")
 		private Integer showColumn;

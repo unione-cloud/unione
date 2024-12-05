@@ -1,5 +1,6 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.unione.cloud.form.page.dto.TableWidgetDto.TableWidgetConfig;
@@ -45,8 +46,12 @@ public class TableWidgetDto extends WidgetDefineDto<TableWidgetConfig> {
 	
 	@Data
 	@ApiModel("表格分页配置DTO")
-	public static class TablePaginationDto{
-		
+	public static class TablePaginationDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1333732908409635861L;
+
 		@ApiModelProperty("自定义记录总数显示逻辑")
 		private String showTotalScript;
 		
@@ -72,7 +77,12 @@ public class TableWidgetDto extends WidgetDefineDto<TableWidgetConfig> {
 	
 	@Data
 	@ApiModel("表格行号配置DTO")
-	public static class TableRownumDto{
+	public static class TableRownumDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8764883326870087401L;
+
 		@ApiModelProperty(value="显示标题",notes = "默认：序号")
 		private String title;
 		
@@ -91,7 +101,12 @@ public class TableWidgetDto extends WidgetDefineDto<TableWidgetConfig> {
 	
 	@Data
 	@ApiModel("表格行号配置DTO")
-	public static class TableOperationDto{
+	public static class TableOperationDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 296826468569608136L;
+
 		@ApiModelProperty(value="显示标题",notes = "默认：操作")
 		private String title;
 		
@@ -122,8 +137,12 @@ public class TableWidgetDto extends WidgetDefineDto<TableWidgetConfig> {
 	
 	@Data
 	@ApiModel("更多操作配置DTO")
-	public static class MoreOperationDto{
-		
+	public static class MoreOperationDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5609162190698708400L;
+
 		@ApiModelProperty(value="标题",notes = "默认：更多")
 		private String title;
 		
@@ -141,7 +160,10 @@ public class TableWidgetDto extends WidgetDefineDto<TableWidgetConfig> {
 	
 	@Data
 	@ApiModel("表格组件配置DTo")
-	public static class TableWidgetConfig{
+	public static class TableWidgetConfig implements Serializable{/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8092409023579026643L;
 		
 		
 	}

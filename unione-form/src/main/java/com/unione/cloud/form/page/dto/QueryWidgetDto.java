@@ -1,5 +1,7 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
+
 import com.unione.cloud.form.page.dto.QueryWidgetDto.QueryWidgetConfig;
 
 import io.swagger.annotations.ApiModel;
@@ -21,7 +23,10 @@ public class QueryWidgetDto extends WidgetDefineDto<QueryWidgetConfig> {
 	
 	@Data
 	@ApiModel("查询组件配置DTo")
-	public static class QueryWidgetConfig{
+	public static class QueryWidgetConfig implements Serializable{/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4611136589521983464L;
 		
 		
 	}

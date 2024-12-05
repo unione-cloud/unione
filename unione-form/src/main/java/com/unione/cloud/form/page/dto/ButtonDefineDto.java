@@ -1,8 +1,9 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
-import com.unione.cloud.form.data.dto.DataDefineDto.DataParams;
+import com.unione.cloud.form.data.dto.DataDefineDto.DataParamDto;
 import com.unione.cloud.form.page.dto.ButtonDefineDto.ButtonWidgetConfigDto;
 
 import io.swagger.annotations.ApiModel;
@@ -37,8 +38,12 @@ public class ButtonDefineDto extends WidgetDefineDto<ButtonWidgetConfigDto>{
 	
 	@Data
 	@ApiModel("按钮响应设置DTO")
-	public static class ButtonActionDto{
-		
+	public static class ButtonActionDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3653219835676601174L;
+
 		@ApiModelProperty(value = "响应方式",notes = "响应方式：link，route，dialog，drawer")
 		private String type;
 		
@@ -70,14 +75,18 @@ public class ButtonDefineDto extends WidgetDefineDto<ButtonWidgetConfigDto>{
 		private String height;
 		
 		@ApiModelProperty(value = "响应参数集合",notes = "")
-		private List<DataParams> params;
+		private List<DataParamDto> params;
 		
 	}
 	
 	@Data
 	@ApiModel("按钮事件Dto")
-	public static class ButtonEventDto {
-		
+	public static class ButtonEventDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8084738054778023214L;
+
 		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
 		private EventDefineDto click;
 		
@@ -94,8 +103,12 @@ public class ButtonDefineDto extends WidgetDefineDto<ButtonWidgetConfigDto>{
 	
 	@Data
 	@ApiModel("事件定义Dto")
-	public static class EventDefineDto {
-		
+	public static class EventDefineDto implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2883289916188473146L;
+
 		@ApiModelProperty("是否启用")
 		private boolean enable;
 		
@@ -109,8 +122,12 @@ public class ButtonDefineDto extends WidgetDefineDto<ButtonWidgetConfigDto>{
 	
 	@Data
 	@ApiModel("按钮属性DTO")
-	public static class ButtonWidgetConfigDto{
-		
+	public static class ButtonWidgetConfigDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8392444232066625861L;
+
 		@ApiModelProperty(value = "按钮icon图标")
 		private String icon;
 		

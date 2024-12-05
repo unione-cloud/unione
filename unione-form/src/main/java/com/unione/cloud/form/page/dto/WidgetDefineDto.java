@@ -37,8 +37,12 @@ public abstract class WidgetDefineDto<T> implements Serializable{
 	
 	@Data
 	@ApiModel("样式设置DTo")
-	public static class CssDto{
-		
+	public static class CssDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -562216706109195212L;
+
 		@ApiModelProperty(value="样式名称")
 		private String cssName;
 		

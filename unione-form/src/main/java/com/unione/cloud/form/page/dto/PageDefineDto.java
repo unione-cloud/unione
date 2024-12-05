@@ -1,5 +1,6 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,12 @@ public class PageDefineDto<T extends PageConfigDto> extends WidgetDefineDto<T>{
 	
 	@Data
 	@ApiModel("页面配置DTO")
-	public static class PageConfigDto{
+	public static class PageConfigDto implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8234983161647012935L;
+		
 		@ApiModelProperty("接口上下文")
 		private String ctx;
 		@ApiModelProperty("接口超时时间")
