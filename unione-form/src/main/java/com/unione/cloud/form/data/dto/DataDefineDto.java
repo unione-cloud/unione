@@ -142,6 +142,9 @@ public class DataDefineDto extends SysDataModel{
 		@ApiModelProperty(value="数据查询")
 		private DataQueryDto query;
 		
+		@ApiModelProperty(value="条件样式")
+		private List<ConditionStyleDto> conditionStyle;
+		
 	}
 	
 	
@@ -420,5 +423,25 @@ public class DataDefineDto extends SysDataModel{
 		private String label;
 	}
 	
+	
+	@Data
+	@ApiModel(value = "条件样式DTO")
+	public static class ConditionStyleDto{
+		
+		@ApiModelProperty(value = "表达式类型",notes = "eq：值匹配,reg:正则")
+		private String type;
+		
+		@ApiModelProperty(value = "条件表达式")
+		private String express;
+		
+		@ApiModelProperty(value = "字体颜色")
+		private String fontColor;
+		
+		@ApiModelProperty(value = "提示信息")
+		private String tips;
+		
+		@ApiModelProperty(value = "是否可用")
+		private boolean enable;
+	}
 	
 }
