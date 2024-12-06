@@ -117,15 +117,10 @@ public class SysDataModelHis extends Pojo {
 	@ApiModelProperty(value="同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否",notes="长度为：10")
 	private Integer syncFlag;
 	/**
-	* 数据字段，json存储,{}
+	* 数据配置，json存储,{}
 	*/
-	@ApiModelProperty(value="数据字段，json存储,{}",notes="长度为：2147483647")
-	private String fields;
-	/**
-	* 数据设置，json存储,{}
-	*/
-	@ApiModelProperty(value="数据设置，json存储,{}",notes="长度为：65535")
-	private String setting;
+	@ApiModelProperty(value="数据配置，json存储,{}",notes="长度为：65535")
+	private String configs;
 	/**
 	* 显示顺序
 	*/

@@ -1,26 +1,97 @@
 package com.unione.cloud.form.data.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.form.data.model.SysDataModel;
+
+import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 @ApiModel("数据模型Dto")
-public class DataDefineDto implements Serializable{
+public class DataDefineDto extends SysDataModel{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7987670113848476469L;
 	
 	
-	@ApiModelProperty(value="字段列表")
-	private List<DataFieldDto> fields;
+	@ApiModelProperty(value="数据配置对象")
+	private DataDefineConfigDto configDto;
+	
+	@JsonIgnore
+	public DataDefineDto setConfigs(String configs) {
+		super.setConfigs(configs);
+		configDto=JSONUtil.toBean(configs, DataDefineConfigDto.class);
+		return this;
+	}
+	
+	@JsonIgnore
+	public String getConfigs() {
+		if(configDto!=null) {
+			super.setConfigs(JSONUtil.toJsonStr(configDto));
+		}
+		return super.getConfigs();
+	}
 	
 	
+	@Data
+	@ApiModel(value="数据定义配置DTO")
+	public static class DataDefineConfigDto{
+		
+		@ApiModelProperty(value="字段列表")
+		private List<DataFieldDto> fields=new ArrayList<>();
+		
+		
+		@ApiModelProperty(value="数据过滤集合",notes = "高级数据过滤")
+		private List<DataFilterDto> filters=new ArrayList<>();
+		
+		
+		@ApiModelProperty(value="数据权限集合",notes = "")
+		private List<DataPermisDto> permis=new ArrayList<>();
+	}
+	
+	
+	@Data
+	@ApiModel(value="数据权限DTO")
+	public static class DataPermisDto{
+		
+		@ApiModelProperty(value="权限标识",notes="")
+		private Long id;
+		
+		@ApiModelProperty(value="权限名称",notes="")
+		private String name;
+		
+		@ApiModelProperty(value="是否需要授权",notes="长度为：10")
+		private Integer needAuth;
+		
+		@ApiModelProperty(value="权限SQL表达式",notes="长度为：1000")
+		private String express;
+		
+		@ApiModelProperty(value="使用状态，字典USEORNOT 1使用，0停用",notes="长度为：10")
+		private Integer status;
+	}
+	
+	
+	@Data
+	@ApiModel(value="数据过滤DTO")
+	public static class DataFilterDto{
+		
+		@ApiModelProperty(value="过滤标题",notes="")
+		private String title;
+		
+		@ApiModelProperty(value="过滤名称",notes="用于识别过滤，前端通过该名称传递相关参数，eg:agests=0-3，查询年龄0-3岁")
+		private String name;
+		
+		@ApiModelProperty(value="过滤脚本",notes="只需要过滤逻辑部分，eg:  CEIL(MONTHS_BETWEEN(SYSDATE,BIRTH_DATE)/12) between 0 and 3")
+		private String filter;
+	}
 	
 	
 	
@@ -53,9 +124,11 @@ public class DataDefineDto implements Serializable{
 		@ApiModelProperty(value="输入提示")
 		private String placeholder;
 		
+		@ApiModelProperty(value="输入帮助")
+		private String help;
+		
 		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
 		private String dataFormat;
-		
 		
 		@ApiModelProperty(value="排序设置")
 		private DataSortDto sort;
@@ -225,7 +298,7 @@ public class DataDefineDto implements Serializable{
 		@ApiModelProperty(value="是否查询")
 		private boolean enable;
 		
-		@ApiModelProperty(value="查询类型",notes = "字典：DATAQUERYTYPE eq：精确查询，like：模糊查询，likeL:左模糊，likeR：右模糊,range：范围查询")
+		@ApiModelProperty(value="查询类型",notes = "字典：DATAQUERYTYPE eq：精确查询，like：模糊查询，likeL:左模糊，likeR：右模糊,range：范围查询,advance：高级查询")
 		private String type;
 		
 		@ApiModelProperty(value="默认查询",notes = "默认查询：即加入关键字查询")
@@ -233,6 +306,9 @@ public class DataDefineDto implements Serializable{
 		
 		@ApiModelProperty(value="默认显示",notes = "true:默认显示该查询,false：高级查询中自行勾选")
 		private boolean visible;
+		
+		@ApiModelProperty(value = "查询名称",notes="查询方式为：高级查询时绑定的查询名称")
+		private String name;
 		
 	}
 	
