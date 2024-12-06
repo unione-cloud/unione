@@ -24,6 +24,8 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.form.page.dto.PageDefineDto.FormPageDefineDto;
+import com.unione.cloud.form.page.dto.PageDefineDto.ListPageDefineDto;
 import com.unione.cloud.form.page.model.SysPageDefine;
 import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -77,10 +79,24 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		return results;
 	}
 
+	
+	@PostMapping(value="/save/form")
+	@ApiOperation(value="保存表单页面")
+	public Results<SysPageDefine> saveFormPage(@Validated(Validator.save.class) @RequestBody FormPageDefineDto entity) {
+		entity.setComponent("unione-form-page");
+		return save(entity);
+	}
+	
+	
+	@PostMapping(value="/save/list")
+	@ApiOperation(value="保存列表页面")
+	public Results<SysPageDefine> saveListPage(@Validated(Validator.save.class) @RequestBody ListPageDefineDto entity) {
+		entity.setComponent("unione-list-page");
+		return save(entity);
+	}
 
-	@PostMapping(value="/save")
-	@ApiOperation(value="保存页面配置")
-	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody SysPageDefine entity) {
+	
+	private Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody SysPageDefine entity) {
 		log.debug("进入:新增页面定义信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增页面定义");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
@@ -140,6 +156,16 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		SysPageDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
 		AssertUtil.service().notNull(tmp, "页面信息未找到","404");
 		LogsUtil.setTarget(tmp.getId());
+		
+		if("unione-form-page".equals(tmp.getComponent())) {
+			FormPageDefineDto pageDefine=new FormPageDefineDto();
+			BeanUtils.copy(tmp, pageDefine);
+			tmp=pageDefine;
+		}else if("unione-list-page".equals(tmp.getComponent())) {
+			ListPageDefineDto pageDefine=new ListPageDefineDto();
+			BeanUtils.copy(tmp, pageDefine);
+			tmp=pageDefine;
+		}
 		
 		LogsUtil.success(tmp.getId());
 		log.debug("退出:加载页面信息方法，sn:{},result:true",sn);

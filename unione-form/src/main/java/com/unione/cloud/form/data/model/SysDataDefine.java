@@ -18,20 +18,20 @@ import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
 /**
- * @标题 	SysDataModel Entity
- * @描述	系统管理：数据模型
+ * @标题 	SysDataDefine Entity
+ * @描述	系统管理：数据定义
  * @作者	Unione Cloud CodeGen
  * @日期	2024-09-05 23:35:09
  * @版本	1.0.0
  **/
 @Data
 @Builder
-@SqlResource("data.SysDataModel")
+@SqlResource("data.SysDataDefine")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@Table(name="sys_data_model")
-public class SysDataModel extends Pojo {
+@Table(name="sys_data_define")
+public class SysDataDefine extends Pojo {
 	/**
 	 * 
 	 */

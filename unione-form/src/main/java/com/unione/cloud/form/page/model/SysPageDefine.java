@@ -14,6 +14,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -120,6 +123,8 @@ public class SysPageDefine extends Pojo {
             
             ｝
 	*/
+	@JsonIgnore
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="页面定义，json结构｛｝",notes="长度为：2147483647")
 	@NotNull(message="页面定义不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotEmpty(message="页面定义不能为空",groups = {Validator.save.class,Validator.update.class})

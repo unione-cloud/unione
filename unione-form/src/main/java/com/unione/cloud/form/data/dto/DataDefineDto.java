@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.unione.cloud.form.data.model.SysDataModel;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.unione.cloud.form.data.model.SysDataDefine;
 
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.ApiModel;
@@ -15,13 +16,14 @@ import lombok.Data;
 
 @Data
 @ApiModel("数据模型Dto")
-public class DataDefineDto extends SysDataModel{
+public class DataDefineDto extends SysDataDefine{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7987670113848476469L;
 	
 	
+	@JsonProperty("configs")
 	@ApiModelProperty(value="数据配置对象")
 	private DataDefineConfigDto configDto;
 	

@@ -385,7 +385,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findUnique(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_ONE);
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
@@ -410,7 +410,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.SELECT);
+		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_ONE);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
 	

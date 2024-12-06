@@ -15,8 +15,8 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.form.data.model.SysDataFieldRelease;
-import com.unione.cloud.form.data.model.SysDataModel;
-import com.unione.cloud.form.data.model.SysDataModelRelease;
+import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.storage.model.DataField;
 import com.unione.cloud.form.data.storage.model.DataFieldConfig;
 import com.unione.cloud.form.data.storage.model.DataModel;
@@ -56,7 +56,7 @@ public class DataModelCache {
 	public DataModel loadRelease(String sn) {
 		log.info("进入：从db加载数据模型【发布】方法,sn:{}",sn);
 		DataModel model=null;
-		SysDataModelRelease tmp = new SysDataModelRelease();
+		SysDataDefineRelease tmp = new SysDataDefineRelease();
 		if(sn.indexOf("@")>0) {
 			sn=sn.substring(0, sn.indexOf("@"));
 			tmp.setVers(Integer.parseInt(sn.substring(sn.indexOf("@")+1)));
@@ -97,7 +97,7 @@ public class DataModelCache {
 	public DataModel load(Long id) {
 		log.info("进入：从db加载数据模型【发布】方法,id:{}",id);
 		DataModel model=null;
-		SysDataModelRelease tmp = dataBaseDao.findById(SysDataModelRelease.class, id);
+		SysDataDefineRelease tmp = dataBaseDao.findById(SysDataDefineRelease.class, id);
 		log.info("退出：从db加载数据模型【发布】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
 			model=new DataModel();
@@ -146,7 +146,7 @@ public class DataModelCache {
 	public DataModel load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
 		DataModel model=null;
-		SysDataModel tmp = new SysDataModel();
+		SysDataDefine tmp = new SysDataDefine();
 		tmp.setSn(sn);
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
@@ -181,7 +181,7 @@ public class DataModelCache {
 	public DataModel load4Dev(Long id) {
 		log.info("进入：从db加载数据模型【dev】方法,id:{}",id);
 		DataModel model=null;
-		SysDataModel tmp = dataBaseDao.findById(SysDataModel.class, id);
+		SysDataDefine tmp = dataBaseDao.findById(SysDataDefine.class, id);
 		log.info("退出：从db加载数据模型【dev】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
 			model=new DataModel();

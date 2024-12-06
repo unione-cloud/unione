@@ -17,24 +17,24 @@ import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
 /**
- * @标题 	SysDataModelRelease Entity
- * @描述	系统管理：数据模型发布
+ * @标题 	SysDataDefineHis Entity
+ * @描述	系统管理：数据定义历史
  * @作者	Unione Cloud CodeGen
  * @日期	2024-09-05 23:35:09
  * @版本	1.0.0
  **/
 @Data
 @Builder
-@SqlResource("data.SysDataModelRelease")
+@SqlResource("data.SysDataDefineHis")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@Table(name="sys_data_model_release")
-public class SysDataModelRelease extends Pojo {
+@Table(name="sys_data_define_his")
+public class SysDataDefineHis extends Pojo {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4825993495959160118L;
+	private static final long serialVersionUID = -431064007498632066L;
 	/**
 	* 应用ID
 	*/
@@ -51,6 +51,11 @@ public class SysDataModelRelease extends Pojo {
 	*/
 	@ApiModelProperty(value="数据源ID",notes="长度为：19")
 	private Long dsId;
+	/**
+	* 数据模型ID
+	*/
+	@ApiModelProperty(value="数据模型ID",notes="长度为：19")
+	private Long modelId;
 	/**
 	* 数据标题
 	*/

@@ -1,5 +1,6 @@
 package com.unione.cloud.beetsql.builder;
 
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.core.model.BaseField;
 
 import lombok.Data;
@@ -36,4 +37,9 @@ public class SqlField {
 	 * 字段脱敏
 	 */
 	private SqlSensitive sensitive;
+	
+	/**
+	 * 查询忽略
+	 */
+	private UniQueryIgnore queryIgnore;
 }

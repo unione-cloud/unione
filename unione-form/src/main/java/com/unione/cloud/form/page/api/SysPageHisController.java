@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,13 +13,13 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
-import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.form.page.model.SysPageHis;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Api(tags = "页面管理：页面历史",description="SysPageHis")
 @RequestMapping("/api/page/his")	 //TreeFeignApi
-public class SysPageHisController implements PojoFeignApi<SysPageHis>{
+public class SysPageHisController implements FeignFind<SysPageHis>,FeignFindById<SysPageHis>,FeignDetail<SysPageHis> {
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -53,40 +52,6 @@ public class SysPageHisController implements PojoFeignApi<SysPageHis>{
 		
 		LogsUtil.success();
 		log.debug("退出:查询页面历史列表方法,params:{},result:{}",params,results.isSuccess());
-		return results;
-	}
-
-
-	@Override
-	public Results<Long> save(@Validated(Validator.save.class) SysPageHis entity) {
-		log.debug("进入:新增页面历史信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增页面历史");
-		// 参数处理
-		dataBaseDao.insert(entity);
-		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增页面历史信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
-	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysPageHis entity) {
-		log.debug("进入:修改页面历史信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改页面历史",entity.getId());
-		
-		String[] fields = {"tmplId","pageId","component","title","sn","vers","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","status","descs"};
-		SqlBuilder<SysPageHis> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改页面历史信息方法，entity:{},result:{}",entity,results.isSuccess());
 		return results;
 	}
 
@@ -125,28 +90,6 @@ public class SysPageHisController implements PojoFeignApi<SysPageHis>{
 	}
 	
 
-	@Override
-	public Results<Long> delete(Set<Long> ids){
-		log.debug("进入:删除页面历史信息方法，ids:{}",ids);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Delete, "删除页面历史");
-		
-		// 参数处理
-		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
-		
-		// 执行删除
-		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(SysPageHis.class,ids));
-		LogsUtil.add("成功删除记录数量:"+count);
-		
-		results.setSuccess(count>0);
-		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody((long)count);
-		LogsUtil.save(count>0);
-
-		log.debug("退出:删除页面历史信息方法，ids:{},result:{}",ids,results.isSuccess());
-		return results;
-	}
 
 
 }

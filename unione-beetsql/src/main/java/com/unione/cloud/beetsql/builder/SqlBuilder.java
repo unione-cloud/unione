@@ -23,6 +23,7 @@ import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniDataSensitive;
 import com.unione.cloud.beetsql.annotation.UniQueryAction;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.beetsql.utils.SensitiveUtil;
 import com.unione.cloud.core.dto.Params;
@@ -282,6 +283,9 @@ public class SqlBuilder<T> {
 					field.setSensitive(SqlSensitive.build(dataSensitive));
 				}
 				
+				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryIgnore.class);
+				field.setQueryIgnore(ignorQuery);
+				
 				if(!fieldLists.isEmpty()) {
 					if(field.isPk() || fieldLists.contains(field.getAlias()) || fieldLists.contains(field.getColumn())) {
 						this.entity.getFields().add(field);
@@ -402,11 +406,26 @@ public class SqlBuilder<T> {
 		boolean isJavaBean=!(this.data instanceof Map);
 		
 		StringBuffer buffer=new StringBuffer();
-		if(SqlType.SELECT.equals(type)||SqlType.SELECT_BYID.equals(type)) {
+		if(SqlType.SELECT.equals(type)||SqlType.SELECT_BYID.equals(type)||SqlType.SELECT_ONE.equals(type)) {
 			buffer.append("SELECT ");
 			// 查询字段处理
 			StringBuffer fieldBuf=new StringBuffer();
-			this.entity.getFields().stream().forEach(field->{
+			this.entity.getFields().stream().filter(field->{
+				// 如果字段设置了过滤
+				if(field.getQueryIgnore()!=null) {
+					if(QueryType.SELECT.equals(field.getQueryIgnore().value())) {
+						return false;
+					}
+					if(QueryType.SELECT_LIST.equals(field.getQueryIgnore().value()) && SqlType.SELECT.equals(type)) {
+						return false;
+					}
+					if(QueryType.SELECT_ONE.equals(field.getQueryIgnore().value()) && (SqlType.SELECT_ONE.equals(type) || 
+							SqlType.SELECT_BYID.equals(type))) {
+						return false;
+					}
+				}
+				return true;
+			}).forEach(field->{
 				fieldBuf.append(",").append(field.getColumn());
 				if(!isJavaBean && !StringUtils.isEmpty(field.getAlias())) {
 					fieldBuf.append(" AS ").append(field.getAlias());

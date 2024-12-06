@@ -33,6 +33,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	 */
 	private static final long serialVersionUID = -177492027121128764L;
 
+	@JsonProperty("configs")
 	@ApiModelProperty("页面配置对象")
 	private T configDto;
 	
@@ -150,8 +151,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("table页面定义Dto")
-	public static class TablePageDefineDto extends PageDefineDto<TablePageConfigDto>{
+	@ApiModel("list页面定义Dto")
+	public static class ListPageDefineDto extends PageDefineDto<ListPageConfigDto>{
 		/**
 		 * 
 		 */
@@ -164,7 +165,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	@Data
 	@ApiModel("Table页面配置Dto")
-	public static class TablePageConfigDto extends PageConfigDto{
+	public static class ListPageConfigDto extends PageConfigDto{
 		/**
 		 * 
 		 */
