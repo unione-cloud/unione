@@ -1,14 +1,24 @@
 package com.unione.cloud.form.page.dto;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.form.data.dto.DataDefineDto.ConditionStyleDto;
 import com.unione.cloud.form.data.dto.DataDefineDto.DataConvertDto;
 import com.unione.cloud.form.data.dto.DataDefineDto.DataParamDto;
@@ -24,6 +34,7 @@ import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @ApiModel("页面定义Dto")
@@ -65,7 +76,9 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = 7542938311504351628L;
 
+		
 		@ApiModelProperty("页面组件集合")
+		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<WidgetDto> widgets;
 		
 		@ApiModelProperty("数据模型sn集合")
@@ -210,10 +223,52 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		}
 	}
 	
+	/**
+	 * 组件反序列化器
+	 * 1、根据组件名称 widget 动态反序列化成对应的组件对象
+	 */
+	@Slf4j
+	public static class WidgetDeserializer extends JsonDeserializer<Object>{
+		
+		public Object deserialize(JsonParser parser,JsonNode node) throws JsonProcessingException {
+			String widget = node.get("widget").asText();
+			switch (widget) {
+			case "unione-button":
+				return parser.getCodec().treeToValue(node, ButtonDto.class);
+			case "unione-form-item":
+				return parser.getCodec().treeToValue(node, FormItemDto.class);
+			case "unione-form":
+				return parser.getCodec().treeToValue(node, FormWidgetDto.class);
+			case "unione-query":
+				return parser.getCodec().treeToValue(node, QueryWidgetDto.class);
+			case "unione-table":
+				return parser.getCodec().treeToValue(node, TableWidgetDto.class);
+			default:
+				log.error("组件名称,widget:"+widget+",未注册", parser.currentValue());
+				throw new ServiceException("组件名称,widget:"+widget+",未注册");
+			}
+		}
+		
+		@Override
+		public Object deserialize(JsonParser parser, DeserializationContext ctx) throws IOException, JacksonException {
+			JsonNode node = parser.getCodec().readTree(parser);
+			if(node.isArray()) {
+				List<Object> list=new ArrayList<>();
+				JsonNode item = null;
+				while((item = node.elements().next())!=null) {
+					list.add(deserialize(parser,item));
+				}
+				return list;
+			}else {
+				return deserialize(parser,node);
+			}
+		}
+	}
+	
 	
 	@Data
 	@ApiModel("表单组件配置Dto")
-	public class FormWidgetDto extends WidgetDto {
+	public static class FormWidgetDto extends WidgetDto {
 		/**
 		 * 
 		 */
@@ -250,7 +305,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	@Data
 	@ApiModel("查询组件配置Dto")
-	public class QueryWidgetDto extends WidgetDto {
+	public static class QueryWidgetDto extends WidgetDto {
 		/**
 		 * 
 		 */
@@ -281,7 +336,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	@Data
 	@ApiModel("表格组件配置Dto")
-	public class TableWidgetDto extends WidgetDto {
+	public static class TableWidgetDto extends WidgetDto {
 		/**
 		 * 
 		 */
