@@ -183,7 +183,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	@Data
 	@ApiModel("组件定义Dto")
-	public static abstract class WidgetDto implements Serializable{
+	public static class WidgetDto implements Serializable{
 		/**
 		 * 
 		 */

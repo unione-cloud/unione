@@ -3,9 +3,7 @@ package com.unione.cloud.form.page.api;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,11 +25,11 @@ import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.page.dto.PageDefineDto.FormPageDefineDto;
 import com.unione.cloud.form.page.dto.PageDefineDto.ListPageDefineDto;
 import com.unione.cloud.form.page.model.SysPageDefine;
+import com.unione.cloud.form.page.service.PageDefineService;
 import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,8 +54,8 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 	@Autowired
 	private SessionService sessionService;
 	
-	@Value("${form.page.default.appid:1000}")
-	private Long DEFAULT_APP_ID;
+	@Autowired
+	private PageDefineService pageDefineService;
 	
 	
 	@Override
@@ -80,66 +78,21 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 	}
 
 	
-	@PostMapping(value="/save/form")
+	@PostMapping(value="/form/save")
 	@ApiOperation(value="保存表单页面")
 	public Results<SysPageDefine> saveFormPage(@Validated(Validator.save.class) @RequestBody FormPageDefineDto entity) {
 		entity.setComponent("unione-form-page");
-		return save(entity);
+		return pageDefineService.saveDefine(entity);
 	}
 	
 	
-	@PostMapping(value="/save/list")
+	@PostMapping(value="/list/save")
 	@ApiOperation(value="保存列表页面")
 	public Results<SysPageDefine> saveListPage(@Validated(Validator.save.class) @RequestBody ListPageDefineDto entity) {
 		entity.setComponent("unione-list-page");
-		return save(entity);
+		return pageDefineService.saveDefine(entity);
 	}
 
-	
-	private Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody SysPageDefine entity) {
-		log.debug("进入:新增页面定义信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增页面定义");
-		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
-				UserFormRoles.FORM_CONFIG,
-				UserFormRoles.FORM_DEV), "当前帐号无权限");
-		if("new_".equals(entity.getSn())) {
-			entity.setSn(null);
-		}
-		
-		SysPageDefine tmp = null;
-		if(!StringUtils.isEmpty(entity.getSn())) {
-			SysPageDefine param=SysPageDefine.builder().sn(entity.getSn()).build();
-			param.setTenantId(sessionService.getTenantId());
-			tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-		}
-		
-		if(tmp!=null) {
-			entity.setId(tmp.getId());
-			// 更新
-			String[] fields = {"title","component","summary","icon","picMax","picMid","picMix","types","trades","reviewPic","configs","isTmpl","isGlobal","descs"};
-			SqlBuilder<SysPageDefine> sqlBuilder=SqlBuilder.build(entity).field(fields);
-			int len = dataBaseDao.updateById(sqlBuilder);
-			LogsUtil.add("保存数据,len:"+len);
-		}else {
-			// 新增
-			// 参数处理
-			if(StringUtils.isEmpty(entity.getSn())) {
-				entity.setSn(RandomUtil.randomString(20));
-			}
-			BeanUtils.setDefaultValue(entity, "appId", DEFAULT_APP_ID);
-			BeanUtils.setDefaultValue(entity, "isTmpl",0);
-			BeanUtils.setDefaultValue(entity, "isGlobal",0);
-			BeanUtils.setDefaultValue(entity, "status",1);
-			entity.setVers(1);
-			
-			int len = dataBaseDao.insert(entity);
-			AssertUtil.service().isTrue(len>0, "页面保存失败");
-		}
-		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增页面定义信息.entity:{},result:true",entity);
-		return Results.success(entity);
-	}
 
 
 	@PostMapping(value="/load/{sn}")
