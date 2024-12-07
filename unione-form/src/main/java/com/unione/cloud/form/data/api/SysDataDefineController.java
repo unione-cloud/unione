@@ -114,7 +114,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
 			BeanUtils.setDefaultValue(dataDefine, "status",1);
 			BeanUtils.setDefaultValue(dataDefine, "ordered",0);
-			BeanUtils.setDefaultValue(dataDefine, "setting","{}");
+			BeanUtils.setDefaultValue(dataDefine, "configs","{}");
 			dataDefine.setVers(1);
 			
 			int len = dataBaseDao.insert(dataDefine);
