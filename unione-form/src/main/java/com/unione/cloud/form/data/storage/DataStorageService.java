@@ -16,17 +16,16 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.form.cache.DataModelCache;
+import com.unione.cloud.form.cache.DataDefineCache;
+import com.unione.cloud.form.data.dto.DataDefineDto.DataFieldDto;
+import com.unione.cloud.form.data.dto.DataDefineDto.ForeignKeyDto;
 import com.unione.cloud.form.data.storage.model.DataCommit;
-import com.unione.cloud.form.data.storage.model.DataField;
-import com.unione.cloud.form.data.storage.model.DataFieldConfig;
+import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
-import com.unione.cloud.form.data.storage.model.DataModel;
 import com.unione.cloud.form.data.storage.model.DataResult;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,62 +46,62 @@ public class DataStorageService {
 	private SessionService sessionService;
 	
 	@Autowired
-	private DataModelCache dataModelCache;
+	private DataDefineCache dataDefineCache;
 	
 	
 	/**
 	 * 	插入数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int insert(DataModel dataModel, Map<String, Object> data) {
-		return insert(dataModel.getDsId(), dataModel, data);
+	public int insert(DataDefine dataDefine, Map<String, Object> data) {
+		return insert(dataDefine.getDsId(), dataDefine, data);
 	}
 
 	/**
 	 * 	插入数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int insert(Long dsId, DataModel dataModel, Map<String, Object> data) {
+	public int insert(Long dsId, DataDefine dataDefine, Map<String, Object> data) {
 		Map<String, Object> params=new HashMap<>();
 		params.put("data", data);
-		processInsertDefaultData(dataModel,data);
-		return storageBaseService.insert(dsId, dataModel.getSqlInsert(), params);
+		processInsertDefaultData(dataDefine,data);
+		return storageBaseService.insert(dsId, dataDefine.getSqlInsert(), params);
 	}
 	
 	/**
 	 * 	插入数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int insert(DataModel dataModel,DataCommit commit) {
-		return insert(dataModel, commit.getData());
+	public int insert(DataDefine dataDefine,DataCommit commit) {
+		return insert(dataDefine, commit.getData());
 	}
 
 
 	/**
 	 * 	批量插入数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int[] insert(DataModel dataModel, List<Map<String, Object>> datas) {
-		return insert(dataModel.getDsId(), dataModel, datas);
+	public int[] insert(DataDefine dataDefine, List<Map<String, Object>> datas) {
+		return insert(dataDefine.getDsId(), dataDefine, datas);
 	}
 
 	/**
 	 * 	批量插入数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int[] insert(Long dsId, DataModel dataModel, List<Map<String, Object>> datas) {
+	public int[] insert(Long dsId, DataDefine dataDefine, List<Map<String, Object>> datas) {
 		datas.stream().forEach(row->{
-			processInsertDefaultData(dataModel, row);
+			processInsertDefaultData(dataDefine, row);
 		});
 		AssertUtil.database().isTrue(false, "暂未实现");
 		return null;
@@ -112,40 +111,40 @@ public class DataStorageService {
 	/**
 	 * 新增操作默认数据处理
 	 * @param dsId
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param data
 	 */
-	public void processInsertDefaultData(DataModel dataModel,Map<String, Object> data) {
-		log.debug("新增操作默认数据处理,dsId:{},data model id:{}",dataModel.getDsId(),dataModel.getId());
-		DataField idField = dataModel.getStsField(BaseField.ID);
+	public void processInsertDefaultData(DataDefine dataDefine,Map<String, Object> data) {
+		log.debug("新增操作默认数据处理,dsId:{},data model id:{}",dataDefine.getDsId(),dataDefine.getId());
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		if (idField != null && data.get(idField.getAlias())==null) {
 			data.put(idField.getAlias(), IdGenHolder.generate());
 		}
-		DataField tenantIdField = dataModel.getStsField(BaseField.TENANT_ID);
+		DataFieldDto tenantIdField = dataDefine.getStsField(BaseField.TENANT_ID);
 		if (tenantIdField != null) {
 			data.put(tenantIdField.getAlias(),sessionService.getTenantId());
 		}
-		DataField orgIdField=dataModel.getStsField(BaseField.ORGAN_ID);
+		DataFieldDto orgIdField=dataDefine.getStsField(BaseField.ORGAN_ID);
 		if (orgIdField!=null){
 			data.put(orgIdField.getAlias(), sessionService.getOrgId());
 		}
-		DataField orgCodeField=dataModel.getStsField(BaseField.ORGAN_CODE);
+		DataFieldDto orgCodeField=dataDefine.getStsField(BaseField.ORGAN_CODE);
 		if (orgCodeField!=null){
 			data.put(orgCodeField.getAlias(), sessionService.getOrgLvsn());
 		}
-		DataField areaCodeField=dataModel.getStsField(BaseField.AREA_CODE);
+		DataFieldDto areaCodeField=dataDefine.getStsField(BaseField.AREA_CODE);
 		if (areaCodeField!=null){
 			data.put(areaCodeField.getAlias(), sessionService.getAreaCode());
 		}
-		DataField userIdField=dataModel.getStsField(BaseField.USER_ID);
+		DataFieldDto userIdField=dataDefine.getStsField(BaseField.USER_ID);
 		if (userIdField!=null){
 			data.put(userIdField.getAlias(), sessionService.getUserId());
 		}
-		DataField delFlagField=dataModel.getStsField(BaseField.DEL_FLAG);
+		DataFieldDto delFlagField=dataDefine.getStsField(BaseField.DEL_FLAG);
 		if (delFlagField!=null){
 			data.put(delFlagField.getAlias(), 0);
 		}
-		DataField createdField=dataModel.getStsField(BaseField.CREATED);
+		DataFieldDto createdField=dataDefine.getStsField(BaseField.CREATED);
 		if (createdField!=null){
 			if("Date".equalsIgnoreCase(createdField.getDataType()) || 
 					"Timestamp".equalsIgnoreCase(createdField.getDataType())) {
@@ -154,11 +153,11 @@ public class DataStorageService {
 				data.put(createdField.getAlias(), DateUtil.date().getTime());
 			}
 		}
-		DataField createdByField=dataModel.getStsField(BaseField.CREATED_BY);
+		DataFieldDto createdByField=dataDefine.getStsField(BaseField.CREATED_BY);
 		if(createdByField!=null){
 			data.put(createdByField.getAlias(), sessionService.getUserId());
 		}
-		DataField lastUpdatedField=dataModel.getStsField(BaseField.LAST_UPDATED);
+		DataFieldDto lastUpdatedField=dataDefine.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdatedField!=null){
 			if("Date".equalsIgnoreCase(lastUpdatedField.getDataType()) || 
 					"Timestamp".equalsIgnoreCase(lastUpdatedField.getDataType())) {
@@ -167,7 +166,7 @@ public class DataStorageService {
 				data.put(lastUpdatedField.getAlias(), DateUtil.date().getTime());
 			}
 		}
-		DataField lastUpdatedByField=dataModel.getStsField(BaseField.LAST_UPDATED_BY);
+		DataFieldDto lastUpdatedByField=dataDefine.getStsField(BaseField.LAST_UPDATED_BY);
 		if(lastUpdatedByField!=null){
 			data.put(lastUpdatedByField.getAlias(), sessionService.getUserId());
 		}
@@ -176,23 +175,23 @@ public class DataStorageService {
 	
 	/**
 	 * 	更新数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int update(DataModel dataModel, Map<String, Object> data, Map<String, Object> params,String... fields) {
-		return update(dataModel.getDsId(), dataModel, data,params,fields);
+	public int update(DataDefine dataDefine, Map<String, Object> data, Map<String, Object> params,String... fields) {
+		return update(dataDefine.getDsId(), dataDefine, data,params,fields);
 	}
 
 	/**
 	 * 	更新数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int update(Long dsId, DataModel dataModel, Map<String, Object> data, Map<String, Object> params,String... fields) {
+	public int update(Long dsId, DataDefine dataDefine, Map<String, Object> data, Map<String, Object> params,String... fields) {
 		Map<String, Boolean> fieldMap = new HashMap<>();
-		processUpdateDeleteDefaultData(dataModel,data);
+		processUpdateDeleteDefaultData(dataDefine,data);
 		if(fields.length>0) {
 			for(String field:fields) {
 				fieldMap.put(field, true);
@@ -206,29 +205,29 @@ public class DataStorageService {
 		paramObj.put("data", data);
 		paramObj.put("params", params);
 		paramObj.put("fields", fieldMap);
-		return storageBaseService.update(dsId, dataModel.getSqlUpdate(), paramObj);
+		return storageBaseService.update(dsId, dataDefine.getSqlUpdate(), paramObj);
 	}
 	
 	
 	/**
 	 * 	更新数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int updateById(DataModel dataModel,DataCommit commit,String ...fields) {
-		return updateById(dataModel.getDsId(),dataModel, commit,fields);
+	public int updateById(DataDefine dataDefine,DataCommit commit,String ...fields) {
+		return updateById(dataDefine.getDsId(),dataDefine, commit,fields);
 	}
 	
 	
 	/**
 	 * 	更新数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int updateById(Long dsId,DataModel dataModel,DataCommit commit,String ...fields) {
-		DataField sidField=dataModel.getStsField(BaseField.ID);
+	public int updateById(Long dsId,DataDefine dataDefine,DataCommit commit,String ...fields) {
+		DataFieldDto sidField=dataDefine.getStsField(BaseField.ID);
 		AssertUtil.service().notNull(commit.getId(), "主键不能为空").notNull(sidField, "未配置主键字段");
 		Map<String, Object> params=new HashMap<>();
 		Map<String, Object> fieldMap=new HashMap<>();
@@ -238,7 +237,7 @@ public class DataStorageService {
 		paramObj.put("fields", fieldMap);
 		params.put(sidField.getName(), commit.getId());
 		
-		processUpdateDeleteDefaultData(dataModel,commit.getData());
+		processUpdateDeleteDefaultData(dataDefine,commit.getData());
 		
 		if(fields.length>0) {
 			for(String field:fields) {
@@ -250,19 +249,19 @@ public class DataStorageService {
 			}
 		}
 		
-		return storageBaseService.update(dsId, dataModel.getSqlUpdate(), paramObj);
+		return storageBaseService.update(dsId, dataDefine.getSqlUpdate(), paramObj);
 	}
 	
 	
 	/**
 	 * 	更新/删除操作默认数据处理
 	 * @param dsId
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param data
 	 */
-	public void processUpdateDeleteDefaultData(DataModel dataModel,Map<String, Object> data) {
-		log.debug("新增操作默认数据处理,dsId:{},data model id:{}",dataModel.getDsId(),dataModel.getId());
-		DataField lastUpdatedField=dataModel.getStsField(BaseField.LAST_UPDATED);
+	public void processUpdateDeleteDefaultData(DataDefine dataDefine,Map<String, Object> data) {
+		log.debug("新增操作默认数据处理,dsId:{},data model id:{}",dataDefine.getDsId(),dataDefine.getId());
+		DataFieldDto lastUpdatedField=dataDefine.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdatedField!=null){
 			if("Date".equalsIgnoreCase(lastUpdatedField.getDataType()) || 
 					"Timestamp".equalsIgnoreCase(lastUpdatedField.getDataType())) {
@@ -271,7 +270,7 @@ public class DataStorageService {
 				data.put(lastUpdatedField.getAlias(), DateUtil.date().getTime());
 			}
 		}
-		DataField lastUpdatedByField=dataModel.getStsField(BaseField.LAST_UPDATED_BY);
+		DataFieldDto lastUpdatedByField=dataDefine.getStsField(BaseField.LAST_UPDATED_BY);
 		if(lastUpdatedByField!=null){
 			data.put(lastUpdatedByField.getAlias(), sessionService.getUserId());
 		}
@@ -280,53 +279,53 @@ public class DataStorageService {
 	
 	/**
 	 * 	删除数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int delete(DataModel dataModel, Map<String, Object> params) {
-		return delete(dataModel.getDsId(), dataModel, params);
+	public int delete(DataDefine dataDefine, Map<String, Object> params) {
+		return delete(dataDefine.getDsId(), dataDefine, params);
 	}
 	
 	
 	/**
 	 * 	删除数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int delete(Long dsId,DataModel dataModel, Map<String, Object> params) {
+	public int delete(Long dsId,DataDefine dataDefine, Map<String, Object> params) {
 		Map<String, Object> data=new HashMap<>();
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("data", data);
 		paramObj.put("params", params);
 		
-		processUpdateDeleteDefaultData(dataModel,data);
+		processUpdateDeleteDefaultData(dataDefine,data);
 		
-		return storageBaseService.delete(dsId, dataModel.getSqlDelete(), params);
+		return storageBaseService.delete(dsId, dataDefine.getSqlDelete(), params);
 	}
 	
 	
 	/**
 	 * 	删除数据:物理/逻辑删除
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param ids
 	 * @return
 	 */
-	public int deleteByIds(DataModel dataModel,Set<Long> ids) {
-		return deleteByIds(dataModel.getDsId(),dataModel, ids);
+	public int deleteByIds(DataDefine dataDefine,Set<Long> ids) {
+		return deleteByIds(dataDefine.getDsId(),dataDefine, ids);
 	}
 	
 	
 	/**
 	 * 	删除数据:物理/逻辑删除
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public int deleteByIds(Long dsId,DataModel dataModel,Set<Long> ids) {
-		DataField delFlagField=dataModel.getStsField(BaseField.DEL_FLAG);
-		DataField idField=dataModel.getStsField(BaseField.ID);
+	public int deleteByIds(Long dsId,DataDefine dataDefine,Set<Long> ids) {
+		DataFieldDto delFlagField=dataDefine.getStsField(BaseField.DEL_FLAG);
+		DataFieldDto idField=dataDefine.getStsField(BaseField.ID);
 		AssertUtil.service().notEmpty(ids, "主键集合不能为空");
 		Map<String, Object> data=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
@@ -342,243 +341,243 @@ public class DataStorageService {
 			fieldMap.put(field, true);
 		}
 		
-		processUpdateDeleteDefaultData(dataModel,data);
+		processUpdateDeleteDefaultData(dataDefine,data);
 		
-		return storageBaseService.delete(dsId, delFlagField!=null?dataModel.getSqlUpdate():dataModel.getSqlDelete(), paramObj);
+		return storageBaseService.delete(dsId, delFlagField!=null?dataDefine.getSqlUpdate():dataDefine.getSqlDelete(), paramObj);
 	}
 	
 	
 
 	/**
 	 * 	查询一条数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public Map<String, Object> findOne(DataModel dataModel, Map<String, Object> params) {
-		return findOne(dataModel.getDsId(),dataModel, params);
+	public Map<String, Object> findOne(DataDefine dataDefine, Map<String, Object> params) {
+		return findOne(dataDefine.getDsId(),dataDefine, params);
 	}
 	
 
 	/**
 	 * 	查询一条数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public Map<String, Object> findOne(Long dsId,DataModel dataModel, Map<String, Object> params) {
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
+	public Map<String, Object> findOne(Long dsId,DataDefine dataDefine, Map<String, Object> params) {
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findOne(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findOne(dsId, sql, paramObj,dataDefine.getFields());
 	}
 	
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param load
 	 * @return
 	 */
-	public Map<String, Object> findById(DataModel dataModel,DataLoad load) {
-		return findById(dataModel.getDsId(),dataModel, load);
+	public Map<String, Object> findById(DataDefine dataDefine,DataLoad load) {
+		return findById(dataDefine.getDsId(),dataDefine, load);
 	}
 	
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param load
 	 * @return
 	 */
-	public Map<String, Object> findById(Long dsId,DataModel dataModel,DataLoad load) {
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
-		DataField idField = dataModel.getStsField(BaseField.ID);
+	public Map<String, Object> findById(Long dsId,DataDefine dataDefine,DataLoad load) {
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(idField!=null?idField.getAlias():"id", load.getId());
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findOne(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findOne(dsId, sql, paramObj,dataDefine.getFields());
 	}
 	
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param load
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(DataModel dataModel,DataLoad load) {
-		return findByIds(dataModel.getDsId(),dataModel, load);
+	public List<Map<String, Object>> findByIds(DataDefine dataDefine,DataLoad load) {
+		return findByIds(dataDefine.getDsId(),dataDefine, load);
 	}
 	
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param load
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(Long dsId,DataModel dataModel,DataLoad load) {
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
-		DataField idField = dataModel.getStsField(BaseField.ID);
+	public List<Map<String, Object>> findByIds(Long dsId,DataDefine dataDefine,DataLoad load) {
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"),load.getIds());
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findList(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 	}
 	
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param id
 	 * @return
 	 */
-	public Map<String, Object> findById(DataModel dataModel,Long id) {
-		return findById(dataModel.getDsId(),dataModel, id);
+	public Map<String, Object> findById(DataDefine dataDefine,Long id) {
+		return findById(dataDefine.getDsId(),dataDefine, id);
 	}
 	
 
 	/**
 	 * 	根据主键查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param id
 	 * @return
 	 */
-	public Map<String, Object> findById(Long dsId,DataModel dataModel,Long id) {
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
-		DataField idField = dataModel.getStsField(BaseField.ID);
+	public Map<String, Object> findById(Long dsId,DataDefine dataDefine,Long id) {
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(idField!=null?idField.getAlias():"id", id);
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findOne(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findOne(dsId, sql, paramObj,dataDefine.getFields());
 	}
 	
 	
 	/**
 	 * 	根据主键集合查询数据
 	 * 
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(DataModel dataModel,Set<Long> ids) {
-		return findByIds(dataModel.getDsId(),dataModel, ids);
+	public List<Map<String, Object>> findByIds(DataDefine dataDefine,Set<Long> ids) {
+		return findByIds(dataDefine.getDsId(),dataDefine, ids);
 	}
 	
 
 	/**
 	 * 	根据主键集合查询数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findByIds(Long dsId,DataModel dataModel,Set<Long> ids) {
+	public List<Map<String, Object>> findByIds(Long dsId,DataDefine dataDefine,Set<Long> ids) {
 		AssertUtil.service().notEmpty(ids, "主键不能为空");
-		DataField idField = dataModel.getStsField(BaseField.ID);
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"), ids);
 		
 		paramObj.put("params", params);
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findList(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 	}
 	
 
 	/**
 	 * 	查询数据列表，未分页
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findList(DataModel dataModel, Map<String, Object> params) {
-		return findList(dataModel.getDsId(), dataModel, params);
+	public List<Map<String, Object>> findList(DataDefine dataDefine, Map<String, Object> params) {
+		return findList(dataDefine.getDsId(), dataDefine, params);
 	}
 
 	
 	/**
 	 * 	查询数据列表，未分页
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @return
 	 */
-	public List<Map<String, Object>> findList(Long dsId, DataModel dataModel, Map<String, Object> params) {
-		String sql=dataModel.getSqlFind().replace("#{page('*')}", "*");
+	public List<Map<String, Object>> findList(Long dsId, DataDefine dataDefine, Map<String, Object> params) {
+		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findList(dsId, sql, paramObj,dataModel.getFields());
+		return storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 	}
 
 	/**
 	 * 	查询数据列表，分页
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @param page
 	 * @param size
 	 * @return
 	 */
-	public DataResult<List<Map<String, Object>>> findListPage(DataModel dataModel, Map<String, Object> params,
+	public DataResult<List<Map<String, Object>>> findListPage(DataDefine dataDefine, Map<String, Object> params,
 			int page, int size) {
-		return findListPage(dataModel.getDsId(), dataModel, params, page, size);
+		return findListPage(dataDefine.getDsId(), dataDefine, params, page, size);
 	}
 
 	/**
 	 * 	查询数据列表，分页
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param params
 	 * @param page
 	 * @param size
 	 * @return
 	 */
-	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,
+	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataDefine dataDefine,
 			Map<String, Object> params, int page, int size) {
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findListPage(dsId, dataModel.getSqlFind(), paramObj, page, size,dataModel.getFields());
+		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, page, size,dataDefine.getFields());
 	}
 	
 	
 	/**
 	 * 	查询数据列表，分页
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param find
 	 * @return
 	 */
-	public DataResult<List<Map<String, Object>>> findListPage(DataModel dataModel,DataFind find) {
-		return findListPage(dataModel.getDsId(),dataModel, find);
+	public DataResult<List<Map<String, Object>>> findListPage(DataDefine dataDefine,DataFind find) {
+		return findListPage(dataDefine.getDsId(),dataDefine, find);
 	}
 
 	/**
 	 * 	查询数据列表，分页
 	 * @param dsId
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param find
 	 * @return
 	 */
-	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataModel dataModel,DataFind find) {
+	public DataResult<List<Map<String, Object>>> findListPage(Long dsId,DataDefine dataDefine,DataFind find) {
 		Map<String, Object> paramObj=new HashMap<>();
 		
 		String keywords=StringUtils.trimToNull(find.getKeywords());
@@ -591,19 +590,19 @@ public class DataStorageService {
 			paramObj.put("sorts", sorts);
 		}
 		
-		processFindDefaultParams(dataModel, find.getBody());
+		processFindDefaultParams(dataDefine, find.getBody());
 		
-		return storageBaseService.findListPage(dsId, dataModel.getSqlFind(), paramObj, find.getPage(),find.getPageSize(), dataModel.getFields());
+		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, find.getPage(),find.getPageSize(), dataDefine.getFields());
 	}
 	
 	
 	/**
 	 * 	查询操作默认参数
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param data
 	 */
-	public void processFindDefaultParams(DataModel dataModel,Map<String, Object> data) {
-		log.debug("查询操作默认参数处理,data model id:{}",dataModel.getId());
+	public void processFindDefaultParams(DataDefine dataDefine,Map<String, Object> data) {
+		log.debug("查询操作默认参数处理,data model id:{}",dataDefine.getId());
 		
 		
 		
@@ -611,13 +610,13 @@ public class DataStorageService {
 	
 	/**
 	 * 	根据外键字段从外键数据表中加载数据
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param fkey
 	 * @param vlaues
 	 * @return
 	 */
-	public Map<String, Map<String, Object>> loadFkeyEntrys(DataModel dataModel,DataField fkey,Set<Object> vlaues){
-		return loadFkeyEntrys(dataModel.getDsId(), fkey, vlaues);
+	public Map<String, Map<String, Object>> loadFkeyEntrys(DataDefine dataDefine,DataFieldDto fkey,Set<Object> vlaues){
+		return loadFkeyEntrys(dataDefine.getDsId(), fkey, vlaues);
 	}
 	
 	
@@ -628,28 +627,29 @@ public class DataStorageService {
 	 * @param vlaues
 	 * @return
 	 */
-	public Map<String, Map<String, Object>> loadFkeyEntrys(Long dsId,DataField fkey,Set<Object> vlaues){
+	public Map<String, Map<String, Object>> loadFkeyEntrys(Long dsId,DataFieldDto fkey,Set<Object> vlaues){
 		Map<String, Map<String, Object>> map=new HashMap<>();
 		String sql = this.buildFkeyQuerySql(fkey);
 		if(StringUtils.isEmpty(sql)) {
 			return map;
 		}
 		
-		DataModel dataModel = dataModelCache.load(fkey.getFkTableId());
-		AssertUtil.service().notNull(dataModel, "外键关联数据定义未找到");
-		DataField idField = dataModel.getStsField(BaseField.ID);
+		
+		DataDefine dataDefine = dataDefineCache.load(fkey.getFkey().getDsn());
+		AssertUtil.service().notNull(dataDefine, "外键关联数据定义未找到");
+		DataFieldDto idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"), vlaues);
 		paramObj.put("params", params);
 		
-		processFindDefaultParams(dataModel, params);
+		processFindDefaultParams(dataDefine, params);
 		
-		List<Map<String, Object>> list = storageBaseService.findList(dsId, sql, paramObj,dataModel.getFields());
+		List<Map<String, Object>> list = storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 		
 		list.stream().forEach(row->{
-			Object fkeyValue=row.get(fkey.getFkFieldName());
+			Object fkeyValue=row.get(fkey.getFkey().getFieldName());
 			if(fkeyValue!=null) {
 				map.put(fkeyValue.toString(), row);
 			}
@@ -661,38 +661,42 @@ public class DataStorageService {
 	
 	/**
 	 * 	加载外键数据集合
-	 * @param dataModel
+	 * @param dataDefine
 	 * @param rows
 	 * @param fkeys
 	 */
-	public void loadFkeyEntrys(DataModel dataModel,List<Map<String, Object>> rows,String... fkeys) {
-		loadFkeyEntrys(dataModel.getDsId(), dataModel, rows, fkeys);
+	public void loadFkeyEntrys(DataDefine dataDefine,List<Map<String, Object>> rows,String... fkeys) {
+		loadFkeyEntrys(dataDefine.getDsId(), dataDefine, rows, fkeys);
 	}
 	
 	/**
 	 * 	加载外键数据集合
-	 * @param dataModel	数据模型
+	 * @param dataDefine	数据模型
 	 * @param rows		数据记录集合
 	 * @param fkeys		外键字段，为空则是所有
 	 */
-	public void loadFkeyEntrys(Long dsId,DataModel dataModel,List<Map<String, Object>> rows,String... fkeys) {
-		log.debug("进入：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataModel.getId(),fkeys,rows.size());
+	public void loadFkeyEntrys(Long dsId,DataDefine dataDefine,List<Map<String, Object>> rows,String... fkeys) {
+		log.debug("进入：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataDefine.getId(),fkeys,rows.size());
 		List<String> fkeyList=new ArrayList<>();
-		Map<String, DataField> fkeyFieldMap=new HashMap<>();
+		Map<String, DataFieldDto> fkeyFieldMap=new HashMap<>();
 		for(String field:fkeys) {
 			fkeyList.add(field);
 		}
-		dataModel.getFields().stream().filter(field->ObjectUtil.equal(1, field.getIsFk()))
-			.filter(fkey->!StringUtils.isEmpty(fkey.getName()))
-			.filter(fkey->(fkeyList.isEmpty()||fkeyList.contains(fkey.getName()))).forEach(fkey->{
-				fkeyFieldMap.put(fkey.getName(), fkey);
-			});
+		dataDefine.getFields().stream().filter(field->{
+			if(field.getFkey()!=null && field.getFkey().isEnable()) {
+				return true;
+			}		
+			return false;
+		}).filter(fkey->!StringUtils.isEmpty(fkey.getName()))
+		.filter(fkey->(fkeyList.isEmpty()||fkeyList.contains(fkey.getName()))).forEach(fkey->{
+			fkeyFieldMap.put(fkey.getName(), fkey);
+		});
 		if(fkeyFieldMap.isEmpty()) {
 			// 外键字段为空
-			log.debug("进入：加载外键数据集合方法,data model id:{},外键字段为空",dataModel.getId());
+			log.debug("进入：加载外键数据集合方法,data model id:{},外键字段为空",dataDefine.getId());
 			return;
 		}
-		log.debug("开始：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataModel.getId(),fkeyFieldMap.keySet(),rows.size());
+		log.debug("开始：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataDefine.getId(),fkeyFieldMap.keySet(),rows.size());
 		
 		Map<String, Set<Object>> fkeyValueMap=new HashMap<>();
 		rows.stream().forEach(row->{
@@ -713,7 +717,7 @@ public class DataStorageService {
 			// fkeyField=>{fkeyValue:{obj}}
 			Map<String, Map<String, Map<String, Object>>> fkeyEntryMap=new HashMap<>();
 			fkeyValueMap.entrySet().stream().forEach(entry->{
-				DataField fkeyField=fkeyFieldMap.get(entry.getKey());
+				DataFieldDto fkeyField=fkeyFieldMap.get(entry.getKey());
 				Set<Object> fkeyValues=entry.getValue();
 				if(fkeyField!=null && fkeyValues!=null && !fkeyValues.isEmpty()) {
 					Map<String, Map<String, Object>> fkeyMap = loadFkeyEntrys(dsId,fkeyField,fkeyValues);
@@ -727,13 +731,13 @@ public class DataStorageService {
 				rows.stream().forEach(row->{
 					fkeyEntryMap.entrySet().stream().forEach(fkeyEntry->{
 						Object fkeyValue=row.get(fkeyEntry.getKey());
-						DataField fkeyField=fkeyFieldMap.get(fkeyEntry.getKey());
+						DataFieldDto fkeyField=fkeyFieldMap.get(fkeyEntry.getKey());
 						if(fkeyField!=null && fkeyValue!=null) {
 							Map<String, Map<String, Object>> fkeyValueObj=fkeyEntry.getValue();
 							if(fkeyValueObj!=null) {
 								 Map<String, Object> fkeyvs=fkeyValueObj.get(fkeyValue.toString());
 								 if(fkeyvs!=null) {
-									 Object fkeyLable=fkeyvs.get(fkeyField.getFkLabelName());
+									 Object fkeyLable=fkeyvs.get(fkeyField.getFkey().getLabelName());
 									 if(fkeyLable!=null) {
 										 // 设置外键显示字段
 										 row.put(String.format("%sLabel", fkeyEntry.getKey()), fkeyLable);
@@ -747,7 +751,7 @@ public class DataStorageService {
 			}
 		}
 		
-		log.debug("退出：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataModel.getId(),fkeyFieldMap.keySet(),rows.size());
+		log.debug("退出：加载外键数据集合方法,data model id:{},fkeys:{},row count:{}",dataDefine.getId(),fkeyFieldMap.keySet(),rows.size());
 	}
 	
 	
@@ -758,37 +762,37 @@ public class DataStorageService {
 	 * @param fkeyName
 	 * @return
 	 */
-	private String buildFkeyQuerySql(DataField fkeyField) {
-		if(fkeyField.getConfigs()!=null && !StringUtils.isEmpty(fkeyField.getFkFieldName()) && 
-				fkeyField.getFkTableId()!=null && !StringUtils.isEmpty(fkeyField.getFkTableName())) {
-			DataFieldConfig fieldConfig=fkeyField.getConfigs();
-			if(fieldConfig.getFkey()!=null) {
-				StringBuffer sql=new StringBuffer();
-				StringBuffer field=new StringBuffer();
-				StringBuffer where=new StringBuffer();
-				
-				field.append(fkeyField.getFkFieldName()).append(",").append(fkeyField.getFkLabelName());
-				if(fieldConfig.getFkey().getFkFields()!=null) {
-					fieldConfig.getFkey().getFkFields().stream().forEach(fk->{
-						field.append(",").append(fk.getName());
-					});
-				}
-				
-				where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(fkeyField.getFkFieldName()).append(")){")
-					 .append(System.lineSeparator()).append(" AND ").append(fkeyField.getFkFieldName()).append(" = #{params.").append(fkeyField.getFkFieldName()).append("}")
-					 .append(System.lineSeparator()).append("-- @}");
-				
-				where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.ids)){")
-				 	 .append(System.lineSeparator()).append(" AND ").append(fkeyField.getFkFieldName()).append(" IN (#{join(params.ids)})")
-				 	 .append(System.lineSeparator()).append("-- @}");
-				
-				where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.keywords)){")
-				 	 .append(System.lineSeparator()).append(" AND ").append(fkeyField.getFkLabelName()).append(" LIKE #{'%'+params.keywords+'%'}")
-				 	 .append(System.lineSeparator()).append("-- @}");
-				
-				sql.append("SELECT ").append(field).append(" FROM ").append(fkeyField.getFkTableName()).append(" WHERE 1=1 ").append(where);
-				return sql.toString();
+	private String buildFkeyQuerySql(DataFieldDto fkeyField) {
+		ForeignKeyDto fkey = fkeyField.getFkey();
+		if(fkey!=null && fkey.isEnable() && !StringUtils.isEmpty(fkey.getFieldName()) && 
+				!StringUtils.isEmpty(fkey.getLabelName()) && !StringUtils.isEmpty(fkey.getDsn())) {
+			DataDefine dataDefine=dataDefineCache.load(fkey.getDsn());
+			
+			StringBuffer sql=new StringBuffer();
+			StringBuffer field=new StringBuffer();
+			StringBuffer where=new StringBuffer();
+			
+			field.append(fkey.getFieldName()).append(",").append(fkey.getLabelName());
+			if(fkey.getFields()!=null) {
+				fkey.getFields().stream().forEach(fk->{
+					field.append(",").append(fk.getName());
+				});
 			}
+			
+			where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(fkey.getFieldName()).append(")){")
+				 .append(System.lineSeparator()).append(" AND ").append(fkey.getFieldName()).append(" = #{params.").append(fkey.getFieldName()).append("}")
+				 .append(System.lineSeparator()).append("-- @}");
+			
+			where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.ids)){")
+			 	 .append(System.lineSeparator()).append(" AND ").append(fkey.getFieldName()).append(" IN (#{join(params.ids)})")
+			 	 .append(System.lineSeparator()).append("-- @}");
+			
+			where.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.keywords)){")
+			 	 .append(System.lineSeparator()).append(" AND ").append(fkey.getLabelName()).append(" LIKE #{'%'+params.keywords+'%'}")
+			 	 .append(System.lineSeparator()).append("-- @}");
+			
+			sql.append("SELECT ").append(field).append(" FROM ").append(dataDefine.getName()).append(" WHERE 1=1 ").append(where);
+			return sql.toString();
 		}
 		return null;
 	}

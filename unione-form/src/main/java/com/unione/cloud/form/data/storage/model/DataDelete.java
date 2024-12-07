@@ -1,7 +1,7 @@
 package com.unione.cloud.form.data.storage.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,8 +10,8 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(description = "数据加载对象")
-public class DataLoad {
+@ApiModel(description = "数据删除对象")
+public class DataDelete {
 	
 	@ApiModelProperty(value="数据定义编码",notes = "")
 	private String dsn;
@@ -23,9 +23,6 @@ public class DataLoad {
 	private Long id;
 	
 	@ApiModelProperty(value="主键集合")
-	private List<Long> ids=new ArrayList<>();
-	
-	@ApiModelProperty(value="字段集合")
-	private List<String> fields=new ArrayList<>();
+	private Set<Long> ids=new HashSet<>();
 
 }

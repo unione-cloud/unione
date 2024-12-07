@@ -3,22 +3,21 @@ package com.unione.cloud.form.data.api;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.form.cache.DataModelCache;
+import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.storage.DataStorageService;
 import com.unione.cloud.form.data.storage.model.DataCommit;
+import com.unione.cloud.form.data.storage.model.DataDelete;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
-import com.unione.cloud.form.data.storage.model.DataModel;
+import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataResult;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -40,20 +39,21 @@ public class SysDataStorageV1Controller{
 	
 	
 	@Autowired
-	private DataModelCache dataModelCache;
+	private DataDefineCache dataModelCache;
 	
 	
 	@Autowired
 	private DataStorageService dataStorageService;
 	
 	
-	@PostMapping("/{dsn}/find")
+	@PostMapping("/find")
     @ApiOperation(value = "数据查询")
-	public DataResult<List<Map<String, Object>>> find(@PathVariable("dsn") String dsn, @RequestBody DataFind dataFind){
-		log.debug("进入：数据存储/数据查询接口,dsn:{},find:{}",dsn,dataFind);
+	public DataResult<List<Map<String, Object>>> find(@RequestBody DataFind dataFind){
+		log.debug("进入：数据存储/数据查询接口,dsn:{},find:{}",dataFind.getDsn(),dataFind);
 		LogsUtil.set(LogType.Query, "数据存储/数据查询");
+		AssertUtil.service().notNull(dataFind, new String[] {"dsn"},"参数%s不能为空");	
 		
-		DataModel dataModel=dataModelCache.load(dsn);
+		DataDefine dataModel=dataModelCache.load(dataFind.getDsn());
 		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataFind));
 		
@@ -64,16 +64,18 @@ public class SysDataStorageV1Controller{
 		dataStorageService.loadFkeyEntrys(dataModel, result.getBody(),dataFind.getFields().toArray(new String[0]));
 		
 		LogsUtil.success();
-		log.debug("退出：数据模型数据查询接口,dsn:{},find:{}",dsn,dataFind);
+		log.debug("退出：数据模型数据查询接口,dsn:{},find:{}",dataFind.getDsn(),dataFind);
 		return result;
 	}
 	
 	
-	@PostMapping("/{dsn}/save")
+	@PostMapping("/save")
     @ApiOperation(value = "数据保存",notes = "有主键进行更新，主键为空则新增")
-	public DataResult<Map<String, Object>> save(@PathVariable("dsn") String dsn, @RequestBody DataCommit dataCommit){
-		log.debug("进入：数据存储/数据保存接口,dsn:{},commit:{}",dsn,dataCommit);
-		DataModel dataModel=dataModelCache.load(dsn);
+	public DataResult<Map<String, Object>> save(@RequestBody DataCommit dataCommit){
+		log.debug("进入：数据存储/数据保存接口,dsn:{},commit:{}",dataCommit.getDsn(),dataCommit);
+		AssertUtil.service().notNull(dataCommit, new String[] {"dsn"},"参数%s不能为空");	
+		
+		DataDefine dataModel=dataModelCache.load(dataCommit.getDsn());
 		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataCommit));
 		
@@ -92,14 +94,14 @@ public class SysDataStorageV1Controller{
 	
 	
 	
-	@PostMapping("/{dsn}/detail")
+	@PostMapping("/detail")
 	@ApiOperation(value = "数据详情",notes = "根据主键加载数据对象")
-	public DataResult<Map<String, Object>> detail(@PathVariable("dsn") String dsn, @RequestBody DataLoad dataLoad) {
-		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dsn,dataLoad);
+	public DataResult<Map<String, Object>> detail(@RequestBody DataLoad dataLoad) {
+		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dataLoad.getDsn(),dataLoad);
 		LogsUtil.set(LogType.Query, "数据存储/数据详情");
-		AssertUtil.service().notNull(dataLoad.getId(), "参数id不能为空");
+		AssertUtil.service().notNull(dataLoad, new String[] {"dsn","id"},"参数%s不能为空");	
 		
-		DataModel dataModel=dataModelCache.load(dsn);
+		DataDefine dataModel=dataModelCache.load(dataLoad.getDsn());
 		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataLoad));
 		
@@ -116,14 +118,16 @@ public class SysDataStorageV1Controller{
 	
 	
 	
-	@PostMapping("/{dsn}/loadByIds")
+	@PostMapping("/loadByIds")
     @ApiOperation(value = "数据列表",notes = "根据主键集合加载数据列表")
-	public DataResult<List<Map<String, Object>>> loadByIds(@PathVariable("dsn") String dsn, @RequestBody DataLoad dataLoad) {
-		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dsn,dataLoad);
+	public DataResult<List<Map<String, Object>>> loadByIds(@RequestBody DataLoad dataLoad) {
+		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dataLoad.getDsn(),dataLoad);
 		LogsUtil.set(LogType.Query, "数据存储/数据列表");
-		AssertUtil.service().notNull(dataLoad.getId(), "参数id不能为空");
+		AssertUtil.service().notNull(dataLoad, new String[] {"dsn","ids"},"参数%s不能为空")
+			.notEmpty(dataLoad.getIds(),"参数ids不能为空");
 		
-		DataModel dataModel=dataModelCache.load(dsn);
+		
+		DataDefine dataModel=dataModelCache.load(dataLoad.getDsn());
 		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataLoad));
 		
@@ -139,18 +143,19 @@ public class SysDataStorageV1Controller{
 	
 	
 	
-	@PostMapping("/{dsn}/delete")
+	@PostMapping("/delete")
     @ApiOperation(value = "删除数据",notes = "根据主键集合删除数据")
-	public DataResult<Integer> delete(@PathVariable("dsn") String dsn, @RequestBody Set<Long> ids){
-		log.debug("进入：数据存储/数据保存接口,dsn:{},ids:{}",dsn,ids);
+	public DataResult<Integer> delete(@RequestBody DataDelete dataDelete){
+		log.debug("进入：数据存储/数据保存接口,dsn:{},dataDelete:{}",dataDelete.getDsn(),dataDelete);
 		LogsUtil.set(LogType.Delete, "数据存储/数据删除");
-		AssertUtil.service().notEmpty(ids, "主键集合不能为空");
+		AssertUtil.service().notNull(dataDelete, new String[] {"dsn","ids"},"参数%s不能为空")
+		.notEmpty(dataDelete.getIds(),"参数ids不能为空");
 		
-		DataModel dataModel=dataModelCache.load(dsn);
+		DataDefine dataModel=dataModelCache.load(dataDelete.getDsn());
 		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
-		LogsUtil.setExtData(JSONUtil.toJsonStr(ids));
+		LogsUtil.setExtData(JSONUtil.toJsonStr(dataDelete.getIds()));
 		
-		int len = dataStorageService.deleteByIds(dataModel, ids);
+		int len = dataStorageService.deleteByIds(dataModel, dataDelete.getIds());
 		
 		LogsUtil.save(len>0);
 		return DataResult.build(len>0);

@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.form.data.model.SysDataDefine;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -111,6 +114,12 @@ public class DataDefineDto extends SysDataDefine{
 		@ApiModelProperty(value="字段标题")
 		private String title;
 		
+		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
+		private String dataType;
+		
+		@ApiModelProperty(value="标准字段，关联的标准字段名称")
+		private String stsField;
+		
 		@ApiModelProperty(value="组件设置")
 		private FieldWidgetDto widget;
 		
@@ -147,6 +156,13 @@ public class DataDefineDto extends SysDataDefine{
 		@ApiModelProperty(value="条件样式")
 		private List<ConditionStyleDto> conditionStyle;
 		
+		@JsonIgnore
+		public String getAlias() {
+			if(!StringUtils.isEmpty(name)) {
+				return StrUtil.toCamelCase(name);
+			}
+			return null;
+		}
 	}
 	
 	

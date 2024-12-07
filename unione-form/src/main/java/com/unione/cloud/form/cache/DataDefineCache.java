@@ -13,21 +13,19 @@ import com.alicp.jetcache.anno.Cached;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.form.data.model.SysDataField;
-import com.unione.cloud.form.data.model.SysDataFieldRelease;
+import com.unione.cloud.form.data.dto.DataDefineDto.DataFieldDto;
 import com.unione.cloud.form.data.model.SysDataDefine;
 import com.unione.cloud.form.data.model.SysDataDefineRelease;
-import com.unione.cloud.form.data.storage.model.DataField;
-import com.unione.cloud.form.data.storage.model.DataFieldConfig;
-import com.unione.cloud.form.data.storage.model.DataModel;
+import com.unione.cloud.form.data.model.SysDataField;
+import com.unione.cloud.form.data.model.SysDataFieldRelease;
+import com.unione.cloud.form.data.storage.model.DataDefine;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DataModelCache {
+public class DataDefineCache {
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -38,7 +36,7 @@ public class DataModelCache {
 	 * @param sn
 	 * @return
 	 */
-	public DataModel load(String sn) {
+	public DataDefine load(String sn) {
 		log.debug("进入：加载数据模型方法,sn:{}",sn);
 		if(sn.endsWith("@dev")) {
 			return load4Dev(sn.substring(0,sn.length()-4));
@@ -53,9 +51,9 @@ public class DataModelCache {
 	 * @return
 	 */
 	@Cached(name="SYS:DATA:MODEL:",key = "#sn",expire = 3600,localExpire = 180,cacheType = CacheType.BOTH,cacheNullValue = true)
-	public DataModel loadRelease(String sn) {
+	public DataDefine loadRelease(String sn) {
 		log.info("进入：从db加载数据模型【发布】方法,sn:{}",sn);
-		DataModel model=null;
+		DataDefine model=null;
 		SysDataDefineRelease tmp = new SysDataDefineRelease();
 		if(sn.indexOf("@")>0) {
 			sn=sn.substring(0, sn.indexOf("@"));
@@ -65,17 +63,17 @@ public class DataModelCache {
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【发布】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
-			model=new DataModel();
+			model=new DataDefine();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
 			sdfr.setModelId(model.getId());
 			List<SysDataFieldRelease> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataField> fields = sdfrs.stream().map(f->{
-				DataField field=new DataField();
+			List<DataFieldDto> fields = sdfrs.stream().map(f->{
+				DataFieldDto field=new DataFieldDto();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
+					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
@@ -94,23 +92,23 @@ public class DataModelCache {
 	 * @return
 	 */
 	@Cached(name="SYS:DATA:MODEL:",key = "#id",expire = 3600,localExpire = 180,cacheType = CacheType.BOTH,cacheNullValue = true)
-	public DataModel load(Long id) {
+	public DataDefine load(Long id) {
 		log.info("进入：从db加载数据模型【发布】方法,id:{}",id);
-		DataModel model=null;
+		DataDefine model=null;
 		SysDataDefineRelease tmp = dataBaseDao.findById(SysDataDefineRelease.class, id);
 		log.info("退出：从db加载数据模型【发布】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
-			model=new DataModel();
+			model=new DataDefine();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
 			sdfr.setModelId(model.getId());
 			List<SysDataFieldRelease> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataField> fields = sdfrs.stream().map(f->{
-				DataField field=new DataField();
+			List<DataFieldDto> fields = sdfrs.stream().map(f->{
+				DataFieldDto field=new DataFieldDto();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
+//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
@@ -143,25 +141,25 @@ public class DataModelCache {
 	 * @param sn
 	 * @return
 	 */
-	public DataModel load4Dev(String sn) {
+	public DataDefine load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
-		DataModel model=null;
+		DataDefine model=null;
 		SysDataDefine tmp = new SysDataDefine();
 		tmp.setSn(sn);
 		tmp = dataBaseDao.findOne(tmp);
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
-			model=new DataModel();
+			model=new DataDefine();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataField sdfr=new SysDataField();
 			sdfr.setModelId(model.getId());
 			List<SysDataField> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataField> fields = sdfrs.stream().map(f->{
-				DataField field=new DataField();
+			List<DataFieldDto> fields = sdfrs.stream().map(f->{
+				DataFieldDto field=new DataFieldDto();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
+//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
@@ -178,23 +176,23 @@ public class DataModelCache {
 	 * @param id
 	 * @return
 	 */
-	public DataModel load4Dev(Long id) {
+	public DataDefine load4Dev(Long id) {
 		log.info("进入：从db加载数据模型【dev】方法,id:{}",id);
-		DataModel model=null;
+		DataDefine model=null;
 		SysDataDefine tmp = dataBaseDao.findById(SysDataDefine.class, id);
 		log.info("退出：从db加载数据模型【dev】方法,id:{},data model:{}",id,tmp);
 		if(tmp!=null) {
-			model=new DataModel();
+			model=new DataDefine();
 			BeanUtil.copyProperties(tmp, model);
 			
 			SysDataField sdfr=new SysDataField();
 			sdfr.setModelId(model.getId());
 			List<SysDataField> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataField> fields = sdfrs.stream().map(f->{
-				DataField field=new DataField();
+			List<DataFieldDto> fields = sdfrs.stream().map(f->{
+				DataFieldDto field=new DataFieldDto();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
+					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());

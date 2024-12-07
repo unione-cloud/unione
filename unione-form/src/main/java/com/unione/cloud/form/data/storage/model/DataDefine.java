@@ -4,17 +4,16 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.unione.cloud.core.model.BaseField;
+import com.unione.cloud.form.data.dto.DataDefineDto.DataFieldDto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel("数据模型DTO")
-public class DataModel implements Serializable{
+@ApiModel("数据定义对象")
+public class DataDefine implements Serializable{
 	/**
 	 * 
 	 */
@@ -41,8 +40,9 @@ public class DataModel implements Serializable{
 	private String sqlUpdate;
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
 	private String sqlDelete;
+	
 	@ApiModelProperty(value="字段集合")
-	private List<DataField> fields;
+	private List<DataFieldDto> fields;
 	
 	
 	/**
@@ -50,9 +50,9 @@ public class DataModel implements Serializable{
 	 * @param field
 	 * @return
 	 */
-	public DataField getStsField(BaseField field) {
+	public DataFieldDto getStsField(BaseField field) {
 		if(this.fields!=null) {
-			Optional<DataField> optional = this.fields.stream()
+			Optional<DataFieldDto> optional = this.fields.stream()
 				.filter(f->field.getColumn().equals(f.getName()) || field.getName().equals(f.getStsField()))
 				.findFirst();
 			if(optional.isPresent()) {

@@ -19,6 +19,12 @@ public class DataFind extends Params<Map<String,Object>> {
 	 * 
 	 */
 	private static final long serialVersionUID = 669876047104921384L;
+	
+	@ApiModelProperty(value="数据定义编码",notes = "")
+	private String dsn;
+	
+	@ApiModelProperty(value="数据定义版本号",notes = "")
+	private Integer vers;
 
 	@ApiModelProperty(value="数据字段集合",notes = "查询指定字段信息，如果为空则是所有字段")
 	private List<String> fields=new ArrayList<>();
