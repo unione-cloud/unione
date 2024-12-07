@@ -108,6 +108,9 @@ public class DataDefineDto extends SysDataDefine{
 		 */
 		private static final long serialVersionUID = -2468858077101285404L;
 
+		@ApiModelProperty(value="字段主键")
+		private Long id;
+		
 		@ApiModelProperty(value="字段名称")
 		private String name;
 		

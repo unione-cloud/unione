@@ -763,6 +763,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	private String buildFkeyQuerySql(DataFieldDto fkeyField) {
+		
 		ForeignKeyDto fkey = fkeyField.getFkey();
 		if(fkey!=null && fkey.isEnable() && !StringUtils.isEmpty(fkey.getFieldName()) && 
 				!StringUtils.isEmpty(fkey.getLabelName()) && !StringUtils.isEmpty(fkey.getDsn())) {

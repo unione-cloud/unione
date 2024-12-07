@@ -79,7 +79,7 @@ public class StorageBaseService {
      * @param dsId
      * @return
      */
-    private SQLManager getSQLManager(Long dsId){
+    public SQLManager getSQLManager(Long dsId){
         log.debug("进入->根据数据存储，创建SQLManager，dsId:{}",dsId);
         AssertUtil.service().notNull(dsId, "参数dsId不能为空");
 
