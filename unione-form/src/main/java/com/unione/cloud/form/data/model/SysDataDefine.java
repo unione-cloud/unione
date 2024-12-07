@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -90,21 +92,25 @@ public class SysDataDefine extends Pojo {
 	/**
 	* 数据查询脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据查询脚本",notes="长度为：65535")
 	private String sqlFind;
 	/**
 	* 数据新增脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据新增脚本",notes="长度为：65535")
 	private String sqlInsert;
 	/**
 	* 数据更新脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据更新脚本",notes="长度为：65535")
 	private String sqlUpdate;
 	/**
 	* 数据删除脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
 	private String sqlDelete;
 	/**
@@ -116,6 +122,7 @@ public class SysDataDefine extends Pojo {
 	* 数据配置，json存储,{}
 	*/
 	@JsonIgnore
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据配置，json存储,{}",notes="长度为：65535")
 	private String configs;
 	/**
