@@ -22,6 +22,7 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.form.page.dto.PageDefineDto;
 import com.unione.cloud.form.page.dto.PageDefineDto.FormPageDefineDto;
 import com.unione.cloud.form.page.dto.PageDefineDto.ListPageDefineDto;
 import com.unione.cloud.form.page.model.SysPageDefine;
@@ -77,23 +78,12 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		return results;
 	}
 
-	
-	@PostMapping(value="/form/save")
-	@ApiOperation(value="保存表单页面")
-	public Results<SysPageDefine> saveFormPage(@Validated(Validator.save.class) @RequestBody FormPageDefineDto entity) {
-		entity.setComponent("unione-form-page");
+	@PostMapping(value="/save")
+	@ApiOperation(value="保存页面定义")
+	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody PageDefineDto entity) {
 		return pageDefineService.saveDefine(entity);
 	}
 	
-	
-	@PostMapping(value="/list/save")
-	@ApiOperation(value="保存列表页面")
-	public Results<SysPageDefine> saveListPage(@Validated(Validator.save.class) @RequestBody ListPageDefineDto entity) {
-		entity.setComponent("unione-list-page");
-		return pageDefineService.saveDefine(entity);
-	}
-
-
 
 	@PostMapping(value="/load/{sn}")
 	@ApiOperation(value="加载页面信息")

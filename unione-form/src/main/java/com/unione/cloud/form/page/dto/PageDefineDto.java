@@ -14,10 +14,12 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.form.data.dto.DataDefineDto.ConditionStyleDto;
 import com.unione.cloud.form.data.dto.DataDefineDto.DataConvertDto;
@@ -46,6 +48,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 
 	@JsonProperty("configs")
 	@ApiModelProperty("页面配置对象")
+	@JsonDeserialize(using = PageConfigDeserializer.class)
 	private T configDto;
 	
 	
@@ -76,6 +79,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = 7542938311504351628L;
 
+		@ApiModelProperty("页面组件名称")
+		private String component;
 		
 		@ApiModelProperty("页面组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
@@ -91,6 +96,26 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		@ApiModelProperty("页面设置对象")
 		private PageSettingDto setting;
 	}
+	
+	
+	@Slf4j
+	public static class PageConfigDeserializer extends JsonDeserializer<Object>{
+		@Override
+		public Object deserialize(JsonParser parser, DeserializationContext ctx) throws IOException, JacksonException {
+			JsonNode node = parser.getCodec().readTree(parser);
+			String component=node.get("component").asText();	
+			switch (component) {
+			case "unione-list-page":
+				return parser.getCodec().treeToValue(node, ListPageConfigDto.class);
+			case "unione-form-page":
+				return parser.getCodec().treeToValue(node, FormPageConfigDto.class);
+			default:
+				log.error("页面组件,component:"+component+",未注册", parser.currentValue());
+				throw new ServiceException("页面组件,component:"+component+",未注册");
+			}
+		}
+	}
+	
 	
 	@Data
 	@ApiModel("页面设置DTO")
@@ -218,6 +243,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private CssDto css;
 	
 		@ApiModelProperty(value="子组件集合")
+		@JsonDeserialize(using = WidgetDeserializer.class)
 		public List<WidgetDto> getWidgets(){
 			return null;
 		}
@@ -252,12 +278,16 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		@Override
 		public Object deserialize(JsonParser parser, DeserializationContext ctx) throws IOException, JacksonException {
 			JsonNode node = parser.getCodec().readTree(parser);
+			
 			if(node.isArray()) {
 				List<Object> list=new ArrayList<>();
-				JsonNode item = null;
-				while((item = node.elements().next())!=null) {
-					list.add(deserialize(parser,item));
-				}
+				node.forEach(item->{
+					try {
+						list.add(deserialize(parser,item));
+					} catch (JsonProcessingException e) {
+						throw new ServiceException(e);
+					}
+				});;
 				return list;
 			}else {
 				return deserialize(parser,node);
@@ -281,6 +311,7 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private String dsn;
 		
 		@ApiModelProperty("表单项/控件集合")
+		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<WidgetDto> widgets;
 
 	}

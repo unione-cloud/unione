@@ -70,7 +70,8 @@ security:
    filter:
       includes: /**
       executions: /portal/,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/api/security/secret/encrypt,/portal/api/security/secret/pubkey,/portal/swagger-ui.html/**,/portal/webjars/**,/portal/swagger-resources/**,/portal/v2/api-docs,/portal/doc.html/**,/portal/druid/**
-
+   tcm:
+      autoEnable: true
 
 
 
