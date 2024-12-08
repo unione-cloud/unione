@@ -349,7 +349,7 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="是否查询")
 		private boolean enable;
 		
-		@ApiModelProperty(value="查询类型",notes = "字典：DATAQUERYTYPE eq：精确查询，like：模糊查询，likeL:左模糊，likeR：右模糊,range：范围查询,advance：高级查询")
+		@ApiModelProperty(value="查询类型",notes = "字典：DATAQUERYTYPE EQ：精确查询，LIKE：模糊查询，LLIKE:左模糊，RLIKE：右模糊,RANGE：范围查询,ADVANCE：高级查询")
 		private String type;
 		
 		@ApiModelProperty(value="默认查询",notes = "默认查询：即加入关键字查询")
@@ -491,5 +491,32 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value = "是否可用")
 		private boolean enable;
 	}
+	
+	
+	
+	public static enum DataDefineCategory{
+		SQL("sql"),NOSQL("nosql"),API("api");
+		
+		private String value;
+		private DataDefineCategory(String value) {
+			this.value=value;
+		}
+		public String value() {
+			return value;
+		}
+	}
+	
+	public static enum DataQueryType{
+		EQ("精确查询"),LIKE("模糊查询"),LLIKE("左模糊"),RLIKE("右模糊"),RANGE("范围查询"),ADVANCE("高级查询");
+		private String value;
+		private DataQueryType(String value) {
+			this.value=value;
+		}
+		public String value() {
+			return value;
+		}
+	}
+	
+	
 	
 }

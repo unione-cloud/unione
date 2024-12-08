@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,14 +22,13 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.service.DataDefineService;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,8 +52,8 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	@Autowired
 	private SessionService sessionService;
 	
-	@Value("${form.page.default.appid:1000}")
-	private Long DEFAULT_APP_ID;
+	@Autowired
+	private DataDefineService dataDefineService;	
 	
 	
 	@Override
@@ -81,49 +78,11 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	@ApiOperation(value="保存数据定义")
 	public Results<DataDefine> save(@Validated(Validator.save.class) @RequestBody DataDefine dataDefine) {
 		log.debug("进入:新增数据定义管理信息.dataDefine:{}",dataDefine);
-		LogsUtil.set(LogType.Insert, "新增数据定义管理");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
 				UserFormRoles.FORM_CONFIG,
 				UserFormRoles.FORM_DEV), "当前帐号无权限");
-		if("new_".equals(dataDefine.getSn())) {
-			dataDefine.setSn(null);
-		}
 		
-		SysDataDefine tmp = null;
-		if(!StringUtils.isEmpty(dataDefine.getSn())) {
-			SysDataDefine param=SysDataDefine.builder().sn(dataDefine.getSn()).build();
-			param.setTenantId(sessionService.getTenantId());
-			tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-		}
-		
-		if(tmp!=null) {
-			dataDefine.setId(tmp.getId());
-			// 更新
-			String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
-			SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
-			int len = dataBaseDao.updateById(sqlBuilder);
-			AssertUtil.service().isTrue(len>0, "数据定义保存失败");
-		}else {
-			// 新增
-			// 参数处理
-			if(StringUtils.isEmpty(dataDefine.getSn())) {
-				dataDefine.setSn(RandomUtil.randomString(20));
-			}
-			BeanUtils.setDefaultValue(dataDefine, "appId", DEFAULT_APP_ID);
-			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
-			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
-			BeanUtils.setDefaultValue(dataDefine, "status",1);
-			BeanUtils.setDefaultValue(dataDefine, "ordered",0);
-			BeanUtils.setDefaultValue(dataDefine, "configs","{}");
-			dataDefine.setVers(1);
-			
-			int len = dataBaseDao.insert(dataDefine);
-			AssertUtil.service().isTrue(len>0, "数据定义保存失败");
-		}
-		
-		LogsUtil.success(dataDefine.getId());
-		log.debug("退出:新增数据定义管理信息.entity:{},result:true",dataDefine);
-		return Results.success(dataDefine);
+		return dataDefineService.save(dataDefine);
 	}
 
 

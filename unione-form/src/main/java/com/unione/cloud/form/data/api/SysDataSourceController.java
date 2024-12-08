@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataSource 数据源管理：系统管理：数据源",description="SysDataSource")
+@Api(tags = "系统管理：数据源管理",description="SysDataSource")
 @RequestMapping("/api/data/source")	 //TreeFeignApi
 public class SysDataSourceController implements PojoFeignApi<SysDataSource>{
 	

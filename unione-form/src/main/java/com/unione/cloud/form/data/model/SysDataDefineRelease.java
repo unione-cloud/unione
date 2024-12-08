@@ -13,6 +13,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -89,23 +91,27 @@ public class SysDataDefineRelease extends Pojo {
 	/**
 	* 数据查询脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据查询脚本",notes="长度为：65535")
-	private String sqlFind;
+	private String findScript;
 	/**
 	* 数据新增脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据新增脚本",notes="长度为：65535")
-	private String sqlInsert;
+	private String insertScript;
 	/**
 	* 数据更新脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据更新脚本",notes="长度为：65535")
-	private String sqlUpdate;
+	private String updateScript;
 	/**
 	* 数据删除脚本
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
-	private String sqlDelete;
+	private String deleteScript;
 	/**
 	* 同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否
 	*/

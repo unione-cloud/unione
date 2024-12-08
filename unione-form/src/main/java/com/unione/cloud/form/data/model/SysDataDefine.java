@@ -94,25 +94,25 @@ public class SysDataDefine extends Pojo {
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据查询脚本",notes="长度为：65535")
-	private String sqlFind;
+	private String findScript;
 	/**
 	* 数据新增脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据新增脚本",notes="长度为：65535")
-	private String sqlInsert;
+	private String insertScript;
 	/**
 	* 数据更新脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据更新脚本",notes="长度为：65535")
-	private String sqlUpdate;
+	private String updateScript;
 	/**
 	* 数据删除脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
-	private String sqlDelete;
+	private String deleteScript;
 	/**
 	* 同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否
 	*/

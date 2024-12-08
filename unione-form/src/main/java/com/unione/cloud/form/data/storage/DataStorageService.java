@@ -71,7 +71,7 @@ public class DataStorageService {
 		Map<String, Object> params=new HashMap<>();
 		params.put("data", data);
 		processInsertDefaultData(dataDefine,data);
-		return storageBaseService.insert(dsId, dataDefine.getSqlInsert(), params);
+		return storageBaseService.insert(dsId, dataDefine.getInsertScript(), params);
 	}
 	
 	/**
@@ -207,7 +207,7 @@ public class DataStorageService {
 		paramObj.put("data", data);
 		paramObj.put("params", params);
 		paramObj.put("fields", fieldMap);
-		return storageBaseService.update(dsId, dataDefine.getSqlUpdate(), paramObj);
+		return storageBaseService.update(dsId, dataDefine.getUpdateScript(), paramObj);
 	}
 	
 	
@@ -251,7 +251,7 @@ public class DataStorageService {
 			}
 		}
 		
-		return storageBaseService.update(dsId, dataDefine.getSqlUpdate(), paramObj);
+		return storageBaseService.update(dsId, dataDefine.getUpdateScript(), paramObj);
 	}
 	
 	
@@ -304,7 +304,7 @@ public class DataStorageService {
 		
 		processUpdateDeleteDefaultData(dataDefine,data);
 		
-		return storageBaseService.delete(dsId, dataDefine.getSqlDelete(), params);
+		return storageBaseService.delete(dsId, dataDefine.getDeleteScript(), params);
 	}
 	
 	
@@ -345,7 +345,7 @@ public class DataStorageService {
 		
 		processUpdateDeleteDefaultData(dataDefine,data);
 		
-		return storageBaseService.delete(dsId, delFlagField!=null?dataDefine.getSqlUpdate():dataDefine.getSqlDelete(), paramObj);
+		return storageBaseService.delete(dsId, delFlagField!=null?dataDefine.getUpdateScript():dataDefine.getDeleteScript(), paramObj);
 	}
 	
 	
@@ -368,7 +368,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	public Map<String, Object> findOne(Long dsId,DataDefine dataDefine, Map<String, Object> params) {
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
 		
@@ -394,7 +394,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	public Map<String, Object> findById(Long dsId,DataDefine dataDefine,DataLoad load) {
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
@@ -431,7 +431,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	public List<Map<String, Object>> findByIds(Long dsId,DataDefine dataDefine,DataLoad load) {
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
@@ -469,7 +469,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	public Map<String, Object> findById(Long dsId,DataDefine dataDefine,Long id) {
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		
 		Map<String, Object> paramObj=new HashMap<>();
@@ -505,7 +505,7 @@ public class DataStorageService {
 		AssertUtil.service().notEmpty(ids, "主键不能为空");
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		Map<String, Object> params=new HashMap<>();
 		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"), ids);
@@ -535,7 +535,7 @@ public class DataStorageService {
 	 * @return
 	 */
 	public List<Map<String, Object>> findList(Long dsId, DataDefine dataDefine, Map<String, Object> params) {
-		String sql=dataDefine.getSqlFind().replace("#{page('*')}", "*");
+		String sql=dataDefine.getFindScript().replace("#{page('*')}", "*");
 		Map<String, Object> paramObj=new HashMap<>();
 		paramObj.put("params", params);
 		
@@ -572,7 +572,7 @@ public class DataStorageService {
 		
 		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, page, size,dataDefine.getFields());
+		return storageBaseService.findListPage(dsId, dataDefine.getFindScript(), paramObj, page, size,dataDefine.getFields());
 	}
 	
 	
@@ -615,7 +615,7 @@ public class DataStorageService {
 					.collect(Collectors.toList());
 		}
 		
-		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, find.getPage(),find.getPageSize(), fields);
+		return storageBaseService.findListPage(dsId, dataDefine.getFindScript(), paramObj, find.getPage(),find.getPageSize(), fields);
 	}
 	
 	
