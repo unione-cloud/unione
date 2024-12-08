@@ -14,22 +14,20 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
-import com.unione.cloud.form.data.dto.DataDefineDto.ConditionStyleDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataConvertDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataParamDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataQueryDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataRuleDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataSortDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.FieldWidgetDto;
-import com.unione.cloud.form.data.dto.DataDefineDto.ForeignKeyDto;
-import com.unione.cloud.form.page.dto.PageDefineDto.PageConfigDto;
+import com.unione.cloud.form.data.storage.model.DataDefine.ConditionStyle;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataConvert;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataParam;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataQuery;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataRule;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataSort;
+import com.unione.cloud.form.data.storage.model.DataDefine.FieldWidget;
+import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
+import com.unione.cloud.form.page.dto.PageDefine.PageConfig;
 import com.unione.cloud.form.page.model.SysPageDefine;
 
 import cn.hutool.json.JSONUtil;
@@ -39,8 +37,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
-@ApiModel("页面定义Dto")
-public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
+@ApiModel("页面定义")
+public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	/**
 	 * 
 	 */
@@ -49,22 +47,22 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	@JsonProperty("configs")
 	@ApiModelProperty("页面配置对象")
 	@JsonDeserialize(using = PageConfigDeserializer.class)
-	private T configDto;
+	private T config;
 	
 	
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public PageDefineDto<T> setConfigs(String configs) {
+	public PageDefine<T> setConfigs(String configs) {
 		super.setConfigs(configs);
 		Type[] types = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		configDto=JSONUtil.toBean(configs, (Class<T>)types[0]);
+		config=JSONUtil.toBean(configs, (Class<T>)types[0]);
 		return this;
 	}
 	
 	@JsonIgnore
 	public String getConfigs() {
-		if(configDto!=null) {
-			super.setConfigs(JSONUtil.toJsonStr(configDto));
+		if(config!=null) {
+			super.setConfigs(JSONUtil.toJsonStr(config));
 		}
 		return super.getConfigs();
 	}
@@ -72,8 +70,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("页面配置DTO")
-	public static class PageConfigDto implements Serializable{
+	@ApiModel("页面配置")
+	public static class PageConfig implements Serializable{
 		/**
 		 * 
 		 */
@@ -84,17 +82,17 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		
 		@ApiModelProperty("页面组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
-		private List<WidgetDto> widgets;
+		private List<Widget> widgets;
 		
 		@ApiModelProperty("数据模型sn集合")
 		private List<String> dsnList;
 		
 		@JsonProperty(access = Access.READ_ONLY)
 		@ApiModelProperty(value="页面权限",notes = "页面组件权限,key:组件id,value:权限定义")
-		private Map<String, WidgetPermisDto> permis;
+		private Map<String, WidgetPermis> permis;
 		
 		@ApiModelProperty("页面设置对象")
-		private PageSettingDto setting;
+		private PageSetting setting;
 	}
 	
 	
@@ -106,9 +104,9 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 			String component=node.get("component").asText();	
 			switch (component) {
 			case "unione-list-page":
-				return parser.getCodec().treeToValue(node, ListPageConfigDto.class);
+				return parser.getCodec().treeToValue(node, ListPageConfig.class);
 			case "unione-form-page":
-				return parser.getCodec().treeToValue(node, FormPageConfigDto.class);
+				return parser.getCodec().treeToValue(node, FormPageConfig.class);
 			default:
 				log.error("页面组件,component:"+component+",未注册", parser.currentValue());
 				throw new ServiceException("页面组件,component:"+component+",未注册");
@@ -118,8 +116,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("页面设置DTO")
-	public static class PageSettingDto implements Serializable{
+	@ApiModel("页面设置")
+	public static class PageSetting implements Serializable{
 		/**
 		 * 
 		 */
@@ -138,8 +136,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Form页面定义Dto")
-	public static class FormPageDefineDto extends PageDefineDto<FormPageConfigDto>{
+	@ApiModel("Form页面定义")
+	public static class FormPageDefine extends PageDefine<FormPageConfig>{
 		/**
 		 * 
 		 */
@@ -149,48 +147,48 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Form页面配置Dto")
-	public static class FormPageConfigDto extends PageConfigDto{
+	@ApiModel("Form页面配置")
+	public static class FormPageConfig extends PageConfig{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 8234983161647019935L;
 		
 		@ApiModelProperty(value="按钮列表",notes = "页面按钮列表")
-		private List<ButtonDto> btns;
+		private List<Button> btns;
 	
 		@ApiModelProperty("表单事件")
-		private FormEventDto event;
+		private FormEvent event;
 		
 	}
 	
 	
 	@Data
-	@ApiModel("表单事件Dto")
-	public static class FormEventDto implements Serializable{
+	@ApiModel("表单事件")
+	public static class FormEvent implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8532953889812739800L;
 
 		@ApiModelProperty(value="表单验证事件",notes = "自定义表单验证逻辑")
-		private EventDefineDto onValidate;
+		private EventDefine onValidate;
 		
 		@ApiModelProperty(value="表单显示事件",notes="动态显示事件，根据逻辑动态显示表单")
-		private EventDefineDto visible;
+		private EventDefine visible;
 		
 		@ApiModelProperty(value="表单保存前置事件",notes="提交表单数据前触发的事件")
-		private EventDefineDto onPrepSave;
+		private EventDefine onPrepSave;
 		
 		@ApiModelProperty(value="表单保存后置事件",notes="表单保存成功后触发的事件")
-		private EventDefineDto onPostSaved;
+		private EventDefine onPostSaved;
 		
 	}
 	
 	
 	@Data
-	@ApiModel("list页面定义Dto")
-	public static class ListPageDefineDto extends PageDefineDto<ListPageConfigDto>{
+	@ApiModel("list页面定义")
+	public static class ListPageDefine extends PageDefine<ListPageConfig>{
 		/**
 		 * 
 		 */
@@ -202,8 +200,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Table页面配置Dto")
-	public static class ListPageConfigDto extends PageConfigDto{
+	@ApiModel("Table页面配置")
+	public static class ListPageConfig extends PageConfig{
 		/**
 		 * 
 		 */
@@ -220,8 +218,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("组件定义Dto")
-	public static class WidgetDto implements Serializable{
+	@ApiModel("组件定义")
+	public static class Widget implements Serializable{
 		/**
 		 * 
 		 */
@@ -240,11 +238,11 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private String title;
 		
 		@ApiModelProperty("样式设置")
-		private CssDto css;
+		private Css css;
 	
 		@ApiModelProperty(value="子组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
-		public List<WidgetDto> getWidgets(){
+		public List<Widget> getWidgets(){
 			return null;
 		}
 	}
@@ -260,15 +258,15 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 			String widget = node.get("widget").asText();
 			switch (widget) {
 			case "unione-button":
-				return parser.getCodec().treeToValue(node, ButtonDto.class);
+				return parser.getCodec().treeToValue(node, Button.class);
 			case "unione-form-item":
-				return parser.getCodec().treeToValue(node, FormItemDto.class);
+				return parser.getCodec().treeToValue(node, FormItem.class);
 			case "unione-form":
-				return parser.getCodec().treeToValue(node, FormWidgetDto.class);
+				return parser.getCodec().treeToValue(node, FormWidget.class);
 			case "unione-query":
-				return parser.getCodec().treeToValue(node, QueryWidgetDto.class);
+				return parser.getCodec().treeToValue(node, QueryWidget.class);
 			case "unione-table":
-				return parser.getCodec().treeToValue(node, TableWidgetDto.class);
+				return parser.getCodec().treeToValue(node, TableWidget.class);
 			default:
 				log.error("组件名称,widget:"+widget+",未注册", parser.currentValue());
 				throw new ServiceException("组件名称,widget:"+widget+",未注册");
@@ -297,8 +295,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单组件配置Dto")
-	public static class FormWidgetDto extends WidgetDto {
+	@ApiModel("表单组件配置")
+	public static class FormWidget extends Widget {
 		/**
 		 * 
 		 */
@@ -312,14 +310,14 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		
 		@ApiModelProperty("表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
-		private List<WidgetDto> widgets;
+		private List<Widget> widgets;
 
 	}
 	
 	
 	@Data
-	@ApiModel("表单组件配置DTo")
-	public static class FormWidgetPropsDto implements Serializable{
+	@ApiModel("表单组件配置")
+	public static class FormWidgetProps implements Serializable{
 		/**
 		 * 
 		 */
@@ -335,8 +333,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("查询组件配置Dto")
-	public static class QueryWidgetDto extends WidgetDto {
+	@ApiModel("查询组件配置")
+	public static class QueryWidget extends Widget {
 		/**
 		 * 
 		 */
@@ -353,8 +351,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 
 	@Data
-	@ApiModel("查询组件配置DTo")
-	public static class QueryWidgetPropsDto implements Serializable{
+	@ApiModel("查询组件配置")
+	public static class QueryWidgetProps implements Serializable{
 		/**
 		 * 
 		 */
@@ -366,8 +364,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格组件配置Dto")
-	public static class TableWidgetDto extends WidgetDto {
+	@ApiModel("表格组件配置")
+	public static class TableWidget extends Widget {
 		/**
 		 * 
 		 */
@@ -378,31 +376,31 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private String dsn;
 		
 		@ApiModelProperty(value="表格列模型")
-		private List<TableColumnDto> columns;
+		private List<TableColumn> columns;
 		
 		@ApiModelProperty(value="分页配置")
-		private TablePaginationDto pagination;
+		private TablePagination pagination;
 		
 		@ApiModelProperty(value="是否开启复选框")
 		private boolean selection;
 		
 		@ApiModelProperty(value="左侧按钮列表",notes = "列表左侧按钮列表")
-		private List<ButtonDto> leftBtns;
+		private List<Button> leftBtns;
 		
 		@ApiModelProperty(value="右侧按钮列表",notes = "右表左侧按钮列表")
-		private List<ButtonDto> rightBtns;
+		private List<Button> rightBtns;
 		
 		@ApiModelProperty("行号设置")
-		private TableRownumDto rownum;
+		private TableRownum rownum;
 		
 		@ApiModelProperty("操作设置")
-		private TableOperationDto operation;
+		private TableOperation operation;
 
 	}
 	
 	@Data
-	@ApiModel("表格分页配置DTO")
-	public static class TableColumnDto implements Serializable{
+	@ApiModel("表格分页配置")
+	public static class TableColumn implements Serializable{
 		/**
 		 * 
 		 */
@@ -421,22 +419,22 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private String dataFormat;
 		
 		@ApiModelProperty(value="组件设置")
-		private FieldWidgetDto widget;
+		private FieldWidget widget;
 		
 		@ApiModelProperty(value="外键设置")
-		private ForeignKeyDto fkey;
+		private ForeignKey fkey;
 		
 		@ApiModelProperty("字段排序")
-		private DataSortDto sort;
+		private DataSort sort;
 		
 		@ApiModelProperty("字段搜索")
-		private DataQueryDto query;
+		private DataQuery query;
 
 		@ApiModelProperty(value="数据转换")
-		private DataConvertDto convert;
+		private DataConvert convert;
 		
 		@ApiModelProperty(value="条件样式")
-		private List<ConditionStyleDto> conditionStyle;
+		private List<ConditionStyle> conditionStyle;
 		
 		@ApiModelProperty(value="固定方式",notes = "默认：left,可选：'left' | 'right'")
 		private String fixed;
@@ -456,8 +454,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("表格分页配置DTO")
-	public static class TablePaginationDto implements Serializable{
+	@ApiModel("表格分页配置")
+	public static class TablePagination implements Serializable{
 		/**
 		 * 
 		 */
@@ -487,8 +485,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格行号配置DTO")
-	public static class TableRownumDto implements Serializable{
+	@ApiModel("表格行号配置")
+	public static class TableRownum implements Serializable{
 		/**
 		 * 
 		 */
@@ -512,8 +510,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格行号配置DTO")
-	public static class TableOperationDto implements Serializable{
+	@ApiModel("表格行号配置")
+	public static class TableOperation implements Serializable{
 		/**
 		 * 
 		 */
@@ -541,15 +539,15 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private boolean visible=true;
 		
 		@ApiModelProperty("操作按钮列表")
-		private List<ButtonDto> btns;
+		private List<Button> btns;
 		
 		@ApiModelProperty("更多设置")
-		private MoreOperationDto more;
+		private MoreOperation more;
 	}
 	
 	@Data
-	@ApiModel("更多操作配置DTO")
-	public static class MoreOperationDto implements Serializable{
+	@ApiModel("更多操作配置")
+	public static class MoreOperation implements Serializable{
 		/**
 		 * 
 		 */
@@ -571,8 +569,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格组件属性DTO")
-	public static class TableWidgetPropsDto implements Serializable{
+	@ApiModel("表格组件属性")
+	public static class TableWidgetProps implements Serializable{
 		/**
 		 * 
 		 */
@@ -583,8 +581,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单项/控件Dto")
-	public static class FormItemDto extends WidgetDto {
+	@ApiModel("表单项/控件")
+	public static class FormItem extends Widget {
 		/**
 		 * 
 		 */
@@ -618,49 +616,49 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private List<String> readonly;
 		
 		@ApiModelProperty(value="表单项事件")
-		private FormItemEventDto event;
+		private FormItemEvent event;
 		
 		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
-		private FormRuleDto rules;
+		private FormRule rules;
 		
 		@ApiModelProperty(value="外键设置")
-		private ForeignKeyDto fkey;
+		private ForeignKey fkey;
 		
 		@ApiModelProperty(value="数据转换")
-		private DataConvertDto convert;
+		private DataConvert convert;
 		
 		@ApiModelProperty(value="条件样式")
-		private List<ConditionStyleDto> conditionStyle;
+		private List<ConditionStyle> conditionStyle;
 		
 	}
 	
 	
 	@Data
-	@ApiModel("表单项事件Dto")
-	public static class FormItemEventDto implements Serializable {
+	@ApiModel("表单项事件")
+	public static class FormItemEvent implements Serializable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 6780968062940236797L;
 
 		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
-		private EventDefineDto click;
+		private EventDefine click;
 		
 		@ApiModelProperty(value="标题事件",notes="动态标题事件，根据逻辑动态显示按钮标题")
-		private EventDefineDto title;
+		private EventDefine title;
 		
 		@ApiModelProperty(value="禁用事件",notes="动态禁用事件，根据逻辑动态禁用按钮")
-		private EventDefineDto disable;
+		private EventDefine disable;
 		
 		@ApiModelProperty(value="显示事件",notes="动态显示事件，根据逻辑动态显示按钮")
-		private EventDefineDto visible;
+		private EventDefine visible;
 		
 	}
 	
 	
 	@Data
-	@ApiModel("规则Dto")
-	public static class FormRuleDto extends DataRuleDto{
+	@ApiModel("规则")
+	public static class FormRule extends DataRule{
 		/**
 		 * 
 		 */
@@ -674,8 +672,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单项配置  DTO")
-	public static class FormItemPropsDto implements Serializable{
+	@ApiModel("表单项配置  ")
+	public static class FormItemProps implements Serializable{
 		/**
 		 * 
 		 */
@@ -692,8 +690,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("按钮组件DTO")
-	public static class ButtonDto extends WidgetDto {
+	@ApiModel("按钮组件")
+	public static class Button extends Widget {
 		/**
 		 * 
 		 */
@@ -709,23 +707,23 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private Boolean disabled;
 		
 		@ApiModelProperty("响应设置")
-		private ButtonActionDto action;
+		private ButtonAction action;
 		
 		@ApiModelProperty("按钮事件")
-		private ButtonEventDto event;
+		private ButtonEvent event;
 		
 		@ApiModelProperty(value="显示顺序",notes = "按钮显示顺序")
 		private Integer index;
 		
 		@ApiModelProperty("按钮属性")
-		private ButtonPropsDto props;
+		private ButtonProps props;
 	}
 	
 	
 	
 	@Data
-	@ApiModel("按钮响应设置DTO")
-	public static class ButtonActionDto implements Serializable{
+	@ApiModel("按钮响应设置")
+	public static class ButtonAction implements Serializable{
 		/**
 		 * 
 		 */
@@ -762,35 +760,35 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		private String height;
 		
 		@ApiModelProperty(value = "响应参数集合",notes = "")
-		private List<DataParamDto> params;
+		private List<DataParam> params;
 		
 	}
 	
 	@Data
-	@ApiModel("按钮事件Dto")
-	public static class ButtonEventDto implements Serializable{
+	@ApiModel("按钮事件")
+	public static class ButtonEvent implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8084738054778023214L;
 
 		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
-		private EventDefineDto click;
+		private EventDefine click;
 		
 		@ApiModelProperty(value="标题事件",notes="动态标题事件，根据逻辑动态显示按钮标题")
-		private EventDefineDto title;
+		private EventDefine title;
 		
 		@ApiModelProperty(value="禁用事件",notes="动态禁用事件，根据逻辑动态禁用按钮")
-		private EventDefineDto disable;
+		private EventDefine disable;
 		
 		@ApiModelProperty(value="显示事件",notes="动态显示事件，根据逻辑动态显示按钮")
-		private EventDefineDto visible;
+		private EventDefine visible;
 		
 	}
 	
 	@Data
-	@ApiModel("事件定义Dto")
-	public static class EventDefineDto implements Serializable {
+	@ApiModel("事件定义")
+	public static class EventDefine implements Serializable {
 		/**
 		 * 
 		 */
@@ -808,8 +806,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("按钮属性DTO")
-	public static class ButtonPropsDto implements Serializable{
+	@ApiModel("按钮属性")
+	public static class ButtonProps implements Serializable{
 		/**
 		 * 
 		 */
@@ -848,8 +846,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("样式设置DTo")
-	public static class CssDto implements Serializable{
+	@ApiModel("样式设置")
+	public static class Css implements Serializable{
 		/**
 		 * 
 		 */
@@ -866,8 +864,8 @@ public class PageDefineDto<T extends PageConfigDto> extends SysPageDefine{
 		
 	}
 	
-	@ApiModel("组件权限定义DTO")
-	public static enum WidgetPermisDto{
+	@ApiModel("组件权限定义")
+	public static enum WidgetPermis{
 		WRITE,READ,NONE
 	}
 	

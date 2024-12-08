@@ -22,9 +22,9 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.form.page.dto.PageDefineDto;
-import com.unione.cloud.form.page.dto.PageDefineDto.FormPageDefineDto;
-import com.unione.cloud.form.page.dto.PageDefineDto.ListPageDefineDto;
+import com.unione.cloud.form.page.dto.PageDefine;
+import com.unione.cloud.form.page.dto.PageDefine.FormPageDefine;
+import com.unione.cloud.form.page.dto.PageDefine.ListPageDefine;
 import com.unione.cloud.form.page.model.SysPageDefine;
 import com.unione.cloud.form.page.service.PageDefineService;
 import com.unione.cloud.form.security.UserFormRoles;
@@ -80,7 +80,7 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 
 	@PostMapping(value="/save")
 	@ApiOperation(value="保存页面定义")
-	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody PageDefineDto entity) {
+	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody PageDefine entity) {
 		return pageDefineService.saveDefine(entity);
 	}
 	
@@ -101,11 +101,11 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		LogsUtil.setTarget(tmp.getId());
 		
 		if("unione-form-page".equals(tmp.getComponent())) {
-			FormPageDefineDto pageDefine=new FormPageDefineDto();
+			FormPageDefine pageDefine=new FormPageDefine();
 			BeanUtils.copy(tmp, pageDefine);
 			tmp=pageDefine;
 		}else if("unione-list-page".equals(tmp.getComponent())) {
-			ListPageDefineDto pageDefine=new ListPageDefineDto();
+			ListPageDefine pageDefine=new ListPageDefine();
 			BeanUtils.copy(tmp, pageDefine);
 			tmp=pageDefine;
 		}

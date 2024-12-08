@@ -25,8 +25,8 @@ import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.form.data.dto.DataDefineDto;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -79,7 +79,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	
 	@PostMapping(value="/save")
 	@ApiOperation(value="保存数据定义")
-	public Results<DataDefineDto> save(@Validated(Validator.save.class) @RequestBody DataDefineDto dataDefine) {
+	public Results<DataDefine> save(@Validated(Validator.save.class) @RequestBody DataDefine dataDefine) {
 		log.debug("进入:新增数据定义管理信息.dataDefine:{}",dataDefine);
 		LogsUtil.set(LogType.Insert, "新增数据定义管理");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,

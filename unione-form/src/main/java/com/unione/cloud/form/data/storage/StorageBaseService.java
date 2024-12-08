@@ -42,10 +42,10 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.form.cache.DataSourceCache;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataFieldDto;
 import com.unione.cloud.form.data.model.SysDataSource;
 import com.unione.cloud.form.data.storage.format.BlobFormat;
 import com.unione.cloud.form.data.storage.format.ClobFormat;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.form.data.storage.model.DataResult;
 
 import cn.hutool.core.date.DateUtil;
@@ -211,7 +211,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked"})
-    public Map<String, Object> findOne(Long dsId,String sql,Map<String, Object> params,List<DataFieldDto> fields){
+    public Map<String, Object> findOne(Long dsId,String sql,Map<String, Object> params,List<DataField> fields){
         log.debug("进入->执行findOne方法,dsId:{},sql:{},params:{}",dsId,sql,params);
         SQLManager sqlManager=this.getSQLManager(dsId);
         SqlId sqlId = sqlManager.getSqlIdFactory().buildTemplate(sql);
@@ -285,7 +285,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "rawtypes" })
-    public List<Map<String, Object>> findList(Long dsId,String sql,Map<String, Object> params,List<DataFieldDto> fields){
+    public List<Map<String, Object>> findList(Long dsId,String sql,Map<String, Object> params,List<DataField> fields){
         log.debug("进入->执行findList方法,dsId:{},sql:{},params:{}",dsId,sql,params);
 
         List<Map> result = this.getSQLManager(dsId).execute(sql, Map.class, params);
@@ -393,7 +393,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public DataResult<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataFieldDto> fields){
+    public DataResult<List<Map<String, Object>>> findListPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
         log.debug("进入->执行findListPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
         DataResult<List<Map<String, Object>>> result=DataResult.success();
         
@@ -419,7 +419,7 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-	public List<Map<String, Object>> findListForPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataFieldDto> fields){
+	public List<Map<String, Object>> findListForPage(Long dsId, String sql,Map<String, Object> params,int page, int size,List<DataField> fields){
         log.debug("进入->执行findListForPage方法,dsId:{},sql:{},params:{},page:{},size:{}",dsId,sql,params,page,size);
         
         PageRequest request = DefaultPageRequest.of(page,size,false);
@@ -438,15 +438,15 @@ public class StorageBaseService {
      * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public List<Map<String, Object>> rowMapper(List<Map> rows,List<DataFieldDto> fields){
+    public List<Map<String, Object>> rowMapper(List<Map> rows,List<DataField> fields){
         if(rows==null || rows.isEmpty()) {
             return new ArrayList<>();
         }
 
         // 字段转换处理
         Map<String, Format> formatMap=new HashMap<>();
-        Map<String, DataFieldDto> fieldMap=new HashMap<>();
-        for(DataFieldDto field:fields) {
+        Map<String, DataField> fieldMap=new HashMap<>();
+        for(DataField field:fields) {
             // 数据格式化处理
             if(!StringUtils.isEmpty(field.getDataFormat())) {
                 String formate = StringUtils.trim(field.getDataFormat());
@@ -484,7 +484,7 @@ public class StorageBaseService {
             				try {
 								value = format.format(value);
 							} catch (Exception e) {
-								DataFieldDto field = fieldMap.get(key);
+								DataField field = fieldMap.get(key);
 								log.error("field value format 格式失败,field:{},value:{},format:{}",key,value,field.getDataFormat(),e);
 							}
             			}

@@ -13,12 +13,12 @@ import com.alicp.jetcache.anno.Cached;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.form.data.dto.DataDefineDto.DataFieldDto;
 import com.unione.cloud.form.data.model.SysDataDefine;
 import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.form.data.model.SysDataFieldRelease;
 import com.unione.cloud.form.data.storage.model.DataDefine;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 
 import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -69,16 +69,16 @@ public class DataDefineCache {
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
 			sdfr.setModelId(model.getId());
 			List<SysDataFieldRelease> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataFieldDto> fields = sdfrs.stream().map(f->{
-				DataFieldDto field=new DataFieldDto();
+			List<DataField> fields = sdfrs.stream().map(f->{
+				DataField field=new DataField();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
+					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
 			
-			model.setFields(fields);
+//			model.setFields(fields);
 		}
 		
 		AssertUtil.service().notNull(model, "数据模型未找到");
@@ -104,16 +104,16 @@ public class DataDefineCache {
 			SysDataFieldRelease sdfr=new SysDataFieldRelease();
 			sdfr.setModelId(model.getId());
 			List<SysDataFieldRelease> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataFieldDto> fields = sdfrs.stream().map(f->{
-				DataFieldDto field=new DataFieldDto();
+			List<DataField> fields = sdfrs.stream().map(f->{
+				DataField field=new DataField();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
+//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
 			
-			model.setFields(fields);
+//			model.setFields(fields);
 			
 		}
 		
@@ -155,16 +155,16 @@ public class DataDefineCache {
 			SysDataField sdfr=new SysDataField();
 			sdfr.setModelId(model.getId());
 			List<SysDataField> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataFieldDto> fields = sdfrs.stream().map(f->{
-				DataFieldDto field=new DataFieldDto();
+			List<DataField> fields = sdfrs.stream().map(f->{
+				DataField field=new DataField();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
+//					field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
 			
-			model.setFields(fields);
+//			model.setFields(fields);
 		}
 		
 		AssertUtil.service().notNull(model, "数据模型未找到");
@@ -188,16 +188,16 @@ public class DataDefineCache {
 			SysDataField sdfr=new SysDataField();
 			sdfr.setModelId(model.getId());
 			List<SysDataField> sdfrs = dataBaseDao.findList(SqlBuilder.build(sdfr).where("modelId=?"));
-			List<DataFieldDto> fields = sdfrs.stream().map(f->{
-				DataFieldDto field=new DataFieldDto();
+			List<DataField> fields = sdfrs.stream().map(f->{
+				DataField field=new DataField();
 				BeanUtil.copyProperties(f, field);
 				if(!StringUtils.isEmpty(f.getConfigs())) {
-					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldDtoConfig.class));
+					//field.setConfigs(JSONUtil.toBean(f.getConfigs(), DataFieldConfig.class));
 				}
 				return field;
 			}).collect(Collectors.toList());
 			
-			model.setFields(fields);
+//			model.setFields(fields);
 			return model;
 		}
 		
