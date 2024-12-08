@@ -15,7 +15,11 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.form.data.model.SysDataDefineHis;
 import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -32,9 +36,9 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataField sys_data_field管理：系统管理：数据字段",description="SysDataField")
-@RequestMapping("/api/data/sysDataField")	 //TreeFeignApi
-public class SysDataFieldController implements PojoFeignApi<SysDataField>{
+@Api(tags = "系统管理：数据字段",description="SysDataField")
+@RequestMapping("/api/data/field")	 //TreeFeignApi
+public class SysDataFieldController implements FeignFind<SysDataField>,FeignFindById<SysDataField>,FeignDetail<SysDataField>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -53,40 +57,6 @@ public class SysDataFieldController implements PojoFeignApi<SysDataField>{
 		
 		LogsUtil.success();
 		log.debug("退出:查询sys_data_field列表方法,params:{},result:{}",params,results.isSuccess());
-		return results;
-	}
-
-
-	@Override
-	public Results<Long> save(@Validated(Validator.save.class) SysDataField entity) {
-		log.debug("进入:新增sys_data_field信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增sys_data_field");
-		// 参数处理
-		dataBaseDao.insert(entity);
-		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增sys_data_field信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
-	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysDataField entity) {
-		log.debug("进入:修改sys_data_field信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改sys_data_field",entity.getId());
-		
-		String[] fields = {"appId","defineId","title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isNull","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","delFlag","descs"};
-		SqlBuilder<SysDataField> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改sys_data_field信息方法，entity:{},result:{}",entity,results.isSuccess());
 		return results;
 	}
 
@@ -125,48 +95,5 @@ public class SysDataFieldController implements PojoFeignApi<SysDataField>{
 	}
 	
 
-	@Override
-	public Results<Long> delete(Set<Long> ids){
-		log.debug("进入:删除sys_data_field信息方法，ids:{}",ids);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Delete, "删除sys_data_field");
-		
-		// 参数处理
-		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
-		
-		// 执行删除
-		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(SysDataField.class,ids));
-		LogsUtil.add("成功删除记录数量:"+count);
-		
-		results.setSuccess(count>0);
-		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody((long)count);
-		LogsUtil.save(count>0);
-
-		log.debug("退出:删除sys_data_field信息方法，ids:{},result:{}",ids,results.isSuccess());
-		return results;
-	}
-
-
-//	@Override
-//	public Results<List<SysDataField>> children(Long sid){
-//		log.debug("进入:加载下级sys_data_field信息,sid:{}",sid);
-//		LogsUtil.set(LogType.Query, "加载下级sys_data_field信息",sid);
-//		 //参数处理
-//		AssertUtil.service().notNull(sid, "参数sid不能为空");
-//		
-//		// 执行查询
-//		SysDataField params = new SysDataField();
-//		params.setParentId(sid);
-//		LogsUtil.add("parentId:%s",sid);
-//	
-//		List<SysDataField> rows = dataBaseDao.findList(SqlBuilder.build(params));
-//		LogsUtil.add("下级sys_data_field记录数量:"+rows.size());
-//		
-//		LogsUtil.success();
-//		log.debug("退出:加载下级sys_data_field信息,sid:{},result:true",sid);
-//		return Results.success(rows);
-//	}
 
 }
