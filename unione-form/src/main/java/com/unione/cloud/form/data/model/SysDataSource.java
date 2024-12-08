@@ -2,6 +2,8 @@ package com.unione.cloud.form.data.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -75,6 +77,7 @@ public class SysDataSource extends Pojo {
 	/**
 	* 认证选项,json存储{}
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="认证选项,json存储{}",notes="长度为：65535")
 	private String authOpts;
 	/**
@@ -90,11 +93,13 @@ public class SysDataSource extends Pojo {
 	/**
 	* 密码，加密存储
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="密码，加密存储",notes="长度为：500")
 	private String password;
 	/**
 	* 配置，json结构
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="配置，json结构",notes="长度为：2147483647")
 	private String configs;
 	/**
