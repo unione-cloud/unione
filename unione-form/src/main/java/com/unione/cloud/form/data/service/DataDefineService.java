@@ -1,12 +1,17 @@
 package com.unione.cloud.form.data.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
@@ -17,11 +22,13 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineCategory;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineConfig;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataFilter;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataQuery;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQueryType;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -59,6 +66,7 @@ public class DataDefineService {
 	 * @param dataDefine
 	 * @return
 	 */
+	@Transactional
 	public Results<DataDefine> save(DataDefine dataDefine){
 		log.info("进入：保存数据定义方法,id:{},sn:{}",dataDefine.getId(),dataDefine.getSn());
 		LogsUtil.set(LogType.Insert, "新增数据定义管理");
@@ -78,37 +86,96 @@ public class DataDefineService {
 			tmp = dataBaseDao.findOne(SqlBuilder.build(param));
 		}
 		
-		if(tmp!=null) {
-			LogsUtil.set(LogType.Update, "更新数据定义管理");
-			dataDefine.setId(tmp.getId());
-			// 更新
-			String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
-			SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
-			int len = dataBaseDao.updateById(sqlBuilder);
-			AssertUtil.service().isTrue(len>0, "数据定义保存失败");
-		}else {
-			// 新增
-			// 参数处理
-			if(StringUtils.isEmpty(dataDefine.getSn())) {
-				dataDefine.setSn(RandomUtil.randomString(20));
+		try {
+			if(tmp!=null) {
+				LogsUtil.set(LogType.Update, "更新数据定义管理");
+				dataDefine.setId(tmp.getId());
+				// 更新
+				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
+				SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
+				int len = dataBaseDao.updateById(sqlBuilder);
+				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
+			}else {
+				// 新增
+				// 参数处理
+				if(StringUtils.isEmpty(dataDefine.getSn())) {
+					dataDefine.setSn(RandomUtil.randomString(20));
+				}
+				BeanUtils.setDefaultValue(dataDefine, "appId", DEFAULT_APP_ID);
+				BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
+				BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
+				BeanUtils.setDefaultValue(dataDefine, "status",1);
+				BeanUtils.setDefaultValue(dataDefine, "ordered",0);
+				BeanUtils.setDefaultValue(dataDefine, "configs","{}");
+				dataDefine.setVers(1);
+				
+				int len = dataBaseDao.insert(dataDefine);
+				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
 			}
-			BeanUtils.setDefaultValue(dataDefine, "appId", DEFAULT_APP_ID);
-			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
-			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
-			BeanUtils.setDefaultValue(dataDefine, "status",1);
-			BeanUtils.setDefaultValue(dataDefine, "ordered",0);
-			BeanUtils.setDefaultValue(dataDefine, "configs","{}");
-			dataDefine.setVers(1);
 			
-			int len = dataBaseDao.insert(dataDefine);
-			AssertUtil.service().isTrue(len>0, "数据定义保存失败");
+			// 同步数据字段
+			this.syncDataField(dataDefine);
+			
+		} catch (Exception e) {
+			log.error("保存数据定义失败",e);
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			return Results.failure("保存数据定义失败");
 		}
 		
-		LogsUtil.success(dataDefine.getId());
 		log.debug("退出:新增数据定义管理信息.entity:{},result:true",dataDefine);
 		return Results.success(dataDefine);
 	}
 	
+	
+	/**
+	 * 同步保存数据字段信息
+	 * @param dataDefine
+	 */
+	public void syncDataField(DataDefine dataDefine) {
+		log.info("进入：同步保存数据字段信息,data define id:{},sn:{},fields:{}",dataDefine.getId(),dataDefine.getSn(),dataDefine.getFields().size());
+		
+		SqlBuilder<SysDataField> sqlBuilder=SqlBuilder.build(SysDataField.class).params("defineId", dataDefine.getId());
+		List<SysDataField> hadFields = dataBaseDao.findList(sqlBuilder);
+		Map<Long,SysDataField> hadFieldMap=new HashMap<>();
+		hadFields.stream().forEach(field->{
+			hadFieldMap.put(field.getId(),field);
+		});		
+		
+		List<DataField> addFields=new ArrayList<>();
+		String fieldAttr[]=new String[] {"title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isNull","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","descs"}; 
+		dataDefine.getFields().stream().forEach(field->{
+			if(field.getId()==null || hadFieldMap.get(field.getId())==null) {
+				field.setAppId(dataDefine.getAppId());
+				field.setDefineId(dataDefine.getId());
+				addFields.add(field);
+				return;
+			}
+			
+			// 更新字段
+			SysDataField sdField=hadFieldMap.remove(field.getId());
+			BeanUtils.copy(field, sdField, fieldAttr);			
+			int len = dataBaseDao.updateById(SqlBuilder.build(sdField).field(fieldAttr));
+			AssertUtil.service().isTrue(len>0, "字段更新失败");			
+		});
+		
+		// 新增字段
+		if(!addFields.isEmpty()) {
+			dataBaseDao.insertBatch(addFields);
+		}
+		
+		// 删除字段
+		if(!hadFieldMap.values().isEmpty()) {
+			List<Long> ids = hadFieldMap.values().stream()
+			.filter(field->ObjectUtil.equal(field.getDelFlag(),0)&&ObjectUtil.equal(field.getStatus(),1))
+			.map(field->field.getId())
+			.collect(Collectors.toList());
+			if(!ids.isEmpty()) {
+				int len = dataBaseDao.deleteLogicById(SqlBuilder.build(SysDataField.class).ids(ids));
+				AssertUtil.service().isTrue(len>0, "字段删除失败");
+			}
+		}
+		
+	}
 	
 	/**
 	 * 生成数据定义增删改查SQL
@@ -209,28 +276,29 @@ public class DataDefineService {
 			}
 			
 			// 查询字段处理
-			if (field.getQuery()!=null && field.getQuery().isEnable()){
-				if (DataQueryType.EQ.name().equals(field.getQuery().getType())){
+			DataQuery query=field.getConfigDto().getQuery();
+			if (query!=null && query.isEnable()){
+				if (DataQueryType.EQ.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 						.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
 						.append("-- @}");
 				}
-				if (DataQueryType.LIKE.name().equals(field.getQuery().getType())){
+				if (DataQueryType.LIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 						.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
 						.append("-- @}");
 				}
-				if (DataQueryType.LLIKE.name().equals(field.getQuery().getType())){
+				if (DataQueryType.LLIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 						.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("}").append(System.lineSeparator())
 						.append("-- @}");
 				}
-				if (DataQueryType.RLIKE.name().equals(field.getQuery().getType())){
+				if (DataQueryType.RLIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 						.append(" AND ").append(field.getName()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
 						.append("-- @}");
 				}
-				if (field.getQuery().isDefoult()){
+				if (query.isDefoult()){
 					if(keywords.length()>0) {
 						keywords.append(" OR ");
 					}
@@ -255,9 +323,9 @@ public class DataDefineService {
 		//外键拼接 BEGIN
 		dataDefine.getFields()
 		.stream()
-		.filter(f -> f.getFkey()!=null && f.getFkey().isEnable() && !ObjectUtil.isEmpty(f.getFkey().getDsn()))
+		.filter(f -> f.getConfigDto().getFkey()!=null && f.getConfigDto().getFkey().isEnable() && !ObjectUtil.isEmpty(f.getConfigDto().getFkey().getDsn()))
 		.forEach(fkeyField -> {
-			ForeignKey fkey=fkeyField.getFkey();
+			ForeignKey fkey=fkeyField.getConfigDto().getFkey();
 			DataDefine fkeyDataDefine=dataDefineCache.load(fkey.getDsn());
 			
 			List<String> fkFieldNames=new ArrayList<>();
@@ -284,14 +352,14 @@ public class DataDefineService {
 			// 外键关联字段查询处理
 			fkeyDataDefine.getFields().stream()
 			.filter(f->fkFieldNames.contains(f.getName()))
-			.filter(f->f.getQuery()!=null)
-			.filter(f->f.getQuery().isEnable())
+			.filter(f->f.getConfigDto().getQuery()!=null)
+			.filter(f->f.getConfigDto().getQuery().isEnable())
 			.forEach(fkfield->{
 				tmpStr.append("isNotEmpty(params.")
 				.append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 				.append(") || ");
 
-				if (DataQueryType.EQ.name().equals(fkfield.getQuery().getType())){
+				if (DataQueryType.EQ.name().equals(fkfield.getConfigDto().getQuery().getType())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -299,7 +367,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append("=#{params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LIKE.name().equals(fkfield.getQuery().getType())){
+				if (DataQueryType.LIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -307,7 +375,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append(" LIKE #{'%'+params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("+'%'}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LLIKE.name().equals(fkfield.getQuery().getType())){
+				if (DataQueryType.LLIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -315,7 +383,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append(" LIKE #{'%'+params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.RLIKE.name().equals(fkfield.getQuery().getType())){
+				if (DataQueryType.RLIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")

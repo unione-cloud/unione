@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataField;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -50,10 +51,10 @@ public class DataDefine extends SysDataDefine{
 	
 	@JsonIgnore
 	public List<DataField> getFields(){
-		if(this.configDto!=null) {
+		if(this.configDto!=null && this.configDto.getFields()!=null) {
 			return this.configDto.getFields();
 		}		
-		return null;
+		return new ArrayList<>();
 	}
 	
 	/**
@@ -129,47 +130,53 @@ public class DataDefine extends SysDataDefine{
 	
 	@Data
 	@ApiModel("数据字段DTO")
-	public static class DataField implements Serializable{
+	public static class DataField extends SysDataField{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -2468858077101285404L;
-
-		@ApiModelProperty(value="字段主键")
-		private Long id;
 		
-		@ApiModelProperty(value="字段名称")
-		private String name;
+		@JsonProperty("configs")
+		@ApiModelProperty(value="字段配置对象")
+		private DataFieldConfig configDto;
 		
-		@ApiModelProperty(value="字段标题")
-		private String title;
+		@JsonIgnore
+		public DataField setConfigs(String configs) {
+			super.setConfigs(configs);
+			configDto=JSONUtil.toBean(configs, DataFieldConfig.class);
+			return this;
+		}
 		
-		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
-		private String dataType;
+		@JsonIgnore
+		public String getConfigs() {
+			if(configDto!=null) {
+				super.setConfigs(JSONUtil.toJsonStr(configDto));
+			}
+			return super.getConfigs();
+		}
 		
-		@ApiModelProperty(value="标准字段，关联的标准字段名称")
-		private String stsField;
+		@JsonIgnore
+		public String getAlias() {
+			if(!StringUtils.isEmpty(this.getName())) {
+				return StrUtil.toCamelCase(this.getName());
+			}
+			return null;
+		}
+	}
+	
+	@Data
+	@ApiModel("字段配置DTO")
+	public static class DataFieldConfig implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8683418205486661110L;
 		
 		@ApiModelProperty(value="组件设置")
 		private FieldWidget widget;
 		
-		@ApiModelProperty(value="是否主键")
-		private boolean isPk;
-		
 		@ApiModelProperty(value="外键设置")
 		private ForeignKey fkey;
-		
-		@ApiModelProperty(value="是否不能为空")
-		private boolean isNull;
-		
-		@ApiModelProperty(value="输入提示")
-		private String placeholder;
-		
-		@ApiModelProperty(value="输入帮助")
-		private String help;
-		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
-		private String dataFormat;
 		
 		@ApiModelProperty(value="排序设置")
 		private DataSort sort;
@@ -186,18 +193,12 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="条件样式")
 		private List<ConditionStyle> conditionStyle;
 		
-		@JsonIgnore
-		public String getAlias() {
-			if(!StringUtils.isEmpty(name)) {
-				return StrUtil.toCamelCase(name);
-			}
-			return null;
-		}
 	}
 	
 	
+	
 	@Data
-	@ApiModel("表单组件配置DTO")
+	@ApiModel("字段组件配置DTO")
 	public static class FieldWidget implements Serializable{
 		/**
 		 * 
@@ -208,6 +209,11 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="表单组件name",notes = "eg：input,select")
 		private String name;
 		
+		@ApiModelProperty(value="输入提示")
+		private String placeholder;
+		
+		@ApiModelProperty(value="输入帮助")
+		private String help;
 		
 		@ApiModelProperty(value="组件属性")
 		private Map<String,Object> props;

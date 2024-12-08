@@ -82,7 +82,10 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 				UserFormRoles.FORM_CONFIG,
 				UserFormRoles.FORM_DEV), "当前帐号无权限");
 		
-		return dataDefineService.save(dataDefine);
+		Results<DataDefine> result = dataDefineService.save(dataDefine);
+		
+		LogsUtil.save(result.isSuccess());
+		return result;
 	}
 
 

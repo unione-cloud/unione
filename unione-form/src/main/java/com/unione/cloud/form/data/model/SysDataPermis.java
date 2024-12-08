@@ -42,10 +42,10 @@ public class SysDataPermis extends Pojo {
 	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long appId;
 	/**
-	* 数据模型ID
+	* 数据定义ID
 	*/
-	@ApiModelProperty(value="数据模型ID",notes="长度为：19")
-	private Long modelId;
+	@ApiModelProperty(value="数据定义ID",notes="长度为：19")
+	private Long defineId;
 	/**
 	* 权限名称
 	*/

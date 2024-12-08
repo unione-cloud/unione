@@ -658,7 +658,7 @@ public class DataStorageService {
 		}
 		
 		
-		DataDefine dataDefine = dataDefineCache.load(fkey.getFkey().getDsn());
+		DataDefine dataDefine = dataDefineCache.load(fkey.getConfigDto().getFkey().getDsn());
 		AssertUtil.service().notNull(dataDefine, "外键关联数据定义未找到");
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		
@@ -672,7 +672,7 @@ public class DataStorageService {
 		List<Map<String, Object>> list = storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 		
 		list.stream().forEach(row->{
-			Object fkeyValue=row.get(fkey.getFkey().getFieldName());
+			Object fkeyValue=row.get(fkey.getConfigDto().getFkey().getFieldName());
 			if(fkeyValue!=null) {
 				map.put(fkeyValue.toString(), row);
 			}
@@ -706,7 +706,7 @@ public class DataStorageService {
 			fkeyList.add(field);
 		}
 		dataDefine.getFields().stream().filter(field->{
-			if(field.getFkey()!=null && field.getFkey().isEnable()) {
+			if(field.getConfigDto().getFkey()!=null && field.getConfigDto().getFkey().isEnable()) {
 				return true;
 			}		
 			return false;
@@ -760,7 +760,7 @@ public class DataStorageService {
 							if(fkeyValueObj!=null) {
 								 Map<String, Object> fkeyvs=fkeyValueObj.get(fkeyValue.toString());
 								 if(fkeyvs!=null) {
-									 Object fkeyLable=fkeyvs.get(fkeyField.getFkey().getLabelName());
+									 Object fkeyLable=fkeyvs.get(fkeyField.getConfigDto().getFkey().getLabelName());
 									 if(fkeyLable!=null) {
 										 // 设置外键显示字段
 										 row.put(String.format("%sLabel", fkeyEntry.getKey()), fkeyLable);
@@ -787,7 +787,7 @@ public class DataStorageService {
 	 */
 	private String buildFkeyQuerySql(DataField fkeyField) {
 		
-		ForeignKey fkey = fkeyField.getFkey();
+		ForeignKey fkey = fkeyField.getConfigDto().getFkey();
 		if(fkey!=null && fkey.isEnable() && !StringUtils.isEmpty(fkey.getFieldName()) && 
 				!StringUtils.isEmpty(fkey.getLabelName()) && !StringUtils.isEmpty(fkey.getDsn())) {
 			DataDefine dataDefine=dataDefineCache.load(fkey.getDsn());

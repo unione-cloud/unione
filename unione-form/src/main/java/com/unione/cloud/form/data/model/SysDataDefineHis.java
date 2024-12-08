@@ -54,10 +54,10 @@ public class SysDataDefineHis extends Pojo {
 	@ApiModelProperty(value="数据源ID",notes="长度为：19")
 	private Long dsId;
 	/**
-	* 数据模型ID
+	* 数据定义ID
 	*/
-	@ApiModelProperty(value="数据模型ID",notes="长度为：19")
-	private Long modelId;
+	@ApiModelProperty(value="数据定义ID",notes="长度为：19")
+	private Long defineId;
 	/**
 	* 数据标题
 	*/

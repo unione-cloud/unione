@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * @标题 	SysDataFieldHis Controller 服务
  * @作者	Unione Cloud CodeGen
- * @日期	2024-06-15 07:47:11
+ * @日期	2024-12-08 20:17:01
  * @版本	1.0.0
  **/
 @Slf4j
@@ -76,7 +76,7 @@ public class SysDataFieldHisController implements PojoFeignApi<SysDataFieldHis>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Update, "修改sys_data_field_his",entity.getId());
 		
-		String[] fields = {"modelHisId","title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isFk","fkType","fkTableId","fkTableName","fkFieldId","fkFieldName","fkLabelName","fkRefWay","isNull","isUnique","widgetName","isQuery","queryDefault","queryType","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","delFlag","descs"};
+		String[] fields = {"appId","defineHisId","title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isNull","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","delFlag","descs"};
 		SqlBuilder<SysDataFieldHis> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);
