@@ -4,9 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.sql.clazz.ColDesc;
+import org.beetl.sql.clazz.TableDesc;
+import org.beetl.sql.clazz.kit.JavaType;
+import org.beetl.sql.core.SQLManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +30,7 @@ import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.model.SysDataDefine;
 import com.unione.cloud.form.data.model.SysDataField;
+import com.unione.cloud.form.data.storage.StorageBaseService;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineCategory;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineConfig;
@@ -36,6 +44,8 @@ import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -55,6 +65,9 @@ public class DataDefineService {
 	
 	@Autowired
 	private DataDefineCache dataDefineCache;
+	
+	@Autowired
+	private StorageBaseService storageBaseService;
 	
 	@Value("${unione.form.page.default.appid:1000}")
 	private Long DEFAULT_APP_ID;
@@ -106,7 +119,6 @@ public class DataDefineService {
 				BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
 				BeanUtils.setDefaultValue(dataDefine, "status",1);
 				BeanUtils.setDefaultValue(dataDefine, "ordered",0);
-				BeanUtils.setDefaultValue(dataDefine, "configs","{}");
 				dataDefine.setVers(1);
 				
 				int len = dataBaseDao.insert(dataDefine);
@@ -141,12 +153,21 @@ public class DataDefineService {
 			hadFieldMap.put(field.getId(),field);
 		});		
 		
+		AtomicInteger fieldCount=new AtomicInteger();
 		List<DataField> addFields=new ArrayList<>();
 		String fieldAttr[]=new String[] {"title","name","dataType","dataFormat","dataLen","dataPrec","isPk","isNull","stsField","configs","needAuth","syncEnable","syncFlag","ordered","status","descs"}; 
 		dataDefine.getFields().stream().forEach(field->{
+			fieldCount.addAndGet(1);
+			field.setOrdered(fieldCount.get());
+			BeanUtils.setDefaultValue(field, "syncEnable",0);
+			BeanUtils.setDefaultValue(field, "syncFlag",0);
+			BeanUtils.setDefaultValue(field, "needAuth",0);
+			
 			if(field.getId()==null || hadFieldMap.get(field.getId())==null) {
 				field.setAppId(dataDefine.getAppId());
 				field.setDefineId(dataDefine.getId());
+				field.setDelFlag(0);
+				field.setStatus(1);				
 				addFields.add(field);
 				return;
 			}
@@ -443,6 +464,119 @@ public class DataDefineService {
 		// 删除SQL组装 END
 		
 	}
+	
+	
+	
+	
+	/**
+	 * 从数据库中导入：数据定义
+	 * @param appId
+	 * @param dsId
+	 * @param tables
+	 * @param force
+	 * @return
+	 */
+	public Results<String> impFromDb(Long appId, Long dsId,List<String> tables,boolean force){
+		log.info("进入：从数据库中导入：数据定义,appId:{},dsId:{},tables:{},force:{}",appId,dsId,tables,force);
+		LogsUtil.add("进入：从数据库中导入：数据定义,appId:%s,dsId:%s,tables:%s,force:%s",appId,dsId,tables,force);
+		AssertUtil.service().notNull(dsId, "参数dsId不能为空").notEmpty(tables, "参数tables不能为空");
+		
+		if(!force) {
+			// 验证表格是否已创建
+			List<SysDataDefine> defineList = dataBaseDao.findList(SqlBuilder.build(SysDataDefine.class)
+				.where("dsId=? and name in [?]")
+				.params("dsId", dsId).params("name", tables));
+			Set<String> hadTables = defineList.stream().map(df->df.getName()).collect(Collectors.toSet());
+			if(!hadTables.isEmpty()) {
+				return Results.failure(String.format("数据table%s已存在，是否重新导入这些table？", 
+						JSONUtil.toJsonPrettyStr(hadTables)));
+			}
+		}
+		
+		// 获取SQL对象
+		SQLManager sqlManager = storageBaseService.getSQLManager(dsId);
+		StringBuffer error=new StringBuffer();
+		Stream<TableDesc> tableDescs = tables.stream().map(table->{
+			try {
+				return sqlManager.getTableDesc(table);
+			} catch (Exception e) {
+				error.append(table).append(",");
+				log.error(String.format("数据table %s 不存在", table),e);
+			}
+			return null;
+		}).filter(t->t!=null);
+		if(error.length()>0) {
+			return Results.failure(String.format("数据table %s 不存在",error.subSequence(0, error.length()-1)));
+		}
+		
+		// tableDescs 转换成 DataDefine
+		tableDescs.forEach(table->{
+			DataDefine dataDefine=new DataDefine();
+			dataDefine.setCategory(DataDefineCategory.SQL.value());
+			dataDefine.setIsCustom(0);
+			dataDefine.setDelFlag(0);
+			dataDefine.setStatus(1);
+			dataDefine.setAppId(appId);
+			dataDefine.setDsId(dsId);
+			dataDefine.setSn(RandomUtil.randomString(20));
+			dataDefine.setVers(1);
+			BeanUtils.setDefaultValue(dataDefine, "appId",DEFAULT_APP_ID);	
+			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
+			BeanUtils.setDefaultValue(dataDefine, "syncFlag",0);
+			BeanUtils.setDefaultValue(dataDefine, "ordered",0);
+			dataDefine.setName(table.getName());
+			dataDefine.setTitle(StrUtil.toCamelCase(table.getName()));
+			dataDefine.setDescs(table.getRemark());
+			
+			Set<String> fieldNames = table.getCols();
+			Set<String> idNames = table.getIdNames();
+			DataDefineConfig configs=new DataDefineConfig();
+			
+			// 解析table字段列表
+			List<DataField> fields=fieldNames.stream().map(fieldName->{
+				DataField field=new DataField();
+				ColDesc col = table.getColDesc(fieldName);
+				field.setName(col.getColName());
+				field.setIsNull("YES".equalsIgnoreCase(col.getIsNullable())?1:0);
+				if(StringUtils.isEmpty(col.getRemark())) {
+					field.setTitle(col.getColName());
+				}else {
+					field.setTitle(col.getRemark());
+					field.setDescs(col.getRemark());
+				}
+				field.setDataLen(col.getSize());
+				field.setIsPk(0);
+				if(idNames.contains(col.getColName())) {
+					field.setIsPk(1);	
+				}
+				field.setDataType(JavaType.mapping.get(col.getSqlType()));
+				return field;
+			}).collect(Collectors.toList());
+			configs.setFields(fields);
+			dataDefine.setConfigDto(configs);
+			
+			// 保存数据定义
+			try {
+				Results<DataDefine> results = save(dataDefine);
+				if(!results.isSuccess()) {
+					error.append("table[").append(dataDefine.getName()).append("]数据定义信息保存失败,");
+				}
+			} catch (Exception e) {
+				log.error("保存数据定义信息失败",e);
+				error.append("table[").append(dataDefine.getName()).append("]数据定义信息保存失败,");
+			}
+		});
+		
+		if(error.length()>0) {
+			return Results.failure(error.subSequence(0, error.length()-1).toString());
+		}
+		
+		return Results.success();
+	}
+	
+	
+	
+	
 	
 	
 

@@ -44,6 +44,8 @@ public class DataDefine extends SysDataDefine{
 	public String getConfigs() {
 		if(configDto!=null) {
 			super.setConfigs(JSONUtil.toJsonStr(configDto));
+		}else {
+			super.setConfigs("{}");
 		}
 		return super.getConfigs();
 	}
@@ -151,6 +153,8 @@ public class DataDefine extends SysDataDefine{
 		public String getConfigs() {
 			if(configDto!=null) {
 				super.setConfigs(JSONUtil.toJsonStr(configDto));
+			}else {
+				super.setConfigs("{}");
 			}
 			return super.getConfigs();
 		}

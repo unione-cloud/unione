@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
@@ -72,7 +73,22 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 		return results;
 	}
 
-
+	
+	@PostMapping(value="/imp/from/db")
+	@ApiOperation(value="从数据库导入",notes = "从数据库中选中表格导入，自动解析生成数据定义")
+	public Results<String> impFromDb(@RequestParam(value="appId",required = false) Long appId,
+			@RequestParam(value="dsId") Long dsId,
+			@RequestParam(value="tables") List<String> tables,
+			@RequestParam(value="force", required = false) boolean force){
+		log.debug("进入：从数据库导入数据定义方法,ds id:{} tables:{}",dsId,tables);
+		LogsUtil.set(LogType.Insert, "从数据库导入数据定义");		
+		
+		Results<String> result = dataDefineService.impFromDb(appId,dsId, tables,force);		
+		
+		LogsUtil.save(result.isSuccess());
+		return result;
+	}
+	
 	
 	@PostMapping(value="/save")
 	@ApiOperation(value="保存数据定义")
