@@ -26,7 +26,7 @@ public class DataFind extends Params<Map<String,Object>> {
 	@ApiModelProperty(value="数据定义版本号",notes = "")
 	private Integer vers;
 
-	@ApiModelProperty(value="数据字段集合",notes = "查询指定字段信息，如果为空则是所有字段")
+	@ApiModelProperty(value="数据字段集合",notes = "查询指定字段信息，如果为空则是所有字段，字段别名：驼峰")
 	private List<String> fields=new ArrayList<>();
 	
 	/**

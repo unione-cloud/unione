@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataResult;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -402,7 +404,14 @@ public class DataStorageService {
 		
 		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findOne(dsId, sql, paramObj,dataDefine.getFields());
+		List<DataField> fields=dataDefine.getFields();
+		if(!ObjectUtil.isEmpty(load.getFields())) {
+			// 过滤指定字段集合
+			fields=fields.stream().filter(field->load.getFields().contains(field.getAlias()))
+					.collect(Collectors.toList());
+		}
+				
+		return storageBaseService.findOne(dsId, sql, paramObj,fields);
 	}
 	
 	/**
@@ -432,7 +441,14 @@ public class DataStorageService {
 		
 		processFindDefaultParams(dataDefine, params);
 		
-		return storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
+		List<DataField> fields=dataDefine.getFields();
+		if(!ObjectUtil.isEmpty(load.getFields())) {
+			// 过滤指定字段集合
+			fields=fields.stream().filter(field->load.getFields().contains(field.getAlias()))
+					.collect(Collectors.toList());
+		}
+		
+		return storageBaseService.findList(dsId, sql, paramObj,fields);
 	}
 	
 	/**
@@ -592,7 +608,14 @@ public class DataStorageService {
 		
 		processFindDefaultParams(dataDefine, find.getBody());
 		
-		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, find.getPage(),find.getPageSize(), dataDefine.getFields());
+		List<DataField> fields=dataDefine.getFields();
+		if(!ObjectUtil.isEmpty(find.getFields())) {
+			// 过滤指定字段集合
+			fields=fields.stream().filter(field->find.getFields().contains(field.getAlias()))
+					.collect(Collectors.toList());
+		}
+		
+		return storageBaseService.findListPage(dsId, dataDefine.getSqlFind(), paramObj, find.getPage(),find.getPageSize(), fields);
 	}
 	
 	

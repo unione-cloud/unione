@@ -25,7 +25,7 @@ public class DataLoad {
 	@ApiModelProperty(value="主键集合")
 	private List<Long> ids=new ArrayList<>();
 	
-	@ApiModelProperty(value="字段集合")
+	@ApiModelProperty(value="字段集合",notes = "字段别名：驼峰")
 	private List<String> fields=new ArrayList<>();
 
 }

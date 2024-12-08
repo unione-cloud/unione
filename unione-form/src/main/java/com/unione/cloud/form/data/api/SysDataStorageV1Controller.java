@@ -3,6 +3,7 @@ package com.unione.cloud.form.data.api;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,14 +15,15 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.storage.DataStorageService;
 import com.unione.cloud.form.data.storage.model.DataCommit;
+import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDelete;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
-import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataResult;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,13 +35,13 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：数据存储接口V1",description="SysDataModelV1")
+@Api(tags = "系统管理：数据存储接口V1",description="SysDataDefineV1")
 @RequestMapping("/api/data/storage/v1")
 public class SysDataStorageV1Controller{
 	
 	
 	@Autowired
-	private DataDefineCache dataModelCache;
+	private DataDefineCache dataDefineCache;
 	
 	
 	@Autowired
@@ -53,15 +55,24 @@ public class SysDataStorageV1Controller{
 		LogsUtil.set(LogType.Query, "数据存储/数据查询");
 		AssertUtil.service().notNull(dataFind, new String[] {"dsn"},"参数%s不能为空");	
 		
-		DataDefine dataModel=dataModelCache.load(dataFind.getDsn());
-		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
+		DataDefine dataDefine=dataDefineCache.load(dataFind.getDsn());
+		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataFind));
 		
 		// 加载列表数据
-		DataResult<List<Map<String, Object>>> result = dataStorageService.findListPage(dataModel, dataFind);
+		DataResult<List<Map<String, Object>>> result = dataStorageService.findListPage(dataDefine, dataFind);
+		
+		// 字段处理
+		List<String> fields=dataDefine.getFields().stream().map(field->field.getName()).collect(Collectors.toList());
+		if(!ObjectUtil.isEmpty(dataFind.getFields())) {
+			// 过滤指定字段集合
+			fields=dataDefine.getFields().stream().filter(field->dataFind.getFields().contains(field.getAlias()))
+					.map(field->field.getName())
+					.collect(Collectors.toList());
+		}
 		
 		// 加载外键数据
-		dataStorageService.loadFkeyEntrys(dataModel, result.getBody(),dataFind.getFields().toArray(new String[0]));
+		dataStorageService.loadFkeyEntrys(dataDefine, result.getBody(),fields.toArray(new String[0]));
 		
 		LogsUtil.success();
 		log.debug("退出：数据模型数据查询接口,dsn:{},find:{}",dataFind.getDsn(),dataFind);
@@ -75,17 +86,17 @@ public class SysDataStorageV1Controller{
 		log.debug("进入：数据存储/数据保存接口,dsn:{},commit:{}",dataCommit.getDsn(),dataCommit);
 		AssertUtil.service().notNull(dataCommit, new String[] {"dsn"},"参数%s不能为空");	
 		
-		DataDefine dataModel=dataModelCache.load(dataCommit.getDsn());
-		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
+		DataDefine dataDefine=dataDefineCache.load(dataCommit.getDsn());
+		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataCommit));
 		
 		int len = -1;
 		if(dataCommit.getId()!=null) {
 			LogsUtil.set(LogType.Update, "数据存储/数据保存");
-			len = dataStorageService.updateById(dataModel, dataCommit);
+			len = dataStorageService.updateById(dataDefine, dataCommit);
 		}else {
 			LogsUtil.set(LogType.Insert, "数据存储/数据保存");
-			len = dataStorageService.insert(dataModel, dataCommit);
+			len = dataStorageService.insert(dataDefine, dataCommit);
 		}
 		
 		LogsUtil.save(len>0);
@@ -101,15 +112,24 @@ public class SysDataStorageV1Controller{
 		LogsUtil.set(LogType.Query, "数据存储/数据详情");
 		AssertUtil.service().notNull(dataLoad, new String[] {"dsn","id"},"参数%s不能为空");	
 		
-		DataDefine dataModel=dataModelCache.load(dataLoad.getDsn());
-		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
+		DataDefine dataDefine=dataDefineCache.load(dataLoad.getDsn());
+		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataLoad));
 		
 		// 加载数据
-		Map<String, Object> row = dataStorageService.findById(dataModel, dataLoad);
+		Map<String, Object> row = dataStorageService.findById(dataDefine, dataLoad);
+		
+		// 字段处理
+		List<String> fields=dataDefine.getFields().stream().map(field->field.getName()).collect(Collectors.toList());
+		if(!ObjectUtil.isEmpty(dataLoad.getFields())) {
+			// 过滤指定字段集合
+			fields=dataDefine.getFields().stream().filter(field->dataLoad.getFields().contains(field.getAlias()))
+					.map(field->field.getName())
+					.collect(Collectors.toList());
+		}
 		
 		//加载外键
-		dataStorageService.loadFkeyEntrys(dataModel, Arrays.asList(row), dataLoad.getFields().toArray(new String[0]));
+		dataStorageService.loadFkeyEntrys(dataDefine, Arrays.asList(row), fields.toArray(new String[0]));
 		
 		LogsUtil.save(row!=null);
 		return DataResult.build(row!=null, row);
@@ -127,15 +147,15 @@ public class SysDataStorageV1Controller{
 			.notEmpty(dataLoad.getIds(),"参数ids不能为空");
 		
 		
-		DataDefine dataModel=dataModelCache.load(dataLoad.getDsn());
-		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
+		DataDefine dataDefine=dataDefineCache.load(dataLoad.getDsn());
+		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataLoad));
 		
 		// 加载数据
-		List<Map<String, Object>> rows = dataStorageService.findByIds(dataModel, dataLoad);
+		List<Map<String, Object>> rows = dataStorageService.findByIds(dataDefine, dataLoad);
 		
 		//加载外键
-		dataStorageService.loadFkeyEntrys(dataModel, rows, dataLoad.getFields().toArray(new String[0]));
+		dataStorageService.loadFkeyEntrys(dataDefine, rows, dataLoad.getFields().toArray(new String[0]));
 		
 		LogsUtil.success();
 		return DataResult.success(rows);
@@ -151,21 +171,15 @@ public class SysDataStorageV1Controller{
 		AssertUtil.service().notNull(dataDelete, new String[] {"dsn","ids"},"参数%s不能为空")
 		.notEmpty(dataDelete.getIds(),"参数ids不能为空");
 		
-		DataDefine dataModel=dataModelCache.load(dataDelete.getDsn());
-		LogsUtil.setTarget(dataModel.getId(),dataModel.getTitle());
+		DataDefine dataDefine=dataDefineCache.load(dataDelete.getDsn());
+		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataDelete.getIds()));
 		
-		int len = dataStorageService.deleteByIds(dataModel, dataDelete.getIds());
+		int len = dataStorageService.deleteByIds(dataDefine, dataDelete.getIds());
 		
 		LogsUtil.save(len>0);
 		return DataResult.build(len>0);
 	}
-	
-	
-	
-	
-	
-	
 	
 
 }
