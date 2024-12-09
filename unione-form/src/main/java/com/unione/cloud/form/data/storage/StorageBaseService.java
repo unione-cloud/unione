@@ -437,7 +437,7 @@ public class StorageBaseService {
      * @param fields
      * @return
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes"})
     public List<Map<String, Object>> rowMapper(List<Map> rows,List<DataField> fields){
         if(rows==null || rows.isEmpty()) {
             return new ArrayList<>();
@@ -445,7 +445,6 @@ public class StorageBaseService {
 
         // 字段转换处理
         Map<String, Format> formatMap=new HashMap<>();
-        Map<String, DataField> fieldMap=new HashMap<>();
         for(DataField field:fields) {
             // 数据格式化处理
             if(!StringUtils.isEmpty(field.getDataFormat())) {
@@ -468,33 +467,28 @@ public class StorageBaseService {
             		formatMap.put(field.getName(), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             	}
             }
-            fieldMap.put(field.getName(), field);
         }
 
         // 迭代数据，row mapper处理
         return rows.stream().map(row -> {
             Map<String, Object> r = new HashMap<>();
-            r.putAll(row);
-            if(!formatMap.keySet().isEmpty()) {
-            	formatMap.keySet().stream().forEach(key -> {
-            		Object value = row.get(key);
-            		if (value != null) {
-            			Format format = formatMap.get(key);
-            			if (format != null) {
-            				try {
-								value = format.format(value);
-							} catch (Exception e) {
-								DataField field = fieldMap.get(key);
-								log.error("field value format 格式失败,field:{},value:{},format:{}",key,value,field.getDataFormat(),e);
-							}
-            			}
-            			if(value instanceof Date) {
-            				value = DateUtil.format((Date)value, "yyyy-MM-dd HH:mm:ss");
-            			}
-            			r.put(key, value);
-            		}
-            	});
-            }
+            fields.stream().forEach(field->{
+            	Object value = row.get(field.getAlias());
+        		if (value != null) {
+	    			Format format = formatMap.get(field.getAlias());
+	    			if (format != null) {
+	    				try {
+							value = format.format(value);
+						} catch (Exception e) {
+							log.error("field value format 格式失败,field:{},value:{},format:{}",field.getAlias(),value,field.getDataFormat(),e);
+						}
+	    			}
+	    			if(value instanceof Date) {
+	    				value = DateUtil.format((Date)value, "yyyy-MM-dd HH:mm:ss");
+	    			}
+	    		}
+            	r.put(field.getAlias(), value);
+            });
             return r;
         }).collect(Collectors.toList());
     }

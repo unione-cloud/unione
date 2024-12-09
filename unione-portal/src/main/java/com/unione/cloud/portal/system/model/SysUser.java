@@ -10,7 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -54,6 +56,7 @@ public class SysUser extends Pojo {
 	* 用户密码
 	*/
 	@JsonIgnore
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="用户密码",notes="长度为：200")
 	@NotNull(message = "用户密码不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
@@ -62,6 +65,7 @@ public class SysUser extends Pojo {
 	* 密码加密盐
 	*/
 	@JsonIgnore
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="密码加密盐",notes="长度为：50")
 	private String pwdSalt;
 	/**
@@ -112,11 +116,13 @@ public class SysUser extends Pojo {
 	/**
 	* 密保问题
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="密保问题",notes="长度为：200")
 	private String securityQuestion;
 	/**
 	* MFA设备标识
 	*/
+	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="MFA设备标识",notes="长度为：100")
 	private String sucurityMfa;
 	/**

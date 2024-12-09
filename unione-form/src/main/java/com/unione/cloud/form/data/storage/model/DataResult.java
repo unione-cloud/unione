@@ -202,7 +202,7 @@ public class DataResult<T> extends Results<T> {
 	 * @return
 	 */
 	public DataResult<T> setMessage(String message){
-		this.setMessage(message);
+		super.setMessage(message);
 		return this;
 	}
 	

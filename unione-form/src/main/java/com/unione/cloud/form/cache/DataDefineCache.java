@@ -7,6 +7,7 @@ import com.alicp.jetcache.anno.CacheInvalidate;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.form.data.model.SysDataDefine;
 import com.unione.cloud.form.data.model.SysDataDefineRelease;
@@ -46,13 +47,12 @@ public class DataDefineCache {
 	public DataDefine loadRelease(String sn) {
 		log.info("进入：从db加载数据模型【发布】方法,sn:{}",sn);
 		DataDefine model=null;
-		SysDataDefineRelease tmp = new SysDataDefineRelease();
+		SysDataDefineRelease tmp = SysDataDefineRelease.builder().sn(sn).build();
 		if(sn.indexOf("@")>0) {
 			sn=sn.substring(0, sn.indexOf("@"));
 			tmp.setVers(Integer.parseInt(sn.substring(sn.indexOf("@")+1)));
 		}
-		tmp.setSn(sn);
-		tmp = dataBaseDao.findOne(tmp);
+		tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
 		log.info("退出：从db加载数据模型【发布】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
 			model=new DataDefine();
@@ -64,44 +64,12 @@ public class DataDefineCache {
 	}
 	
 	
-//	/**
-//	 * 	加载数据模型【发布】
-//	 * @param id
-//	 * @return
-//	 */
-//	@Cached(name="SYS:DATA:MODEL:",key = "#id",expire = 3600,localExpire = 180,cacheType = CacheType.BOTH,cacheNullValue = true)
-//	public DataDefine load(Long id) {
-//		log.info("进入：从db加载数据模型【发布】方法,id:{}",id);
-//		DataDefine model=null;
-//		SysDataDefineRelease tmp = dataBaseDao.findById(SysDataDefineRelease.class, id);
-//		log.info("退出：从db加载数据模型【发布】方法,id:{},data model:{}",id,tmp);
-//		if(tmp!=null) {
-//			model=new DataDefine();
-//			BeanUtil.copyProperties(tmp, model);
-//		}
-//		
-//		AssertUtil.service().notNull(model, "数据模型未找到");
-//		return model;
-//	}
-	
 	/**
 	 * 	清空缓存
 	 * @param sn
 	 */
 	@CacheInvalidate(name = "SYS:DATA:MODEL:", key = "#sn")
 	public void clear(String sn) {}
-	
-//	/**
-//	 * 	清空缓存
-//	 * @param id
-//	 */
-//	@CacheInvalidate(name = "SYS:DATA:MODEL:", key = "#id")
-//	public void clear(Long id) {
-//		DataDefine define=this.load(id);
-//		if(define!=null) {
-//			this.clear(define.getSn());
-//		}
-//	}
 	
 	
 	/**
@@ -112,9 +80,8 @@ public class DataDefineCache {
 	public DataDefine load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
 		DataDefine model=null;
-		SysDataDefine tmp = new SysDataDefine();
-		tmp.setSn(sn);
-		tmp = dataBaseDao.findOne(tmp);
+		SysDataDefine tmp = SysDataDefine.builder().sn(sn).build();
+		tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
 			model=new DataDefine();
@@ -125,24 +92,6 @@ public class DataDefineCache {
 		return model;
 	}
 	
-//	/**
-//	 * 	加载数据模型【dev】
-//	 * @param id
-//	 * @return
-//	 */
-//	public DataDefine load4Dev(Long id) {
-//		log.info("进入：从db加载数据模型【dev】方法,id:{}",id);
-//		DataDefine model=null;
-//		SysDataDefine tmp = dataBaseDao.findById(SysDataDefine.class, id);
-//		log.info("退出：从db加载数据模型【dev】方法,id:{},data model:{}",id,tmp);
-//		if(tmp!=null) {
-//			model=new DataDefine();
-//			BeanUtil.copyProperties(tmp, model);
-//		}
-//		
-//		AssertUtil.service().notNull(model, "数据模型未找到");
-//		return model;
-//	}
 	
 
 }

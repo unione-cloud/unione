@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -143,6 +144,30 @@ public class DataDefine extends SysDataDefine{
 		private DataFieldConfig configDto;
 		
 		@JsonIgnore
+		private String alias;
+		
+		
+		public DataField setName(String name) {
+			super.setName(name);
+			if(!StringUtils.isEmpty(name)) {
+				String tt[]=name.toLowerCase().split("_");
+				StringBuffer buf=new StringBuffer();
+				buf.append(tt[0]);
+				for(int i=1;i<tt.length;i++) {
+					String t=tt[i];
+					if(!StringUtils.isEmpty(t)) {
+						buf.append((t.charAt(0)+"").toUpperCase());
+						if(t.length()>1) {
+							buf.append(t.substring(1));
+						}
+					}
+				}
+				this.alias=buf.toString();
+			}
+			return this;
+		}
+		
+		@JsonIgnore
 		public DataField setConfigs(String configs) {
 			super.setConfigs(configs);
 			configDto=JSONUtil.toBean(configs, DataFieldConfig.class);
@@ -159,13 +184,6 @@ public class DataDefine extends SysDataDefine{
 			return super.getConfigs();
 		}
 		
-		@JsonIgnore
-		public String getAlias() {
-			if(!StringUtils.isEmpty(this.getName())) {
-				return StrUtil.toCamelCase(this.getName());
-			}
-			return null;
-		}
 	}
 	
 	@Data
