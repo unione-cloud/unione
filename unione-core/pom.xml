@@ -342,7 +342,7 @@
 		<dependency>
 		  <groupId>com.alicp.jetcache</groupId>
 		  <artifactId>jetcache-starter-redis</artifactId>
-		  <version>${spring.boot.version}</version>
+		  <version>${jetcache.version}</version>
 		</dependency>
 		
 		

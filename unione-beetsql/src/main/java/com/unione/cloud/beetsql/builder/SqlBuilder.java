@@ -493,7 +493,8 @@ public class SqlBuilder<T> {
 		
 		// 如果是findById,updateById,deleteById并且未设置查询条件，生成更新条件
 		if(StringUtils.isEmpty(this.entity.getWhere()) && 
-				(SqlType.UPDATE_BYID.equals(type) || SqlType.DELETE_BYID.equals(type) || SqlType.SELECT_BYID.equals(type))) {
+				(SqlType.UPDATE_BYID.equals(type) || SqlType.DELETE_BYID.equals(type) || 
+						SqlType.SELECT_BYID.equals(type))) {
 			SqlField idField=this.entity.getKeyField();
 			AssertUtil.service().notNull(idField,"主键字段不能为空");
 			StringBuffer where=new StringBuffer();

@@ -301,23 +301,23 @@ public class DataDefineService {
 			if (query!=null && query.isEnable()){
 				if (DataQueryType.EQ.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-						.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
-						.append("-- @}");
+					.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
+					.append("-- @}");
 				}
 				if (DataQueryType.LIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-						.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
-						.append("-- @}");
+					.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
+					.append("-- @}");
 				}
 				if (DataQueryType.LLIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-						.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("}").append(System.lineSeparator())
-						.append("-- @}");
+					.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("}").append(System.lineSeparator())
+					.append("-- @}");
 				}
 				if (DataQueryType.RLIKE.name().equals(query.getType())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-						.append(" AND ").append(field.getName()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
-						.append("-- @}");
+					.append(" AND ").append(field.getName()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
+					.append("-- @}");
 				}
 				if (query.isDefoult()){
 					if(keywords.length()>0) {
@@ -344,7 +344,9 @@ public class DataDefineService {
 		//外键拼接 BEGIN
 		dataDefine.getFields()
 		.stream()
-		.filter(f -> f.getConfigDto().getFkey()!=null && f.getConfigDto().getFkey().isEnable() && !ObjectUtil.isEmpty(f.getConfigDto().getFkey().getDsn()))
+		.filter(f->f.getConfigDto().getFkey()!=null)
+		.filter(f->f.getConfigDto().getFkey().isEnable())
+		.filter(f ->!ObjectUtil.isEmpty(f.getConfigDto().getFkey().getDsn()))
 		.forEach(fkeyField -> {
 			ForeignKey fkey=fkeyField.getConfigDto().getFkey();
 			DataDefine fkeyDataDefine=dataDefineCache.load(fkey.getDsn());
@@ -550,6 +552,8 @@ public class DataDefineService {
 					field.setIsPk(1);	
 				}
 				field.setDataType(JavaType.mapping.get(col.getSqlType()));
+				field.setConfigs("{}");
+				
 				return field;
 			}).collect(Collectors.toList());
 			configs.setFields(fields);
