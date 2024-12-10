@@ -19,11 +19,13 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.service.DataDefineService;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.security.UserFormRoles;
@@ -45,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Api(tags = "数据管理：数据定义管理",description="SysDataModel")
 @RequestMapping("/api/data/define")	 //TreeFeignApi
-public class SysDataDefineController implements FeignDelete<SysDataDefine>,FeignFind<SysDataDefine>,FeignFindById<SysDataDefine>{
+public class SysDataDefineController implements FeignDelete<SysDataDefine>,FeignFind<SysDataDefine>,FeignFindById<SysDataDefine>,FeignDetail<DataDefine>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -119,11 +121,27 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 		log.debug("退出:批量查询数据定义管理信息方法，ids:{},result:true",ids);
 		return Results.success(rows);
 	}
+	
+	@Override
+	public Results<DataDefine> detail(Long id) {
+		log.debug("进入:查看数据定义详细信息方法，id:{}",id);
+		LogsUtil.set(LogType.Query, "查看数据定义详细",id);
+		// 参数处理
+		AssertUtil.service().notNull(id,"参数id不能为空");
+		
+		LogsUtil.add("查找记录");
+		SysDataDefine tmp = dataBaseDao.findById(SqlBuilder.build(SysDataDefine.class,id));
+		AssertUtil.service().notNull(tmp, "记录未找到");
+		
+		LogsUtil.success(tmp.getId());
+		log.debug("退出:查看数据定义详细信息方法，id:{},result:true",id);
+		return Results.success(DataDefine.from(tmp));
+	}
 
 
 	@PostMapping(value="/load/{sn}")
 	@ApiOperation(value="加载数据定义")
-	public Results<SysDataDefine> load(@PathVariable("sn") String sn) {
+	public Results<DataDefine> load(@PathVariable("sn") String sn) {
 		log.debug("进入:加载数据定义方法，sn:{}",sn);
 		LogsUtil.set(LogType.Query, "加载数据定义");
 		// 参数处理
@@ -131,14 +149,31 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 		LogsUtil.setExtData(sn);
 		
 		LogsUtil.add("查找记录");
-		SysDataDefine param=SysDataDefine.builder().sn(sn).build();
-		SysDataDefine tmp = dataBaseDao.findOne(SqlBuilder.build(param));
-		AssertUtil.service().notNull(tmp, "页面信息未找到","404");
-		LogsUtil.setTarget(tmp.getId());
 		
-		LogsUtil.success(tmp.getId());
+		DataDefine define = null;
+		if(sn.endsWith("@dev")) {
+			SysDataDefine tmp=SysDataDefine.builder().sn(sn.substring(0,sn.length()-4)).build();
+			tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
+			AssertUtil.service().notNull(tmp, "数据定义未找到","404");
+			define=DataDefine.from(tmp);
+		} else if(sn.indexOf("@")<0){
+			SysDataDefine tmp=SysDataDefine.builder().sn(sn).build();
+			tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
+			AssertUtil.service().notNull(tmp, "数据定义未找到","404");
+			define=DataDefine.from(tmp);
+		} else {
+			SysDataDefineRelease tmp=SysDataDefineRelease.builder().sn(sn).build();
+			tmp.setVers(Integer.parseInt(sn.substring(sn.indexOf("@")+1)));
+			tmp.setSn(sn.substring(0, sn.indexOf("@")));
+			tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
+			AssertUtil.service().notNull(tmp, "数据定义未找到","404");
+			define=DataDefine.from(tmp);
+		}
+		LogsUtil.setTarget(define.getId());
+		
+		LogsUtil.success(define.getId());
 		log.debug("退出:加载数据定义方法，sn:{},result:true",sn);
-		return Results.success(tmp);
+		return Results.success(define);
 	}
 	
 

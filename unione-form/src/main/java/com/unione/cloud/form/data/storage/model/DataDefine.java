@@ -12,7 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.core.model.BaseField;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.model.SysDataField;
 
 import cn.hutool.core.util.StrUtil;
@@ -76,6 +78,19 @@ public class DataDefine extends SysDataDefine{
 		}
 		return null;
 	}
+	
+	
+	public static DataDefine from(SysDataDefine from) {
+		DataDefine dataDefine=new DataDefine();
+		BeanUtils.copy(from, dataDefine);
+		return dataDefine;
+	}
+	public static DataDefine from(SysDataDefineRelease from) {
+		DataDefine dataDefine=new DataDefine();
+		BeanUtils.copy(from, dataDefine);
+		return dataDefine;
+	}
+	
 	
 	@Data
 	@ApiModel(value="数据定义配置DTO")

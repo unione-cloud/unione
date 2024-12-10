@@ -49,8 +49,8 @@ public class DataDefineCache {
 		DataDefine model=null;
 		SysDataDefineRelease tmp = SysDataDefineRelease.builder().sn(sn).build();
 		if(sn.indexOf("@")>0) {
-			sn=sn.substring(0, sn.indexOf("@"));
 			tmp.setVers(Integer.parseInt(sn.substring(sn.indexOf("@")+1)));
+			sn=sn.substring(0, sn.indexOf("@"));
 		}
 		tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
 		log.info("退出：从db加载数据模型【发布】方法,sn:{},data model:{}",sn,tmp);
