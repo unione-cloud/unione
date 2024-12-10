@@ -24,6 +24,7 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -103,11 +104,16 @@ public class DataDefineService {
 			if(tmp!=null) {
 				LogsUtil.set(LogType.Update, "更新数据定义管理");
 				dataDefine.setId(tmp.getId());
-				// 更新
+				
+				// 同步数据字段
+				this.syncDataField(dataDefine);
+				
+				// 更新数据定义
 				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
 				SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
 				int len = dataBaseDao.updateById(sqlBuilder);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
+				
 			}else {
 				// 新增
 				// 参数处理
@@ -120,13 +126,15 @@ public class DataDefineService {
 				BeanUtils.setDefaultValue(dataDefine, "status",1);
 				BeanUtils.setDefaultValue(dataDefine, "ordered",0);
 				dataDefine.setVers(1);
+				dataDefine.setId(IdGenHolder.generate());
 				
-				int len = dataBaseDao.insert(dataDefine);
+				// 同步数据字段
+				this.syncDataField(dataDefine);
+				
+				// 保存数据定义
+				int len = dataBaseDao.insertWithId(dataDefine);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
 			}
-			
-			// 同步数据字段
-			this.syncDataField(dataDefine);
 			
 		} catch (Exception e) {
 			log.error("保存数据定义失败",e);
