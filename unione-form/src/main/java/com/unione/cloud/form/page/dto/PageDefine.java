@@ -311,6 +311,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty("表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<Widget> widgets;
+		
 
 	}
 	
@@ -666,24 +667,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="触发事件",notes = "change,blur")
 		private String trigger;
-		
-		
-	}
-	
-	
-	@Data
-	@ApiModel("表单项配置  ")
-	public static class FormItemProps implements Serializable{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -2367848605872325522L;
-
-		@ApiModelProperty(value="是否必填")
-		private Boolean required;
-		
-		@ApiModelProperty(value="组件提示信息")
-		private String placeholder;
 		
 		
 	}

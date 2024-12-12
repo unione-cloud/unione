@@ -94,8 +94,13 @@ public class DataDefine extends SysDataDefine{
 	
 	@Data
 	@ApiModel(value="数据定义配置DTO")
-	public static class DataDefineConfig{
-		
+	public static class DataDefineConfig implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+
 		@ApiModelProperty(value="字段列表")
 		private List<DataField> fields=new ArrayList<>();
 		
@@ -106,13 +111,41 @@ public class DataDefine extends SysDataDefine{
 		
 		@ApiModelProperty(value="数据权限集合",notes = "")
 		private List<DataPermis> permis=new ArrayList<>();
+		
+		
+		@ApiModelProperty(value="数据显示配置",notes = "")
+		private DataShow show;
+		
+	}
+	
+	@Data
+	@ApiModel(value="数据显示DTO")
+	public static class DataShow implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@ApiModelProperty(value="表单显示列数",notes = "表单显示列数，默认3")
+		private Integer showColumn;
+		
+		@ApiModelProperty(value="表单显示列数",notes = "表单项label显示宽度，默认9")
+		private Integer labelWidget;
+		
+		@ApiModelProperty(value="列表页面模版",notes = "")
+		private String  listTmpl;
+		
 	}
 	
 	
 	@Data
 	@ApiModel(value="数据权限DTO")
-	public static class DataPermis{
-		
+	public static class DataPermis implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@ApiModelProperty(value="权限标识",notes="")
 		private Long id;
 		
@@ -132,8 +165,12 @@ public class DataDefine extends SysDataDefine{
 	
 	@Data
 	@ApiModel(value="数据过滤DTO")
-	public static class DataFilter{
-		
+	public static class DataFilter implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@ApiModelProperty(value="过滤标题",notes="")
 		private String title;
 		
@@ -441,7 +478,10 @@ public class DataDefine extends SysDataDefine{
 		private Boolean whitespace;
 		
 		@ApiModelProperty(value="预设规则名称",notes = "手机号：tel，邮箱：email，身份证号：idcard等等")
-		private String  advance;
+		private String  advanceName;
+		
+		@ApiModelProperty(value="预设验证失败消息",notes = "")
+		private String  advanceMessage;
 		
 		@ApiModelProperty(value="最小值")
 		private Integer rangeMin;
@@ -506,11 +546,11 @@ public class DataDefine extends SysDataDefine{
 		 */
 		private static final long serialVersionUID = -7995835231421560625L;
 
-		@ApiModelProperty(value="选项key")
-		private String key;
+		@ApiModelProperty(value="选项value")
+		private String value;
 		
 		
-		@ApiModelProperty(value="选项标签")
+		@ApiModelProperty(value="选项label")
 		private String label;
 	}
 	
