@@ -477,11 +477,8 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="是否忽略空格",notes = "必填验证开启时，是否忽略空格")
 		private Boolean whitespace;
 		
-		@ApiModelProperty(value="预设规则名称",notes = "手机号：tel，邮箱：email，身份证号：idcard等等")
-		private String  advanceName;
-		
-		@ApiModelProperty(value="预设验证失败消息",notes = "")
-		private String  advanceMessage;
+		@ApiModelProperty(value="预设规则",notes = "字典：FORMDATARULE,手机号：tel，邮箱：email，身份证号：idcard等等")
+		private String  advance;
 		
 		@ApiModelProperty(value="最小值")
 		private Integer rangeMin;

@@ -598,17 +598,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="组件初始值")
 		private String value;
 		
-		@ApiModelProperty(value="是否不能为空")
-		private boolean isNull;
-		
-		@ApiModelProperty(value="输入提示")
-		private String placeholder;
-		
-		@ApiModelProperty(value="输入帮助")
-		private String help;
-		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
-		private String dataFormat;
 		
 		@ApiModelProperty(value="隐藏表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
 		private List<String> hidden;
@@ -630,6 +619,32 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="条件样式")
 		private List<ConditionStyle> conditionStyle;
+		
+		@ApiModelProperty(value="组件属性")
+		private FormItemProps props;
+		
+	}
+	
+	
+	@Data
+	@ApiModel("表单项配置  ")
+	public static class FormItemProps implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2367848605872325522L;
+
+		@ApiModelProperty(value="是否必填")
+		private Boolean required;
+		
+		@ApiModelProperty(value="组件提示信息")
+		private String placeholder;
+		
+		@ApiModelProperty(value="输入帮助")
+		private String help;
+		
+		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		private String dataFormat;
 		
 	}
 	
