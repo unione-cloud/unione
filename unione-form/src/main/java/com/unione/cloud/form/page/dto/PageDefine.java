@@ -397,6 +397,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty("操作设置")
 		private TableOperation operation;
 
+		@ApiModelProperty("table设置")
+		private TableWidgetProps props;
+		
 	}
 	
 	@Data
@@ -576,6 +579,12 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 * 
 		 */
 		private static final long serialVersionUID = -8092409023579026643L;
+		
+		@ApiModelProperty(value="滚动条：X",notes = "横向滚动设置")
+		private Integer scrollX;
+		
+		@ApiModelProperty(value="滚动条：Y",notes = "纵向滚动设置")
+		private Integer scrollY;
 		
 		
 	}
