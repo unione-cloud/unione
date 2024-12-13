@@ -14,6 +14,7 @@ import org.beetl.sql.clazz.ColDesc;
 import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.JavaType;
 import org.beetl.sql.core.SQLManager;
+import org.beetl.sql.core.meta.MetadataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -476,6 +478,55 @@ public class DataDefineService {
 		
 	}
 	
+	
+	/**
+	 * 	从数据库中加载table
+	 * @param appId
+	 * @param dsId
+	 * @param tableName
+	 * @return
+	 */
+	public Results<List<SysDataDefine>> loadFromDb(Long appId,Long dsId,String tableName){
+		log.info("进入：从数据库中加载table方法,ds id:{},tableName:{}",dsId,tableName);
+		
+		SQLManager sqlManager = storageBaseService.getSQLManager(dsId);
+		MetadataManager metadataManager = sqlManager.getMetaDataManager();
+		List<String> tableNames = metadataManager.allTable().stream().filter(table->{
+			if(StringUtils.isEmpty(tableName)) {
+				return true;
+			}
+			return table.indexOf(tableName)>=0;
+		}).collect(Collectors.toList());
+		
+		// 分批验证table是否已登记
+		List<SysDataDefine> tableList = ListUtil.partition(tableNames, 500).stream().map(names->{
+			Map<String, SysDataDefine> map=dataBaseDao.findList(SqlBuilder.build(SysDataDefine.class)
+					.where("delFlag=0 and appId=? and dsId=? and name in [names]")
+					.params("appId", appId)
+					.params("dsId", dsId)
+					.params("names", names))
+					.stream().collect(Collectors.toMap(SysDataDefine::getName,v->v));
+			return names.stream().map(name->{
+				SysDataDefine define=new SysDataDefine();
+				SysDataDefine tmp=map.get(name);
+				if(tmp!=null) {
+					define.setId(tmp.getId());
+					define.setTitle(tmp.getTitle());
+				}else {
+					TableDesc table = metadataManager.getTable(name);
+					if(StringUtils.isEmpty(table.getRemark())) {
+						define.setTitle(StrUtil.toCamelCase(name));
+					}else {
+						define.setTitle(table.getRemark());
+					}
+				}
+				define.setName(name);
+				return define;
+			}).collect(Collectors.toList());
+		}).flatMap(List::stream).collect(Collectors.toList());
+		
+		return Results.success(tableList);
+	}
 	
 	
 	

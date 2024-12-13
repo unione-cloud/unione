@@ -76,13 +76,27 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	}
 
 	
+	@PostMapping(value="/load/from/db")
+	@ApiOperation(value="从数据库加载table",notes = "从数据库中选中加载数据table，支持table名称过滤")
+	public Results<List<SysDataDefine>> loadFromDb(@RequestParam(value="appId",required = false) Long appId,
+			@RequestParam(value="dsId") Long dsId,
+			@RequestParam(value="tableName",required = false) String tableName){
+		log.debug("进入：从数据库加载table方法,ds id:{}, tableName:{}",dsId,tableName);
+		LogsUtil.set(LogType.Query, "从数据库加载table");		
+		
+		Results<List<SysDataDefine>> result = dataDefineService.loadFromDb(appId,dsId, tableName);		
+		
+		LogsUtil.save(result.isSuccess());
+		return result;
+	}
+	
 	@PostMapping(value="/imp/from/db")
-	@ApiOperation(value="从数据库导入",notes = "从数据库中选中表格导入，自动解析生成数据定义")
+	@ApiOperation(value="从数据库导入table",notes = "从数据库中选中表格导入table，自动解析生成数据定义")
 	public Results<String> impFromDb(@RequestParam(value="appId",required = false) Long appId,
 			@RequestParam(value="dsId") Long dsId,
 			@RequestParam(value="tables") List<String> tables,
 			@RequestParam(value="force", required = false) boolean force){
-		log.debug("进入：从数据库导入数据定义方法,ds id:{} tables:{}",dsId,tables);
+		log.debug("进入：从数据库导入数据定义方法,ds id:{}, tables:{}",dsId,tables);
 		LogsUtil.set(LogType.Insert, "从数据库导入数据定义");		
 		
 		Results<String> result = dataDefineService.impFromDb(appId,dsId, tables,force);		
