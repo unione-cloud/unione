@@ -109,7 +109,7 @@ public class DataDefineService {
 				this.syncDataField(dataDefine);
 				
 				// 更新数据定义
-				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","settings","ordered","status","descs"};
+				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","configs","ordered","status","descs"};
 				SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
 				int len = dataBaseDao.updateById(sqlBuilder);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
@@ -182,7 +182,8 @@ public class DataDefineService {
 			
 			// 更新字段
 			SysDataField sdField=hadFieldMap.remove(field.getId());
-			BeanUtils.copy(field, sdField, fieldAttr);			
+			BeanUtils.copy(field, sdField, fieldAttr);
+			sdField.setConfigs(field.getConfigs());
 			int len = dataBaseDao.updateById(SqlBuilder.build(sdField).field(fieldAttr));
 			AssertUtil.service().isTrue(len>0, "字段更新失败");			
 		});
