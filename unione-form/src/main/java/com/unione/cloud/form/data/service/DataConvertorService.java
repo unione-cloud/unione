@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
@@ -69,8 +70,8 @@ public class DataConvertorService {
 	 * @param request
 	 * @return
 	 */
-	public Results<List<DataConvertOption>> load(Long id,DataConvertRequest request){
-		log.debug("进入：加载数据选项方法,id:{},request:{}",id,request);
+	public Results<List<DataConvertOption>> load(Long id,Params<DataConvertRequest> params){
+		log.debug("进入：加载数据选项方法,id:{},params:{}",id,params);
 		AssertUtil.service().notNull(id, "转换器id不能为空");
 		
 		SysDataConvertor convertor=dataBaseDao.findById(SqlBuilder.build(SysDataConvertor.class).id(id));
@@ -78,9 +79,9 @@ public class DataConvertorService {
 			.notEq(convertor.getStatus(), 1, "转换器已停用");
 		
 		if(ConvertorType.API.value().equals(convertor.getTypes())) {
-			return loadApi(convertor,request);
+			return loadApi(convertor,params);
 		}else if(ConvertorType.DBTABLE.value().equals(convertor.getTypes())) {
-			return loadDbTable(convertor,request);
+			return loadDbTable(convertor,params);
 		}
 		
 		return Results.success();
@@ -93,8 +94,8 @@ public class DataConvertorService {
 	 * @param request
 	 * @return
 	 */
-	public Results<List<DataConvertOption>> loadApi(SysDataConvertor convertor,DataConvertRequest request){
-		log.info("进入：从远程接口中加载转换数据方法,id:{},ds id:{},url:{},request:{}",convertor.getId(),convertor.getDsId(),convertor.getUrl(),request);
+	public Results<List<DataConvertOption>> loadApi(SysDataConvertor convertor,Params<DataConvertRequest> params){
+		log.info("进入：从远程接口中加载转换数据方法,id:{},ds id:{},url:{},request:{}",convertor.getId(),convertor.getDsId(),convertor.getUrl(),params.getBody());
 		
 		return Results.success();
 	}
@@ -106,7 +107,8 @@ public class DataConvertorService {
 	 * @param request
 	 * @return
 	 */
-	public Results<List<DataConvertOption>> loadDbTable(SysDataConvertor convertor,DataConvertRequest request){
+	public Results<List<DataConvertOption>> loadDbTable(SysDataConvertor convertor,Params<DataConvertRequest> params){
+		DataConvertRequest request=params.getBody();
 		log.info("进入：从远程接口中加载转换数据方法,id:{},ds id:{},table:{},request:{}",convertor.getId(),convertor.getDsId(),convertor.getTableName(),request);
 		AssertUtil.service().notNull(convertor, new String[]{"dsId","tableName","valueField","labelField"},"转换器属性%s丢失");
 		if(!ObjectUtil.isEmpty(convertor.getPidField())) {
@@ -155,23 +157,23 @@ public class DataConvertorService {
 			sql.append(System.lineSeparator()).append(convertor.getTableWhere());
 		}
 		
-		Map<String, Object> params=new HashMap<>();
-		params.put("id",request.getId());
-		params.put("pid",request.getPid());
-		params.put("value",request.getValue());
-		params.put("keywords",request.getKeywords());
+		Map<String, Object> paramsObj=new HashMap<>();
+		paramsObj.put("id",request.getId());
+		paramsObj.put("pid",request.getPid());
+		paramsObj.put("value",request.getValue());
+		paramsObj.put("keywords",request.getKeywords());
 		
-		params.put("user",sessionService.getPrincipal());
-		params.put("now", DateUtil.date());
+		paramsObj.put("user",sessionService.getPrincipal());
+		paramsObj.put("now", DateUtil.date());
 		
 		Map<String, Object> ctx=new HashMap<>();
-		ctx.put("params", params);
+		ctx.put("params", paramsObj);
 		List<String> fields=Arrays.asList("id","pid","value","label"); 
 		Results<List<DataConvertOption>> result=Results.success();
 		if(convertor.isPaging()) {
 			// 分页加载
 			DataResult<List<Map<String, Object>>> dataResult = storageBaseService.findListPage(convertor.getDsId(), 
-					sql.toString(), ctx, request.getPage()!=null?request.getPage():1, 15);
+					sql.toString(), ctx, params.getPage(), 15);
 			result.setTotal(dataResult.getTotal());
 			List<DataConvertOption> options = dataResult.getBody().stream().map(row->{
 				DataConvertOption option=new DataConvertOption();

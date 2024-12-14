@@ -60,8 +60,8 @@ public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor
 	
 	@PostMapping("/load/{id}")
 	@ApiOperation(value="加载转换数据")
-	public Results<List<DataConvertOption>> load(@PathVariable("id") Long id, @RequestBody DataConvertRequest request){
-		return dataConvertorService.load(id,request);
+	public Results<List<DataConvertOption>> load(@PathVariable("id") Long id, @RequestBody Params<DataConvertRequest> params){
+		return dataConvertorService.load(id,params);
 	}
 	
 	

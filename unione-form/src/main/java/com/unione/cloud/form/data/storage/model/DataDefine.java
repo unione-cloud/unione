@@ -454,7 +454,7 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="转换器ID")
 		private Long id;
 		
-		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项,dbtable:数据集,api:数据接口")
+		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项,dbtable:数据集,api：后端接口(后端代理调用),rest:前端接口（前端直接调用）")
 		private String types;
 		
 		@ApiModelProperty(value="字典名称")

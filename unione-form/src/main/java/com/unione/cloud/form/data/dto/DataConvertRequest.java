@@ -20,7 +20,4 @@ public class DataConvertRequest {
 	@ApiModelProperty(value="转换value")
 	private String value;
 	
-	@ApiModelProperty(value="当前页码")
-	private Integer page;
-	
 }

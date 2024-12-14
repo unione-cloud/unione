@@ -54,7 +54,7 @@ public class SysDataConvertor extends Pojo {
 	/**
 	* 类型，dict：字典，option：静态选项，dbtable：数据集，api：接口
 	*/
-	@ApiModelProperty(value="类型，dict：字典，option：静态选项，dbtable：数据集，api：接口",notes="长度为：20")
+	@ApiModelProperty(value="类型，dict：字典，option：静态选项，dbtable：数据集，api：后端接口(后端代理调用),rest:前端接口（前端直接调用）",notes="长度为：20")
 	private String types;
 	/**
 	* 字典名称
