@@ -164,12 +164,14 @@ public class DataConvertorService {
 		params.put("user",sessionService.getPrincipal());
 		params.put("now", DateUtil.date());
 		
+		Map<String, Object> ctx=new HashMap<>();
+		ctx.put("params", params);
 		List<String> fields=Arrays.asList("id","pid","value","label"); 
 		Results<List<DataConvertOption>> result=Results.success();
 		if(convertor.isPaging()) {
 			// 分页加载
 			DataResult<List<Map<String, Object>>> dataResult = storageBaseService.findListPage(convertor.getDsId(), 
-					sql.toString(), params, request.getPage()!=null?request.getPage():1, 15);
+					sql.toString(), ctx, request.getPage()!=null?request.getPage():1, 15);
 			result.setTotal(dataResult.getTotal());
 			List<DataConvertOption> options = dataResult.getBody().stream().map(row->{
 				DataConvertOption option=new DataConvertOption();
@@ -188,7 +190,7 @@ public class DataConvertorService {
 			result.setBody(options);
 		}else {
 			// 列表加载
-			List<DataConvertOption> options = storageBaseService.findList(convertor.getDsId(), sql.toString(), params)
+			List<DataConvertOption> options = storageBaseService.findList(convertor.getDsId(), sql.toString(), ctx)
 			.stream().map(row->{
 				DataConvertOption option=new DataConvertOption();
 				row.keySet().stream().forEach(key->{
