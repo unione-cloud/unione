@@ -129,20 +129,25 @@ public class DataConvertorService {
 		}
 		sql.append(field);
 		sql.append(" FROM ").append(convertor.getTableName());
-		sql.append(" WHERE 1=1 ").append(System.lineSeparator())
-		   .append("-- @if(isNotEmpty(params.id))").append(System.lineSeparator())
-		   .append(" AND ").append(convertor.getIdField()).append("=#{params.id}").append(System.lineSeparator())
-		   .append("-- @}");
+		sql.append(" WHERE 1=1 ");
+		if(!ObjectUtil.isEmpty(convertor.getIdField())) {
+			sql.append(System.lineSeparator())
+			   .append("-- @if(isNotEmpty(params.id)){").append(System.lineSeparator())
+			   .append(" AND ").append(convertor.getIdField()).append("=#{params.id}").append(System.lineSeparator())
+			   .append("-- @}");
+		}
+		if(!ObjectUtil.isEmpty(convertor.getPidField())) {
+			sql.append(System.lineSeparator())
+			   .append("-- @if(isNotEmpty(params.pid)){").append(System.lineSeparator())
+			   .append(" AND ").append(convertor.getPidField()).append("=#{params.pid}").append(System.lineSeparator())
+			   .append("-- @}");
+		}
 		sql.append(System.lineSeparator())
-		   .append("-- @if(isNotEmpty(params.pid))").append(System.lineSeparator())
-		   .append(" AND ").append(convertor.getPidField()).append("=#{params.pid}").append(System.lineSeparator())
-		   .append("-- @}");
-		sql.append(System.lineSeparator())
-		   .append("-- @if(isNotEmpty(params.value) && !isBlank(params.value))").append(System.lineSeparator())
+		   .append("-- @if(isNotEmpty(params.value) && !isBlank(params.value)){").append(System.lineSeparator())
 		   .append(" AND ").append(convertor.getValueField()).append("=#{params.value}").append(System.lineSeparator())
 		   .append("-- @}");
 		sql.append(System.lineSeparator())
-		   .append("-- @if(isNotEmpty(params.keywords) && !isBlank(params.keywords))").append(System.lineSeparator())
+		   .append("-- @if(isNotEmpty(params.keywords) && !isBlank(params.keywords)){").append(System.lineSeparator())
 		   .append(" AND (").append(convertor.getValueField()).append(" LIKE #{'%'+params.keywords+'%'} OR ").append(convertor.getLabelField()).append(" LIKE #{'%'+params.keywords+'%'})").append(System.lineSeparator())
 		   .append("-- @}");
 		
@@ -172,6 +177,9 @@ public class DataConvertorService {
 					if(fields.contains(key)) {
 						BeanUtils.setFieldValue(option, key, row.get(key));
 					}else {
+						if(option.getProps()==null) {
+							option.setProps(new HashMap<>());
+						}
 						option.getProps().put(key, row.get(key));
 					}
 				});
@@ -187,6 +195,9 @@ public class DataConvertorService {
 					if(fields.contains(key)) {
 						BeanUtils.setFieldValue(option, key, row.get(key));
 					}else {
+						if(option.getProps()==null) {
+							option.setProps(new HashMap<>());
+						}
 						option.getProps().put(key, row.get(key));
 					}
 				});
@@ -203,6 +214,9 @@ public class DataConvertorService {
 				options.stream().forEach(o->{
 					DataConvertOption parent=map.get(o.getPid());
 					if(parent!=null) {
+						if(parent.getChildren()==null) {
+							parent.setChildren(new ArrayList<>());
+						}
 						parent.getChildren().add(o);
 					}else {
 						root.add(o);

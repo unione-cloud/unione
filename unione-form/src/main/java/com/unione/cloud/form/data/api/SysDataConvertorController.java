@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.data.dto.DataConvertOption;
 import com.unione.cloud.form.data.dto.DataConvertRequest;
 import com.unione.cloud.form.data.model.SysDataConvertor;
@@ -39,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
+@RefreshScope
 @RestController
 @Api(tags = "系统管理：数据转换器",description="SysDataConvertor")
 @RequestMapping("/api/data/convertor")	 //TreeFeignApi
@@ -49,6 +53,9 @@ public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor
 	
 	@Autowired
 	private DataConvertorService dataConvertorService;
+	
+	@Value("${unione.form.page.default.appid:1000}")
+	private Long DEFAULT_APP_ID;
 	
 	
 	@PostMapping("/load/{id}")
@@ -79,6 +86,11 @@ public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor
 	public Results<Long> save(@Validated(Validator.save.class) SysDataConvertor entity) {
 		log.debug("进入:新增数据转换器信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增数据转换器");
+		
+		entity.setDelFlag(0);
+		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "appId",DEFAULT_APP_ID);
+		
 		// 参数处理
 		dataBaseDao.insert(entity);
 		

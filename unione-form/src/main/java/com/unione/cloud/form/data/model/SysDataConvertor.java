@@ -1,5 +1,9 @@
 package com.unione.cloud.form.data.model;
 import java.util.Date;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
@@ -11,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	SysDataConvertor Entity
@@ -104,11 +109,15 @@ public class SysDataConvertor extends Pojo {
 	/**
 	* value字段
 	*/
+	@NotEmpty(message = "value字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "value字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
 	@ApiModelProperty(value="value字段",notes="长度为：50")
 	private String valueField;
 	/**
 	* label字段
 	*/
+	@NotEmpty(message = "label字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "label字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
 	@ApiModelProperty(value="label字段",notes="长度为：50")
 	private String labelField;
 	/**

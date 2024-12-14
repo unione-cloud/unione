@@ -50,6 +50,17 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		log.debug("进入:加载基础字典信息方法,name:{}",name);
 		List<BaseDict> list = dataBaseDao.findList(SqlBuilder.build(BaseDict.builder()
 				.dictName(name).status(1).build()).sort(Sort.build("ordered", "asc")));
+		
+		list.stream().forEach(row->{
+			row.setCreated(null);
+			row.setCreatedBy(null);
+			row.setLastUpdated(null);
+			row.setLastUpdatedBy(null);
+			row.setAppId(null);
+			row.setAppName(null);
+			row.setStatus(null);
+		});
+		
 		return Results.success(list);
 	}
 	
