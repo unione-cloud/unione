@@ -451,9 +451,11 @@ public class DataDefine extends SysDataDefine{
 		 * 
 		 */
 		private static final long serialVersionUID = -397912081282257936L;
-
-		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项")
-		private String type;
+		@ApiModelProperty(value="转换器ID")
+		private Long id;
+		
+		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项,dbtable:数据集,api:数据接口")
+		private String types;
 		
 		@ApiModelProperty(value="字典名称")
 		private String dictName;
@@ -461,7 +463,50 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="选项集合")
 		private List<DataOption> options;
 		
+		@ApiModelProperty(value="搜索是否可用")
+		private boolean search;
+		
+		@ApiModelProperty(value="树形结构是否异步加载",notes="长度为：10")
+		private boolean isAsync;
+		
+		@ApiModelProperty(value="是否分页加载",notes="长度为：10")
+		private boolean isPaging;
+		
+		@ApiModelProperty(value="api url地址")
+		private String url;
+		
+		@ApiModelProperty(value="数据源ID")
+		private Long dsId;
+		
+		@ApiModelProperty(value="table名称")
+		private String tableName;
+		
+		@ApiModelProperty(value = "数据字段集合",notes = "默认只加载value,label字段，可以通过该属性加载其他更多字段,多个字段用逗号分隔")
+		private String tableField;
+		
+		@ApiModelProperty(value = "数据过滤",notes = "支持数据条件过滤，使用beetlsql语法")
+		private String tableWhere;
+		
+		@ApiModelProperty(value = "数据排序",notes = "指定排序规则")
+		private String tableOrder;
+		
+		@ApiModelProperty(value = "主键字段",notes = "默认ID")
+		private String idField;
+		
+		@ApiModelProperty(value = "父级字段",notes = "默认PID")
+		private String pidField;
+		
+		@ApiModelProperty(value = "value字段",notes = "如果为空，则组件使用keyField字段")
+		private String valueField;
+		
+		@ApiModelProperty(value = "label字段")
+		private String labelField;
+		
+		@ApiModelProperty(value = "显示层级",notes = "树形组件生效")
+		private Integer showLevel;
+		
 	}
+	
 	
 	
 	

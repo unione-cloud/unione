@@ -297,6 +297,69 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		}
 	}
 	
+	@Data
+	@ApiModel("按钮组件")
+	public static class Button extends Widget {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4064275584042514224L;
+
+		@ApiModelProperty(value="按钮名称",notes = "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
+		private String name;
+		
+		@ApiModelProperty("是否显示")
+		private Boolean visible;
+		
+		@ApiModelProperty("是否禁用")
+		private Boolean disabled;
+		
+		@ApiModelProperty("响应设置")
+		private ButtonAction action;
+		
+		@ApiModelProperty("按钮事件")
+		private ButtonEvent event;
+		
+		@ApiModelProperty(value="显示顺序",notes = "按钮显示顺序")
+		private Integer index;
+		
+		@ApiModelProperty("按钮属性")
+		private ButtonProps props;
+	}
+	
+	@Data
+	@ApiModel("按钮属性")
+	public static class ButtonProps implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8392444232066625861L;
+
+		@ApiModelProperty(value = "按钮icon图标")
+		private String icon;
+		
+		@ApiModelProperty(value = "按钮shape形状",notes = "可选:default | circle | round")
+		private String shape;
+		
+		@ApiModelProperty(value = "按钮type类型",notes = "可选:primary | ghost | dashed | link | text | default")
+		private String type;
+		
+		@ApiModelProperty(value = "按钮size大小",notes = "可选:large | middle | small")
+		private String size;
+		
+		@ApiModelProperty(value = "按钮trigger事件触发",notes = "可选:large | middle | small")
+		private String trigger;
+		
+		@ApiModelProperty("是否危险按钮")
+		private boolean danger;
+		
+		@ApiModelProperty(value="自适应按钮",notes = "将按钮宽度调整为其父宽度的选项")
+		private boolean block;
+		
+		@ApiModelProperty(value="幽灵按钮",notes = "使按钮背景透明")
+		private boolean ghost;
+		
+	}
 	
 	@Data
 	@ApiModel("表单组件配置")
@@ -335,6 +398,83 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private Integer labelWidget;
 		
 	}
+	
+	@Data
+	@ApiModel("表单项/控件")
+	public static class FormItem extends Widget {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -28563820147504303L;
+		
+		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
+		private String dsn;
+
+		@ApiModelProperty(value="组件name",notes = "数据绑定字段名称")
+		private String name;
+		
+		@ApiModelProperty(value="组件初始值")
+		private String value;
+		
+		
+		@ApiModelProperty(value="隐藏表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
+		private List<String> hidden;
+		
+		@ApiModelProperty(value="只读表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否只读，为空时所有表单可写，不为空时指定表单只读")
+		private List<String> readonly;
+		
+		@ApiModelProperty(value="表单项事件")
+		private FormItemEvent event;
+		
+		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
+		private FormRule rules;
+		
+		@ApiModelProperty(value="外键设置")
+		private ForeignKey fkey;
+		
+		@ApiModelProperty(value="条件样式")
+		private List<ConditionStyle> conditionStyle;
+		
+		@ApiModelProperty(value="组件属性")
+		private FormItemProps props;
+		
+	}
+	
+	
+	@Data
+	@ApiModel("表单项配置  ")
+	public static class FormItemProps implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2367848605872325522L;
+
+		@ApiModelProperty(value="是否必填")
+		private Boolean required;
+		
+		@ApiModelProperty(value="组件提示信息")
+		private String placeholder;
+		
+		@ApiModelProperty(value="输入帮助")
+		private String help;
+		
+		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		private String dataFormat;
+		
+	}
+	
+	
+	@Data
+	@ApiModel("下拉框组件")
+	public static class SelectBox extends FormItem {
+		
+		
+		@ApiModelProperty(value="数据转换")
+		private DataConvert convert;
+		
+		
+	}
+	
 	
 	
 	@Data
@@ -405,6 +545,26 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private TableWidgetProps props;
 		
 	}
+	
+	
+	@Data
+	@ApiModel("表格组件属性")
+	public static class TableWidgetProps implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8092409023579026643L;
+		
+		@ApiModelProperty(value="滚动条：X",notes = "横向滚动设置")
+		private Integer scrollX;
+		
+		@ApiModelProperty(value="滚动条：Y",notes = "纵向滚动设置")
+		private Integer scrollY;
+		
+		
+	}
+	
+	
 	
 	@Data
 	@ApiModel("表格分页配置")
@@ -576,90 +736,8 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	
-	@Data
-	@ApiModel("表格组件属性")
-	public static class TableWidgetProps implements Serializable{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -8092409023579026643L;
-		
-		@ApiModelProperty(value="滚动条：X",notes = "横向滚动设置")
-		private Integer scrollX;
-		
-		@ApiModelProperty(value="滚动条：Y",notes = "纵向滚动设置")
-		private Integer scrollY;
-		
-		
-	}
 	
 	
-	@Data
-	@ApiModel("表单项/控件")
-	public static class FormItem extends Widget {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -28563820147504303L;
-		
-		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
-		private String dsn;
-
-		@ApiModelProperty(value="组件name",notes = "数据绑定字段名称")
-		private String name;
-		
-		@ApiModelProperty(value="组件初始值")
-		private String value;
-		
-		
-		@ApiModelProperty(value="隐藏表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
-		private List<String> hidden;
-		
-		@ApiModelProperty(value="只读表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否只读，为空时所有表单可写，不为空时指定表单只读")
-		private List<String> readonly;
-		
-		@ApiModelProperty(value="表单项事件")
-		private FormItemEvent event;
-		
-		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
-		private FormRule rules;
-		
-		@ApiModelProperty(value="外键设置")
-		private ForeignKey fkey;
-		
-		@ApiModelProperty(value="数据转换")
-		private DataConvert convert;
-		
-		@ApiModelProperty(value="条件样式")
-		private List<ConditionStyle> conditionStyle;
-		
-		@ApiModelProperty(value="组件属性")
-		private FormItemProps props;
-		
-	}
-	
-	
-	@Data
-	@ApiModel("表单项配置  ")
-	public static class FormItemProps implements Serializable{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -2367848605872325522L;
-
-		@ApiModelProperty(value="是否必填")
-		private Boolean required;
-		
-		@ApiModelProperty(value="组件提示信息")
-		private String placeholder;
-		
-		@ApiModelProperty(value="输入帮助")
-		private String help;
-		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
-		private String dataFormat;
-		
-	}
 	
 	
 	@Data
@@ -700,35 +778,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	
-	@Data
-	@ApiModel("按钮组件")
-	public static class Button extends Widget {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -4064275584042514224L;
-
-		@ApiModelProperty(value="按钮名称",notes = "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
-		private String name;
-		
-		@ApiModelProperty("是否显示")
-		private Boolean visible;
-		
-		@ApiModelProperty("是否禁用")
-		private Boolean disabled;
-		
-		@ApiModelProperty("响应设置")
-		private ButtonAction action;
-		
-		@ApiModelProperty("按钮事件")
-		private ButtonEvent event;
-		
-		@ApiModelProperty(value="显示顺序",notes = "按钮显示顺序")
-		private Integer index;
-		
-		@ApiModelProperty("按钮属性")
-		private ButtonProps props;
-	}
+	
 	
 	
 	
@@ -816,39 +866,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 	}
 	
-	@Data
-	@ApiModel("按钮属性")
-	public static class ButtonProps implements Serializable{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -8392444232066625861L;
-
-		@ApiModelProperty(value = "按钮icon图标")
-		private String icon;
-		
-		@ApiModelProperty(value = "按钮shape形状",notes = "可选:default | circle | round")
-		private String shape;
-		
-		@ApiModelProperty(value = "按钮type类型",notes = "可选:primary | ghost | dashed | link | text | default")
-		private String type;
-		
-		@ApiModelProperty(value = "按钮size大小",notes = "可选:large | middle | small")
-		private String size;
-		
-		@ApiModelProperty(value = "按钮trigger事件触发",notes = "可选:large | middle | small")
-		private String trigger;
-		
-		@ApiModelProperty("是否危险按钮")
-		private boolean danger;
-		
-		@ApiModelProperty(value="自适应按钮",notes = "将按钮宽度调整为其父宽度的选项")
-		private boolean block;
-		
-		@ApiModelProperty(value="幽灵按钮",notes = "使按钮背景透明")
-		private boolean ghost;
-		
-	}
 	
 	
 	

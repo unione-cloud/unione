@@ -65,9 +65,9 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("data");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("data");
-		SourceBuilder mdBuilder = new SqlMdSourceBuilder("data");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("system");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("system");
+//		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
 //		sourceBuilder.add(mdBuilder);
@@ -80,7 +80,7 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
-		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.form");
+		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.portal");
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 		
 		//可以在控制台看到生成的所有代码
@@ -91,9 +91,8 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("sys_data_field",mavenProject);
-		factory.gen("sys_data_field_his",mavenProject);
-		factory.gen("sys_data_field_release",mavenProject);
+		factory.gen("base_dict",mavenProject);
+		factory.gen("base_dict_setting",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 
