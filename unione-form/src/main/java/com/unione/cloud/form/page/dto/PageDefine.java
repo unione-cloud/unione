@@ -93,6 +93,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty("页面设置对象")
 		private PageSetting setting;
+		
+		@ApiModelProperty("样式设置")
+		private Css css;
+		
 	}
 	
 	
