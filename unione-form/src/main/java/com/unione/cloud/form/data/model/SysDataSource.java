@@ -4,6 +4,7 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -35,11 +36,13 @@ public class SysDataSource extends Pojo {
 	/**
 	* 标题
 	*/
+	@UniQueryKeyWord
 	@ApiModelProperty(value="标题",notes="长度为：100")
 	private String title;
 	/**
 	* 名称，eg：数据库名称
 	*/
+	@UniQueryKeyWord
 	@ApiModelProperty(value="名称，eg：数据库名称",notes="长度为：50")
 	private String name;
 	/**
@@ -120,6 +123,7 @@ public class SysDataSource extends Pojo {
 	/**
 	* 说明
 	*/
+	@UniQueryKeyWord
 	@ApiModelProperty(value="说明",notes="长度为：500")
 	private String descs;
 
