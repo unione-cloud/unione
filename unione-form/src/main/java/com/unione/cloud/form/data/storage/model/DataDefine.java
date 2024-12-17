@@ -264,8 +264,11 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="数据查询")
 		private DataQuery query;
 		
+		@ApiModelProperty(value="显示设置")
+		private FieldShow show;
+		
 		@ApiModelProperty(value="条件样式")
-		private List<ConditionStyle> conditionStyle;
+		private List<ConditionStyle> termStyle;
 		
 	}
 	
@@ -362,6 +365,9 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="表单显示",notes = "字段在表单页面显示配置")
 		private FieldForm form;
 		
+		@ApiModelProperty(value="详情显示",notes = "字段在表单页面显示配置")
+		private FieldForm view;
+		
 	}
 	
 	@Data
@@ -454,7 +460,7 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="转换器ID")
 		private Long id;
 		
-		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项,dbtable:数据集,api：后端接口(后端代理调用),rest:前端接口（前端直接调用）")
+		@ApiModelProperty(value="转换类型",notes = "dict:字典,option:静态选项,dbtable:数据集,remote：远程接口(后端代理调用),local:本地接口（前端直接调用）")
 		private String types;
 		
 		@ApiModelProperty(value="字典名称")
@@ -472,8 +478,11 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="是否分页加载",notes="长度为：10")
 		private boolean isPaging;
 		
-		@ApiModelProperty(value="api url地址")
+		@ApiModelProperty(value="api url地址",notes = "统一使用POST请求，json提交,标准结构:{body:{参数}}")
 		private String url;
+		
+		@ApiModelProperty(value="api 接口参数",notes = "标准json字符串,直接使用该参数进行接口请求")
+		private String params;
 		
 		@ApiModelProperty(value="数据源ID")
 		private Long dsId;
@@ -530,6 +539,9 @@ public class DataDefine extends SysDataDefine{
 		
 		@ApiModelProperty(value="最大值")
 		private Integer rangeMax;
+		
+		@ApiModelProperty(value="范围验证消息")
+		private String rangeMessage;
 		
 		@ApiModelProperty(value="正则表达式")
 		private String regExpress;
