@@ -48,6 +48,11 @@ public class SysDataField extends Pojo {
 	@ApiModelProperty(value="名称",notes="长度为：50")
 	private String name;
 	/**
+	* 默认值
+	*/
+	@ApiModelProperty(value="默认值",notes="长度为：100")
+	private String dataValue;
+	/**
 	* 数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等
 	*/
 	@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")

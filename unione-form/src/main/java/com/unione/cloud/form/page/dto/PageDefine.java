@@ -458,6 +458,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="输入帮助")
 		private String help;
 		
+		@ApiModelProperty(value="输入提示")
+		private String tooltip;
+		
 		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
 		private String dataFormat;
 		

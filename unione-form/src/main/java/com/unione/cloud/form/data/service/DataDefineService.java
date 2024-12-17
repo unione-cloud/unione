@@ -310,22 +310,22 @@ public class DataDefineService {
 			// 查询字段处理
 			DataQuery query=field.getConfigDto().getQuery();
 			if (query!=null && query.isEnable()){
-				if (DataQueryType.EQ.name().equals(query.getType())){
+				if (DataQueryType.EQ.name().equals(query.getTypes())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 					.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LIKE.name().equals(query.getType())){
+				if (DataQueryType.LIKE.name().equals(query.getTypes())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 					.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LLIKE.name().equals(query.getType())){
+				if (DataQueryType.LLIKE.name().equals(query.getTypes())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 					.append(" AND ").append(field.getName()).append(" LIKE #{'%'+params.").append(field.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.RLIKE.name().equals(query.getType())){
+				if (DataQueryType.RLIKE.name().equals(query.getTypes())){
 					whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
 					.append(" AND ").append(field.getName()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}").append(System.lineSeparator())
 					.append("-- @}");
@@ -393,7 +393,7 @@ public class DataDefineService {
 				.append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 				.append(") || ");
 
-				if (DataQueryType.EQ.name().equals(fkfield.getConfigDto().getQuery().getType())){
+				if (DataQueryType.EQ.name().equals(fkfield.getConfigDto().getQuery().getTypes())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -401,7 +401,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append("=#{params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
+				if (DataQueryType.LIKE.name().equals(fkfield.getConfigDto().getQuery().getTypes())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -409,7 +409,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append(" LIKE #{'%'+params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("+'%'}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.LLIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
+				if (DataQueryType.LLIKE.name().equals(fkfield.getConfigDto().getQuery().getTypes())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")
@@ -417,7 +417,7 @@ public class DataDefineService {
 					.append(" AND fkt.").append(fkfield.getName()).append(" LIKE #{'%'+params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append("}").append(System.lineSeparator())
 					.append("-- @}");
 				}
-				if (DataQueryType.RLIKE.name().equals(fkfield.getConfigDto().getQuery().getType())){
+				if (DataQueryType.RLIKE.name().equals(fkfield.getConfigDto().getQuery().getTypes())){
 					fkWhereFields.append(System.lineSeparator())
 					.append("-- @if(isNotEmpty(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias())
 					.append(") && !isBlank(params.").append(fkeyField.getAlias()).append("Params.").append(fkfield.getAlias()).append(")")

@@ -292,6 +292,9 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="输入帮助")
 		private String help;
 		
+		@ApiModelProperty(value="输入提示")
+		private String tooltip;
+		
 		@ApiModelProperty(value="组件属性")
 		private Map<String,Object> props;
 		
@@ -436,7 +439,7 @@ public class DataDefine extends SysDataDefine{
 		private boolean enable;
 		
 		@ApiModelProperty(value="查询类型",notes = "字典：DATAQUERYTYPE EQ：精确查询，LIKE：模糊查询，LLIKE:左模糊，RLIKE：右模糊,RANGE：范围查询,ADVANCE：高级查询")
-		private String type;
+		private String types;
 		
 		@ApiModelProperty(value="默认查询",notes = "默认查询：即加入关键字查询")
 		private boolean defoult;
@@ -493,7 +496,7 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value = "数据字段集合",notes = "默认只加载value,label字段，可以通过该属性加载其他更多字段,多个字段用逗号分隔")
 		private String tableField;
 		
-		@ApiModelProperty(value = "数据过滤",notes = "支持数据条件过滤，使用beetlsql语法")
+		@ApiModelProperty(value = "数据过滤",notes = "支持数据条件过滤，eg：sex=1")
 		private String tableWhere;
 		
 		@ApiModelProperty(value = "数据排序",notes = "指定排序规则")
@@ -505,10 +508,10 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value = "父级字段",notes = "默认PID")
 		private String pidField;
 		
-		@ApiModelProperty(value = "value字段",notes = "如果为空，则组件使用keyField字段")
+		@ApiModelProperty(value = "value字段",notes = "不能为空")
 		private String valueField;
 		
-		@ApiModelProperty(value = "label字段")
+		@ApiModelProperty(value = "label字段",notes = "不能为空")
 		private String labelField;
 		
 		@ApiModelProperty(value = "显示层级",notes = "树形组件生效")
