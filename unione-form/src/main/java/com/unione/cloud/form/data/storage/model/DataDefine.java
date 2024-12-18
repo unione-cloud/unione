@@ -530,6 +530,9 @@ public class DataDefine extends SysDataDefine{
 		 * 
 		 */
 		private static final long serialVersionUID = -1474367822075160446L;
+		
+		@ApiModelProperty(value="规则触发时机",notes = "change,blur")
+		private List<String> trigger;
 
 		@ApiModelProperty(value="是否忽略空格",notes = "必填验证开启时，是否忽略空格")
 		private Boolean whitespace;

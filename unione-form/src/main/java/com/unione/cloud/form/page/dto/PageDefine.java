@@ -135,6 +135,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="平台名称",notes = "pc,app")
 		private String platform;
+		
+		@ApiModelProperty(value="规则触发时机",notes = "change,blur")
+		private String ruleTrigger;
+		
 	}
 	
 	
@@ -427,7 +431,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private FormItemEvent event;
 		
 		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
-		private FormRule rules;
+		private DataRule rule;
 		
 		@ApiModelProperty(value="外键设置")
 		private ForeignKey fkey;
@@ -764,22 +768,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private EventDefine visible;
 		
 	}
-	
-	
-	@Data
-	@ApiModel("规则")
-	public static class FormRule extends DataRule{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 2149358082168501860L;
-		
-		@ApiModelProperty(value="触发事件",notes = "change,blur")
-		private String trigger;
-		
-		
-	}
-	
 	
 	
 	
