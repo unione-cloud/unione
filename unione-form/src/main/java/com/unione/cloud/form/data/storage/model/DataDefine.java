@@ -485,7 +485,7 @@ public class DataDefine extends SysDataDefine{
 		private String url;
 		
 		@ApiModelProperty(value="api 接口参数",notes = "标准json字符串,直接使用该参数进行接口请求")
-		private String params;
+		private Object params;
 		
 		@ApiModelProperty(value="数据源ID")
 		private Long dsId;
