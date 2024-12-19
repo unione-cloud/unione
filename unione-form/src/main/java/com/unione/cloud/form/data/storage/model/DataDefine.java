@@ -313,11 +313,23 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="是否外键")
 		private boolean enable;
 		
-		@ApiModelProperty(value="外键关联数据模型编码",notes = "")
+		@ApiModelProperty(value="外键关联数据编码",notes = "")
 		private String dsn;
+		
+		@ApiModelProperty(value="外键关联数据id",notes = "")
+		private String dsnId;
+		
+		@ApiModelProperty(value="外键关联数据名称",notes = "")
+		private String dsnName;
+		
+		@ApiModelProperty(value="外键关联数据标题",notes = "")
+		private String dsnTitle;
 		
 		@ApiModelProperty(value="外键关联字段名称",notes = "")
 		private String fieldName;
+		
+		@ApiModelProperty(value="外键关联字段标题",notes = "")
+		private String fieldTitle;
 		
 		@ApiModelProperty(value="外键显示字段名称",notes = "如果不为空，则数据列表中显示该字段指定名称的字段数据")
 		private String labelName;
@@ -485,7 +497,7 @@ public class DataDefine extends SysDataDefine{
 		private String url;
 		
 		@ApiModelProperty(value="api 接口参数",notes = "标准json字符串,直接使用该参数进行接口请求")
-		private Object params;
+		private Map<String, Object> params;
 		
 		@ApiModelProperty(value="数据源ID")
 		private Long dsId;
