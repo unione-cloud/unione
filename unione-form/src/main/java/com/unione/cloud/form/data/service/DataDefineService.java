@@ -47,6 +47,9 @@ import com.unione.cloud.form.data.storage.model.DataDefine.DataFilter;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQuery;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQueryType;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
+import com.unione.cloud.form.page.dto.PageDefine.FormPageDefine;
+import com.unione.cloud.form.page.dto.PageDefine.ListPageDefine;
+import com.unione.cloud.form.page.model.SysPageDefine;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
@@ -369,6 +372,42 @@ public class DataDefineService {
 		define.setSignature(signature);
 		return signature;
 	} 
+	
+	
+	/**
+	 * 生成页面信息：增删改查
+	 * @param define
+	 */
+	public void buildPageInfo(DataDefine define) {
+		log.debug("进入：生成页面信息：增删改查,data define id:{}",define.getId());
+		LogsUtil.add("进入：生成页面信息：增删改查,data define id:%s",define.getId());
+		
+		SysPageDefine listPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:list", define.getSn())));		
+		SysPageDefine formPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:form", define.getSn())));
+		SysPageDefine viewPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:view", define.getSn())));
+		
+		
+		ListPageDefine listDefine=new ListPageDefine();
+		FormPageDefine formDefine=new FormPageDefine();
+		FormPageDefine viewDefine=new FormPageDefine();
+		
+		
+		
+		
+		
+	}
+	
+	/**
+	 * 发布页面信息：增删改查
+	 * @param define
+	 */
+	public void releasePageInfo(DataDefine define) {
+		
+		
+	}
 	
 	
 	/**
