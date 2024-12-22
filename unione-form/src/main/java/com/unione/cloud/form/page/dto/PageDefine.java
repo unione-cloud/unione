@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,7 +48,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	@JsonProperty("configs")
 	@ApiModelProperty("页面配置对象")
 	@JsonDeserialize(using = PageConfigDeserializer.class)
-	private T config;
+	private T configDto;
 	
 	
 	@JsonIgnore
@@ -55,14 +56,14 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	public PageDefine<T> setConfigs(String configs) {
 		super.setConfigs(configs);
 		Type[] types = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		config=JSONUtil.toBean(configs, (Class<T>)types[0]);
+		configDto=JSONUtil.toBean(configs, (Class<T>)types[0]);
 		return this;
 	}
 	
 	@JsonIgnore
 	public String getConfigs() {
-		if(config!=null) {
-			super.setConfigs(JSONUtil.toJsonStr(config));
+		if(configDto!=null) {
+			super.setConfigs(JSONUtil.toJsonStr(configDto));
 		}
 		return super.getConfigs();
 	}
@@ -82,7 +83,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty("页面组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
-		private List<Widget> widgets;
+		private List<Widget> widgets=new ArrayList<>();
 		
 		@ApiModelProperty("数据模型sn集合")
 		private List<String> dsnList;
@@ -215,8 +216,38 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = 8134983161647019935L;
 		
+		@JsonIgnore
+		private QueryWidget queryForm;
+		
+		@JsonIgnore
+		private TableWidget tableList;
 		
 		
+		public QueryWidget getQueryForm() {
+			if(queryForm==null) {
+				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof QueryWidget).findFirst();
+				if(optional.isPresent()) {
+					queryForm=(QueryWidget)optional.get();
+				}else {
+					queryForm=new QueryWidget();
+					this.getWidgets().add(0, queryForm);
+				}
+			}
+			return queryForm;
+		}
+		
+		public TableWidget getTableList() {
+			if(tableList==null) {
+				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof TableWidget).findFirst();
+				if(optional.isPresent()) {
+					tableList=(TableWidget)optional.get();
+				}else {
+					tableList=new TableWidget();
+					this.getWidgets().add(tableList);
+				}
+			}
+			return tableList;
+		}
 		
 	}
 	
@@ -494,12 +525,76 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 
 		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
+		
+		@ApiModelProperty(value="关键字查询",notes = "")
+		private QueryKeywords keywords;
+		
+		@ApiModelProperty(value="查询字段集合",notes = "")
+		private List<QueryField> fields;
+		
+		
+		
+		
 
 		//TODO	补全组件定义
-		
+		public QueryWidget() {
+			this.setWidget("unione-query");
+		}
 		
 		
 	}
+	
+	@Data
+	@ApiModel("查询关键字")
+	public static class QueryKeywords implements Serializable{/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3043407708514297445L;
+		@ApiModelProperty(value="是否显示",notes = "")
+		private boolean visible;
+		@ApiModelProperty(value="显示标题",notes = "")
+		private String title;
+		@ApiModelProperty(value="查询名称",notes = "默认：keywords")
+		private String name;
+		@ApiModelProperty(value="输入提示",notes = "")
+		private String placeholder;
+	}
+	
+	@Data
+	@ApiModel("查询字段")
+	public static class QueryField implements Serializable{
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4572865056411195920L;
+		
+		@ApiModelProperty(value="字段标题",notes = "")
+		private String title;
+		
+		@ApiModelProperty(value="字段名称",notes = "")
+		private String name;
+		
+		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		private String dataFormat;
+		
+		@ApiModelProperty(value="组件设置")
+		private FieldWidget widget;
+		
+		@ApiModelProperty(value="外键设置")
+		private ForeignKey fkey;
+		
+		@ApiModelProperty("字段搜索")
+		private DataQuery query;
+
+		@ApiModelProperty(value="数据转换")
+		private DataConvert convert;
+		
+		@ApiModelProperty(value="条件样式")
+		private List<ConditionStyle> conditionStyle;
+		
+	}
+	
 	
 
 	@Data
@@ -550,6 +645,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 
 		@ApiModelProperty("table设置")
 		private TableWidgetProps props;
+		
+		public TableWidget() {
+			this.setWidget("unione-table");
+		}
 		
 	}
 	
@@ -888,6 +987,19 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		WRITE,READ,NONE
 	}
 	
+	
+	@ApiModel("页面类型")
+	public static enum PageType{
+		CODE("code"),SETTING("setting"),DESGIN("design");
+		
+		private String value;
+		private PageType(String value) {
+			this.value=value;
+		}
+		public String value() {
+			return this.value;
+		}
+	}
 	
 }
 

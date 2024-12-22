@@ -43,12 +43,14 @@ import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineCategory;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineConfig;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataFieldConfig;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataFilter;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQuery;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQueryType;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
 import com.unione.cloud.form.page.dto.PageDefine.FormPageDefine;
 import com.unione.cloud.form.page.dto.PageDefine.ListPageDefine;
+import com.unione.cloud.form.page.dto.PageDefine.PageType;
 import com.unione.cloud.form.page.model.SysPageDefine;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -389,7 +391,7 @@ public class DataDefineService {
 		SysPageDefine viewPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
 				.params("sn", String.format("%s:view", define.getSn())));
 		
-		
+		LogsUtil.add("列表页面初始化,psn:%s",String.format("%s:list", define.getSn()));
 		ListPageDefine listDefine=new ListPageDefine();
 		if(listPage!=null) {
 			listDefine.setId(listPage.getId());
@@ -397,15 +399,54 @@ public class DataDefineService {
 			listDefine.setSn(String.format("%s:list", define.getSn()));
 			listDefine.setComponent("unione-page-list");
 			listDefine.setAppId(define.getAppId());
-			
-			
+			listDefine.setTypes(PageType.SETTING.value());
+			listDefine.setIsTmpl(0);
+			listDefine.setIsGlobal(0);
+			listDefine.setStatus(1);		
 		}
 		listDefine.setVers(define.getVers());
 		listDefine.setTitle(String.format("%s列表", define.getTitle()));
+		listDefine.setConfigs("{}");
 		
+		define.getConfigDto().getFields().stream().forEach(field->{
+			DataFieldConfig config=field.getConfigDto();
+			if(config!=null) {
+				if(config.getQuery()!=null && config.getQuery().isEnable()) {
+					// 查询字段
+					listDefine.getConfigDto().getQueryForm();
+					
+				}	
+			}
+		});	
+		
+		
+		LogsUtil.add("表单页面初始化,psn:%s",String.format("%s:form", define.getSn()));
 		FormPageDefine formDefine=new FormPageDefine();
-		FormPageDefine viewDefine=new FormPageDefine();
+		if(formPage!=null) {
+			formDefine.setId(formPage.getId());
+		}else {
+			formDefine.setSn(String.format("%s:form", define.getSn()));
+			formDefine.setComponent("unione-page-form");
+			formDefine.setAppId(define.getAppId());
+			formDefine.setTypes(PageType.SETTING.value());
+			formDefine.setIsTmpl(0);
+			formDefine.setIsGlobal(0);
+			formDefine.setStatus(1);
+		}
 		
+		LogsUtil.add("详情页面初始化,psn:%s",String.format("%s:view", define.getSn()));
+		FormPageDefine viewDefine=new FormPageDefine();
+		if(viewPage!=null) {
+			viewDefine.setId(viewPage.getId());
+		}else {
+			viewDefine.setSn(String.format("%s:view", define.getSn()));
+			viewDefine.setComponent("unione-page-view");
+			viewDefine.setAppId(define.getAppId());
+			viewDefine.setTypes(PageType.SETTING.value());
+			viewDefine.setIsTmpl(0);
+			viewDefine.setIsGlobal(0);
+			viewDefine.setStatus(1);
+		}
 		
 		
 		
