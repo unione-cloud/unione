@@ -513,12 +513,12 @@ public class SqlBuilder<T> {
 			
 			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID).stream().forEach(field->{
 				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
-			      .append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("},\n")
+			      .append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n")
 			      .append("-- @}\n");
 			});
 			this.entity.getStsFields(BaseField.ORGAN_CODE).stream().forEach(field->{
 				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
-			      .append(" AND ").append(field.getColumn()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'},\n")
+			      .append(" AND ").append(field.getColumn()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}\n")
 			      .append("-- @}\n");
 			});
 			
@@ -785,6 +785,11 @@ public class SqlBuilder<T> {
 	
 	public SqlBuilder<T> ids(List<Long> ids){
 		this.ids=ids;
+		return this;
+	}
+	
+	public SqlBuilder<T> ids(Set<Long> ids){
+		this.ids=new ArrayList<>(ids);
 		return this;
 	}
 	

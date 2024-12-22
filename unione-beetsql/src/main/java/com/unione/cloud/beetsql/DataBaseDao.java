@@ -97,8 +97,8 @@ public class DataBaseDao {
 	 */
 	public <T> int[] insertBatch(List<T> list) {
 		SessionService sessionService=SessionHolder.build();
+		PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(list.get(0).getClass(), BaseField.ID.getName());
 		list.stream().forEach(entity->{
-			PropertyDescriptor idProp = BeanKit.getPropertyDescriptor(entity.getClass(), BaseField.ID.getName());
 			if(Long.class.equals(idProp.getPropertyType())) {
 				BeanKit.setBeanProperty(entity, IdGenHolder.generate(), idProp.getName());
 			}

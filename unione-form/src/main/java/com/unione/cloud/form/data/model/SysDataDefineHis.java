@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
@@ -27,11 +28,12 @@ import com.unione.cloud.core.model.Validator;
  **/
 @Data
 @Builder
-@SqlResource("data.SysDataDefineHis")
+@UniDataPermis
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_data_define_his")
+@SqlResource("data.SysDataDefineHis")
 public class SysDataDefineHis extends Pojo {
 	/**
 	 * 
@@ -127,6 +129,11 @@ public class SysDataDefineHis extends Pojo {
 	*/
 	@ApiModelProperty(value="数据配置，json存储,{}",notes="长度为：65535")
 	private String configs;
+	/**
+	* 数据签名
+	*/
+	@ApiModelProperty(value="数据签名",notes="数据签名，（configs，xxxxScript等）字段hash运算后的值,长度为：100")
+	private String signature;
 	/**
 	* 显示顺序
 	*/

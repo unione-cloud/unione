@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
@@ -28,11 +29,12 @@ import com.unione.cloud.core.model.Validator;
  **/
 @Data
 @Builder
-@SqlResource("data.SysDataDefine")
+@UniDataPermis
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_data_define")
+@SqlResource("data.SysDataDefine")
 public class SysDataDefine extends Pojo {
 	/**
 	 * 
@@ -125,6 +127,11 @@ public class SysDataDefine extends Pojo {
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="数据配置，json存储,{}",notes="长度为：65535")
 	private String configs;
+	/**
+	* 数据签名
+	*/
+	@ApiModelProperty(value="数据签名",notes="数据签名，（configs，xxxxScript等）字段hash运算后的值,长度为：100")
+	private String signature;
 	/**
 	* 显示顺序
 	*/

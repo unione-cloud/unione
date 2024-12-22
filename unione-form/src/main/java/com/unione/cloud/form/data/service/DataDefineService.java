@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -28,10 +29,15 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.model.SysDataDefine;
+import com.unione.cloud.form.data.model.SysDataDefineHis;
+import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.model.SysDataField;
+import com.unione.cloud.form.data.model.SysDataFieldHis;
+import com.unione.cloud.form.data.model.SysDataFieldRelease;
 import com.unione.cloud.form.data.storage.StorageBaseService;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataDefineCategory;
@@ -45,6 +51,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -72,8 +79,136 @@ public class DataDefineService {
 	@Autowired
 	private StorageBaseService storageBaseService;
 	
+	@Autowired
+	private SecretService secretService;
+	
 	@Value("${unione.form.page.default.appid:1000}")
 	private Long DEFAULT_APP_ID;
+	
+	
+	
+	/**
+	 * 发布数据定义
+	 * @param ids
+	 * @return
+	 */
+	@Transactional
+	public Results<String> release(Set<Long> ids){
+		log.info("进入：预发布数据定义方法,ids:{}",ids);		
+		AssertUtil.service().notEmpty(ids, "参数数据定义id集合不能为空");		
+		LogsUtil.add("ids:%s",JSONUtil.toJsonStr(ids));
+		LogsUtil.setExtData(JSONUtil.toJsonStr(ids));
+		LogsUtil.add("加载数据定义列表");
+		List<SysDataDefine> defines=dataBaseDao.findByIds(SqlBuilder.build(SysDataDefine.class).ids(ids));		
+		
+		LogsUtil.add("验证数据定义加载结果");
+		defines.stream().forEach(d->ids.remove(d.getId()));
+		AssertUtil.service().isTrue(ids.isEmpty(), "参数数据定义对象未找到,ids:"+JSONUtil.toJsonStr(ids));	
+		
+		LogsUtil.add("验证数据定义是否被删除");
+		List<String> delNames = defines.stream()
+			.filter(d->Objects.equals(1, d.getDelFlag()))
+			.map(d->d.getTitle())
+			.collect(Collectors.toList());
+		AssertUtil.service().isTrue(delNames.isEmpty(), "数据定义已删除"+JSONUtil.toJsonStr(delNames));
+		
+		LogsUtil.add("加载数据定义发布列表");
+		Map<Long,SysDataDefineRelease> definesRelease=dataBaseDao.findList(SqlBuilder.build(SysDataDefineRelease.class).ids(ids))
+				.stream().collect(Collectors.toMap(SysDataDefineRelease::getId, (v1)->v1));
+		
+		LogsUtil.add("迭代数据定义列表，处理发布逻辑");
+		StringBuffer success=new StringBuffer();
+		StringBuffer unchange=new StringBuffer();
+		
+		try {
+			defines.stream().forEach(define->{
+				SysDataDefineRelease release=definesRelease.get(define.getId());
+				if(release==null || !Objects.equals(release.getSignature(),define.getSignature())){
+					// 未发布、签名不一致（有更新）
+					doRelease(define,release);
+					success.append(define.getTitle()).append(",");
+				}else {
+					// 数据定义未更新，不需要重新发布
+					unchange.append(define.getTitle()).append(",");
+				}
+				
+			});
+		} catch (Exception e) {
+			log.error("发布数据定义失败",e);
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			return	Results.failure();
+		};
+		
+		StringBuffer info=new StringBuffer();
+		info.append("成功发布:").append(success.length()>0?success.substring(0,success.length()-1):"0");
+		if(unchange.length()>0) {
+			info.append(",无变化：").append(unchange.substring(0,unchange.length()-1));
+		}
+		LogsUtil.add("result:%s",info.toString());
+		
+		return Results.success(info.toString());
+	}
+	
+	
+	/**
+	 * 发布数据定义
+	 * @param define
+	 * @param relase
+	 */
+	private void doRelease(SysDataDefine define,SysDataDefineRelease relase) {
+		log.info("进入：发布数据定义方法,define id:{},release id:{}",define.getId(),relase!=null?relase.getId():"null");		
+		LogsUtil.add("进入：发布数据定义方法,define id:%s,release id:%s",define.getId(),relase!=null?relase.getId():"null");
+		LogsUtil.add("data define id:%s",define.getId());
+		
+		define.setPublishDate(DateUtil.date());
+		
+		LogsUtil.add("加载数据字段列表");
+		List<SysDataField> fields=dataBaseDao.findList(SqlBuilder.build(SysDataField.class)
+				.params("defineId", define.getId()));	
+		
+		// 发布记录
+		if(relase!=null) {
+			LogsUtil.add("新版本发布，curent ver:%s",define.getVers());
+			define.setVers(define.getVers()+1);
+			dataBaseDao.delete(SqlBuilder.build(SysDataDefineRelease.class).id(define.getId()));
+			dataBaseDao.delete(SqlBuilder.build(SysDataFieldRelease.class).params("defineId",define.getId()));
+		}else {
+			define.setVers(1);
+			LogsUtil.add("首次发布，curent ver:%s",define.getVers());
+		}
+		relase=new SysDataDefineRelease();
+		BeanUtils.copy(define, relase);
+		int len = dataBaseDao.insertWithId(relase);
+		AssertUtil.service().isTrue(len>0, "数据定义发布失败");
+		
+		List<SysDataFieldRelease> fieldReleaseList= fields.stream().map(field->{
+			SysDataFieldRelease fieldRelease=new SysDataFieldRelease();
+			BeanUtils.copy(field, fieldRelease);
+			return fieldRelease;
+		}).collect(Collectors.toList());
+		dataBaseDao.insertBatchWithId(fieldReleaseList);		
+		LogsUtil.add("保存字段发布，field count:%s",fieldReleaseList.size());
+		
+		// 发布历史
+		SysDataDefineHis defineHis=new SysDataDefineHis();
+		BeanUtils.copy(define, defineHis);
+		defineHis.setDefineId(define.getId());
+		dataBaseDao.insert(defineHis);
+		LogsUtil.add("保存数据定义历史，did:%s,hid:%s",defineHis.getDefineId(),defineHis.getId());		
+		
+		List<SysDataFieldHis> fieldHisList= fields.stream().map(field->{
+			SysDataFieldHis fieldHis=new SysDataFieldHis();
+			BeanUtils.copy(field, fieldHis);
+			fieldHis.setDefineHisId(defineHis.getId());
+			return fieldHis;
+		}).collect(Collectors.toList());
+		dataBaseDao.insertBatch(fieldHisList);		
+		LogsUtil.add("保存数据字段历史，field count:%s",fieldHisList.size());
+		
+		len = dataBaseDao.updateById(SqlBuilder.build(define).field("vers","publishDate"));
+		AssertUtil.service().isTrue(len>0, "数据定义发布失败");
+		
+	}
 	
 	
 	
@@ -110,8 +245,11 @@ public class DataDefineService {
 				// 同步数据字段
 				this.syncDataField(dataDefine);
 				
+				// 签名
+				this.doSignature(dataDefine);
+				
 				// 更新数据定义
-				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","configs","ordered","status","descs"};
+				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","configs","signature","ordered","status","descs"};
 				SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
 				int len = dataBaseDao.updateById(sqlBuilder);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
@@ -132,6 +270,9 @@ public class DataDefineService {
 				
 				// 同步数据字段
 				this.syncDataField(dataDefine);
+				
+				// 签名
+				this.doSignature(dataDefine);
 				
 				// 保存数据定义
 				int len = dataBaseDao.insertWithId(dataDefine);
@@ -208,6 +349,26 @@ public class DataDefineService {
 		}
 		
 	}
+	
+	
+	/**
+	 * 数据定义：签名
+	 * @param define
+	 * @return
+	 */
+	public String doSignature(SysDataDefine define) {
+		StringBuffer tmp=new StringBuffer();
+		tmp.append(define.getFindScript())
+		   .append(define.getInsertScript())
+		   .append(define.getUpdateScript())
+		   .append(define.getDeleteScript())
+		   .append(define.getConfigs());
+		
+		String signature=secretService.hash(tmp.toString());
+		define.setSignature(signature);
+		return signature;
+	} 
+	
 	
 	/**
 	 * 生成数据定义增删改查SQL

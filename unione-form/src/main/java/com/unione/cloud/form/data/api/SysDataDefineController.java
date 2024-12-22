@@ -65,7 +65,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 		LogsUtil.set(LogType.Query, "查询数据定义管理列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysDataDefine>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<SysDataDefine>> results = dataBaseDao.findPages(SqlBuilder.build(params).params("delFlag", 0));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -110,11 +110,28 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	@ApiOperation(value="保存数据定义")
 	public Results<DataDefine> save(@Validated(Validator.save.class) @RequestBody DataDefine dataDefine) {
 		log.debug("进入:新增数据定义管理信息.dataDefine:{}",dataDefine);
+		LogsUtil.set(LogType.Insert, "保存数据定义");
 		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
 				UserFormRoles.FORM_CONFIG,
 				UserFormRoles.FORM_DEV), "当前帐号无权限");
 		
 		Results<DataDefine> result = dataDefineService.save(dataDefine);
+		
+		LogsUtil.save(result.isSuccess());
+		return result;
+	}
+	
+	
+	@PostMapping(value="/release")
+	@ApiOperation(value="发布数据定义")
+	public Results<String> release(@RequestBody Set<Long> ids) {
+		log.debug("进入:发布数据定义方法，ids:{}",ids);
+		LogsUtil.set(LogType.Update, "发布数据定义");
+		AssertUtil.service().isTrue(sessionService.hasRole(UserFormRoles.FORM_ADMIN,
+				UserFormRoles.FORM_CONFIG,
+				UserFormRoles.FORM_DEV), "当前帐号无权限");
+		
+		Results<String> result = dataDefineService.release(ids);
 		
 		LogsUtil.save(result.isSuccess());
 		return result;
