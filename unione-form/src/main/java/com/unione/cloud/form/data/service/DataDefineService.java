@@ -161,6 +161,7 @@ public class DataDefineService {
 		LogsUtil.add("data define id:%s",define.getId());
 		
 		define.setPublishDate(DateUtil.date());
+		define.setStatus(2);
 		
 		LogsUtil.add("加载数据字段列表");
 		List<SysDataField> fields=dataBaseDao.findList(SqlBuilder.build(SysDataField.class)
@@ -205,7 +206,7 @@ public class DataDefineService {
 		dataBaseDao.insertBatch(fieldHisList);		
 		LogsUtil.add("保存数据字段历史，field count:%s",fieldHisList.size());
 		
-		len = dataBaseDao.updateById(SqlBuilder.build(define).field("vers","publishDate"));
+		len = dataBaseDao.updateById(SqlBuilder.build(define).field("vers","publishDate","status"));
 		AssertUtil.service().isTrue(len>0, "数据定义发布失败");
 		
 	}

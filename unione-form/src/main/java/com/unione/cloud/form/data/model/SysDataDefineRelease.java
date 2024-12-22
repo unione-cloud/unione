@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
@@ -89,6 +91,8 @@ public class SysDataDefineRelease extends Pojo {
 	* 发布日期
 	*/
 	@ApiModelProperty(value="发布日期",notes="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
 	private Date publishDate;
 	/**
 	* 数据查询脚本
