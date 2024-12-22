@@ -335,7 +335,7 @@ public class DataDefine extends SysDataDefine{
 		private String labelName;
 		
 		@ApiModelProperty(value="外键显示字段标题",notes = "如果不为空，则数据列表表头中显示该字段标题")
-		private String labeTitle;
+		private String labelTitle;
 
 		@ApiModelProperty(value="额外显示的外键数据字段",notes = "")
 		private List<ForeignField> fields;
