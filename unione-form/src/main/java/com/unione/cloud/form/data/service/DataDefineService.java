@@ -391,6 +391,18 @@ public class DataDefineService {
 		
 		
 		ListPageDefine listDefine=new ListPageDefine();
+		if(listPage!=null) {
+			listDefine.setId(listPage.getId());
+		}else {
+			listDefine.setSn(String.format("%s:list", define.getSn()));
+			listDefine.setComponent("unione-page-list");
+			listDefine.setAppId(define.getAppId());
+			
+			
+		}
+		listDefine.setVers(define.getVers());
+		listDefine.setTitle(String.format("%s列表", define.getTitle()));
+		
 		FormPageDefine formDefine=new FormPageDefine();
 		FormPageDefine viewDefine=new FormPageDefine();
 		

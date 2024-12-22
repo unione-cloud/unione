@@ -130,6 +130,11 @@ public class SysPageDefine extends Pojo {
 	@NotEmpty(message="页面定义不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String configs;
 	/**
+	* 页面签名
+	*/
+	@ApiModelProperty(value="页面签名",notes="页面签名，（configs等）字段hash运算后的值,长度为：100")
+	private String signature;
+	/**
 	* 是否模版
 	*/
 	@ApiModelProperty(value="是否模版",notes="长度为：10")

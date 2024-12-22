@@ -116,6 +116,11 @@ public class SysPageRelease extends Pojo {
 	@ApiModelProperty(value="页面定义，json结构｛｝",notes="长度为：2147483647")
 	private String configs;
 	/**
+	* 页面签名
+	*/
+	@ApiModelProperty(value="页面签名",notes="页面签名，（configs等）字段hash运算后的值,长度为：100")
+	private String signature;
+	/**
 	* 是否模版
 	*/
 	@ApiModelProperty(value="是否模版",notes="长度为：10")
