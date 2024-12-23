@@ -152,6 +152,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = -3059345850174302894L;
 		
+		
+		
+		
 	}
 	
 	
@@ -168,6 +171,21 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 		@ApiModelProperty("表单事件")
 		private FormEvent event;
+		
+		@JsonIgnore
+		private FormWidget form;
+		public FormWidget getForm() {
+			if(form==null) {
+				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof FormWidget).findFirst();
+				if(optional.isPresent()) {
+					form=(FormWidget)optional.get();
+				}else {
+					form=new FormWidget();
+					this.getWidgets().add(form);
+				}
+			}
+			return form;
+		}
 		
 	}
 	
@@ -263,6 +281,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 * 
 		 */
 		private static final long serialVersionUID = 1203629620171596812L;
+		
+		@ApiModelProperty("显示顺序")
+		private Integer index;
 
 		@ApiModelProperty("组件id")
 		private String wid;
@@ -412,7 +433,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty("表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
-		private List<Widget> widgets;
+		private List<Widget> widgets=new ArrayList<>();
 		
 
 	}
@@ -451,6 +472,8 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="组件初始值")
 		private String value;
 		
+		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
+		private String dataType;
 		
 		@ApiModelProperty(value="隐藏表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
 		private List<String> hidden;
@@ -471,10 +494,34 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private List<ConditionStyle> conditionStyle;
 		
 		@ApiModelProperty(value="组件属性")
-		private FormItemProps props;
+		private FormItemProps props=new FormItemProps();
+		
+		@ApiModelProperty(value="组件显示")
+		private FormItemView view=new FormItemView();
 		
 	}
 	
+	@Data
+	@ApiModel("表单项view配置  ")
+	public static class FormItemView implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2367848605872325522L;
+		
+		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		private String dataFormat;
+
+		@ApiModelProperty(value="显示宽度",notes = "占用空间大小，24单元格")
+		private Integer width;
+		
+		@ApiModelProperty(value="label宽度",notes = "占用空间大小，24单元格")
+		private Integer labelWidth;
+		
+		@ApiModelProperty(value="widget宽度",notes = "占用空间大小，24单元格")
+		private Integer valueWidth;
+		
+	}
 	
 	@Data
 	@ApiModel("表单项配置  ")
@@ -485,7 +532,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private static final long serialVersionUID = -2367848605872325522L;
 
 		@ApiModelProperty(value="是否必填")
-		private Boolean required;
+		private boolean required;
 		
 		@ApiModelProperty(value="组件提示信息")
 		private String placeholder;
@@ -496,8 +543,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="输入提示")
 		private String tooltip;
 		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
-		private String dataFormat;
 		
 	}
 	
@@ -575,6 +620,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="字段名称",notes = "")
 		private String name;
 		
+		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
+		private String dataType;
+		
 		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
 		private String dataFormat;
 		
@@ -592,6 +640,12 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="条件样式")
 		private List<ConditionStyle> conditionStyle;
+		
+		@ApiModelProperty(value="默认查询",notes = "默认查询：即加入关键字查询")
+		private boolean defoult;
+		
+		@ApiModelProperty(value="默认显示",notes = "true:默认显示该查询,false：高级查询中自行勾选")
+		private boolean visible;
 		
 	}
 	
@@ -623,7 +677,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private String dsn;
 		
 		@ApiModelProperty(value="表格列模型")
-		private List<TableColumn> columns;
+		private List<TableColumn> columns=new ArrayList<>();
 		
 		@ApiModelProperty(value="分页配置")
 		private TablePagination pagination;
@@ -709,6 +763,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="条件样式")
 		private List<ConditionStyle> conditionStyle;
+		
+		@ApiModelProperty(value="显示顺序",notes = "默认是根据字段列表索引顺序显示，可以通过该字段指定显示顺序")
+		private Integer index;
 		
 		@ApiModelProperty(value="固定方式",notes = "默认：left,可选：'left' | 'right'")
 		private String fixed;

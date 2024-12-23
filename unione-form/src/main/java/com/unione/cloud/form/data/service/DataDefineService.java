@@ -1,7 +1,9 @@
 package com.unione.cloud.form.data.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,11 +49,18 @@ import com.unione.cloud.form.data.storage.model.DataDefine.DataFieldConfig;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataFilter;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQuery;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataQueryType;
+import com.unione.cloud.form.data.storage.model.DataDefine.FieldForm;
+import com.unione.cloud.form.data.storage.model.DataDefine.FieldList;
+import com.unione.cloud.form.data.storage.model.DataDefine.FieldWidget;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
+import com.unione.cloud.form.page.dto.PageDefine.FormItem;
 import com.unione.cloud.form.page.dto.PageDefine.FormPageDefine;
 import com.unione.cloud.form.page.dto.PageDefine.ListPageDefine;
 import com.unione.cloud.form.page.dto.PageDefine.PageType;
+import com.unione.cloud.form.page.dto.PageDefine.QueryField;
+import com.unione.cloud.form.page.dto.PageDefine.TableColumn;
 import com.unione.cloud.form.page.model.SysPageDefine;
+import com.unione.cloud.form.page.service.PageDefineService;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
@@ -86,6 +95,9 @@ public class DataDefineService {
 	
 	@Autowired
 	private SecretService secretService;
+	
+	@Autowired
+	private PageDefineService pageDefineService;
 	
 	@Value("${unione.form.page.default.appid:1000}")
 	private Long DEFAULT_APP_ID;
@@ -214,6 +226,10 @@ public class DataDefineService {
 		len = dataBaseDao.updateById(SqlBuilder.build(define).field("vers","publishDate","status"));
 		AssertUtil.service().isTrue(len>0, "数据定义发布失败");
 		
+		
+		releasePageInfo(define);
+		
+		
 	}
 	
 	
@@ -284,6 +300,9 @@ public class DataDefineService {
 				int len = dataBaseDao.insertWithId(dataDefine);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
 			}
+			
+			// 生成页面信息
+			buildPageInfo(dataDefine);
 			
 		} catch (Exception e) {
 			log.error("保存数据定义失败",e);
@@ -408,18 +427,6 @@ public class DataDefineService {
 		listDefine.setTitle(String.format("%s列表", define.getTitle()));
 		listDefine.setConfigs("{}");
 		
-		define.getConfigDto().getFields().stream().forEach(field->{
-			DataFieldConfig config=field.getConfigDto();
-			if(config!=null) {
-				if(config.getQuery()!=null && config.getQuery().isEnable()) {
-					// 查询字段
-					listDefine.getConfigDto().getQueryForm();
-					
-				}	
-			}
-		});	
-		
-		
 		LogsUtil.add("表单页面初始化,psn:%s",String.format("%s:form", define.getSn()));
 		FormPageDefine formDefine=new FormPageDefine();
 		if(formPage!=null) {
@@ -433,6 +440,10 @@ public class DataDefineService {
 			formDefine.setIsGlobal(0);
 			formDefine.setStatus(1);
 		}
+		formDefine.setVers(define.getVers());
+		formDefine.setTitle(String.format("%s表单", define.getTitle()));
+		formDefine.setConfigs("{}");
+		formDefine.getConfigDto().getForm().setDsn(define.getSn());
 		
 		LogsUtil.add("详情页面初始化,psn:%s",String.format("%s:view", define.getSn()));
 		FormPageDefine viewDefine=new FormPageDefine();
@@ -447,18 +458,182 @@ public class DataDefineService {
 			viewDefine.setIsGlobal(0);
 			viewDefine.setStatus(1);
 		}
+		viewDefine.setVers(define.getVers());
+		viewDefine.setTitle(String.format("%s详情", define.getTitle()));
+		viewDefine.setConfigs("{}");
+		viewDefine.getConfigDto().getForm().setDsn(define.getSn());
 		
+		LogsUtil.add("迭代字段列表，生成：列表页面，表单页面，详情页面");
+		define.getConfigDto().getFields().stream().forEach(field->{
+			DataFieldConfig config=field.getConfigDto();
+			if(config!=null) {
+				// 查询字段
+				if(config.getQuery()!=null && config.getQuery().isEnable()) {
+					QueryField queryField=new QueryField();
+					BeanUtils.copy(field, queryField);
+					BeanUtils.copy(field.getConfigDto(), queryField);
+					queryField.setVisible(config.getQuery().isVisible());
+					queryField.setDefoult(config.getQuery().isDefoult());
+					queryField.setWidget(config.getWidget());
+					if(!StringUtils.isEmpty(config.getQuery().getName())) {
+						queryField.setName(config.getQuery().getName());
+					}
+					listDefine.getConfigDto().getQueryForm().getFields().add(queryField);
+				}
+				// 列表字段
+				if(config.getShow()!=null && config.getShow().getList()!=null) {
+					FieldList listField=config.getShow().getList();
+					if(listField.isEnable()) {
+						TableColumn column=new TableColumn();
+						BeanUtils.copy(field, column);
+						BeanUtils.copy(field.getConfigDto(), column);
+						if(listField.getIndex()!=null) {
+							column.setIndex(listField.getIndex());
+						}else {
+							column.setIndex(listDefine.getConfigDto().getTableList().getColumns().size());
+						}
+						column.setFixed(listField.getFixed());
+						column.setWidth(listField.getWidth());
+						column.setAlign(listField.getAlign());
+						column.setRowMergeEnable(listField.isRowMergeEnable());
+						column.setColMergeEnable(listField.isColMergeEnable());
+						listDefine.getConfigDto().getTableList().getColumns().add(column);
+					}
+				}
+				// 表单字段
+				if(config.getShow()!=null && config.getShow().getForm()!=null) {
+					FieldForm formField=config.getShow().getForm();
+					if(formField.isEnable()) {
+						FormItem formItem=new FormItem();
+						BeanUtils.copy(field, formItem);
+						BeanUtils.copy(field.getConfigDto(), formItem);
+						if(Objects.equals(0, field.getIsNull())) {
+							formItem.getProps().setRequired(true);
+						}
+						if(formField.getIndex()!=null) {
+							formItem.setIndex(formField.getIndex());
+						}else {
+							formItem.setIndex(formDefine.getConfigDto().getForm().getWidgets().size());
+						}
+						formItem.setValue(field.getDataValue());
+						formItem.getView().setDataFormat(field.getDataFormat());
+						formItem.getView().setWidth(formField.getWidth());
+						formItem.getView().setLabelWidth(formField.getLabelWidth());
+						formItem.getView().setValueWidth(formField.getValueWidth());
+						
+						FieldWidget widget=config.getWidget();
+						if(widget!=null) {
+							formItem.setWidget(widget.getName());
+							formItem.getProps().setPlaceholder(widget.getPlaceholder());
+							formItem.getProps().setTooltip(widget.getTooltip());
+							formItem.getProps().setHelp(widget.getHelp());
+						}
+						formDefine.getConfigDto().getForm().getWidgets().add(formItem);
+					}
+					
+				}
+				
+				// 详情字段
+				if(config.getShow()!=null && config.getShow().getView()!=null) {
+					FieldForm viewField=config.getShow().getView();
+					if(viewField.isEnable()) {
+						FormItem formItem=new FormItem();
+						BeanUtils.copy(field, formItem);
+						BeanUtils.copy(field.getConfigDto(), formItem);
+						if(Objects.equals(0, field.getIsNull())) {
+							formItem.getProps().setRequired(true);
+						}
+						if(viewField.getIndex()!=null) {
+							formItem.setIndex(viewField.getIndex());
+						}else {
+							formItem.setIndex(viewDefine.getConfigDto().getForm().getWidgets().size());
+						}
+						formItem.setValue(field.getDataValue());
+						formItem.getView().setDataFormat(field.getDataFormat());
+						formItem.getView().setWidth(viewField.getWidth());
+						formItem.getView().setLabelWidth(viewField.getLabelWidth());
+						formItem.getView().setValueWidth(viewField.getValueWidth());
+						
+						FieldWidget widget=config.getWidget();
+						if(widget!=null) {
+							formItem.setWidget(widget.getName());
+							formItem.getProps().setPlaceholder(widget.getPlaceholder());
+							formItem.getProps().setTooltip(widget.getTooltip());
+							formItem.getProps().setHelp(widget.getHelp());
+						}
+						viewDefine.getConfigDto().getForm().getWidgets().add(formItem);
+					}
+					
+				}
+			}
+		});	
 		
+		LogsUtil.add("保存：列表页面，表单页面，详情页面");
+		pageDefineService.doSignature(listDefine);
+		if(listDefine.getId()!=null) {
+			// 更新
+			int len = dataBaseDao.updateById(SqlBuilder.build(listDefine).field("vers","title","configs","signature"));
+			LogsUtil.add("更新列表页面,len:%s",len);
+		}else {
+			// 新增
+			listPage=new SysPageDefine();
+			BeanUtils.copy(listDefine, listPage);
+			int len = dataBaseDao.insert(listPage);
+			LogsUtil.add("保存列表页面,len:%s",len);
+		}
 		
+		pageDefineService.doSignature(formDefine);
+		if(formDefine.getId()!=null) {
+			// 更新
+			int len = dataBaseDao.updateById(SqlBuilder.build(formDefine).field("vers","title","configs","signature"));
+			LogsUtil.add("更新表单页面,len:%s",len);
+		}else {
+			// 新增
+			formPage=new SysPageDefine();
+			BeanUtils.copy(formDefine, formPage);
+			int len = dataBaseDao.insert(formPage);
+			LogsUtil.add("保存表单页面,len:%s",len);
+		}
 		
+		pageDefineService.doSignature(viewDefine);
+		if(viewDefine.getId()!=null) {
+			// 更新
+			int len = dataBaseDao.updateById(SqlBuilder.build(viewDefine).field("vers","title","configs","signature"));
+			LogsUtil.add("更新详情页面,len:%s",len);
+		}else {
+			// 新增
+			viewPage=new SysPageDefine();
+			BeanUtils.copy(viewDefine, viewPage);
+			int len = dataBaseDao.insert(viewPage);
+			LogsUtil.add("保存详情页面,len:%s",len);
+		}
+		
+		LogsUtil.add("退出：生成页面信息：增删改查,data define id:%s,list page id:%s,form page id:%s,view page id:%s",
+				define.getId(),listPage.getId(),formPage.getId(),viewPage.getId());
+		log.debug("退出：生成页面信息：增删改查,data define id:{},list page id:{},form page id:{},view page id:{}",
+				define.getId(),listPage.getId(),formPage.getId(),viewPage.getId());
 	}
+	
 	
 	/**
 	 * 发布页面信息：增删改查
 	 * @param define
 	 */
-	public void releasePageInfo(DataDefine define) {
+	public void releasePageInfo(SysDataDefine define) {
+		log.info("进入：数据定义，列表，表单，详情页面发布方法");
+		SysPageDefine listPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:list", define.getSn())));
+		AssertUtil.service().notNull(listPage, "列表页面信息未找到");
 		
+		SysPageDefine formPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:form", define.getSn())));
+		AssertUtil.service().notNull(formPage, "表单页面信息未找到");
+		
+		SysPageDefine viewPage=dataBaseDao.findOne(SqlBuilder.build(SysPageDefine.class)
+				.params("sn", String.format("%s:view", define.getSn())));
+		AssertUtil.service().notNull(viewPage, "详情页面信息未找到");
+		
+		pageDefineService.release(new HashSet<>(Arrays.asList(listPage.getId(),formPage.getId(),viewPage.getId())));
 		
 	}
 	

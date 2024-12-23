@@ -399,6 +399,12 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="对齐方式",notes = "默认：left,可选：'center' | 'left' | 'right'")
 		private String align;
 		
+		@ApiModelProperty(value = "行合并开关",notes = "数据列表页面")
+		private boolean rowMergeEnable;
+		
+		@ApiModelProperty(value = "列合并开关",notes = "数据列表页面")
+		private boolean colMergeEnable;
+		
 	}
 	
 	@Data

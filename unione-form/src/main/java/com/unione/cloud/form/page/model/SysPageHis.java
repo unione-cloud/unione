@@ -1,8 +1,12 @@
 package com.unione.cloud.form.page.model;
+import java.util.Date;
+
 import org.beetl.sql.annotation.entity.AssignID;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -130,6 +134,13 @@ public class SysPageHis extends Pojo {
 	*/
 	@ApiModelProperty(value="页面状态，字典PAGESTATUS 1新建，2发布，3修改，4撤回",notes="长度为：10")
 	private Integer status;
+	/**
+	* 发布日期
+	*/
+	@ApiModelProperty(value="发布日期",notes="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date publishDate;
 	/**
 	* 备注
 	*/
