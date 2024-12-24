@@ -30,8 +30,8 @@ import com.unione.cloud.form.data.storage.model.DataDefine.FieldWidget;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
 import com.unione.cloud.form.page.dto.PageDefine.PageConfig;
 import com.unione.cloud.form.page.model.SysPageDefine;
+import com.unione.cloud.core.util.JsonUtil;
 
-import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -56,14 +56,15 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	public PageDefine<T> setConfigs(String configs) {
 		super.setConfigs(configs);
 		Type[] types = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		configDto=JSONUtil.toBean(configs, (Class<T>)types[0]);
+		System.out.println("types:"+types[0]);
+		configDto=JsonUtil.toBean((Class<T>)types[0],configs);
 		return this;
 	}
 	
 	@JsonIgnore
 	public String getConfigs() {
 		if(configDto!=null) {
-			super.setConfigs(JSONUtil.toJsonStr(configDto));
+			super.setConfigs(JsonUtil.toJson(configDto));
 		}
 		return super.getConfigs();
 	}
@@ -108,9 +109,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 			JsonNode node = parser.getCodec().readTree(parser);
 			String component=node.get("component").asText();	
 			switch (component) {
-			case "unione-list-page":
+			case "unione-page-list":
 				return parser.getCodec().treeToValue(node, ListPageConfig.class);
-			case "unione-form-page":
+			case "unione-page-form":
 				return parser.getCodec().treeToValue(node, FormPageConfig.class);
 			default:
 				log.error("页面组件,component:"+component+",未注册", parser.currentValue());
@@ -174,6 +175,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@JsonIgnore
 		private FormWidget form;
+		@JsonIgnore
 		public FormWidget getForm() {
 			if(form==null) {
 				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof FormWidget).findFirst();
@@ -240,7 +242,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@JsonIgnore
 		private TableWidget tableList;
 		
-		
+		@JsonIgnore
 		public QueryWidget getQueryForm() {
 			if(queryForm==null) {
 				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof QueryWidget).findFirst();
@@ -254,6 +256,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 			return queryForm;
 		}
 		
+		@JsonIgnore
 		public TableWidget getTableList() {
 			if(tableList==null) {
 				Optional<Widget> optional = this.getWidgets().stream().filter(w->w instanceof TableWidget).findFirst();
@@ -316,6 +319,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		public Object deserialize(JsonParser parser,JsonNode node) throws JsonProcessingException {
 			String widget = node.get("widget").asText();
+			log.info("widget:"+widget);
 			switch (widget) {
 			case "unione-button":
 				return parser.getCodec().treeToValue(node, Button.class);

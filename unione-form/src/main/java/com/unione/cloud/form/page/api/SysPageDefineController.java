@@ -100,11 +100,11 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 		AssertUtil.service().notNull(tmp, "页面信息未找到","404");
 		LogsUtil.setTarget(tmp.getId());
 		
-		if("unione-form-page".equals(tmp.getComponent())) {
+		if("unione-page-form".equals(tmp.getComponent())) {
 			FormPageDefine pageDefine=new FormPageDefine();
 			BeanUtils.copy(tmp, pageDefine);
 			tmp=pageDefine;
-		}else if("unione-list-page".equals(tmp.getComponent())) {
+		}else if("unione-page-list".equals(tmp.getComponent())) {
 			ListPageDefine pageDefine=new ListPageDefine();
 			BeanUtils.copy(tmp, pageDefine);
 			tmp=pageDefine;
