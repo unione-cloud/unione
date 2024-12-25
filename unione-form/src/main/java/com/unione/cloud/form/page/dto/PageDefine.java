@@ -579,7 +579,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private QueryKeywords keywords;
 		
 		@ApiModelProperty(value="查询字段集合",notes = "")
-		private List<QueryField> fields;
+		private List<QueryField> fields=new ArrayList<>();
 		
 		
 		
