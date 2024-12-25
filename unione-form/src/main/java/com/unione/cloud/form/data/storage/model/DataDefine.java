@@ -116,6 +116,9 @@ public class DataDefine extends SysDataDefine{
 		@ApiModelProperty(value="数据显示配置",notes = "")
 		private DataShow show;
 		
+		@ApiModelProperty(value="是否静默",notes = "静默模式，不提示异常信息")
+		private boolean silence;
+		
 	}
 	
 	@Data

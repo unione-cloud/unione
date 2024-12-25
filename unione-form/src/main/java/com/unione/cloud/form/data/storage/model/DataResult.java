@@ -8,6 +8,14 @@ public class DataResult<T> extends Results<T> {
 	 */
 	private static final long serialVersionUID = 7550726584804583822L;
 
+	private boolean silence;
+	
+	
+	public DataResult<T> silence(){
+		this.silence=true;
+		return this;
+	}
+	
 	/**
 	 * 	构建响应
 	 * @param <T>

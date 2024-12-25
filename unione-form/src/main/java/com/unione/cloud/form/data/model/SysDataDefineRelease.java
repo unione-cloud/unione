@@ -83,6 +83,11 @@ public class SysDataDefineRelease extends Pojo {
 	@ApiModelProperty(value="类别，sql：关系型存储，nosql：非关系型存储，api：接口存储",notes="长度为：10")
 	private String category;
 	/**
+	* URL，api接口url，不包含服务ctx部分,/开头，eg：/user
+	*/
+	@ApiModelProperty(value="api接入url",notes="api接口url，不包含服务ctx部分,/开头，eg：/user,长度为：100")
+	private String url;
+	/**
 	* 自定义，字典TUREORFALSE 1是，0否
 	*/
 	@ApiModelProperty(value="自定义，字典TUREORFALSE 1是，0否",notes="长度为：10")

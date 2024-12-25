@@ -426,6 +426,9 @@ public class DataDefineService {
 		listDefine.setVers(define.getVers());
 		listDefine.setTitle(String.format("%s列表", define.getTitle()));
 		listDefine.setConfigs("{}");
+		listDefine.getConfigDto().getQueryForm().setDsn(define.getSn());
+		listDefine.getConfigDto().getTableList().setDsn(define.getSn());
+		
 		
 		LogsUtil.add("表单页面初始化,psn:%s",String.format("%s:form", define.getSn()));
 		FormPageDefine formDefine=new FormPageDefine();

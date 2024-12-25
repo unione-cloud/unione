@@ -129,12 +129,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = 8234983161647012935L;
 		
-		@ApiModelProperty("接口上下文")
-		private String ctx;
-		
-		@ApiModelProperty("接口超时时间")
-		private Long timeout;
-		
 		@ApiModelProperty(value="平台名称",notes = "pc,app")
 		private String platform;
 		
@@ -581,9 +575,11 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="查询字段集合",notes = "")
 		private List<QueryField> fields=new ArrayList<>();
 		
+		@ApiModelProperty(value="按钮集合",notes = "")
+		private List<Button> btns;
 		
-		
-		
+		@ApiModelProperty(value="label显示宽度",notes = "默认7，最大24")
+		private Integer labelWidth;
 
 		//TODO	补全组件定义
 		public QueryWidget() {
