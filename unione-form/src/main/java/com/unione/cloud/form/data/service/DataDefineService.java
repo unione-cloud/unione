@@ -478,6 +478,7 @@ public class DataDefineService {
 					queryField.setVisible(config.getQuery().isVisible());
 					queryField.setDefoult(config.getQuery().isDefoult());
 					queryField.setWidget(config.getWidget());
+					queryField.setName(field.getAlias());
 					if(!StringUtils.isEmpty(config.getQuery().getName())) {
 						queryField.setName(config.getQuery().getName());
 					}
@@ -490,6 +491,7 @@ public class DataDefineService {
 						TableColumn column=new TableColumn();
 						BeanUtils.copy(field, column);
 						BeanUtils.copy(field.getConfigDto(), column);
+						column.setName(field.getAlias());
 						if(listField.getIndex()!=null) {
 							column.setIndex(listField.getIndex());
 						}else {
@@ -510,6 +512,7 @@ public class DataDefineService {
 						FormItem formItem=new FormItem();
 						BeanUtils.copy(field, formItem);
 						BeanUtils.copy(field.getConfigDto(), formItem);
+						formItem.setName(field.getAlias());
 						if(Objects.equals(0, field.getIsNull())) {
 							formItem.getProps().setRequired(true);
 						}
@@ -543,6 +546,7 @@ public class DataDefineService {
 						FormItem formItem=new FormItem();
 						BeanUtils.copy(field, formItem);
 						BeanUtils.copy(field.getConfigDto(), formItem);
+						formItem.setName(field.getAlias());
 						if(Objects.equals(0, field.getIsNull())) {
 							formItem.getProps().setRequired(true);
 						}
