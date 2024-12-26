@@ -271,7 +271,7 @@ public class DataDefineService {
 				this.doSignature(dataDefine);
 				
 				// 更新数据定义
-				String[] fields = {"dirId","dsId","title","name","isCustom","category","sqlFind","sqlInsert","sqlUpdate","sqlDelete","url","syncFlag","fields","configs","signature","ordered","status","descs"};
+				String[] fields = {"dirId","dsId","title","name","isCustom","category","findScript","insertScript","updateScript","deleteScript","url","syncFlag","fields","configs","signature","ordered","status","descs"};
 				SqlBuilder<SysDataDefine> sqlBuilder=SqlBuilder.build((SysDataDefine)dataDefine).field(fields);
 				int len = dataBaseDao.updateById(sqlBuilder);
 				AssertUtil.service().isTrue(len>0, "数据定义保存失败");
@@ -735,12 +735,7 @@ public class DataDefineService {
 		for (DataField field:dataDefine.getFields()){
 			// 如果是主键字段
 			if (idField!=null && field.getName().equals(idField.getName())){
-				whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-					.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
-					.append("-- @}");
-				updateWhereFiels.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){").append(System.lineSeparator())
-					.append(" AND ").append(field.getName()).append("=#{params.").append(field.getAlias()).append("}").append(System.lineSeparator())
-					.append("-- @}");
+				continue;
 			}
 			
 			// 查询字段处理

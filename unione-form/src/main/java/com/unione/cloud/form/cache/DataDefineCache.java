@@ -80,6 +80,7 @@ public class DataDefineCache {
 	public DataDefine load4Dev(String sn) {
 		log.info("进入：从db加载数据模型【dev】方法,sn:{}",sn);
 		DataDefine model=null;
+		AssertUtil.service().notNull(sn, "数据编码不能为空");
 		SysDataDefine tmp = SysDataDefine.builder().sn(sn).build();
 		tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
 		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
