@@ -237,7 +237,7 @@ public class DataStorageService {
 		paramObj.put("data", commit.getData());
 		paramObj.put("params", params);
 		paramObj.put("fields", fieldMap);
-		params.put(sidField.getName(), commit.getId());
+		params.put(sidField.getAlias(), commit.getId());
 		
 		processUpdateDeleteDefaultData(dataDefine,commit.getData());
 		
@@ -338,14 +338,14 @@ public class DataStorageService {
 		paramObj.put("fields", fieldMap);
 		
 		params.put(String.format("%ss", idField!=null?idField.getAlias():"id"), ids);
-		data.put(delFlagField.getName(), 1);
+		data.put(delFlagField.getAlias(), 1);
 		for(String field:data.keySet()) {
 			fieldMap.put(field, true);
 		}
 		
 		processUpdateDeleteDefaultData(dataDefine,data);
 		
-		return storageBaseService.delete(dsId, delFlagField!=null?dataDefine.getUpdateScript():dataDefine.getDeleteScript(), paramObj);
+		return storageBaseService.delete(dsId, dataDefine.getDeleteScript(), paramObj);
 	}
 	
 	
@@ -711,8 +711,8 @@ public class DataStorageService {
 			}		
 			return false;
 		}).filter(fkey->!StringUtils.isEmpty(fkey.getName()))
-		.filter(fkey->(fkeyList.isEmpty()||fkeyList.contains(fkey.getName()))).forEach(fkey->{
-			fkeyFieldMap.put(fkey.getName(), fkey);
+		.filter(fkey->(fkeyList.isEmpty()||fkeyList.contains(fkey.getAlias()))).forEach(fkey->{
+			fkeyFieldMap.put(fkey.getAlias(), fkey);
 		});
 		if(fkeyFieldMap.isEmpty()) {
 			// 外键字段为空

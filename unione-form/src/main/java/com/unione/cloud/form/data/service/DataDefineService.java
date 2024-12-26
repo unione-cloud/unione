@@ -662,7 +662,6 @@ public class DataDefineService {
 		StringBuffer updateWhereFiels = new StringBuffer();
 
 		StringBuffer whereFields = new StringBuffer();
-		List<DataField> whereIgnoreFields=new ArrayList<>();
 		StringBuffer updateFields = new StringBuffer();
 		StringBuffer deleteSql = new StringBuffer();
 		updateFields.append(System.lineSeparator()).append("-- @trim(){");
@@ -671,7 +670,6 @@ public class DataDefineService {
 		// 标准查询条件
 		DataField idField = dataDefine.getStsField(BaseField.ID);
 		if(idField!=null) {
-			whereIgnoreFields.add(idField);
 			whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.id)){").append(System.lineSeparator())
 				.append(" AND ").append(idField.getName()).append("=#{params.id}").append(System.lineSeparator())
 				.append("-- @}");
@@ -688,7 +686,6 @@ public class DataDefineService {
 		
 		DataField lastUpdatedField = dataDefine.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdatedField!=null) {
-			whereIgnoreFields.add(lastUpdatedField);
 			whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(lastUpdatedField.getAlias()).append("Start)){").append(System.lineSeparator())
 				.append(" AND ").append(lastUpdatedField.getName()).append(" > #{params.").append(lastUpdatedField.getAlias()).append("Start}").append(System.lineSeparator())
 				.append("-- @}");
@@ -698,7 +695,6 @@ public class DataDefineService {
 		}
 		DataField createdField = dataDefine.getStsField(BaseField.CREATED);
 		if(createdField!=null) {
-			whereIgnoreFields.add(createdField);
 			whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(createdField.getAlias()).append("Start)){").append(System.lineSeparator())
 				.append(" AND ").append(createdField.getName()).append(" > #{params.").append(createdField.getAlias()).append("Start}").append(System.lineSeparator())
 				.append("-- @}");
@@ -708,6 +704,9 @@ public class DataDefineService {
 		}
 		DataField delFlagField = dataDefine.getStsField(BaseField.DEL_FLAG);
 		if(delFlagField!=null) {
+			whereFields.append(System.lineSeparator()).append("-- @if(isNotEmpty(params.").append(delFlagField.getAlias()).append(")){").append(System.lineSeparator())
+				.append(" AND ").append(delFlagField.getName()).append("=#{params.").append(delFlagField.getAlias()).append("}").append(System.lineSeparator())
+				.append("-- @}");
 			deleteSql.append("UPDATE ").append(dataDefine.getName())
 				.append(" SET ").append(delFlagField.getName()).append("=1 ");
 			DataField lastUpdatedByField = dataDefine.getStsField(BaseField.LAST_UPDATED_BY);
@@ -733,10 +732,6 @@ public class DataDefineService {
 
 		//迭代字段拼接
 		for (DataField field:dataDefine.getFields()){
-			// 如果是主键字段
-			if (idField!=null && field.getName().equals(idField.getName())){
-				continue;
-			}
 			
 			// 查询字段处理
 			DataQuery query=field.getConfigDto().getQuery();

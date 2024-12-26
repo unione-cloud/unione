@@ -1,6 +1,7 @@
 package com.unione.cloud.form.data.api;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.storage.DataStorageService;
 import com.unione.cloud.form.data.storage.model.DataCommit;
@@ -20,6 +22,7 @@ import com.unione.cloud.form.data.storage.model.DataDelete;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataResult;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
@@ -58,6 +61,14 @@ public class SysDataStorageV1Controller{
 		DataDefine dataDefine=dataDefineCache.load(dataFind.getDsn());
 		LogsUtil.setTarget(dataDefine.getId(),dataDefine.getTitle());
 		LogsUtil.setExtData(JSONUtil.toJsonStr(dataFind));
+		
+		DataField delField = dataDefine.getStsField(BaseField.DEL_FLAG);
+		if(delField!=null) {
+			if(dataFind.getBody()==null) {
+				dataFind.setBody(new HashMap<>());
+			}
+			dataFind.getBody().put(delField.getAlias(), 0);
+		}
 		
 		// 加载列表数据
 		DataResult<List<Map<String, Object>>> result = dataStorageService.findListPage(dataDefine, dataFind);

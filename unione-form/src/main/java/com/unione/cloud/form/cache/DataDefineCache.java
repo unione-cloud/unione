@@ -83,13 +83,13 @@ public class DataDefineCache {
 		AssertUtil.service().notNull(sn, "数据编码不能为空");
 		SysDataDefine tmp = SysDataDefine.builder().sn(sn).build();
 		tmp = dataBaseDao.findOne(SqlBuilder.build(tmp));
-		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,tmp);
 		if(tmp!=null) {
 			model=new DataDefine();
 			BeanUtil.copyProperties(tmp, model);
 		}
 		
 		AssertUtil.service().notNull(model, "数据模型未找到");
+		log.info("退出：从db加载数据模型【dev】方法,sn:{},data model:{}",sn,model.getId());
 		return model;
 	}
 	
