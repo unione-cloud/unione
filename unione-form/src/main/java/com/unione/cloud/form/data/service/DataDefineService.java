@@ -529,7 +529,7 @@ public class DataDefineService {
 						
 						FieldWidget widget=config.getWidget();
 						if(widget!=null) {
-							formItem.setWidget(widget.getName());
+							formItem.setControl(widget.getName());
 							formItem.getProps().setPlaceholder(widget.getPlaceholder());
 							formItem.getProps().setTooltip(widget.getTooltip());
 							formItem.getProps().setHelp(widget.getHelp());
@@ -563,7 +563,7 @@ public class DataDefineService {
 						
 						FieldWidget widget=config.getWidget();
 						if(widget!=null) {
-							formItem.setWidget(widget.getName());
+							formItem.setControl(widget.getName());
 							formItem.getProps().setPlaceholder(widget.getPlaceholder());
 							formItem.getProps().setTooltip(widget.getTooltip());
 							formItem.getProps().setHelp(widget.getHelp());

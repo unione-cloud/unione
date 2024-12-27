@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import cn.hutool.core.util.RandomUtil;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -302,6 +305,13 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		public List<Widget> getWidgets(){
 			return null;
 		}
+		
+		public String getWid() {
+			if(StringUtils.isEmpty(wid)) {
+				wid=RandomUtil.randomString(20);
+			}
+			return wid;
+		}
 	}
 	
 	/**
@@ -470,8 +480,11 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
+		
+		@ApiModelProperty(value="控件名称",notes = "表单控件名称，eg：unione-select-box")
+		private String control;
 
-		@ApiModelProperty(value="组件name",notes = "数据绑定字段名称")
+		@ApiModelProperty(value="字段name",notes = "数据绑定字段名称")
 		private String name;
 		
 		@ApiModelProperty(value="组件初始值")
