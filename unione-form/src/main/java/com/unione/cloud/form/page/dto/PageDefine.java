@@ -379,6 +379,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty("按钮属性")
 		private ButtonProps props;
+		
+		public String getWidget() {
+			return "unione-button";
+		}
 	}
 	
 	@Data
@@ -432,7 +436,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty("表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<Widget> widgets=new ArrayList<>();
-		
+
+		public String getWidget() {
+			return "unione-form";
+		}
 
 	}
 	
@@ -497,6 +504,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="组件显示")
 		private FormItemView view=new FormItemView();
 		
+		public String getWidget() {
+			return "unione-form-item";
+		}
 	}
 	
 	@Data
@@ -581,11 +591,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="label显示宽度",notes = "默认7，最大24")
 		private Integer labelWidth;
 
-		//TODO	补全组件定义
-		public QueryWidget() {
-			this.setWidget("unione-query");
+		public String getWidget() {
+			return "unione-query";
 		}
-		
 		
 	}
 	
@@ -700,10 +708,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty("table设置")
 		private TableWidgetProps props;
 		
-		public TableWidget() {
-			this.setWidget("unione-table");
+		public String getWidget() {
+			return "unione-table";
 		}
-		
 	}
 	
 	
