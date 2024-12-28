@@ -502,6 +502,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="表单项事件")
 		private FormItemEvent event;
 		
+		@ApiModelProperty(value="数据转换")
+		private DataConvert convert;
+		
 		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
 		private DataRule rule;
 		
