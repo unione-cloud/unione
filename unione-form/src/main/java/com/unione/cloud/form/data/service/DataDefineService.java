@@ -447,6 +447,7 @@ public class DataDefineService {
 		formDefine.setTitle(String.format("%s表单", define.getTitle()));
 		formDefine.setConfigs("{}");
 		formDefine.getConfigDto().getForm().setDsn(define.getSn());
+		formDefine.getConfigDto().getForm().setPrimarry(true);
 		
 		LogsUtil.add("详情页面初始化,psn:%s",String.format("%s:view", define.getSn()));
 		FormPageDefine viewDefine=new FormPageDefine();
@@ -465,6 +466,7 @@ public class DataDefineService {
 		viewDefine.setTitle(String.format("%s详情", define.getTitle()));
 		viewDefine.setConfigs("{}");
 		viewDefine.getConfigDto().getForm().setDsn(define.getSn());
+		viewDefine.getConfigDto().getForm().setPrimarry(true);
 		
 		LogsUtil.add("迭代字段列表，生成：列表页面，表单页面，详情页面");
 		define.getConfigDto().getFields().stream().forEach(field->{
