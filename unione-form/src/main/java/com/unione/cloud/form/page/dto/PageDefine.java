@@ -290,10 +290,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 		@ApiModelProperty("组件名称")
 		private String widget;
-		
-		@ApiModelProperty("组件渲染器")
-		private String render;
-		
+				
 		@ApiModelProperty("组件标题")
 		private String title;
 		
@@ -438,7 +435,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private static final long serialVersionUID = -5448770098453865691L;
 		
 		@ApiModelProperty(value="是否主表单",notes = "一个表单页面有且只有一个主表单")
-		private boolean isPrimarry;
+		private boolean isPrimary;
 
 		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
@@ -446,6 +443,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty("表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<Widget> widgets=new ArrayList<>();
+		
+		@ApiModelProperty("表设置")
+		private FormSetting setting;
 
 		public String getWidget() {
 			return "unione-form";
@@ -456,7 +456,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	@Data
 	@ApiModel("表单组件配置")
-	public static class FormWidgetProps implements Serializable{
+	public static class FormSetting implements Serializable{
 		/**
 		 * 
 		 */
@@ -465,8 +465,8 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="表单显示列数",notes = "表单显示列数，默认3")
 		private Integer showColumn;
 		
-		@ApiModelProperty(value="表单显示列数",notes = "表单项label显示宽度，默认9")
-		private Integer labelWidget;
+		@ApiModelProperty(value="label显示列数",notes = "label显示宽度，默认9")
+		private Integer labelWidth;
 		
 	}
 	
@@ -536,7 +536,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
 		private String dataFormat;
 
-		@ApiModelProperty(value="显示宽度",notes = "占用空间大小，24单元格")
+		@ApiModelProperty(value="显示宽度",notes = "占用空间大小，1-3栏")
 		private Integer width;
 		
 		@ApiModelProperty(value="label宽度",notes = "占用空间大小，24单元格")
