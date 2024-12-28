@@ -975,7 +975,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value = "点击遮罩层是否关闭",notes = "抽屉，对话框有效")
 		private boolean maskClosable;
 		
-		@ApiModelProperty(value = "响应组件名称",notes = "预留属性")
+		@ApiModelProperty(value = "响应组件名称",notes = "不为空用组件渲染，否则iframe集成")
 		private String component;
 		
 		@ApiModelProperty(value = "页面编码",notes = "预留属性")
