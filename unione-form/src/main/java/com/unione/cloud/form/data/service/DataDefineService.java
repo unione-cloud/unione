@@ -1,5 +1,6 @@
 package com.unione.cloud.form.data.service;
 
+import java.lang.reflect.AnnotatedArrayType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -428,6 +429,7 @@ public class DataDefineService {
 		listDefine.setConfigs("{}");
 		listDefine.getConfigDto().getQueryForm().setDsn(define.getSn());
 		listDefine.getConfigDto().getTableList().setDsn(define.getSn());
+		listDefine.getConfigDto().setDsnList(Arrays.asList(define.getSn()));	
 		
 		
 		LogsUtil.add("表单页面初始化,psn:%s",String.format("%s:form", define.getSn()));
@@ -448,6 +450,7 @@ public class DataDefineService {
 		formDefine.setConfigs("{}");
 		formDefine.getConfigDto().getForm().setDsn(define.getSn());
 		formDefine.getConfigDto().getForm().setPrimary(true);
+		formDefine.getConfigDto().setDsnList(Arrays.asList(define.getSn()));
 		
 		LogsUtil.add("详情页面初始化,psn:%s",String.format("%s:view", define.getSn()));
 		FormPageDefine viewDefine=new FormPageDefine();
@@ -467,6 +470,7 @@ public class DataDefineService {
 		viewDefine.setConfigs("{}");
 		viewDefine.getConfigDto().getForm().setDsn(define.getSn());
 		viewDefine.getConfigDto().getForm().setPrimary(true);
+		viewDefine.getConfigDto().setDsnList(Arrays.asList(define.getSn()));
 		
 		LogsUtil.add("迭代字段列表，生成：列表页面，表单页面，详情页面");
 		define.getConfigDto().getFields().stream().forEach(field->{
