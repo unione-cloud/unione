@@ -435,7 +435,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private static final long serialVersionUID = -5448770098453865691L;
 		
 		@ApiModelProperty(value="是否主表单",notes = "一个表单页面有且只有一个主表单")
-		private boolean isPrimary;
+		private boolean primary;
 
 		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
