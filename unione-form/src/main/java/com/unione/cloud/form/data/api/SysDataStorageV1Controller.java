@@ -18,11 +18,11 @@ import com.unione.cloud.form.cache.DataDefineCache;
 import com.unione.cloud.form.data.storage.DataStorageService;
 import com.unione.cloud.form.data.storage.model.DataCommit;
 import com.unione.cloud.form.data.storage.model.DataDefine;
+import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.form.data.storage.model.DataDelete;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataResult;
-import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
@@ -111,7 +111,12 @@ public class SysDataStorageV1Controller{
 		}
 		
 		LogsUtil.save(len>0);
-		return DataResult.build(len>0);
+		if(len>0) {
+			DataResult<Map<String, Object>> result=DataResult.success(dataCommit.getData());
+			result.setId(dataCommit.getId());
+			return result;
+		}
+		return DataResult.failure();
 	}
 	
 	
@@ -143,7 +148,12 @@ public class SysDataStorageV1Controller{
 		dataStorageService.loadFkeyEntrys(dataDefine, Arrays.asList(row), fields.toArray(new String[0]));
 		
 		LogsUtil.save(row!=null);
-		return DataResult.build(row!=null, row);
+		if(row!=null) {
+			DataResult<Map<String, Object>> result=DataResult.build(row!=null, row);
+			result.setId(dataLoad.getId());
+			return result;
+		}
+		return DataResult.failure("记录未找到");
 	}
 	
 	

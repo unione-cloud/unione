@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataResult;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +83,12 @@ public class DataStorageService {
 	 * @return
 	 */
 	public int insert(DataDefine dataDefine,DataCommit commit) {
+		
+		commit.setId(IdGenHolder.generate());
+		DataField idField = dataDefine.getStsField(BaseField.ID);
+		AssertUtil.service().notNull(idField, "当前数据未定义数据主键");
+		commit.getData().put(idField.getAlias(), commit.getId());
+		
 		return insert(dataDefine, commit.getData());
 	}
 
@@ -172,6 +180,27 @@ public class DataStorageService {
 		if(lastUpdatedByField!=null){
 			data.put(lastUpdatedByField.getAlias(), sessionService.getUserId());
 		}
+		
+		//=================
+		// 数据字段：默认值处理
+		dataDefine.getFields().stream().forEach(field->{
+			if(Objects.isNull(data.get(field.getAlias())) && !StringUtils.isEmpty(field.getDataValue())) {
+				try {
+					Objects defaultValue=null;
+					if("Date".equals(field.getDataType()) || "Timestap".equals(field.getDataType())){
+						defaultValue=Convert.convertByClassName(String.format("java.util.%s", field.getDataType()), field.getDataValue());
+                	}else {
+                		defaultValue=Convert.convertByClassName(String.format("java.lang.%s", field.getDataType()), field.getDataValue());
+                	}
+					if(defaultValue!=null) {
+						data.put(field.getAlias(), defaultValue);
+					}
+				} catch (Exception e) {
+					log.error("数据字段：默认值设置失败,dsn:{},field name:{},value:{}",dataDefine.getSn(),field.getName(),field.getDataValue(),e);
+				}
+			}
+		});
+		
 	}
 
 	

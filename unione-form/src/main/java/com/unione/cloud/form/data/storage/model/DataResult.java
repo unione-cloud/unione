@@ -2,6 +2,9 @@ package com.unione.cloud.form.data.storage.model;
 
 import com.unione.cloud.core.dto.Results;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class DataResult<T> extends Results<T> {
 	/**
 	 * 
@@ -9,6 +12,10 @@ public class DataResult<T> extends Results<T> {
 	private static final long serialVersionUID = 7550726584804583822L;
 
 	private boolean silence;
+	
+	@Getter
+	@Setter
+	private Long  id;
 	
 	
 	public DataResult<T> silence(){
