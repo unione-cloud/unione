@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.nacos.shaded.org.checkerframework.common.returnsreceiver.qual.This;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.lettuce.core.ScriptOutputType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -140,6 +142,13 @@ public class Params<T> implements Serializable {
 		private String name;
 		@ApiModelProperty("是否升序排序")
 		private boolean asc;
+		
+		public static Sort build(String name,boolean asc) {
+			Sort sort=new Sort();
+			sort.setName(name);
+			sort.setAsc(asc);
+			return sort;
+		}
 		
 		public String getName() {
 			if(name!=null && name.matches("[a-zA-Z0-9]*")) {
