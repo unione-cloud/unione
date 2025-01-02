@@ -1,6 +1,7 @@
 package com.unione.cloud.form.data.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.dto.Params.Sort;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.api.FeignDelete;
 import com.unione.cloud.core.feign.api.FeignDetail;
@@ -32,6 +34,7 @@ import com.unione.cloud.form.security.UserFormRoles;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,7 +67,10 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 		log.debug("进入:查询数据定义管理列表方法,params:{}",params);
 		LogsUtil.set(LogType.Query, "查询数据定义管理列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
-				
+		if(ObjectUtil.isEmpty(params.getSorts())) {
+			params.setSorts(Arrays.asList(Sort.build("created", false)));
+		}
+		
 		Results<List<SysDataDefine>> results = dataBaseDao.findPages(SqlBuilder.build(params).params("delFlag", 0));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
