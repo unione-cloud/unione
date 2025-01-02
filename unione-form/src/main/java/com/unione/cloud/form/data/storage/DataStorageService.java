@@ -23,6 +23,7 @@ import com.unione.cloud.form.data.storage.model.DataCommit;
 import com.unione.cloud.form.data.storage.model.DataDefine;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataField;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
+import com.unione.cloud.form.data.util.DataUtil;
 import com.unione.cloud.form.data.storage.model.DataFind;
 import com.unione.cloud.form.data.storage.model.DataLoad;
 import com.unione.cloud.form.data.storage.model.DataResult;
@@ -700,8 +701,9 @@ public class DataStorageService {
 		
 		List<Map<String, Object>> list = storageBaseService.findList(dsId, sql, paramObj,dataDefine.getFields());
 		
+		String fkeyName=DataUtil.toHump(fkey.getConfigDto().getFkey().getFieldName());
 		list.stream().forEach(row->{
-			Object fkeyValue=row.get(fkey.getConfigDto().getFkey().getFieldName());
+			Object fkeyValue=row.get(fkeyName);
 			if(fkeyValue!=null) {
 				map.put(fkeyValue.toString(), row);
 			}
@@ -739,7 +741,7 @@ public class DataStorageService {
 				return true;
 			}		
 			return false;
-		}).filter(fkey->!StringUtils.isEmpty(fkey.getName()))
+		}).filter(fkey->!StringUtils.isEmpty(fkey.getAlias()))
 		.filter(fkey->(fkeyList.isEmpty()||fkeyList.contains(fkey.getAlias()))).forEach(fkey->{
 			fkeyFieldMap.put(fkey.getAlias(), fkey);
 		});

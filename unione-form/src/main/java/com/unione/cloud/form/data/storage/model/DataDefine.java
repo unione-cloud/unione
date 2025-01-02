@@ -16,6 +16,7 @@ import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.form.data.model.SysDataDefine;
 import com.unione.cloud.form.data.model.SysDataDefineRelease;
 import com.unione.cloud.form.data.model.SysDataField;
+import com.unione.cloud.form.data.util.DataUtil;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -205,19 +206,7 @@ public class DataDefine extends SysDataDefine{
 		public DataField setName(String name) {
 			super.setName(name);
 			if(!StringUtils.isEmpty(name)) {
-				String tt[]=name.toLowerCase().split("_");
-				StringBuffer buf=new StringBuffer();
-				buf.append(tt[0]);
-				for(int i=1;i<tt.length;i++) {
-					String t=tt[i];
-					if(!StringUtils.isEmpty(t)) {
-						buf.append((t.charAt(0)+"").toUpperCase());
-						if(t.length()>1) {
-							buf.append(t.substring(1));
-						}
-					}
-				}
-				this.alias=buf.toString();
+				this.alias=DataUtil.toHump(name);
 			}
 			return this;
 		}

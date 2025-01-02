@@ -74,11 +74,11 @@ public class SysDataStorageV1Controller{
 		DataResult<List<Map<String, Object>>> result = dataStorageService.findListPage(dataDefine, dataFind);
 		
 		// 字段处理
-		List<String> fields=dataDefine.getFields().stream().map(field->field.getName()).collect(Collectors.toList());
+		List<String> fields=dataDefine.getFields().stream().map(field->field.getAlias()).collect(Collectors.toList());
 		if(!ObjectUtil.isEmpty(dataFind.getFields())) {
 			// 过滤指定字段集合
 			fields=dataDefine.getFields().stream().filter(field->dataFind.getFields().contains(field.getAlias()))
-					.map(field->field.getName())
+					.map(field->field.getAlias())
 					.collect(Collectors.toList());
 		}
 		
