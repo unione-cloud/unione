@@ -1,8 +1,12 @@
 package com.unione.cloud.portal.system.model;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -45,21 +49,28 @@ public class BaseDict extends Pojo {
 	* 字典名称
 	*/
 	@ApiModelProperty(value="字典名称",notes="长度为：100")
+	@NotEmpty(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictName;
 	/**
 	* 字典类型，0平台，1租户，2机构
 	*/
 	@ApiModelProperty(value="字典类型，0平台，1租户，2机构",notes="长度为：10")
+	@NotEmpty(message = "字典类型不能为空",groups= {Validator.save.class,Validator.update.class})
 	private Integer dictType;
 	/**
 	* 字典键
 	*/
 	@ApiModelProperty(value="字典键",notes="长度为：100")
+	@NotEmpty(message = "字典键不能为空",groups= {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "字典键不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictKey;
 	/**
 	* 字典值
 	*/
 	@ApiModelProperty(value="字典值",notes="长度为：1000")
+	@NotEmpty(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictValue;
 	/**
 	* 字典显示设置，json存储{}

@@ -1,13 +1,20 @@
 package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +26,9 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.core.util.JsonUtil;
+import com.unione.cloud.portal.system.dto.DictShowDto;
 import com.unione.cloud.portal.system.model.BaseDict;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -86,8 +96,28 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	public Results<Long> save(@Validated(Validator.save.class) BaseDict entity) {
 		log.debug("进入:新增基础字典信息.entity:{}",entity);
 		LogsUtil.set(LogType.Insert, "新增基础字典");
+		
+		// 验证字典名称是否已存在
+		BaseDict parent=null;
+		if(Objects.equals(-1L, entity.getParentId())) {
+			long count = dataBaseDao.count(SqlBuilder.build(entity).where("dictName=?"));
+			AssertUtil.service().isTrue(count<=0, "字典名称["+entity.getDictName()+"]已存在");
+			entity.setDictKey(entity.getDictName());
+		}else {
+			parent=dataBaseDao.findById(BaseDict.class, entity.getParentId());
+			AssertUtil.service().notNull(parent, "父级节点未找到");
+		}
+		
 		// 参数处理
+		BeanUtils.setDefaultValue(entity, "ordered",0);
+		BeanUtils.setDefaultValue(entity, "status",1);
 		dataBaseDao.insert(entity);
+		
+		if(parent!=null && Objects.equals(1, parent.getIsLeaf())) {
+			parent.setIsLeaf(0);
+			int len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+			LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
+		}
 		
 		LogsUtil.success(entity.getId());
 		log.debug("退出:新增基础字典信息.entity:{},result:true",entity);
@@ -101,10 +131,58 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Update, "修改基础字典",entity.getId());
 		
-		String[] fields = {"parentId","appId","appName","dictName","dictType","dictKey","dictValue","dictShow","ordered","isLeaf","status"};
-		SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
+		int len = 0;
+		if(Objects.equals(-1L, entity.getParentId())) {
+			LogsUtil.add("加载字典信息,id:%s",entity.getId());
+			BaseDict tmp=dataBaseDao.findById(BaseDict.class, entity.getId());
+			AssertUtil.service().notNull(tmp, "记录未找到");
+			
+			LogsUtil.add("更新字典信息");
+			entity.setIsLeaf(0);
+			entity.setDictKey(entity.getDictName());
+			BeanUtils.setDefaultValue(entity, "ordered",0);
+			BeanUtils.setDefaultValue(entity, "status",1);
+			BeanUtils.setDefaultValue(entity, "dictShow","{\"type\":\"text\"}");
+			String[] fields = {"appId","appName","dictType","dictValue","dictShow","ordered","isLeaf","status"};
+			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("保存数据,len:"+len);
+			
+			LogsUtil.add("判断字典信息，验证是否需要同步更新字典项");
+			List<String> fieldList=Arrays.asList("appName","dictType","status").stream()
+				.filter(field->!Objects.equals(BeanUtils.getFieldValue(entity, field), BeanUtils.getFieldValue(tmp, field)))
+				.collect(Collectors.toList());
+			if(!fieldList.isEmpty()) {
+				int len2 = dataBaseDao.update(SqlBuilder.build(entity).where("dictName=?").field(fieldList.toArray(new String[0])));
+				LogsUtil.add("同步更新字典项,fields:%s,len:%s",fieldList,len2);
+			}
+			if(!Objects.equals(entity.getDictShow(), tmp.getDictShow())) {
+				DictShowDto show=JsonUtil.toBean(DictShowDto.class, entity.getDictShow());
+				AtomicInteger count=new AtomicInteger();
+				dataBaseDao.findList(SqlBuilder.build(entity).where("dictName=?"))
+					.stream().filter(dict->!Objects.equals(-1L, dict.getParentId()))
+					.forEach(dict->{
+						if(!StringUtils.isEmpty(dict.getDictShow())) {
+							DictShowDto dictShow=JsonUtil.toBean(DictShowDto.class, dict.getDictShow());
+							dictShow.setType(show.getType());
+							dict.setDictShow(JsonUtil.toJson(dictShow));
+						}else {
+							dict.setDictShow(entity.getDictShow());
+						}
+						int len2 = dataBaseDao.updateById(SqlBuilder.build(dict).field("dictShow"));
+						if(len2>0) {
+							count.addAndGet(1);
+						}
+					});
+				LogsUtil.add("同步更新字典项,fields:dictShow,len:%s",count.get());
+			}
+		}else {
+			// 修改字典项信息
+			String[] fields = {"dictKey","dictValue","dictShow","ordered","status"};
+			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("保存数据,len:"+len);
+		}
 		
 		results.setBody(entity.getId());
 		results.setSuccess(len>0);
@@ -116,6 +194,21 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	}
 
 
+	@PostMapping("/status")
+	@ApiOperation(value="启用/停用")
+	public Results<Void> setStatus(@RequestBody BaseDict entity){
+		log.debug("进入:启用/停用方法，id:{},status:{}",entity.getId(),entity.getStatus());
+		LogsUtil.set(LogType.Update, "启用/停用基础字典");
+		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
+			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[0,1]");
+		
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		
+		log.debug("退出:启用/停用方法，id:{},status:{},len:{}",entity.getId(),entity.getStatus(),len);
+		LogsUtil.save(len>0);
+		return Results.build(len>0);
+	}
+	
 
 	@Override
 	public Results<List<BaseDict>> findByIds(Set<Long> ids) {
