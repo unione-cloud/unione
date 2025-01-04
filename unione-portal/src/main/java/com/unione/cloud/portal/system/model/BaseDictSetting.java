@@ -1,7 +1,8 @@
 package com.unione.cloud.portal.system.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+
+import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	BaseDictSetting Entity
@@ -27,12 +26,6 @@ import com.unione.cloud.core.model.Pojo;
 @Accessors(chain = true)
 @Table(name="base_dict_setting")
 public class BaseDictSetting extends Pojo {
-	/**
-	* 主键
-	*/
-	@AssignID
-	@ApiModelProperty(value="主键",notes="长度为：19")
-	private Long sid;
 	/**
 	* 上级ID
 	*/
