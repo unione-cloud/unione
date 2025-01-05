@@ -126,9 +126,9 @@ public class SysUserRoleController implements PojoFeignApi<SysUserRole>{
 	
 
 	@Override
-	public Results<Long> delete(Set<Long> ids){
+	public Results<Integer> delete(Set<Long> ids){
 		log.debug("进入:删除用户角色信息方法，ids:{}",ids);
-		Results<Long> results = new Results<>();
+		Results<Integer> results = new Results<>();
 		LogsUtil.set(LogType.Delete, "删除用户角色");
 		
 		// 参数处理
@@ -136,12 +136,12 @@ public class SysUserRoleController implements PojoFeignApi<SysUserRole>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(SysUserRole.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(SysUserRole.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody((long)count);
+		results.setBody(count);
 		LogsUtil.save(count>0);
 
 		log.debug("退出:删除用户角色信息方法，ids:{},result:{}",ids,results.isSuccess());

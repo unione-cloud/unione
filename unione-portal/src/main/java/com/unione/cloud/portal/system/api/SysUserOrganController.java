@@ -126,9 +126,9 @@ public class SysUserOrganController implements PojoFeignApi<SysUserOrgan>{
 	
 
 	@Override
-	public Results<Long> delete(Set<Long> ids){
+	public Results<Integer> delete(Set<Long> ids){
 		log.debug("进入:删除用户机构信息方法，ids:{}",ids);
-		Results<Long> results = new Results<>();
+		Results<Integer> results = new Results<>();
 		LogsUtil.set(LogType.Delete, "删除用户机构");
 		
 		// 参数处理
@@ -136,12 +136,12 @@ public class SysUserOrganController implements PojoFeignApi<SysUserOrgan>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(SysUserOrgan.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(SysUserOrgan.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody((long)count);
+		results.setBody(count);
 		LogsUtil.save(count>0);
 
 		log.debug("退出:删除用户机构信息方法，ids:{},result:{}",ids,results.isSuccess());

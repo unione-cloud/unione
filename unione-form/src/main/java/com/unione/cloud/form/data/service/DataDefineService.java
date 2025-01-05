@@ -189,8 +189,8 @@ public class DataDefineService {
 		if(relase!=null) {
 			LogsUtil.add("新版本发布，curent ver:%s",define.getVers());
 			define.setVers(define.getVers()+1);
-			dataBaseDao.delete(SqlBuilder.build(SysDataDefineRelease.class).id(define.getId()));
-			dataBaseDao.delete(SqlBuilder.build(SysDataFieldRelease.class).params("defineId",define.getId()));
+			dataBaseDao.deleteById(SqlBuilder.build(SysDataDefineRelease.class).id(define.getId()));
+			dataBaseDao.deleteById(SqlBuilder.build(SysDataFieldRelease.class).params("defineId",define.getId()));
 		}else {
 			define.setVers(1);
 			LogsUtil.add("首次发布，curent ver:%s",define.getVers());

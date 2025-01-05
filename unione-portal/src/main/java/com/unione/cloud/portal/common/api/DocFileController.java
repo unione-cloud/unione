@@ -425,9 +425,9 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 
 	@Override
-	public Results<Long> delete(Set<Long> ids){
+	public Results<Integer> delete(Set<Long> ids){
 		log.debug("进入控制:删除文档文件信息方法，ids:{}",ids);
-		Results<Long> results = new Results<>();
+		Results<Integer> results = new Results<>();
 		boolean logSaveFlag=false;
 		if(LogsUtil.getEntry().getTypes()==null) {
 			LogsUtil.set(LogType.Delete, "删除文档文件");
@@ -448,13 +448,13 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:%s",JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(SysApiInfo.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(SysApiInfo.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody((long)count);
+		results.setBody(count);
 		
 		if(logSaveFlag) {
 			//保存日志
