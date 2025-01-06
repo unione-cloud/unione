@@ -369,6 +369,9 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@ApiModelProperty(value="按钮名称",notes = "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
 		private String name;
 		
+		@ApiModelProperty(value = "按钮icon图标")
+		private String icon;
+		
 		@ApiModelProperty("是否显示")
 		private Boolean visible;
 		
@@ -399,9 +402,6 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 * 
 		 */
 		private static final long serialVersionUID = -8392444232066625861L;
-
-		@ApiModelProperty(value = "按钮icon图标")
-		private String icon;
 		
 		@ApiModelProperty(value = "按钮shape形状",notes = "可选:default | circle | round")
 		private String shape;
