@@ -106,16 +106,28 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		}else {
 			parent=dataBaseDao.findById(BaseDict.class, entity.getParentId());
 			AssertUtil.service().notNull(parent, "父级节点未找到");
+			BeanUtils.copy(parent, entity, "appId","appName","dictName","dictType");
 		}
 		
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "ordered",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
-		dataBaseDao.insert(entity);
+		BeanUtils.setDefaultValue(entity, "isLeaf",1);
+		int len = 0;
+		if(entity.getId()==null) {
+			len = dataBaseDao.insert(entity);
+			LogsUtil.add("新增数据,len:"+len);
+		}else {
+			String[] fields = {"dictKey","dictValue","dictShow","ordered","status"};
+			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("更新数据,len:"+len);
+		}
+		AssertUtil.service().isTrue(len>0, "保存失败");
 		
 		if(parent!=null && Objects.equals(1, parent.getIsLeaf())) {
 			parent.setIsLeaf(0);
-			int len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+			len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
 			LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
 		}
 		
