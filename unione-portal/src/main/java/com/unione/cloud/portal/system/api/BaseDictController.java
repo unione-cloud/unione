@@ -100,8 +100,11 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		// 验证字典名称是否已存在
 		BaseDict parent=null;
 		if(Objects.equals(-1L, entity.getParentId())) {
-			long count = dataBaseDao.count(SqlBuilder.build(entity).where("dictName=?"));
-			AssertUtil.service().isTrue(count<=0, "字典名称["+entity.getDictName()+"]已存在");
+			parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("dictName=? and parentId=-1"));
+			if(parent!=null) {
+				BeanUtils.copy(parent, entity, "appId","appName","dictName","dictType");
+				entity.setParentId(parent.getId());
+			}
 			entity.setDictKey(entity.getDictName());
 		}else {
 			parent=dataBaseDao.findById(BaseDict.class, entity.getParentId());
