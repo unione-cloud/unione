@@ -1,6 +1,8 @@
 package com.unione.cloud.portal.system.model;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
@@ -56,7 +58,7 @@ public class BaseDict extends Pojo {
 	* 字典类型，0平台，1租户，2机构
 	*/
 	@ApiModelProperty(value="字典类型，0平台，1租户，2机构",notes="长度为：10")
-	@NotEmpty(message = "字典类型不能为空",groups= {Validator.save.class,Validator.update.class})
+	@NotNull(message = "字典类型不能为空",groups= {Validator.save.class,Validator.update.class})
 	private Integer dictType;
 	/**
 	* 字典键
