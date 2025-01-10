@@ -198,16 +198,16 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private static final long serialVersionUID = -8532953889812739800L;
 
 		@ApiModelProperty(value="表单验证事件",notes = "自定义表单验证逻辑")
-		private EventDefine onValidate;
+		private EventDefine validate;
 		
 		@ApiModelProperty(value="表单显示事件",notes="动态显示事件，根据逻辑动态显示表单")
 		private EventDefine visible;
 		
 		@ApiModelProperty(value="表单保存前置事件",notes="提交表单数据前触发的事件")
-		private EventDefine onPrepSave;
+		private EventDefine preSave;
 		
 		@ApiModelProperty(value="表单保存后置事件",notes="表单保存成功后触发的事件")
-		private EventDefine onPostSaved;
+		private EventDefine postSaved;
 		
 	}
 	
