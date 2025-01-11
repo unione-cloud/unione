@@ -100,22 +100,37 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		// 验证字典名称是否已存在
 		BaseDict parent=null;
 		if(Objects.equals(-1L, entity.getParentId())) {
-			long count = dataBaseDao.count(SqlBuilder.build(entity).where("dictName=?"));
-			AssertUtil.service().isTrue(count<=0, "字典名称["+entity.getDictName()+"]已存在");
+			parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("dictName=? and parentId=-1"));
+			if(parent!=null) {
+				BeanUtils.copy(parent, entity, "appId","appName","dictName","dictType");
+				entity.setParentId(parent.getId());
+			}
 			entity.setDictKey(entity.getDictName());
 		}else {
 			parent=dataBaseDao.findById(BaseDict.class, entity.getParentId());
 			AssertUtil.service().notNull(parent, "父级节点未找到");
+			BeanUtils.copy(parent, entity, "appId","appName","dictName","dictType");
 		}
 		
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "ordered",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
-		dataBaseDao.insert(entity);
+		BeanUtils.setDefaultValue(entity, "isLeaf",1);
+		int len = 0;
+		if(entity.getId()==null) {
+			len = dataBaseDao.insert(entity);
+			LogsUtil.add("新增数据,len:"+len);
+		}else {
+			String[] fields = {"dictKey","dictValue","dictShow","ordered","status"};
+			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("更新数据,len:"+len);
+		}
+		AssertUtil.service().isTrue(len>0, "保存失败");
 		
 		if(parent!=null && Objects.equals(1, parent.getIsLeaf())) {
 			parent.setIsLeaf(0);
-			int len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+			len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
 			LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
 		}
 		
