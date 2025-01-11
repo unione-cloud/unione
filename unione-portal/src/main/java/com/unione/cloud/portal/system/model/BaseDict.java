@@ -5,6 +5,7 @@ import javax.validation.constraints.NotEmpty;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -31,6 +32,10 @@ import lombok.experimental.Accessors;
 @Table(name="base_dict")
 public class BaseDict extends Pojo {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2087834552742633262L;
+	/**
 	* 上级ID
 	*/
 	@ApiModelProperty(value="上级ID",notes="长度为：19")
@@ -48,6 +53,7 @@ public class BaseDict extends Pojo {
 	/**
 	* 字典名称
 	*/
+	@UniQueryKeyWord
 	@ApiModelProperty(value="字典名称",notes="长度为：100")
 	@NotEmpty(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
@@ -68,6 +74,7 @@ public class BaseDict extends Pojo {
 	/**
 	* 字典值
 	*/
+	@UniQueryKeyWord
 	@ApiModelProperty(value="字典值",notes="长度为：1000")
 	@NotEmpty(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})

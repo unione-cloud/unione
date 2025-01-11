@@ -328,6 +328,8 @@ public class SqlBuilder<T> {
 			// Model 数据库操作，解析通用过滤条件，包括：关键字查询，id查询，常规查询
 			// 关键字查询
 			SqlCondition keyWordCondition=new SqlCondition();
+			keyWordCondition.setAction(SqlAction.KEYWORD);
+			
 			// 常规查询
 			List<SqlCondition> normalConditions=new ArrayList<>();
 			
@@ -370,7 +372,6 @@ public class SqlBuilder<T> {
 					keyword.setFun(SqlFun.OR);
 					keyword.setColumn(field.getColumn());
 					keyword.setName(field.getAlias());
-					keyword.setAction(SqlAction.KEYWORD);
 					keyWordCondition.getChildrens().add(keyword);
 				}
 				

@@ -42,6 +42,25 @@ public class SqlCondition {
 			return;
 		}
 		
+		// KEYWORDS搜索特殊处理
+		if(SqlAction.KEYWORD.equals(this.action)) {
+			buffer.append("-- @if(varNotNull(query.keywords)){\n")
+				  .append(this.fun.name());
+			if(this.childrens.size()>1) {
+				buffer.append(" (");
+				StringBuffer keyBuffer=new StringBuffer();
+				this.childrens.stream().forEach((child)->{
+					keyBuffer.append(" OR ").append(child.getColumn()).append(" LIKE #{'%'+query.keywords+'%'}");
+				});
+				buffer.append(keyBuffer.substring(4));
+				buffer.append(") \n");
+			}else {
+				buffer.append(" ").append(this.childrens.get(0).getColumn()).append(" LIKE #{'%'+query.keywords+'%'}");
+			}
+			buffer.append("-- @}\n");
+			return;
+		}
+				
 		// 常规处理
 		if(this.childrens==null || this.childrens.isEmpty()) {
 			buffer.append("-- @if(varNotNull(params.").append(this.name).append(")){\n")
