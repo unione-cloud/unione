@@ -173,4 +173,11 @@ public class SysUser extends Pojo {
 	@ApiModelProperty(value="描述",notes="长度为：400")
 	private String descs;
 
+	
+	////////////////
+	// 非持久化属性
+	@ApiModelProperty("机构名称")
+	private String orgName;
+	
+	
 }

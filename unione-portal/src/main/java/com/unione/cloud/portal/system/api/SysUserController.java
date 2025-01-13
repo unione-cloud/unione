@@ -2,7 +2,9 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -17,13 +19,13 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.secret.SecretService;
+import com.unione.cloud.portal.cache.UnioneCacheService;
+import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
@@ -47,6 +49,9 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	@Autowired
 	private SecretService secretService;
 	
+	@Autowired
+	private UnioneCacheService unioneCacheService;
+	
 	
 	@Override
 	public Results<List<SysUser>> find(Params<SysUser> params) {
@@ -55,9 +60,20 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
 		Results<List<SysUser>> results = dataBaseDao.findPages(SqlBuilder.build(params));
-				
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+		
+		Set<Long> orgIds = results.getBody().stream().map(u->u.getOrgId()).filter(i->i!=null)
+			.collect(Collectors.toSet());
+		Map<Long, SysOrgan> orgMap=unioneCacheService.loadOrgan(orgIds);
+		
+		// 数据渲染
+		results.getBody().stream().forEach(row->{
+			SysOrgan organ=orgMap.get(row.getOrgId());
+			if(organ!=null) {
+				row.setOrgName(organ.getName());
+			}
+		});
 		
 		LogsUtil.success();
 		log.debug("退出控制:查询系统用户列表方法,params:{},result:{}",params,results.isSuccess());
