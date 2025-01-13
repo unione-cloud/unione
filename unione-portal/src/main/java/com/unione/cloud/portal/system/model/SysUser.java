@@ -1,6 +1,7 @@
 package com.unione.cloud.portal.system.model;
 import java.util.Date;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -10,9 +11,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -55,10 +58,10 @@ public class SysUser extends Pojo {
 	/**
 	* 用户密码
 	*/
-	@JsonIgnore
+	@JsonProperty(access = Access.WRITE_ONLY)
 	@UniQueryIgnore(QueryType.SELECT_LIST)
 	@ApiModelProperty(value="用户密码",notes="长度为：200")
-	@NotNull(message = "用户密码不能为空",groups = {Validator.save.class})
+	@NotBlank(message = "用户密码不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
 	private String pwdText;
 	/**
