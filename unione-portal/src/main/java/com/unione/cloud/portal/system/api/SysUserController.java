@@ -108,7 +108,7 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 		
 		String[] fields = {"orgId","userType","username","realName","aliasName","avatar","birthday","sex","email","qq","tel","status","lockTime","descs"};
 		SysUser where=new SysUser();
-		where.setId(entity.getUserId());
+		where.setId(entity.getId());
 		SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(entity,where).field(fields);
 		int len = dataBaseDao.updateById(sqlBuilder);
 		LogsUtil.add("保存数据,len:"+len);

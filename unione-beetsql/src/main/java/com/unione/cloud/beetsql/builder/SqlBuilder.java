@@ -469,14 +469,14 @@ public class SqlBuilder<T> {
 					return;
 				}
 				buffer.append("-- @if(isNotEmpty(fields.").append(field.getAlias()).append(")){\n")
-				      .append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("},\n")
+				      .append(field.getColumn()).append(" = #{data.").append(field.getAlias()).append("},\n")
 				      .append("-- @}\n");
 			});
 			
 			StringBuffer lastUpBuf=new StringBuffer();
 			this.entity.getStsFields(BaseField.LAST_UPDATED,BaseField.LAST_UPDATED_BY)
 				.stream().forEach(field->{
-					lastUpBuf.append(",").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n");
+					lastUpBuf.append(",").append(field.getColumn()).append(" = #{data.").append(field.getAlias()).append("}\n");
 				});
 			if(lastUpBuf.length()>0) {
 				buffer.append(lastUpBuf.substring(1));
