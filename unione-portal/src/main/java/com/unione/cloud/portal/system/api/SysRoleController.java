@@ -59,14 +59,25 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 
 	@Override
 	public Results<Long> save(@Validated(Validator.save.class) SysRole entity) {
-		log.debug("进入:新增角色信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增角色");
-		// 参数处理
-		dataBaseDao.insert(entity);
+		log.debug("进入:保存角色信息.entity:{}",entity);
+		LogsUtil.set(LogType.Insert, "保存角色");
 		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增角色信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
+		// 参数处理
+		int len = 0;
+		if(entity.getId()==null) {
+			len = dataBaseDao.insert(entity);
+			LogsUtil.add("保存数据,len:"+len);
+		}else {
+			String[] fields = {"orgId","name","sn","types","status","descs"};
+			SqlBuilder<SysRole> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			LogsUtil.add("更新数据,len:"+len);
+		}
+		
+		LogsUtil.setTarget(entity.getId(), entity.getName());
+		LogsUtil.save(len>0, entity.getId());
+		log.debug("退出:保存角色信息.entity:{},result:true",entity);
+		return Results.build(len>0, entity.getId());
 	}
 
 
