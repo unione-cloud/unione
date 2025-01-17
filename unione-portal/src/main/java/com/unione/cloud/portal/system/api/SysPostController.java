@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：岗位信息，岗位对应的行政区划信息直接存储在数据权限：岗位权限表中。一个岗位可以有多个行政区划，但都是当前用户所属机构关联",description="SysPost")
+@Tag(name = "系统管理：岗位信息，岗位对应的行政区划信息直接存储在数据权限：岗位权限表中。一个岗位可以有多个行政区划，但都是当前用户所属机构关联",description="SysPost")
 @RequestMapping("/api/system/post")	 //TreeFeignApi
 public class SysPostController implements TreeFeignApi<SysPost>{
 	

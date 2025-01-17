@@ -7,19 +7,19 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel("认证结果")
+@Schema("认证结果")
 public class LoginResult {
 	
-	@ApiModelProperty("令牌")
+	@Schema(title="令牌")
 	private String token;
 	
-	@ApiModelProperty("凭证对象")
+	@Schema(title="凭证对象")
 	private UserPrincipal principal;
 	
-	@ApiModelProperty("结果")
+	@Schema(title="结果")
 	private boolean success;
 	
-	@ApiModelProperty("消息")
+	@Schema(title="消息")
 	private String message;
 	
 	private LoginResult() {}

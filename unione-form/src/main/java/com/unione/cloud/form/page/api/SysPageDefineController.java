@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RefreshScope
 @RestController
-@Api(tags = "页面管理：页面定义",description="SysPageDefine")
+@Tag(name = "页面管理：页面定义",description="SysPageDefine")
 @RequestMapping("/api/page/define")	 //TreeFeignApi
 public class SysPageDefineController implements FeignDelete<SysPageDefine>,FeignFind<SysPageDefine>{
 	

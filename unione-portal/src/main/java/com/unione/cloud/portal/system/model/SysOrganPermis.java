@@ -29,22 +29,22 @@ public class SysOrganPermis extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**
 	* 资源ID
 	*/
-	@ApiModelProperty(value="资源ID",notes="长度为：19")
+	@Schema(title="资源ID",description="长度为：19")
 	private Long resId;
 	/**
 	* 资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具
 	*/
-	@ApiModelProperty(value="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",notes="长度为：20")
+	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
 	private String resType;
 	/**
 	* 是否可传递授权，1是，0否
 	*/
-	@ApiModelProperty(value="是否可传递授权，1是，0否",notes="长度为：10")
+	@Schema(title="是否可传递授权，1是，0否",description="长度为：10")
 	private Integer enDilivery;
 
 }

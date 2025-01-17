@@ -34,77 +34,77 @@ public class SysPageWidget extends Pojo {
 	/**
 	* 标题
 	*/
-	@ApiModelProperty(value="标题",notes="长度为：50")
+	@Schema(title="标题",description="长度为：50")
 	private String title;
 	/**
 	* 名称，唯一
 	*/
-	@ApiModelProperty(value="名称，唯一",notes="长度为：30")
+	@Schema(title="名称，唯一",description="长度为：30")
 	private String name;
 	/**
 	* 类型，字典PORTLETTYPE：form表单组件， table表格，chartBar:柱状图，chartPie:饼图，layout布局
 	*/
-	@ApiModelProperty(value="类型，字典PORTLETTYPE：form表单组件， table表格，chartBar:柱状图，chartPie:饼图，layout布局",notes="长度为：30")
+	@Schema(title="类型，字典PORTLETTYPE：form表单组件， table表格，chartBar:柱状图，chartPie:饼图，layout布局",description="长度为：30")
 	private String types;
 	/**
 	* 预览图片url
 	*/
-	@ApiModelProperty(value="预览图片url",notes="长度为：250")
+	@Schema(title="预览图片url",description="长度为：250")
 	private String reviewPic;
 	/**
 	* 图标（字体图标）
 	*/
-	@ApiModelProperty(value="图标（字体图标）",notes="长度为：100")
+	@Schema(title="图标（字体图标）",description="长度为：100")
 	private String icon;
 	/**
 	* 大图标(图片图标)
 	*/
-	@ApiModelProperty(value="大图标(图片图标)",notes="长度为：250")
+	@Schema(title="大图标(图片图标)",description="长度为：250")
 	private String picMax;
 	/**
 	* 中图标(图片图标)
 	*/
-	@ApiModelProperty(value="中图标(图片图标)",notes="长度为：250")
+	@Schema(title="中图标(图片图标)",description="长度为：250")
 	private String picMid;
 	/**
 	* 小图标(图片图标)
 	*/
-	@ApiModelProperty(value="小图标(图片图标)",notes="长度为：250")
+	@Schema(title="小图标(图片图标)",description="长度为：250")
 	private String picMix;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 基础组件，字典TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="基础组件，字典TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="基础组件，字典TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isBase;
 	/**
 	* 行业分类，多个逗号分隔
 	*/
-	@ApiModelProperty(value="行业分类，多个逗号分隔",notes="长度为：500")
+	@Schema(title="行业分类，多个逗号分隔",description="长度为：500")
 	private String trades;
 	/**
 	* 状态，字典USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="状态，字典USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="状态，字典USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 	/**
 	* 组件定义，json结构｛｝
 	*/
-	@ApiModelProperty(value="组件定义，json结构｛｝",notes="长度为：2147483647")
+	@Schema(title="组件定义，json结构｛｝",description="长度为：2147483647")
 	private String configs;
 	/**
 	* 属性定义，json结构｛｝
 	*/
-	@ApiModelProperty(value="属性定义，json结构｛｝",notes="长度为：2147483647")
+	@Schema(title="属性定义，json结构｛｝",description="长度为：2147483647")
 	private String props;
 	/**
 	* 描述
 	*/
-	@ApiModelProperty(value="描述",notes="长度为：500")
+	@Schema(title="描述",description="长度为：500")
 	private String descs;
 
 }

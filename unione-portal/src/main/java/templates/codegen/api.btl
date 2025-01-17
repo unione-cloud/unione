@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "${className} ${modelName}管理：${comment}",description="${className}")
+@Tag(name = "${className} ${modelName}管理：${comment}",description="${className}")
 @RequestMapping("/api/${requestMapping}")	 //TreeFeignApi
 public class ${className}Controller implements PojoFeignApi<${className}>{
 	

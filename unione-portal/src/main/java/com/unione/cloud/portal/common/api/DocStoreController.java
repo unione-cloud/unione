@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RefreshScope
 @RestController
-@Api(tags = "doc管理：文件存储 管理服务")
+@Tag(name = "doc管理：文件存储 管理服务")
 @RequestMapping("/api/store")
 public class DocStoreController{
 	/**
@@ -190,7 +190,7 @@ public class DocStoreController{
 	}
 
 
-	@ApiOperation(value="上传文件[单个]",notes = "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@ApiOperation(value="上传文件[单个]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
 			@PathVariable("appCode") String appCode,
@@ -289,7 +289,7 @@ public class DocStoreController{
 		return Results.success(list);
 	}
 
-	@ApiOperation(value="上传文件[批量]",notes = "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@ApiOperation(value="上传文件[批量]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/batch/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
 			@PathVariable("appCode") String appCode,
@@ -303,7 +303,7 @@ public class DocStoreController{
 
 
 	@PostMapping("/delete/{fileId}")
-	@ApiOperation(value="删除文件",notes = "根据文件id删除")
+	@ApiOperation(value="删除文件",description= "根据文件id删除")
 	public Results<Void> delete(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:删除文件存储信息方法，fileId:{}",fileId);
 		Results<Void> results = new Results<>();
@@ -361,7 +361,7 @@ public class DocStoreController{
 
 
 	@PostMapping("/delete/owner/{ownerId}")
-	@ApiOperation(value="删除文件",notes = "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
+	@ApiOperation(value="删除文件",description= "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
 	public Results<Integer[]> deleteByOwner(@PathVariable("ownerId") Long ownerId) {
 		log.debug("进入:删除文件存储信息方法，ownerId:{}",ownerId);
 		boolean logSaveFlag=false;
@@ -438,7 +438,7 @@ public class DocStoreController{
 
 
 	@GetMapping("/download/{fileId}")
-	@ApiOperation(value="下载文件",notes = "根据文件id下载")
+	@ApiOperation(value="下载文件",description= "根据文件id下载")
 	public void download(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件下载方法，fileId:{}",fileId);
 		File file = this.downloadFile(fileId);
@@ -522,7 +522,7 @@ public class DocStoreController{
 
 	
 	@PostMapping("/download")
-	@ApiOperation(value="下载文件【批量】",notes = "根据文件id下载")
+	@ApiOperation(value="下载文件【批量】",description= "根据文件id下载")
 	public void download(@RequestBody List<Long> fileIds) {
 		log.debug("进入:文件下载方法，fileIds:{}",fileIds);
 		boolean logSaveFlag=false;
@@ -629,7 +629,7 @@ public class DocStoreController{
 
 	
 	@PostMapping("/download/dir")
-	@ApiOperation(value="下载文档【批量】",notes = "批量下载文件和文件夹")
+	@ApiOperation(value="下载文档【批量】",description= "批量下载文件和文件夹")
 	public void download(@RequestParam("fileIds") List<Long> fileIds,@RequestParam("dirIds") List<Long> dirIds) {
 		log.debug("进入:下载文档【批量】方法，fileIds:{},dirIds:{}",fileIds,dirIds);
 		boolean logSaveFlag=false;
@@ -726,7 +726,7 @@ public class DocStoreController{
 	
 
 	@GetMapping("/preview/{fileId}")
-	@ApiOperation(value="预览文件",notes = "根据文件id下载")
+	@ApiOperation(value="预览文件",description= "根据文件id下载")
 	public void preview(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览方法，fileId:{}",fileId);
 		boolean logSaveFlag=false;
@@ -827,7 +827,7 @@ public class DocStoreController{
 	
 
 	@GetMapping("/preview/public/{fileId}")
-	@ApiOperation(value="预览文件【公开】",notes = "根据文件id下载，公开文件，不进行验证")
+	@ApiOperation(value="预览文件【公开】",description= "根据文件id下载，公开文件，不进行验证")
 	public void previewPublic(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览【公开】方法，fileId:{}",fileId);
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");

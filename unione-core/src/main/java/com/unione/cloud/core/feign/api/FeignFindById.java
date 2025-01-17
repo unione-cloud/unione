@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignFindById<T> {
 
 	@PostMapping("/findByIds")
-	@ApiOperation(value = "查询列表", notes = "通过sid查询列表")
+	@Operation(description = "查询列表")
 	public Results<List<T>> findByIds(@RequestBody Set<Long> ids);
 	
 }

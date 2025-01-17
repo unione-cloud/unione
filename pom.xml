@@ -2,12 +2,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>unione.cloud</groupId>
+	<groupId>cloud.unione</groupId>
 	<artifactId>unione</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<description>
-		统一建站云平台，提供一站式低代码建站服务
+		悠云统一建站云平台，提供一站式低代码建站服务
 	</description>
 	
 	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->
@@ -16,7 +16,7 @@
 		<developer>
 			<name>Jeking Yang</name>
 			<email>jeking217@163.com</email>
-			<url>https://wiki.unione.cloud/jeking217</url>
+			<url>https://wiki.cloud.unione/jeking217</url>
 			<organization>unione cloud</organization>
 		</developer>
 	</developers>
@@ -262,48 +262,48 @@
 	<!-- unione cloud:基础版本 -->
 	<properties>
 		<encoding>UTF-8</encoding>
-		<jdk.version>1.8</jdk.version>
+		<jdk.version>23</jdk.version>
 		<spring.boot.skip>true</spring.boot.skip>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	
+		<jakarta.version>6.1.0</jakarta.version>
 		<!-- spring boot,cloud index -->
-		<spring.boot.version>2.7.18</spring.boot.version>
-		<spring.cloud.version>3.1.9</spring.cloud.version>
+		<spring.boot.version>3.4.0</spring.boot.version>
+		<spring.cloud.version>4.2.0</spring.cloud.version>
 		
 		<!-- feign index -->
 		<netflix.version>2.2.10.RELEASE</netflix.version>
 	
 		<!-- common index -->
-		<jakarta.version>2.0.1</jakarta.version>
 		<lombok.version>1.18.36</lombok.version>
 		<druid.version>1.2.11</druid.version>
-		<pool2.version>2.11.0</pool2.version>
-		<httpclient.version>4.5.13</httpclient.version>
+		<pool2.version>2.12.0</pool2.version>
+		<httpclient.version>5.4.1</httpclient.version>
 		
 		<!-- beetsql index -->
-		<ibeetl.version>3.25.1-RELEASE</ibeetl.version>
-		<hutool.version>5.8.21</hutool.version>
+		<ibeetl.version>3.30.14-RELEASE</ibeetl.version>
+		<hutool.version>5.8.34</hutool.version>
 		<mysql.version>8.0.21</mysql.version>
 		
 		<!-- swagger index -->
 		<swagger.version>3.0.0</swagger.version>
-		<knife4j.version>3.0.3</knife4j.version>
+		<knife4j.version>4.5.0</knife4j.version>
 		
 		<!-- jackson index -->
-		<jackson.version>2.13.3</jackson.version>
-		<lang.version>3.12.0</lang.version>
+		<jackson.version>2.18.1</jackson.version>
+		<lang.version>3.17.0</lang.version>
 		<codec.version>1.15</codec.version>
 		<beanutils.version>1.9.4</beanutils.version>
 		
 		<!-- jwt index -->
-		<jwt.version>4.0.0</jwt.version>
+		<jwt.version>4.4.0</jwt.version>
 		
 		<!-- logger index -->
 		<slf4j.version>1.7.36</slf4j.version>
-		<logback.version>1.2.11</logback.version>
+		<logback.version>1.5.12</logback.version>
 		
 		<!-- nacos index -->
-		<nacos.version>2.2.8.RELEASE</nacos.version>
+		<nacos.version>2023.0.3.2</nacos.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		
 		<!-- thymeleaf index -->

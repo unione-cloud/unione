@@ -1,13 +1,12 @@
 package com.unione.cloud.form.data.model;
-import javax.validation.constraints.NotNull;
-
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,33 +35,33 @@ public class SysDataAuth extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long appId;
 	/**
 	* 数据定义ID
 	*/
-	@ApiModelProperty(value="数据定义ID",notes="长度为：19")
+	@Schema(title="数据定义ID",description="长度为：19")
 	private Long defineId;
 	/**
 	* 数据权限ID
 	*/
-	@ApiModelProperty(value="数据权限ID",notes="长度为：19")
+	@Schema(title="数据权限ID",description="长度为：19")
 	private Long permisId;
 	/**
 	* 目标类型，字典DMSDATAAUTHTYPE  dc：中心， role：角色，user：用户，organ：机构
 	*/
-	@ApiModelProperty(value="目标类型，字典DMSDATAAUTHTYPE  dc：中心， role：角色，user：用户，organ：机构",notes="长度为：10")
+	@Schema(title="目标类型，字典DMSDATAAUTHTYPE  dc：中心， role：角色，user：用户，organ：机构",description="长度为：10")
 	private String targetType;
 	/**
 	* 目标ID
 	*/
-	@ApiModelProperty(value="目标ID",notes="长度为：19")
+	@Schema(title="目标ID",description="长度为：19")
 	private Long targetId;
 	/**
 	* 使用状态，字典USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="使用状态，字典USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="使用状态，字典USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 
 }

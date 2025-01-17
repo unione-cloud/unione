@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：租户信息",description="SysTenant")
+@Tag(name = "系统管理：租户信息",description="SysTenant")
 @RequestMapping("/api/system/tenant")	 //TreeFeignApi
 public class SysTenantController implements PojoFeignApi<SysTenant>{
 	

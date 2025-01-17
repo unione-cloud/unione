@@ -1,18 +1,9 @@
 package com.unione.cloud.form.data.model;
 import java.util.Date;
 
-import javax.validation.constraints.NotNull;
-
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.beetsql.annotation.UniDataPermis;
@@ -20,6 +11,14 @@ import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * @标题 	SysDataDefineHis Entity
@@ -44,63 +43,63 @@ public class SysDataDefineHis extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long appId;
 	/**
 	* 目录ID
 	*/
-	@ApiModelProperty(value="目录ID",notes="长度为：19")
+	@Schema(title="目录ID",description="长度为：19")
 	private Long dirId;
 	/**
 	* 数据源ID
 	*/
-	@ApiModelProperty(value="数据源ID",notes="长度为：19")
+	@Schema(title="数据源ID",description="长度为：19")
 	private Long dsId;
 	/**
 	* 数据定义ID
 	*/
-	@ApiModelProperty(value="数据定义ID",notes="长度为：19")
+	@Schema(title="数据定义ID",description="长度为：19")
 	private Long defineId;
 	/**
 	* 数据标题
 	*/
-	@ApiModelProperty(value="数据标题",notes="长度为：100")
+	@Schema(title="数据标题",description="长度为：100")
 	private String title;
 	/**
 	* 数据名称，对应数据库表名称
 	*/
-	@ApiModelProperty(value="数据名称，对应数据库表名称",notes="长度为：100")
+	@Schema(title="数据名称，对应数据库表名称",description="长度为：100")
 	private String name;
 	/**
 	* 数据编码
 	*/
-	@ApiModelProperty(value="数据编码",notes="长度为：50")
+	@Schema(title="数据编码",description="长度为：50")
 	private String sn;
 	/**
 	* 版本号
 	*/
-	@ApiModelProperty(value="版本号",notes="长度为：10")
+	@Schema(title="版本号",description="长度为：10")
 	private Integer vers;
 	/**
 	* 类别，sql：关系型存储，nosql：非关系型存储，api：接口存储
 	*/
-	@ApiModelProperty(value="类别，sql：关系型存储，nosql：非关系型存储，api：接口存储",notes="长度为：10")
+	@Schema(title="类别，sql：关系型存储，nosql：非关系型存储，api：接口存储",description="长度为：10")
 	private String category;
 	/**
 	* URL，api接口url，不包含服务ctx部分,/开头，eg：/user
 	*/
-	@ApiModelProperty(value="api接入url",notes="api接口url，不包含服务ctx部分,/开头，eg：/user,长度为：100")
+	@Schema(title="api接入url",description="api接口url，不包含服务ctx部分,/开头，eg：/user,长度为：100")
 	private String url;
 	/**
 	* 自定义，字典TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="自定义，字典TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="自定义，字典TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isCustom;
 	/**
 	* 发布日期
 	*/
-	@ApiModelProperty(value="发布日期",notes="长度为：19")
+	@Schema(title="发布日期",description="长度为：19")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
 	private Date publishDate;
@@ -108,55 +107,55 @@ public class SysDataDefineHis extends Pojo {
 	* 数据查询脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
-	@ApiModelProperty(value="数据查询脚本",notes="长度为：65535")
+	@Schema(title="数据查询脚本",description="长度为：65535")
 	private String findScript;
 	/**
 	* 数据新增脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
-	@ApiModelProperty(value="数据新增脚本",notes="长度为：65535")
+	@Schema(title="数据新增脚本",description="长度为：65535")
 	private String insertScript;
 	/**
 	* 数据更新脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
-	@ApiModelProperty(value="数据更新脚本",notes="长度为：65535")
+	@Schema(title="数据更新脚本",description="长度为：65535")
 	private String updateScript;
 	/**
 	* 数据删除脚本
 	*/
 	@UniQueryIgnore(QueryType.SELECT_LIST)
-	@ApiModelProperty(value="数据删除脚本",notes="长度为：65535")
+	@Schema(title="数据删除脚本",description="长度为：65535")
 	private String deleteScript;
 	/**
 	* 同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="同步状态，是否已同步数据库，字典TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer syncFlag;
 	/**
 	* 数据配置，json存储,{}
 	*/
-	@ApiModelProperty(value="数据配置，json存储,{}",notes="长度为：65535")
+	@Schema(title="数据配置，json存储,{}",description="长度为：65535")
 	private String configs;
 	/**
 	* 数据签名
 	*/
-	@ApiModelProperty(value="数据签名",notes="数据签名，（configs，xxxxScript等）字段hash运算后的值,长度为：100")
+	@Schema(title="数据签名",description="数据签名，（configs，xxxxScript等）字段hash运算后的值,长度为：100")
 	private String signature;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 发布状态，字典PUBLISHSTATUS 0新建，1提交，2发布，3撤回
 	*/
-	@ApiModelProperty(value="发布状态，字典PUBLISHSTATUS 0新建，1提交，2发布，3撤回",notes="长度为：10")
+	@Schema(title="发布状态，字典PUBLISHSTATUS 0新建，1提交，2发布，3撤回",description="长度为：10")
 	private Integer status;
 	/**
 	* 说明
 	*/
-	@ApiModelProperty(value="说明",notes="长度为：500")
+	@Schema(title="说明",description="长度为：500")
 	private String descs;
 
 }

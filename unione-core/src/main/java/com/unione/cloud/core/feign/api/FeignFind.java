@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignFind<T> {
 
@@ -18,7 +18,7 @@ public interface FeignFind<T> {
 	 * @return
 	 */
 	@PostMapping("/find")
-    @ApiOperation(value = "查询")
+	@Operation(description = "查询")
 	public Results<List<T>> find(@RequestBody Params<T> params);
 	
 }

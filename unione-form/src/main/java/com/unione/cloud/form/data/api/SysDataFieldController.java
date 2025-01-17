@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：数据字段",description="SysDataField")
+@Tag(name = "系统管理：数据字段",description="SysDataField")
 @RequestMapping("/api/data/field")	 //TreeFeignApi
 public class SysDataFieldController implements FeignFind<SysDataField>,FeignFindById<SysDataField>,FeignDetail<SysDataField>{
 	

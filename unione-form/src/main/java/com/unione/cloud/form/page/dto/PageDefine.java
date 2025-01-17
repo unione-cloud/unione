@@ -41,7 +41,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
-@ApiModel("页面定义")
+@Schema("页面定义")
 public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	/**
 	 * 
@@ -49,7 +49,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	private static final long serialVersionUID = -177492027121128764L;
 
 	@JsonProperty("configs")
-	@ApiModelProperty("页面配置对象")
+	@Schema(title="页面配置对象")
 	@JsonDeserialize(using = PageConfigDeserializer.class)
 	private T configDto;
 	
@@ -75,31 +75,31 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("页面配置")
+	@Schema("页面配置")
 	public static class PageConfig implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 7542938311504351628L;
 
-		@ApiModelProperty("页面组件名称")
+		@Schema(title="页面组件名称")
 		private String component;
 		
-		@ApiModelProperty("页面组件集合")
+		@Schema(title="页面组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<Widget> widgets=new ArrayList<>();
 		
-		@ApiModelProperty("数据模型sn集合")
+		@Schema(title="数据模型sn集合")
 		private List<String> dsnList;
 		
 		@JsonProperty(access = Access.READ_ONLY)
-		@ApiModelProperty(value="页面权限",notes = "页面组件权限,key:组件id,value:权限定义")
+		@Schema(title="页面权限",description= "页面组件权限,key:组件id,value:权限定义")
 		private Map<String, WidgetPermis> permis;
 		
-		@ApiModelProperty("页面设置对象")
+		@Schema(title="页面设置对象")
 		private PageSetting setting;
 		
-		@ApiModelProperty("样式设置")
+		@Schema(title="样式设置")
 		private Css css;
 		
 	}
@@ -125,17 +125,17 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("页面设置")
+	@Schema("页面设置")
 	public static class PageSetting implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 8234983161647012935L;
 		
-		@ApiModelProperty(value="平台名称",notes = "pc,app")
+		@Schema(title="平台名称",description= "pc,app")
 		private String platform;
 		
-		@ApiModelProperty(value="规则触发时机",notes = "change,blur")
+		@Schema(title="规则触发时机",description= "change,blur")
 		private String ruleTrigger;
 		
 	}
@@ -143,7 +143,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Form页面定义")
+	@Schema("Form页面定义")
 	public static class FormPageDefine extends PageDefine<FormPageConfig>{
 		/**
 		 * 
@@ -157,17 +157,17 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Form页面配置")
+	@Schema("Form页面配置")
 	public static class FormPageConfig extends PageConfig{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 8234983161647019935L;
 		
-		@ApiModelProperty(value="按钮列表",notes = "页面按钮列表")
+		@Schema(title="按钮列表",description= "页面按钮列表")
 		private List<Button> btns;
 	
-		@ApiModelProperty("表单事件")
+		@Schema(title="表单事件")
 		private FormEvent event;
 		
 		@JsonIgnore
@@ -190,30 +190,30 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单事件")
+	@Schema("表单事件")
 	public static class FormEvent implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8532953889812739800L;
 
-		@ApiModelProperty(value="表单验证事件",notes = "自定义表单验证逻辑")
+		@Schema(title="表单验证事件",description= "自定义表单验证逻辑")
 		private EventDefine validate;
 		
-		@ApiModelProperty(value="表单显示事件",notes="动态显示事件，根据逻辑动态显示表单")
+		@Schema(title="表单显示事件",description="动态显示事件，根据逻辑动态显示表单")
 		private EventDefine visible;
 		
-		@ApiModelProperty(value="表单保存前置事件",notes="提交表单数据前触发的事件")
+		@Schema(title="表单保存前置事件",description="提交表单数据前触发的事件")
 		private EventDefine preSave;
 		
-		@ApiModelProperty(value="表单保存后置事件",notes="表单保存成功后触发的事件")
+		@Schema(title="表单保存后置事件",description="表单保存成功后触发的事件")
 		private EventDefine postSaved;
 		
 	}
 	
 	
 	@Data
-	@ApiModel("list页面定义")
+	@Schema("list页面定义")
 	public static class ListPageDefine extends PageDefine<ListPageConfig>{
 		/**
 		 * 
@@ -226,7 +226,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("Table页面配置")
+	@Schema("Table页面配置")
 	public static class ListPageConfig extends PageConfig{
 		/**
 		 * 
@@ -275,29 +275,29 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("组件定义")
+	@Schema("组件定义")
 	public static class Widget implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1203629620171596812L;
 		
-		@ApiModelProperty("显示顺序")
+		@Schema(title="显示顺序")
 		private Integer index;
 
-		@ApiModelProperty("组件id")
+		@Schema(title="组件id")
 		private String wid;
 		
-		@ApiModelProperty("组件名称")
+		@Schema(title="组件名称")
 		private String widget;
 				
-		@ApiModelProperty("组件标题")
+		@Schema(title="组件标题")
 		private String title;
 		
-		@ApiModelProperty("样式设置")
+		@Schema(title="样式设置")
 		private Css css;
 	
-		@ApiModelProperty(value="子组件集合")
+		@Schema(title="子组件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		public List<Widget> getWidgets(){
 			return null;
@@ -359,35 +359,35 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("按钮组件")
+	@Schema("按钮组件")
 	public static class Button extends Widget {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -4064275584042514224L;
 
-		@ApiModelProperty(value="按钮名称",notes = "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
+		@Schema(title="按钮名称",description= "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
 		private String name;
 		
-		@ApiModelProperty(value = "按钮icon图标")
+		@Schema(title=" = "按钮icon图标")
 		private String icon;
 		
-		@ApiModelProperty("是否显示")
+		@Schema(title="是否显示")
 		private Boolean visible;
 		
-		@ApiModelProperty("是否禁用")
+		@Schema(title="是否禁用")
 		private Boolean disabled;
 		
-		@ApiModelProperty("响应设置")
+		@Schema(title="响应设置")
 		private ButtonAction action;
 		
-		@ApiModelProperty("按钮事件")
+		@Schema(title="按钮事件")
 		private ButtonEvent event;
 		
-		@ApiModelProperty(value="显示顺序",notes = "按钮显示顺序")
+		@Schema(title="显示顺序",description= "按钮显示顺序")
 		private Integer index;
 		
-		@ApiModelProperty("按钮属性")
+		@Schema(title="按钮属性")
 		private ButtonProps props;
 		
 		public String getWidget() {
@@ -396,55 +396,55 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("按钮属性")
+	@Schema("按钮属性")
 	public static class ButtonProps implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8392444232066625861L;
 		
-		@ApiModelProperty(value = "按钮shape形状",notes = "可选:default | circle | round")
+		@Schema(title=" = "按钮shape形状",description= "可选:default | circle | round")
 		private String shape;
 		
-		@ApiModelProperty(value = "按钮type类型",notes = "可选:primary | ghost | dashed | link | text | default")
+		@Schema(title=" = "按钮type类型",description= "可选:primary | ghost | dashed | link | text | default")
 		private String type;
 		
-		@ApiModelProperty(value = "按钮size大小",notes = "可选:large | middle | small")
+		@Schema(title=" = "按钮size大小",description= "可选:large | middle | small")
 		private String size;
 		
-		@ApiModelProperty(value = "按钮trigger事件触发",notes = "可选:large | middle | small")
+		@Schema(title=" = "按钮trigger事件触发",description= "可选:large | middle | small")
 		private String trigger;
 		
-		@ApiModelProperty("是否危险按钮")
+		@Schema(title="是否危险按钮")
 		private boolean danger;
 		
-		@ApiModelProperty(value="自适应按钮",notes = "将按钮宽度调整为其父宽度的选项")
+		@Schema(title="自适应按钮",description= "将按钮宽度调整为其父宽度的选项")
 		private boolean block;
 		
-		@ApiModelProperty(value="幽灵按钮",notes = "使按钮背景透明")
+		@Schema(title="幽灵按钮",description= "使按钮背景透明")
 		private boolean ghost;
 		
 	}
 	
 	@Data
-	@ApiModel("表单组件配置")
+	@Schema("表单组件配置")
 	public static class FormWidget extends Widget {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -5448770098453865691L;
 		
-		@ApiModelProperty(value="是否主表单",notes = "一个表单页面有且只有一个主表单")
+		@Schema(title="是否主表单",description= "一个表单页面有且只有一个主表单")
 		private boolean primary;
 
-		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
+		@Schema(title="数据模型编码",description= "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
 		
-		@ApiModelProperty("表单项/控件集合")
+		@Schema(title="表单项/控件集合")
 		@JsonDeserialize(using = WidgetDeserializer.class)
 		private List<Widget> widgets=new ArrayList<>();
 		
-		@ApiModelProperty("表设置")
+		@Schema(title="表设置")
 		private FormSetting setting;
 
 		public String getWidget() {
@@ -455,69 +455,69 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单组件配置")
+	@Schema("表单组件配置")
 	public static class FormSetting implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -5448771098453865691L;
 		
-		@ApiModelProperty(value="表单显示列数",notes = "表单显示列数，默认3")
+		@Schema(title="表单显示列数",description= "表单显示列数，默认3")
 		private Integer showColumn;
 		
-		@ApiModelProperty(value="label显示列数",notes = "label显示宽度，默认9")
+		@Schema(title="label显示列数",description= "label显示宽度，默认9")
 		private Integer labelWidth;
 		
 	}
 	
 	@Data
-	@ApiModel("表单项/控件")
+	@Schema("表单项/控件")
 	public static class FormItem extends Widget {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -28563820147504303L;
 		
-		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
+		@Schema(title="数据模型编码",description= "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
 		
-		@ApiModelProperty(value="控件名称",notes = "表单控件名称，eg：unione-select-box")
+		@Schema(title="控件名称",description= "表单控件名称，eg：unione-select-box")
 		private String control;
 
-		@ApiModelProperty(value="字段name",notes = "数据绑定字段名称")
+		@Schema(title="字段name",description= "数据绑定字段名称")
 		private String name;
 		
-		@ApiModelProperty(value="组件初始值")
+		@Schema(title="组件初始值")
 		private String value;
 		
-		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
+		@Schema(title="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",description="长度为：20")
 		private String dataType;
 		
-		@ApiModelProperty(value="隐藏表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
+		@Schema(title="隐藏表单",description= "特指：新增表单：add，修改表单:edit，详情表单:view，中是否隐藏，为空时不受限，不为空时指定表单隐藏")
 		private List<String> hidden;
 		
-		@ApiModelProperty(value="只读表单",notes = "特指：新增表单：add，修改表单:edit，详情表单:view，中是否只读，为空时所有表单可写，不为空时指定表单只读")
+		@Schema(title="只读表单",description= "特指：新增表单：add，修改表单:edit，详情表单:view，中是否只读，为空时所有表单可写，不为空时指定表单只读")
 		private List<String> readonly;
 		
-		@ApiModelProperty(value="表单项事件")
+		@Schema(title="表单项事件")
 		private FormItemEvent event;
 		
-		@ApiModelProperty(value="数据转换")
+		@Schema(title="数据转换")
 		private DataConvert convert;
 		
-		@ApiModelProperty(value="组件验证规则",notes = "表单组件验证规则")
+		@Schema(title="组件验证规则",description= "表单组件验证规则")
 		private DataRule rule;
 		
-		@ApiModelProperty(value="外键设置")
+		@Schema(title="外键设置")
 		private ForeignKey fkey;
 		
-		@ApiModelProperty(value="条件样式")
+		@Schema(title="条件样式")
 		private List<ConditionStyle> conditionStyle;
 		
-		@ApiModelProperty(value="组件属性")
+		@Schema(title="组件属性")
 		private FormItemProps props=new FormItemProps();
 		
-		@ApiModelProperty(value="组件显示")
+		@Schema(title="组件显示")
 		private FormItemView view=new FormItemView();
 		
 		public String getWidget() {
@@ -526,45 +526,45 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("表单项view配置  ")
+	@Schema("表单项view配置  ")
 	public static class FormItemView implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -2367848605872325522L;
 		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		@Schema(title="数据格式",description= "数值类型/日期类型:显示格式")
 		private String dataFormat;
 
-		@ApiModelProperty(value="显示宽度",notes = "占用空间大小，1-3栏")
+		@Schema(title="显示宽度",description= "占用空间大小，1-3栏")
 		private Integer width;
 		
-		@ApiModelProperty(value="label宽度",notes = "占用空间大小，24单元格")
+		@Schema(title="label宽度",description= "占用空间大小，24单元格")
 		private Integer labelWidth;
 		
-		@ApiModelProperty(value="widget宽度",notes = "占用空间大小，24单元格")
+		@Schema(title="widget宽度",description= "占用空间大小，24单元格")
 		private Integer valueWidth;
 		
 	}
 	
 	@Data
-	@ApiModel("表单项配置  ")
+	@Schema("表单项配置  ")
 	public static class FormItemProps implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -2367848605872325522L;
 
-		@ApiModelProperty(value="是否必填")
+		@Schema(title="是否必填")
 		private boolean required;
 		
-		@ApiModelProperty(value="组件提示信息")
+		@Schema(title="组件提示信息")
 		private String placeholder;
 		
-		@ApiModelProperty(value="输入帮助")
+		@Schema(title="输入帮助")
 		private String help;
 		
-		@ApiModelProperty(value="输入提示")
+		@Schema(title="输入提示")
 		private String tooltip;
 		
 		
@@ -572,11 +572,11 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("下拉框组件")
+	@Schema("下拉框组件")
 	public static class SelectBox extends FormItem {
 		
 		
-		@ApiModelProperty(value="数据转换")
+		@Schema(title="数据转换")
 		private DataConvert convert;
 		
 		
@@ -585,26 +585,26 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("查询组件配置")
+	@Schema("查询组件配置")
 	public static class QueryWidget extends Widget {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -5448770098453865691L;
 
-		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
+		@Schema(title="数据模型编码",description= "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
 		
-		@ApiModelProperty(value="关键字查询",notes = "")
+		@Schema(title="关键字查询",description= "")
 		private QueryKeywords keywords;
 		
-		@ApiModelProperty(value="查询字段集合",notes = "")
+		@Schema(title="查询字段集合",description= "")
 		private List<QueryField> fields=new ArrayList<>();
 		
-		@ApiModelProperty(value="按钮集合",notes = "")
+		@Schema(title="按钮集合",description= "")
 		private List<Button> btns;
 		
-		@ApiModelProperty(value="label显示宽度",notes = "默认7，最大24")
+		@Schema(title="label显示宽度",description= "默认7，最大24")
 		private Integer labelWidth;
 
 		public String getWidget() {
@@ -614,23 +614,23 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@ApiModel("查询关键字")
+	@Schema("查询关键字")
 	public static class QueryKeywords implements Serializable{/**
 		 * 
 		 */
 		private static final long serialVersionUID = 3043407708514297445L;
-		@ApiModelProperty(value="是否显示",notes = "")
+		@Schema(title="是否显示",description= "")
 		private boolean visible;
-		@ApiModelProperty(value="显示标题",notes = "")
+		@Schema(title="显示标题",description= "")
 		private String title;
-		@ApiModelProperty(value="查询名称",notes = "默认：keywords")
+		@Schema(title="查询名称",description= "默认：keywords")
 		private String name;
-		@ApiModelProperty(value="输入提示",notes = "")
+		@Schema(title="输入提示",description= "")
 		private String placeholder;
 	}
 	
 	@Data
-	@ApiModel("查询字段")
+	@Schema("查询字段")
 	public static class QueryField implements Serializable{
 		
 		/**
@@ -638,37 +638,37 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		 */
 		private static final long serialVersionUID = -4572865056411195920L;
 		
-		@ApiModelProperty(value="字段标题",notes = "")
+		@Schema(title="字段标题",description= "")
 		private String title;
 		
-		@ApiModelProperty(value="字段名称",notes = "")
+		@Schema(title="字段名称",description= "")
 		private String name;
 		
-		@ApiModelProperty(value="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",notes="长度为：20")
+		@Schema(title="数据类型，直接使用java映射类型，如：String，Double，Float，Boolean，Date 等",description="长度为：20")
 		private String dataType;
 		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		@Schema(title="数据格式",description= "数值类型/日期类型:显示格式")
 		private String dataFormat;
 		
-		@ApiModelProperty(value="组件设置")
+		@Schema(title="组件设置")
 		private FieldWidget widget;
 		
-		@ApiModelProperty(value="外键设置")
+		@Schema(title="外键设置")
 		private ForeignKey fkey;
 		
-		@ApiModelProperty("字段搜索")
+		@Schema(title="字段搜索")
 		private DataQuery query;
 
-		@ApiModelProperty(value="数据转换")
+		@Schema(title="数据转换")
 		private DataConvert convert;
 		
-		@ApiModelProperty(value="条件样式")
+		@Schema(title="条件样式")
 		private List<ConditionStyle> conditionStyle;
 		
-		@ApiModelProperty(value="默认查询",notes = "默认查询：即加入关键字查询")
+		@Schema(title="默认查询",description= "默认查询：即加入关键字查询")
 		private boolean defoult;
 		
-		@ApiModelProperty(value="默认显示",notes = "true:默认显示该查询,false：高级查询中自行勾选")
+		@Schema(title="默认显示",description= "true:默认显示该查询,false：高级查询中自行勾选")
 		private boolean visible;
 		
 	}
@@ -676,7 +676,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 
 	@Data
-	@ApiModel("查询组件配置")
+	@Schema("查询组件配置")
 	public static class QueryWidgetProps implements Serializable{
 		/**
 		 * 
@@ -689,7 +689,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格组件配置")
+	@Schema("表格组件配置")
 	public static class TableWidget extends Widget {
 		/**
 		 * 
@@ -697,31 +697,31 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		private static final long serialVersionUID = 3079809143371203058L;
 		
 		
-		@ApiModelProperty(value="数据模型编码",notes = "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
+		@Schema(title="数据模型编码",description= "如果不为空，子组件不单独设置，则跟随父组件绑定同一个数据模型")
 		private String dsn;
 		
-		@ApiModelProperty(value="表格列模型")
+		@Schema(title="表格列模型")
 		private List<TableColumn> columns=new ArrayList<>();
 		
-		@ApiModelProperty(value="分页配置")
+		@Schema(title="分页配置")
 		private TablePagination pagination;
 		
-		@ApiModelProperty(value="是否开启复选框")
+		@Schema(title="是否开启复选框")
 		private boolean selection;
 		
-		@ApiModelProperty(value="左侧按钮列表",notes = "列表左侧按钮列表")
+		@Schema(title="左侧按钮列表",description= "列表左侧按钮列表")
 		private List<Button> leftBtns;
 		
-		@ApiModelProperty(value="右侧按钮列表",notes = "右表左侧按钮列表")
+		@Schema(title="右侧按钮列表",description= "右表左侧按钮列表")
 		private List<Button> rightBtns;
 		
-		@ApiModelProperty("行号设置")
+		@Schema(title="行号设置")
 		private TableRownum rownum;
 		
-		@ApiModelProperty("操作设置")
+		@Schema(title="操作设置")
 		private TableOperation operation;
 
-		@ApiModelProperty("table设置")
+		@Schema(title="table设置")
 		private TableWidgetProps props;
 		
 		public String getWidget() {
@@ -731,17 +731,17 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格组件属性")
+	@Schema("表格组件属性")
 	public static class TableWidgetProps implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8092409023579026643L;
 		
-		@ApiModelProperty(value="滚动条：X",notes = "横向滚动设置")
+		@Schema(title="滚动条：X",description= "横向滚动设置")
 		private Integer scrollX;
 		
-		@ApiModelProperty(value="滚动条：Y",notes = "纵向滚动设置")
+		@Schema(title="滚动条：Y",description= "纵向滚动设置")
 		private Integer scrollY;
 		
 		
@@ -750,173 +750,173 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表格分页配置")
+	@Schema("表格分页配置")
 	public static class TableColumn implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -1290335572266633088L;
 		
-		@ApiModelProperty(value="字段标题",notes = "")
+		@Schema(title="字段标题",description= "")
 		private String title;
 		
-		@ApiModelProperty(value="字段名称",notes = "")
+		@Schema(title="字段名称",description= "")
 		private String name;
 		
-		@ApiModelProperty(value="是否主键")
+		@Schema(title="是否主键")
 		private boolean isPk;
 		
-		@ApiModelProperty(value="数据格式",notes = "数值类型/日期类型:显示格式")
+		@Schema(title="数据格式",description= "数值类型/日期类型:显示格式")
 		private String dataFormat;
 		
-		@ApiModelProperty(value="组件设置")
+		@Schema(title="组件设置")
 		private FieldWidget widget;
 		
-		@ApiModelProperty(value="外键设置")
+		@Schema(title="外键设置")
 		private ForeignKey fkey;
 		
-		@ApiModelProperty("字段排序")
+		@Schema(title="字段排序")
 		private DataSort sort;
 		
-		@ApiModelProperty("字段搜索")
+		@Schema(title="字段搜索")
 		private DataQuery query;
 
-		@ApiModelProperty(value="数据转换")
+		@Schema(title="数据转换")
 		private DataConvert convert;
 		
-		@ApiModelProperty(value="条件样式")
+		@Schema(title="条件样式")
 		private List<ConditionStyle> conditionStyle;
 		
-		@ApiModelProperty(value="显示顺序",notes = "默认是根据字段列表索引顺序显示，可以通过该字段指定显示顺序")
+		@Schema(title="显示顺序",description= "默认是根据字段列表索引顺序显示，可以通过该字段指定显示顺序")
 		private Integer index;
 		
-		@ApiModelProperty(value="固定方式",notes = "默认：left,可选：'left' | 'right'")
+		@Schema(title="固定方式",description= "默认：left,可选：'left' | 'right'")
 		private String fixed;
 		
-		@ApiModelProperty(value="对齐方式",notes = "默认：center,可选：'center' | 'left' | 'right'")
+		@Schema(title="对齐方式",description= "默认：center,可选：'center' | 'left' | 'right'")
 		private String align;
 		
-		@ApiModelProperty("显示宽度")
+		@Schema(title="显示宽度")
 		private Integer width;
 		
-		@ApiModelProperty(value = "行合并开关",notes = "数据列表页面")
+		@Schema(title=" = "行合并开关",description= "数据列表页面")
 		private boolean rowMergeEnable;
 		
-		@ApiModelProperty(value = "列合并开关",notes = "数据列表页面")
+		@Schema(title=" = "列合并开关",description= "数据列表页面")
 		private boolean colMergeEnable;
 		
 	}
 	
 	@Data
-	@ApiModel("表格分页配置")
+	@Schema("表格分页配置")
 	public static class TablePagination implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1333732908409635861L;
 
-		@ApiModelProperty("自定义记录总数显示逻辑")
+		@Schema(title="自定义记录总数显示逻辑")
 		private String showTotalScript;
 		
-		@ApiModelProperty(value="每页记录数量",notes = "默认：10")
+		@Schema(title="每页记录数量",description= "默认：10")
 		private Integer pageSize;
 		
-		@ApiModelProperty(value="指定每页可以显示多少条",notes = "eg：['10', '20', '50', '100']")
+		@Schema(title="指定每页可以显示多少条",description= "eg：['10', '20', '50', '100']")
 		private List<Integer> pageSizeOptions;
 		
-		@ApiModelProperty(value="显示位置",notes = "")
+		@Schema(title="显示位置",description= "")
 		private String position;
 		
-		@ApiModelProperty(value = "分页大小",notes = "可选:large | middle | small")
+		@Schema(title=" = "分页大小",description= "可选:large | middle | small")
 		private String   size;
 		
-		@ApiModelProperty(value="当 size 未指定时，根据屏幕宽度自动调整尺寸",notes = "")
+		@Schema(title="当 size 未指定时，根据屏幕宽度自动调整尺寸",description= "")
 		private boolean responsive;
 		
-		@ApiModelProperty(value="当添加该属性时，显示为简单分页",notes = "")
+		@Schema(title="当添加该属性时，显示为简单分页",description= "")
 		private boolean simple;
 	}
 	
 	
 	@Data
-	@ApiModel("表格行号配置")
+	@Schema("表格行号配置")
 	public static class TableRownum implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 8764883326870087401L;
 
-		@ApiModelProperty(value="显示标题",notes = "默认：序号")
+		@Schema(title="显示标题",description= "默认：序号")
 		private String title;
 		
-		@ApiModelProperty(value="固定方式",notes = "默认：left,可选：'left' | 'right'")
+		@Schema(title="固定方式",description= "默认：left,可选：'left' | 'right'")
 		private String fixed;
 		
-		@ApiModelProperty(value="对齐方式",notes = "默认：center,可选：'center' | 'left' | 'right'")
+		@Schema(title="对齐方式",description= "默认：center,可选：'center' | 'left' | 'right'")
 		private String align;
 		
-		@ApiModelProperty("显示宽度")
+		@Schema(title="显示宽度")
 		private Integer width;
 		
-		@ApiModelProperty("是否显示")
+		@Schema(title="是否显示")
 		private boolean visible=true;
 	}
 	
 	
 	@Data
-	@ApiModel("表格行号配置")
+	@Schema("表格行号配置")
 	public static class TableOperation implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 296826468569608136L;
 
-		@ApiModelProperty(value="显示标题",notes = "默认：操作")
+		@Schema(title="显示标题",description= "默认：操作")
 		private String title;
 		
-		@ApiModelProperty(value="固定方式",notes = "默认：right,可选：'left' | 'right'")
+		@Schema(title="固定方式",description= "默认：right,可选：'left' | 'right'")
 		private String fixed;
 		
-		@ApiModelProperty(value="对齐方式",notes = "默认：center,可选：'center' | 'left' | 'right'")
+		@Schema(title="对齐方式",description= "默认：center,可选：'center' | 'left' | 'right'")
 		private String align;
 		
-		@ApiModelProperty(value="显示位置",notes = "默认最后面")
+		@Schema(title="显示位置",description= "默认最后面")
 		private Integer index;
 		
-		@ApiModelProperty("显示宽度")
+		@Schema(title="显示宽度")
 		private Integer width;
 		
-		@ApiModelProperty("显示操作数量")
+		@Schema(title="显示操作数量")
 		private Integer count;
 		
-		@ApiModelProperty("是否显示")
+		@Schema(title="是否显示")
 		private boolean visible=true;
 		
-		@ApiModelProperty("操作按钮列表")
+		@Schema(title="操作按钮列表")
 		private List<Button> btns;
 		
-		@ApiModelProperty("更多设置")
+		@Schema(title="更多设置")
 		private MoreOperation more;
 	}
 	
 	@Data
-	@ApiModel("更多操作配置")
+	@Schema("更多操作配置")
 	public static class MoreOperation implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 5609162190698708400L;
 
-		@ApiModelProperty(value="标题",notes = "默认：更多")
+		@Schema(title="标题",description= "默认：更多")
 		private String title;
 		
-		@ApiModelProperty(value="触发方式",notes = "默认：hover，可选：click|hover|contextmenu")
+		@Schema(title="触发方式",description= "默认：hover，可选：click|hover|contextmenu")
 		private String trigger;
 		
-		@ApiModelProperty(value = "按钮size大小",notes = "可选：large | middle | small")
+		@Schema(title=" = "按钮size大小",description= "可选：large | middle | small")
 		private String size;
 		
-		@ApiModelProperty(value = "显示布局",notes = "可选：vertical | horizontal")
+		@Schema(title=" = "显示布局",description= "可选：vertical | horizontal")
 		private String layout;
 		
 	}
@@ -927,23 +927,23 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("表单项事件")
+	@Schema("表单项事件")
 	public static class FormItemEvent implements Serializable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 6780968062940236797L;
 
-		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
+		@Schema(title="点击事件",description= "按钮点击后触发的脚本")
 		private EventDefine click;
 		
-		@ApiModelProperty(value="标题事件",notes="动态标题事件，根据逻辑动态显示按钮标题")
+		@Schema(title="标题事件",description="动态标题事件，根据逻辑动态显示按钮标题")
 		private EventDefine title;
 		
-		@ApiModelProperty(value="禁用事件",notes="动态禁用事件，根据逻辑动态禁用按钮")
+		@Schema(title="禁用事件",description="动态禁用事件，根据逻辑动态禁用按钮")
 		private EventDefine disable;
 		
-		@ApiModelProperty(value="显示事件",notes="动态显示事件，根据逻辑动态显示按钮")
+		@Schema(title="显示事件",description="动态显示事件，根据逻辑动态显示按钮")
 		private EventDefine visible;
 		
 	}
@@ -953,85 +953,85 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("按钮响应设置")
+	@Schema("按钮响应设置")
 	public static class ButtonAction implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -3653219835676601174L;
 
-		@ApiModelProperty(value = "响应方式",notes = "响应方式：link，route，dialog，drawer")
+		@Schema(title=" = "响应方式",description= "响应方式：link，route，dialog，drawer")
 		private String type;
 		
-		@ApiModelProperty(value = "连接url",notes = "支持变量，动态设置参数")
+		@Schema(title=" = "连接url",description= "支持变量，动态设置参数")
 		private String href;
 		
-		@ApiModelProperty(value = "连接target",notes = "连接跳转方式 _self,_blank")
+		@Schema(title=" = "连接target",description= "连接跳转方式 _self,_blank")
 		private String target;
 		
-		@ApiModelProperty(value = "抽屉显示位置",notes = "抽屉：左侧：left，右侧：right")
+		@Schema(title=" = "抽屉显示位置",description= "抽屉：左侧：left，右侧：right")
 		private String position;
 		
-		@ApiModelProperty(value = "点击遮罩层是否关闭",notes = "抽屉，对话框有效")
+		@Schema(title=" = "点击遮罩层是否关闭",description= "抽屉，对话框有效")
 		private boolean maskClosable;
 		
-		@ApiModelProperty(value = "响应组件名称",notes = "不为空用组件渲染，否则iframe集成")
+		@Schema(title=" = "响应组件名称",description= "不为空用组件渲染，否则iframe集成")
 		private String component;
 		
-		@ApiModelProperty(value = "页面编码",notes = "预留属性")
+		@Schema(title=" = "页面编码",description= "预留属性")
 		private String psn;
 		
-		@ApiModelProperty(value = "响应标题",notes = "对话框，抽屉")
+		@Schema(title=" = "响应标题",description= "对话框，抽屉")
 		private String title;
 		
-		@ApiModelProperty(value = "显示宽度",notes = "对话框，抽屉，单位：px,%,vw")
+		@Schema(title=" = "显示宽度",description= "对话框，抽屉，单位：px,%,vw")
 		private String width;
 		
-		@ApiModelProperty(value = "显示高度",notes = "对话框单位：px,%,vw")
+		@Schema(title=" = "显示高度",description= "对话框单位：px,%,vw")
 		private String height;
 		
-		@ApiModelProperty(value = "响应参数集合",notes = "")
+		@Schema(title=" = "响应参数集合",description= "")
 		private List<DataParam> params;
 		
 	}
 	
 	@Data
-	@ApiModel("按钮事件")
+	@Schema("按钮事件")
 	public static class ButtonEvent implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8084738054778023214L;
 
-		@ApiModelProperty(value="点击事件",notes = "按钮点击后触发的脚本")
+		@Schema(title="点击事件",description= "按钮点击后触发的脚本")
 		private EventDefine click;
 		
-		@ApiModelProperty(value="标题事件",notes="动态标题事件，根据逻辑动态显示按钮标题")
+		@Schema(title="标题事件",description="动态标题事件，根据逻辑动态显示按钮标题")
 		private EventDefine title;
 		
-		@ApiModelProperty(value="禁用事件",notes="动态禁用事件，根据逻辑动态禁用按钮")
+		@Schema(title="禁用事件",description="动态禁用事件，根据逻辑动态禁用按钮")
 		private EventDefine disable;
 		
-		@ApiModelProperty(value="显示事件",notes="动态显示事件，根据逻辑动态显示按钮")
+		@Schema(title="显示事件",description="动态显示事件，根据逻辑动态显示按钮")
 		private EventDefine visible;
 		
 	}
 	
 	@Data
-	@ApiModel("事件定义")
+	@Schema("事件定义")
 	public static class EventDefine implements Serializable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -2883289916188473146L;
 
-		@ApiModelProperty("是否启用")
+		@Schema(title="是否启用")
 		private boolean enable;
 		
-		@ApiModelProperty("事件处理脚本")
+		@Schema(title="事件处理脚本")
 		private String  scriptText;
 		
-		@ApiModelProperty("事件脚本说明")
+		@Schema(title="事件脚本说明")
 		private String  scriptHelp;
 		
 	}
@@ -1044,31 +1044,31 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@ApiModel("样式设置")
+	@Schema("样式设置")
 	public static class Css implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -562216706109195212L;
 
-		@ApiModelProperty(value="样式名称")
+		@Schema(title="样式名称")
 		private String cssName;
 		
-		@ApiModelProperty(value="样式定义")
+		@Schema(title="样式定义")
 		private String cssText;
 		
-		@ApiModelProperty(value="样式属性",notes = "字体大小:fontSize,字体颜色:color等等")
+		@Schema(title="样式属性",description= "字体大小:fontSize,字体颜色:color等等")
 		private Map<String, String> props;
 		
 	}
 	
-	@ApiModel("组件权限定义")
+	@Schema("组件权限定义")
 	public static enum WidgetPermis{
 		WRITE,READ,NONE
 	}
 	
 	
-	@ApiModel("页面类型")
+	@Schema("页面类型")
 	public static enum PageType{
 		CODE("code"),SETTING("setting"),DESGIN("design");
 		

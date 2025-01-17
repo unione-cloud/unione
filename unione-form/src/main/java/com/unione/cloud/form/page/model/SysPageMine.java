@@ -34,17 +34,17 @@ public class SysPageMine extends Pojo {
 	/**
 	* 页面ID
 	*/
-	@ApiModelProperty(value="页面ID",notes="长度为：19")
+	@Schema(title="页面ID",description="长度为：19")
 	private Long pageId;
 	/**
 	* 页面设置，json结构{}
 	*/
-	@ApiModelProperty(value="页面设置，json结构{}",notes="长度为：2147483647")
+	@Schema(title="页面设置，json结构{}",description="长度为：2147483647")
 	private String configs;
 	/**
 	* 备注
 	*/
-	@ApiModelProperty(value="备注",notes="长度为：200")
+	@Schema(title="备注",description="长度为：200")
 	private String descs;
 
 }

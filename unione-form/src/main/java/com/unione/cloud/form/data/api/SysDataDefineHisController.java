@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：数据定义历史",description="SysDataModelHis")
+@Tag(name = "系统管理：数据定义历史",description="SysDataModelHis")
 @RequestMapping("/api/data/define/his")	 //TreeFeignApi
 public class SysDataDefineHisController implements FeignFind<SysDataDefineHis>,FeignFindById<SysDataDefineHis>,FeignDetail<SysDataDefineHis>{
 	

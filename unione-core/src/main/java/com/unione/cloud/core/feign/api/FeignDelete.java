@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignDelete<T> {
 
@@ -17,7 +17,7 @@ public interface FeignDelete<T> {
 	 * @return
 	 */
 	@PostMapping("/delete")
-	@ApiOperation(value = "删除", notes = "批量删除")
+	@Operation(description = "删除")
 	public Results<Integer> delete(@RequestBody Set<Long> ids);
 	
 	

@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "页面管理：我的页面",description="SysPageMine")
+@Tag(name = "页面管理：我的页面",description="SysPageMine")
 @RequestMapping("/api/page/mine")	 //TreeFeignApi
 public class SysPageMineController implements PojoFeignApi<SysPageMine>{
 	

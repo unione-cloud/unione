@@ -18,6 +18,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest.Builder;
@@ -342,7 +343,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			
 			// 判断是否为 /security/logout请求
 			if(matcher.match("/*/security/logout", requestUri)) {
-				String method=request.getMethodValue();
+				String method=request.getMethod().name();
 				if(!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
 					Results<?> result=new Results<>();
 					result.setMessage("资源未找到");
@@ -356,7 +357,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			
 			// 判断是否为 /*/isAuthed请求
 			if(matcher.match("/*/security/isAuthed", requestUri)) {
-				String method=request.getMethodValue();
+				String method=request.getMethod().name();
 				if(!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
 					Results<?> result=new Results<>();
 					result.setMessage("资源未找到");
@@ -416,7 +417,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 	 */
 	@SuppressWarnings("null")
 	protected void after(ServerWebExchange exchange,Config config) {
-		HttpStatus httpStatus=exchange.getResponse().getStatusCode();
+		HttpStatusCode httpStatus=exchange.getResponse().getStatusCode();
 		if (!exchange.getResponse().isCommitted()&& httpStatus.isError()) {
 			 String uri=exchange.getRequest().getURI().toString();
 			 int status = exchange.getResponse().getStatusCode().value();

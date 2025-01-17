@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignDetail<T> {
 
@@ -15,7 +15,7 @@ public interface FeignDetail<T> {
 	 * @return
 	 */
 	@PostMapping("/detail")
-	@ApiOperation(value = "详情")
+	@Operation(description = "详情")
 	public Results<T> detail(@RequestBody Long id);
 	
 	

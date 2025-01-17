@@ -6,7 +6,7 @@ if(!isBaseField(attr.colName)){
 	/**
 	* ${attr.comment}
 	*/
-	@ApiModelProperty(value="${attr.comment}",notes="长度为：${attr.colSize}")
+	@Schema(title="${attr.comment}",description="长度为：${attr.colSize}")
 	<%}%>
 	private ${attr.javaType} ${attr.name};
 <%

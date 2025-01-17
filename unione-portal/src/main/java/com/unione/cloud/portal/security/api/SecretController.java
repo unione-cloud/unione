@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RefreshScope
 @RestController
-@Api(tags = "安全服务：密码加解密")
+@Tag(name = "安全服务：密码加解密")
 @RequestMapping("/api/security/secret")
 public class SecretController {
 
@@ -66,7 +66,7 @@ public class SecretController {
 	 * @return
 	 */
 	@PostMapping("/encrypts")
-	@ApiOperation(value="数据加密【批量】",notes = "批量加密")
+	@ApiOperation(value="数据加密【批量】",description= "批量加密")
 	public Results<Map<String, String>> encrypts(@RequestBody List<String> data) {
 		Map<String, String> map=new HashMap<>();
 		data.stream().forEach(str->{

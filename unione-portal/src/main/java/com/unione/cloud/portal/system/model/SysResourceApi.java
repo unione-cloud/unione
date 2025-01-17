@@ -29,27 +29,27 @@ public class SysResourceApi extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**
 	* 资源ID
 	*/
-	@ApiModelProperty(value="资源ID",notes="长度为：19")
+	@Schema(title="资源ID",description="长度为：19")
 	private Long resId;
 	/**
 	* 资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具
 	*/
-	@ApiModelProperty(value="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",notes="长度为：20")
+	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
 	private String resType;
 	/**
 	* 接口ID
 	*/
-	@ApiModelProperty(value="接口ID",notes="长度为：19")
+	@Schema(title="接口ID",description="长度为：19")
 	private Long apiId;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="状态，字典，使用状态 USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="状态，字典，使用状态 USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 
 }

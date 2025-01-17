@@ -29,57 +29,57 @@ public class SysPost extends Pojo {
 	/**
 	* 上级岗位ID
 	*/
-	@ApiModelProperty(value="上级岗位ID",notes="长度为：19")
+	@Schema(title="上级岗位ID",description="长度为：19")
 	private Long parentId;
 	/**
 	* 岗位名称
 	*/
-	@ApiModelProperty(value="岗位名称",notes="长度为：200")
+	@Schema(title="岗位名称",description="长度为：200")
 	private String name;
 	/**
 	* 岗位编码，携带层级的岗位编码
 	*/
-	@ApiModelProperty(value="岗位编码，携带层级的岗位编码",notes="长度为：50")
+	@Schema(title="岗位编码，携带层级的岗位编码",description="长度为：50")
 	private String sn;
 	/**
 	* 岗位类型，字典POSTTYPES 9其他
 	*/
-	@ApiModelProperty(value="岗位类型，字典POSTTYPES 9其他",notes="长度为：10")
+	@Schema(title="岗位类型，字典POSTTYPES 9其他",description="长度为：10")
 	private Integer types;
 	/**
 	* 岗位图标
 	*/
-	@ApiModelProperty(value="岗位图标",notes="长度为：20")
+	@Schema(title="岗位图标",description="长度为：20")
 	private String iconFont;
 	/**
 	* 岗位图片
 	*/
-	@ApiModelProperty(value="岗位图片",notes="长度为：200")
+	@Schema(title="岗位图片",description="长度为：200")
 	private String iconPic;
 	/**
 	* 岗位职责
 	*/
-	@ApiModelProperty(value="岗位职责",notes="长度为：1000")
+	@Schema(title="岗位职责",description="长度为：1000")
 	private String duty;
 	/**
 	* 岗位说明
 	*/
-	@ApiModelProperty(value="岗位说明",notes="长度为：1000")
+	@Schema(title="岗位说明",description="长度为：1000")
 	private String descs;
 	/**
 	* 是否叶子节点，字典 TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="是否叶子节点，字典 TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="是否叶子节点，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isLeaf;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 岗位状态，字典USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="岗位状态，字典USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="岗位状态，字典USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 
 }

@@ -29,77 +29,77 @@ public class SysAppInfo extends Pojo {
 	/**
 	* 应用名称
 	*/
-	@ApiModelProperty(value="应用名称",notes="长度为：100")
+	@Schema(title="应用名称",description="长度为：100")
 	private String name;
 	/**
 	* 应用编码，唯一
 	*/
-	@ApiModelProperty(value="应用编码，唯一",notes="长度为：50")
+	@Schema(title="应用编码，唯一",description="长度为：50")
 	private String sn;
 	/**
 	* 是否微应用
 	*/
-	@ApiModelProperty(value="是否微应用",notes="长度为：10")
+	@Schema(title="是否微应用",description="长度为：10")
 	private Integer isMp;
 	/**
 	* 应用URL
 	*/
-	@ApiModelProperty(value="应用URL",notes="长度为：250")
+	@Schema(title="应用URL",description="长度为：250")
 	private String url;
 	/**
 	* 首页URL
 	*/
-	@ApiModelProperty(value="首页URL",notes="长度为：250")
+	@Schema(title="首页URL",description="长度为：250")
 	private String welcome;
 	/**
 	* 版本号
 	*/
-	@ApiModelProperty(value="版本号",notes="长度为：30")
+	@Schema(title="版本号",description="长度为：30")
 	private String versNo;
 	/**
 	* 版本说明
 	*/
-	@ApiModelProperty(value="版本说明",notes="长度为：500")
+	@Schema(title="版本说明",description="长度为：500")
 	private String versDesc;
 	/**
 	* 图标（字体图标）
 	*/
-	@ApiModelProperty(value="图标（字体图标）",notes="长度为：100")
+	@Schema(title="图标（字体图标）",description="长度为：100")
 	private String icon;
 	/**
 	* 大图标(图片图标)
 	*/
-	@ApiModelProperty(value="大图标(图片图标)",notes="长度为：250")
+	@Schema(title="大图标(图片图标)",description="长度为：250")
 	private String picMax;
 	/**
 	* 中图标(图片图标)
 	*/
-	@ApiModelProperty(value="中图标(图片图标)",notes="长度为：250")
+	@Schema(title="中图标(图片图标)",description="长度为：250")
 	private String picMid;
 	/**
 	* 小图标(图片图标)
 	*/
-	@ApiModelProperty(value="小图标(图片图标)",notes="长度为：250")
+	@Schema(title="小图标(图片图标)",description="长度为：250")
 	private String picMix;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 是否平台应用，字典 TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="是否平台应用，字典 TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="是否平台应用，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isPlatform;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="状态，字典，使用状态 USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="状态，字典，使用状态 USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 	/**
 	* 描述
 	*/
-	@ApiModelProperty(value="描述",notes="长度为：500")
+	@Schema(title="描述",description="长度为：500")
 	private String descs;
 
 }

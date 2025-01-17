@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：基础字典",description="BaseDict")
+@Tag(name = "系统管理：基础字典",description="BaseDict")
 @RequestMapping("/api/system/dict")	 //TreeFeignApi
 public class BaseDictController implements TreeFeignApi<BaseDict>{
 	

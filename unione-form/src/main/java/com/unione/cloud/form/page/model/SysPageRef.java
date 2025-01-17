@@ -34,42 +34,42 @@ public class SysPageRef extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**
 	* 页面ID
 	*/
-	@ApiModelProperty(value="页面ID",notes="长度为：19")
+	@Schema(title="页面ID",description="长度为：19")
 	private Long pageId;
 	/**
 	* 页面编码
 	*/
-	@ApiModelProperty(value="页面编码",notes="长度为：50")
+	@Schema(title="页面编码",description="长度为：50")
 	private String pageSn;
 	/**
 	* 组件名称
 	*/
-	@ApiModelProperty(value="组件名称",notes="长度为：50")
+	@Schema(title="组件名称",description="长度为：50")
 	private String widgetName;
 	/**
 	* 组件编码
 	*/
-	@ApiModelProperty(value="组件编码",notes="长度为：50")
+	@Schema(title="组件编码",description="长度为：50")
 	private String widgetWid;
 	/**
 	* 引用页面ID
 	*/
-	@ApiModelProperty(value="引用页面ID",notes="长度为：19")
+	@Schema(title="引用页面ID",description="长度为：19")
 	private Long refPageId;
 	/**
 	* 引用页面编码
 	*/
-	@ApiModelProperty(value="引用页面编码",notes="长度为：50")
+	@Schema(title="引用页面编码",description="长度为：50")
 	private String refPageSn;
 	/**
 	* 备注
 	*/
-	@ApiModelProperty(value="备注",notes="长度为：200")
+	@Schema(title="备注",description="长度为：200")
 	private String descs;
 
 }

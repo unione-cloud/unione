@@ -29,22 +29,22 @@ public class SysUserOrgan extends Pojo {
 	/**
 	* 加入时间
 	*/
-	@ApiModelProperty(value="加入时间",notes="长度为：19")
+	@Schema(title="加入时间",description="长度为：19")
 	private Long timeJoin;
 	/**
 	* 离开时间
 	*/
-	@ApiModelProperty(value="离开时间",notes="长度为：19")
+	@Schema(title="离开时间",description="长度为：19")
 	private Long timeLeave;
 	/**
 	* 状态，字典UGROUPMENSTATUS 1正常，2离开
 	*/
-	@ApiModelProperty(value="状态，字典UGROUPMENSTATUS 1正常，2离开",notes="长度为：10")
+	@Schema(title="状态，字典UGROUPMENSTATUS 1正常，2离开",description="长度为：10")
 	private Integer status;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 
 }

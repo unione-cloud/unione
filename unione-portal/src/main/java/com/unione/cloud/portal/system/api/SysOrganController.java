@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：机构管理",description="SysOrgan")
+@Tag(name = "系统管理：机构管理",description="SysOrgan")
 @RequestMapping("/api/system/organ")	 //TreeFeignApi
 public class SysOrganController implements TreeFeignApi<SysOrgan>{
 	

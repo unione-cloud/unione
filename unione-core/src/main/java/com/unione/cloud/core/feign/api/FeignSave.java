@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignSave<T> {
 
@@ -15,7 +15,7 @@ public interface FeignSave<T> {
 	 * @return
 	 */
 	@PostMapping("/save")
-    @ApiOperation(value = "新增")
+	@Operation(description = "新增")
 	public Results<Long> save(@RequestBody T entity);
 	
 }

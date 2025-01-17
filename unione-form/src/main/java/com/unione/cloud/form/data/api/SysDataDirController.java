@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataDir sys_data_dir管理：系统管理：数据目录",description="SysDataDir")
+@Tag(name = "SysDataDir sys_data_dir管理：系统管理：数据目录",description="SysDataDir")
 @RequestMapping("/api/data/sysDataDir")	 //TreeFeignApi
 public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 	

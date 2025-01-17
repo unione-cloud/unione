@@ -29,47 +29,47 @@ public class SysUserPost extends Pojo {
 	/**
 	* 岗位ID
 	*/
-	@ApiModelProperty(value="岗位ID",notes="长度为：19")
+	@Schema(title="岗位ID",description="长度为：19")
 	private Long postId;
 	/**
 	* 用户所属机构ID
 	*/
-	@ApiModelProperty(value="用户所属机构ID",notes="长度为：19")
+	@Schema(title="用户所属机构ID",description="长度为：19")
 	private Long userOrgId;
 	/**
 	* 用户所属机构名称
 	*/
-	@ApiModelProperty(value="用户所属机构名称",notes="长度为：255")
+	@Schema(title="用户所属机构名称",description="长度为：255")
 	private String userOrgName;
 	/**
 	* 成员姓名
 	*/
-	@ApiModelProperty(value="成员姓名",notes="长度为：100")
+	@Schema(title="成员姓名",description="长度为：100")
 	private String name;
 	/**
 	* 加入时间
 	*/
-	@ApiModelProperty(value="加入时间",notes="长度为：19")
+	@Schema(title="加入时间",description="长度为：19")
 	private Long timeJoin;
 	/**
 	* 离开时间
 	*/
-	@ApiModelProperty(value="离开时间",notes="长度为：19")
+	@Schema(title="离开时间",description="长度为：19")
 	private Long timeLeave;
 	/**
 	* 成员状态，字典UGROUPMENSTATUS 1正常，2离开
 	*/
-	@ApiModelProperty(value="成员状态，字典UGROUPMENSTATUS 1正常，2离开",notes="长度为：10")
+	@Schema(title="成员状态，字典UGROUPMENSTATUS 1正常，2离开",description="长度为：10")
 	private Integer status;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 成员描述
 	*/
-	@ApiModelProperty(value="成员描述",notes="长度为：1000")
+	@Schema(title="成员描述",description="长度为：1000")
 	private String descs;
 
 }

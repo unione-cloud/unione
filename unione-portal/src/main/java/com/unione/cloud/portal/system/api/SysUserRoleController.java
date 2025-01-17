@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：用户角色",description="SysUserRole")
+@Tag(name = "系统管理：用户角色",description="SysUserRole")
 @RequestMapping("/api/system/userRole")	 //TreeFeignApi
 public class SysUserRoleController implements PojoFeignApi<SysUserRole>{
 	

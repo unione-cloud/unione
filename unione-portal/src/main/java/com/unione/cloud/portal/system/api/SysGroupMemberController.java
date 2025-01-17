@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：分组成员",description="SysGroupMember")
+@Tag(name = "系统管理：分组成员",description="SysGroupMember")
 @RequestMapping("/api/system/groupMember")	 //TreeFeignApi
 public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 	

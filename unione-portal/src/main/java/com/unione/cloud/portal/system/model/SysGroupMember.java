@@ -29,57 +29,57 @@ public class SysGroupMember extends Pojo {
 	/**
 	* 分组ID
 	*/
-	@ApiModelProperty(value="分组ID",notes="长度为：19")
+	@Schema(title="分组ID",description="长度为：19")
 	private Long groupId;
 	/**
 	* 成员类型，字典GROUPTYPES 1用户分组，9其他
 	*/
-	@ApiModelProperty(value="成员类型，字典GROUPTYPES 1用户分组，9其他",notes="长度为：10")
+	@Schema(title="成员类型，字典GROUPTYPES 1用户分组，9其他",description="长度为：10")
 	private Integer mbType;
 	/**
 	* 成员ID
 	*/
-	@ApiModelProperty(value="成员ID",notes="长度为：19")
+	@Schema(title="成员ID",description="长度为：19")
 	private Long mbId;
 	/**
 	* 成员机构名称
 	*/
-	@ApiModelProperty(value="成员机构名称",notes="长度为：255")
+	@Schema(title="成员机构名称",description="长度为：255")
 	private String orgName;
 	/**
 	* 成员标题
 	*/
-	@ApiModelProperty(value="成员标题",notes="长度为：100")
+	@Schema(title="成员标题",description="长度为：100")
 	private String name;
 	/**
 	* 成员编码
 	*/
-	@ApiModelProperty(value="成员编码",notes="长度为：20")
+	@Schema(title="成员编码",description="长度为：20")
 	private String sn;
 	/**
 	* 加入时间
 	*/
-	@ApiModelProperty(value="加入时间",notes="长度为：19")
+	@Schema(title="加入时间",description="长度为：19")
 	private Long timeJoin;
 	/**
 	* 离开时间
 	*/
-	@ApiModelProperty(value="离开时间",notes="长度为：19")
+	@Schema(title="离开时间",description="长度为：19")
 	private Long timeLeave;
 	/**
 	* 成员状态，字典UGROUPMENSTATUS 1正常，2离开
 	*/
-	@ApiModelProperty(value="成员状态，字典UGROUPMENSTATUS 1正常，2离开",notes="长度为：10")
+	@Schema(title="成员状态，字典UGROUPMENSTATUS 1正常，2离开",description="长度为：10")
 	private Integer status;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 成员描述
 	*/
-	@ApiModelProperty(value="成员描述",notes="长度为：1000")
+	@Schema(title="成员描述",description="长度为：1000")
 	private String descs;
 
 }

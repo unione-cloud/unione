@@ -29,82 +29,82 @@ public class SysOrgan extends Pojo {
 	/**
 	* 上级ID
 	*/
-	@ApiModelProperty(value="上级ID",notes="长度为：19")
+	@Schema(title="上级ID",description="长度为：19")
 	private Long parentId;
 	/**
 	* 企业/机构名称
 	*/
-	@ApiModelProperty(value="企业/机构名称",notes="长度为：250")
+	@Schema(title="企业/机构名称",description="长度为：250")
 	private String name;
 	/**
 	* 企业/机构别名
 	*/
-	@ApiModelProperty(value="企业/机构别名",notes="长度为：250")
+	@Schema(title="企业/机构别名",description="长度为：250")
 	private String alias;
 	/**
 	* 类型：字典ORGTYPES 1企业，2机构，3部门
 	*/
-	@ApiModelProperty(value="类型：字典ORGTYPES 1企业，2机构，3部门",notes="长度为：10")
+	@Schema(title="类型：字典ORGTYPES 1企业，2机构，3部门",description="长度为：10")
 	private Integer types;
 	/**
 	* 区域label，eg：广州市->天河区
 	*/
-	@ApiModelProperty(value="区域label，eg：广州市->天河区",notes="长度为：200")
+	@Schema(title="区域label，eg：广州市->天河区",description="长度为：200")
 	private String areaLabel;
 	/**
 	* 编码，携带层级属性的机构编码，不能为空，唯一
 	*/
-	@ApiModelProperty(value="编码，携带层级属性的机构编码，不能为空，唯一",notes="长度为：100")
+	@Schema(title="编码，携带层级属性的机构编码，不能为空，唯一",description="长度为：100")
 	private String sn;
 	/**
 	* 所在层级
 	*/
-	@ApiModelProperty(value="所在层级",notes="长度为：10")
+	@Schema(title="所在层级",description="长度为：10")
 	private Integer level;
 	/**
 	* 主营业务
 	*/
-	@ApiModelProperty(value="主营业务",notes="长度为：500")
+	@Schema(title="主营业务",description="长度为：500")
 	private String busiMain;
 	/**
 	* 经营范围
 	*/
-	@ApiModelProperty(value="经营范围",notes="长度为：500")
+	@Schema(title="经营范围",description="长度为：500")
 	private String busiScop;
 	/**
 	* 企业/机构地址
 	*/
-	@ApiModelProperty(value="企业/机构地址",notes="长度为：250")
+	@Schema(title="企业/机构地址",description="长度为：250")
 	private String addr;
 	/**
 	* 联系电话
 	*/
-	@ApiModelProperty(value="联系电话",notes="长度为：50")
+	@Schema(title="联系电话",description="长度为：50")
 	private String tel;
 	/**
 	* 级别
 	*/
-	@ApiModelProperty(value="级别",notes="长度为：10")
+	@Schema(title="级别",description="长度为：10")
 	private Integer levels;
 	/**
 	* 是否叶子节点 1：是叶子节点 0：非叶子节点
 	*/
-	@ApiModelProperty(value="是否叶子节点 1：是叶子节点 0：非叶子节点",notes="长度为：10")
+	@Schema(title="是否叶子节点 1：是叶子节点 0：非叶子节点",description="长度为：10")
 	private Integer isLeaf;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 状态
 	*/
-	@ApiModelProperty(value="状态",notes="长度为：10")
+	@Schema(title="状态",description="长度为：10")
 	private Integer status;
 	/**
 	* 说明
 	*/
-	@ApiModelProperty(value="说明",notes="长度为：500")
+	@Schema(title="说明",description="长度为：500")
 	private String descs;
 
 }

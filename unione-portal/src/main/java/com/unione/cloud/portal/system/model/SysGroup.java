@@ -29,57 +29,57 @@ public class SysGroup extends Pojo {
 	/**
 	* 上级分组ID
 	*/
-	@ApiModelProperty(value="上级分组ID",notes="长度为：19")
+	@Schema(title="上级分组ID",description="长度为：19")
 	private Long parentId;
 	/**
 	* 分组名称
 	*/
-	@ApiModelProperty(value="分组名称",notes="长度为：200")
+	@Schema(title="分组名称",description="长度为：200")
 	private String name;
 	/**
 	* 分组编码，携带层级的编码
 	*/
-	@ApiModelProperty(value="分组编码，携带层级的编码",notes="长度为：30")
+	@Schema(title="分组编码，携带层级的编码",description="长度为：30")
 	private String sn;
 	/**
 	* 所在层级
 	*/
-	@ApiModelProperty(value="所在层级",notes="长度为：10")
+	@Schema(title="所在层级",description="长度为：10")
 	private Integer level;
 	/**
 	* 分组类型，字典GROUPTYPES 1用户分组，9其他
 	*/
-	@ApiModelProperty(value="分组类型，字典GROUPTYPES 1用户分组，9其他",notes="长度为：10")
+	@Schema(title="分组类型，字典GROUPTYPES 1用户分组，9其他",description="长度为：10")
 	private Integer types;
 	/**
 	* 分组图标
 	*/
-	@ApiModelProperty(value="分组图标",notes="长度为：20")
+	@Schema(title="分组图标",description="长度为：20")
 	private String iconFont;
 	/**
 	* 分组图片
 	*/
-	@ApiModelProperty(value="分组图片",notes="长度为：200")
+	@Schema(title="分组图片",description="长度为：200")
 	private String iconPic;
 	/**
 	* 分组说明
 	*/
-	@ApiModelProperty(value="分组说明",notes="长度为：1000")
+	@Schema(title="分组说明",description="长度为：1000")
 	private String descs;
 	/**
 	* 是否叶子节点，字典 TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="是否叶子节点，字典 TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="是否叶子节点，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isLeaf;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 分组状态，字典UGROUPSTATUS 1正常，2解散
 	*/
-	@ApiModelProperty(value="分组状态，字典UGROUPSTATUS 1正常，2解散",notes="长度为：10")
+	@Schema(title="分组状态，字典UGROUPSTATUS 1正常，2解散",description="长度为：10")
 	private Integer status;
 
 }

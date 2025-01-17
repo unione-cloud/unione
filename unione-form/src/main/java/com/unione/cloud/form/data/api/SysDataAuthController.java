@@ -21,7 +21,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataAuth sys_data_auth管理：系统管理：数据授权",description="SysDataAuth")
+@Tag(name = "SysDataAuth sys_data_auth管理：系统管理：数据授权",description="SysDataAuth")
 @RequestMapping("/api/data/sysDataAuth")	 //TreeFeignApi
 public class SysDataAuthController implements PojoFeignApi<SysDataAuth>{
 	
@@ -70,25 +70,25 @@ public class SysDataAuthController implements PojoFeignApi<SysDataAuth>{
 	}
 
 
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysDataAuth entity) {
-		log.debug("进入:修改sys_data_auth信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改sys_data_auth",entity.getId());
-		
-		String[] fields = {"modelId","permisId","targetType","targetId","status","delFlag"};
-		SqlBuilder<SysDataAuth> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改sys_data_auth信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
-	}
+//	@Override
+//	public Results<Long> update(@Validated(Validator.update.class) SysDataAuth entity) {
+//		log.debug("进入:修改sys_data_auth信息方法，entity:{}",entity);
+//		Results<Long> results = new Results<>();
+//		LogsUtil.set(LogType.Update, "修改sys_data_auth",entity.getId());
+//		
+//		String[] fields = {"modelId","permisId","targetType","targetId","status","delFlag"};
+//		SqlBuilder<SysDataAuth> sqlBuilder=SqlBuilder.build(entity).field(fields);
+//		int len = dataBaseDao.updateById(sqlBuilder);
+//		LogsUtil.add("保存数据,len:"+len);
+//		
+//		results.setBody(entity.getId());
+//		results.setSuccess(len>0);
+//		results.setMessage(len>0?"操作成功":"操作失败");
+//		LogsUtil.save(len>0, entity.getId());
+//
+//		log.debug("退出:修改sys_data_auth信息方法，entity:{},result:{}",entity,results.isSuccess());
+//		return results;
+//	}
 
 
 

@@ -2,7 +2,6 @@ package com.unione.cloud.form.data.api;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +30,8 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RefreshScope
 @RestController
-@Api(tags = "系统管理：数据转换器",description="SysDataConvertor")
+@Tag(name = "系统管理：数据转换器",description="SysDataConvertor")
 @RequestMapping("/api/data/convertor")	 //TreeFeignApi
 public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor>{
 	
@@ -59,7 +58,7 @@ public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor
 	
 	
 	@PostMapping("/load/{id}")
-	@ApiOperation(value="加载转换数据")
+	@Operation(description ="加载转换数据")
 	public Results<List<DataConvertOption>> load(@PathVariable("id") Long id, @RequestBody Params<DataConvertRequest> params){
 		return dataConvertorService.load(id,params);
 	}
@@ -100,25 +99,25 @@ public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor
 	}
 
 
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysDataConvertor entity) {
-		log.debug("进入:修改数据转换器信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改数据转换器",entity.getId());
-		
-		String[] fields = {"appId","dsId","title","types","dictName","options","search","url","tableName","tableField","tableWhere","tableOrder","idField","pidField","valueField","labelField","showLevel","status","isAsync","isPaging"};
-		SqlBuilder<SysDataConvertor> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改数据转换器信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
-	}
+//	@Override
+//	public Results<Long> update(@Validated(Validator.update.class) SysDataConvertor entity) {
+//		log.debug("进入:修改数据转换器信息方法，entity:{}",entity);
+//		Results<Long> results = new Results<>();
+//		LogsUtil.set(LogType.Update, "修改数据转换器",entity.getId());
+//		
+//		String[] fields = {"appId","dsId","title","types","dictName","options","search","url","tableName","tableField","tableWhere","tableOrder","idField","pidField","valueField","labelField","showLevel","status","isAsync","isPaging"};
+//		SqlBuilder<SysDataConvertor> sqlBuilder=SqlBuilder.build(entity).field(fields);
+//		int len = dataBaseDao.updateById(sqlBuilder);
+//		LogsUtil.add("保存数据,len:"+len);
+//		
+//		results.setBody(entity.getId());
+//		results.setSuccess(len>0);
+//		results.setMessage(len>0?"操作成功":"操作失败");
+//		LogsUtil.save(len>0, entity.getId());
+//
+//		log.debug("退出:修改数据转换器信息方法，entity:{},result:{}",entity,results.isSuccess());
+//		return results;
+//	}
 
 
 

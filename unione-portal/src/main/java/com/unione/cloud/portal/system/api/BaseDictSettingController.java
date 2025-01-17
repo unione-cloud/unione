@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "BaseDictSetting base_dict_setting管理：基础：字典设置，租户，机构字典设置",description="BaseDictSetting")
+@Tag(name = "BaseDictSetting base_dict_setting管理：基础：字典设置，租户，机构字典设置",description="BaseDictSetting")
 @RequestMapping("/api/system/baseDictSetting")	 //TreeFeignApi
 public class BaseDictSettingController implements PojoFeignApi<BaseDictSetting>{
 	

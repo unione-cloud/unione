@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.unione.cloud.core.dto.Results;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public interface FeignChildren<T> {
 
@@ -17,7 +17,7 @@ public interface FeignChildren<T> {
 	 * @return
 	 */
 	@PostMapping("/children")
-    @ApiOperation(value = "子节点列表")
+    @Operation(description = "子节点列表")
 	public Results<List<T>> children(@RequestBody Long sid);
 	
 	

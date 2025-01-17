@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：用户信息 管理服务",description="SysUser")
+@Tag(name = "系统管理：用户信息 管理服务",description="SysUser")
 @RequestMapping("/api/system/user")
 public class SysUserController implements PojoFeignApi<SysUser>{
 	

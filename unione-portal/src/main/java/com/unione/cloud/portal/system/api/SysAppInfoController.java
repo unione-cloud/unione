@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：应用管理",description="SysAppInfo")
+@Tag(name = "系统管理：应用管理",description="SysAppInfo")
 @RequestMapping("/api/system/appInfo")	 //TreeFeignApi
 public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	

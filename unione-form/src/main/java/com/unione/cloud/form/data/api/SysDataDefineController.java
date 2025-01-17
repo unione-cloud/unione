@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
-import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.dto.Params.Sort;
+import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.api.FeignDelete;
 import com.unione.cloud.core.feign.api.FeignDetail;
@@ -36,8 +36,8 @@ import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "数据管理：数据定义管理",description="SysDataModel")
+@Tag(name = "数据管理：数据定义管理",description="SysDataModel")
 @RequestMapping("/api/data/define")	 //TreeFeignApi
 public class SysDataDefineController implements FeignDelete<SysDataDefine>,FeignFind<SysDataDefine>,FeignFindById<SysDataDefine>,FeignDetail<DataDefine>{
 	
@@ -83,7 +83,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 
 	
 	@PostMapping(value="/load/from/db")
-	@ApiOperation(value="从数据库加载table",notes = "从数据库中选中加载数据table，支持table名称过滤")
+	@Operation(description= "从数据库中选中加载数据table，支持table名称过滤")
 	public Results<List<SysDataDefine>> loadFromDb(@RequestParam(value="appId",required = false) Long appId,
 			@RequestParam(value="dsId") Long dsId,
 			@RequestParam(value="tableName",required = false) String tableName){
@@ -97,7 +97,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	}
 	
 	@PostMapping(value="/imp/from/db")
-	@ApiOperation(value="从数据库导入table",notes = "从数据库中选中表格导入table，自动解析生成数据定义")
+	@Operation(description= "从数据库中选中表格导入table，自动解析生成数据定义")
 	public Results<String> impFromDb(@RequestParam(value="appId",required = false) Long appId,
 			@RequestParam(value="dsId") Long dsId,
 			@RequestParam(value="tables") List<String> tables,
@@ -113,7 +113,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	
 	
 	@PostMapping(value="/save")
-	@ApiOperation(value="保存数据定义")
+	@Operation(description="保存数据定义")
 	public Results<DataDefine> save(@Validated(Validator.save.class) @RequestBody DataDefine dataDefine) {
 		log.debug("进入:新增数据定义管理信息.dataDefine:{}",dataDefine);
 		LogsUtil.set(LogType.Insert, "保存数据定义");
@@ -129,7 +129,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 	
 	
 	@PostMapping(value="/release")
-	@ApiOperation(value="发布数据定义")
+	@Operation(description="发布数据定义")
 	public Results<String> release(@RequestBody Set<Long> ids) {
 		log.debug("进入:发布数据定义方法，ids:{}",ids);
 		LogsUtil.set(LogType.Update, "发布数据定义");
@@ -177,7 +177,7 @@ public class SysDataDefineController implements FeignDelete<SysDataDefine>,Feign
 
 
 	@PostMapping(value="/load/{sn}")
-	@ApiOperation(value="加载数据定义")
+	@Operation(description="加载数据定义")
 	public Results<DataDefine> load(@PathVariable("sn") String sn) {
 		log.debug("进入:加载数据定义方法，sn:{}",sn);
 		LogsUtil.set(LogType.Query, "加载数据定义");

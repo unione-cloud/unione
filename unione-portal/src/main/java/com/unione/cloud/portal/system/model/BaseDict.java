@@ -40,36 +40,36 @@ public class BaseDict extends Pojo {
 	/**
 	* 上级ID
 	*/
-	@ApiModelProperty(value="上级ID",notes="长度为：19")
+	@Schema(title="上级ID",description="长度为：19")
 	private Long parentId;
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**
 	* 应用名称
 	*/
-	@ApiModelProperty(value="应用名称",notes="长度为：50")
+	@Schema(title="应用名称",description="长度为：50")
 	private String appName;
 	/**
 	* 字典名称
 	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="字典名称",notes="长度为：100")
+	@Schema(title="字典名称",description="长度为：100")
 	@NotEmpty(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictName;
 	/**
 	* 字典类型，0平台，1租户，2机构
 	*/
-	@ApiModelProperty(value="字典类型，0平台，1租户，2机构",notes="长度为：10")
+	@Schema(title="字典类型，0平台，1租户，2机构",description="长度为：10")
 	@NotNull(message = "字典类型不能为空",groups= {Validator.save.class,Validator.update.class})
 	private Integer dictType;
 	/**
 	* 字典键
 	*/
-	@ApiModelProperty(value="字典键",notes="长度为：100")
+	@Schema(title="字典键",description="长度为：100")
 	@NotEmpty(message = "字典键不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典键不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictKey;
@@ -77,29 +77,29 @@ public class BaseDict extends Pojo {
 	* 字典值
 	*/
 	@UniQueryKeyWord
-	@ApiModelProperty(value="字典值",notes="长度为：1000")
+	@Schema(title="字典值",description="长度为：1000")
 	@NotEmpty(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
 	private String dictValue;
 	/**
 	* 字典显示设置，json存储{}
 	*/
-	@ApiModelProperty(value="字典显示设置，json存储{}",notes="长度为：1000")
+	@Schema(title="字典显示设置，json存储{}",description="长度为：1000")
 	private String dictShow;
 	/**
 	* 排序
 	*/
-	@ApiModelProperty(value="排序",notes="长度为：5")
+	@Schema(title="排序",description="长度为：5")
 	private Integer ordered;
 	/**
 	* 是否叶子节点，字典TUREORFALSE 1是，0否
 	*/
-	@ApiModelProperty(value="是否叶子节点，字典TUREORFALSE 1是，0否",notes="长度为：10")
+	@Schema(title="是否叶子节点，字典TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isLeaf;
 	/**
 	* 状态 是否使用，字典USEORNOT 1 使用，0停用
 	*/
-	@ApiModelProperty(value="状态 是否使用，字典USEORNOT 1 使用，0停用",notes="长度为：10")
+	@Schema(title="状态 是否使用，字典USEORNOT 1 使用，0停用",description="长度为：10")
 	private Integer status;
 
 }

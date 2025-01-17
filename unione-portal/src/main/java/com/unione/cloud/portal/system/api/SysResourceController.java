@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：系统资源",description="SysResource")
+@Tag(name = "系统管理：系统资源",description="SysResource")
 @RequestMapping("/api/system/resource")	 //TreeFeignApi
 public class SysResourceController implements TreeFeignApi<SysResource>{
 	

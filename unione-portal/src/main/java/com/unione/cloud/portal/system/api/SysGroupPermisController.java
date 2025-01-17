@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：分组权限",description="SysGroupPermis")
+@Tag(name = "系统管理：分组权限",description="SysGroupPermis")
 @RequestMapping("/api/system/groupPermis")	 //TreeFeignApi
 public class SysGroupPermisController implements PojoFeignApi<SysGroupPermis>{
 	

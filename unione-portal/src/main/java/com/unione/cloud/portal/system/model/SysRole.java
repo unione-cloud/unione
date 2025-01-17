@@ -29,27 +29,27 @@ public class SysRole extends Pojo {
 	/**
 	* 名称
 	*/
-	@ApiModelProperty(value="名称",notes="长度为：100")
+	@Schema(title="名称",description="长度为：100")
 	private String name;
 	/**
 	* 编码
 	*/
-	@ApiModelProperty(value="编码",notes="长度为：20")
+	@Schema(title="编码",description="长度为：20")
 	private String sn;
 	/**
 	* 类型，字典ROLETYPE 9其他
 	*/
-	@ApiModelProperty(value="类型，字典ROLETYPE 9其他",notes="长度为：10")
+	@Schema(title="类型，字典ROLETYPE 9其他",description="长度为：10")
 	private Integer types;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="状态，字典，使用状态 USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="状态，字典，使用状态 USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 	/**
 	* 描述
 	*/
-	@ApiModelProperty(value="描述",notes="长度为：500")
+	@Schema(title="描述",description="长度为：500")
 	private String descs;
 
 }

@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class DictShowDto {
 	
-	@ApiModelProperty(value="显示类型",notes = "text,tag")
+	@Schema(title="显示类型",description= "text,tag")
 	private String type;
 	
-	@ApiModelProperty(value="显示颜色",notes = "颜色16进制码")
+	@Schema(title="显示颜色",description= "颜色16进制码")
 	private String color;
 }

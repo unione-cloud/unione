@@ -1,21 +1,18 @@
 package com.unione.cloud.form.data.model;
-import java.util.Date;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import io.swagger.annotations.ApiModelProperty;
+import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
-import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	SysDataConvertor Entity
@@ -39,106 +36,106 @@ public class SysDataConvertor extends Pojo {
 	/**
 	* 应用ID
 	*/
-	@ApiModelProperty(value="应用ID",notes="长度为：19")
+	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**
 	* 数据源ID
 	*/
-	@ApiModelProperty(value="数据源ID",notes="长度为：19")
+	@Schema(title="数据源ID",description="长度为：19")
 	private Long dsId;
 	/**
 	* 标题
 	*/
-	@ApiModelProperty(value="标题",notes="长度为：100")
+	@Schema(title="标题",description="长度为：100")
 	private String title;
 	/**
 	* 类型，dict：字典，option：静态选项，dbtable：数据集，api：接口
 	*/
-	@ApiModelProperty(value="类型，dict：字典，option：静态选项，dbtable：数据集，api：后端接口(后端代理调用),rest:前端接口（前端直接调用）",notes="长度为：20")
+	@Schema(title="类型，dict：字典，option：静态选项，dbtable：数据集，api：后端接口(后端代理调用),rest:前端接口（前端直接调用）",description="长度为：20")
 	private String types;
 	/**
 	* 字典名称
 	*/
-	@ApiModelProperty(value="字典名称",notes="长度为：50")
+	@Schema(title="字典名称",description="长度为：50")
 	private String dictName;
 	/**
 	* 静态选项
 	*/
-	@ApiModelProperty(value="静态选项",notes="长度为：65535")
+	@Schema(title="静态选项",description="长度为：65535")
 	private String options;
 	/**
 	* 搜索是否可用
 	*/
-	@ApiModelProperty(value="搜索是否可用",notes="长度为：1")
+	@Schema(title="搜索是否可用",description="长度为：1")
 	private boolean search;
 	/**
 	* 接口url地址
 	*/
-	@ApiModelProperty(value="接口url地址",notes="长度为：200")
+	@Schema(title="接口url地址",description="长度为：200")
 	private String url;
 	/**
 	* table名称
 	*/
-	@ApiModelProperty(value="table名称",notes="长度为：50")
+	@Schema(title="table名称",description="长度为：50")
 	private String tableName;
 	/**
 	* 数据字段集合
 	*/
-	@ApiModelProperty(value="数据字段集合",notes="长度为：1000")
+	@Schema(title="数据字段集合",description="长度为：1000")
 	private String tableField;
 	/**
 	* 数据过滤
 	*/
-	@ApiModelProperty(value="数据过滤",notes="长度为：65535")
+	@Schema(title="数据过滤",description="长度为：65535")
 	private String tableWhere;
 	/**
 	* 数据排序
 	*/
-	@ApiModelProperty(value="数据排序",notes="长度为：50")
+	@Schema(title="数据排序",description="长度为：50")
 	private String tableOrder;
 	/**
 	* 主键字段，默认ID
 	*/
-	@ApiModelProperty(value="主键字段，默认ID",notes="长度为：50")
+	@Schema(title="主键字段，默认ID",description="长度为：50")
 	private String idField;
 	/**
 	* 父级字段，默认PID
 	*/
-	@ApiModelProperty(value="父级字段，默认PID",notes="长度为：50")
+	@Schema(title="父级字段，默认PID",description="长度为：50")
 	private String pidField;
 	/**
 	* value字段
 	*/
 	@NotEmpty(message = "value字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "value字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
-	@ApiModelProperty(value="value字段",notes="长度为：50")
+	@Schema(title="value字段",description="长度为：50")
 	private String valueField;
 	/**
 	* label字段
 	*/
 	@NotEmpty(message = "label字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "label字段名称不能为空",groups = {Validator.save.class,Validator.update.class})
-	@ApiModelProperty(value="label字段",notes="长度为：50")
+	@Schema(title="label字段",description="长度为：50")
 	private String labelField;
 	/**
 	* 显示层级
 	*/
-	@ApiModelProperty(value="显示层级",notes="长度为：10")
+	@Schema(title="显示层级",description="长度为：10")
 	private Integer showLevel;
 	/**
 	* 树形结构是否异步加载
 	*/
-	@ApiModelProperty(value="树形结构是否异步加载",notes="长度为：10")
+	@Schema(title="树形结构是否异步加载",description="长度为：10")
 	private boolean isAsync;
 	/**
 	* 是否分页加载
 	*/
-	@ApiModelProperty(value="是否分页加载",notes="长度为：10")
+	@Schema(title="是否分页加载",description="长度为：10")
 	private boolean isPaging;
 	/**
 	* 使用状态，字典USEORNOT 1使用，0停用
 	*/
-	@ApiModelProperty(value="使用状态，字典USEORNOT 1使用，0停用",notes="长度为：10")
+	@Schema(title="使用状态，字典USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
 
 }

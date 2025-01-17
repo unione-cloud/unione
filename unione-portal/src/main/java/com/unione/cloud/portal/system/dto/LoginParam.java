@@ -5,19 +5,19 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel("认证参数")
+@Schema("认证参数")
 public class LoginParam {
 
-	@ApiModelProperty("帐号")
+	@Schema(title="帐号")
 	private String username;
 	
-	@ApiModelProperty("手机号")
+	@Schema(title="手机号")
 	private String userphone;
 	
-	@ApiModelProperty("密码")
+	@Schema(title="密码")
 	private String password;
 	
-	@ApiModelProperty("验证码")
+	@Schema(title="验证码")
 	private String captcha;
 	
 }

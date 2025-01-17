@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：分组管理，分组对应的行政区划信息直接存储在数据权限：行政区划权限表中。一个分组可以有多个行政区划，但都是当前用户所",description="SysGroup")
+@Tag(name = "系统管理：分组管理，分组对应的行政区划信息直接存储在数据权限：行政区划权限表中。一个分组可以有多个行政区划，但都是当前用户所",description="SysGroup")
 @RequestMapping("/api/system/group")	 //TreeFeignApi
 public class SysGroupController implements TreeFeignApi<SysGroup>{
 	

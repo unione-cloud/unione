@@ -4,8 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -17,7 +16,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@ApiModel(description = "系统响应DTO[分页]")
+@Schema(description = "系统响应DTO[分页]")
 public class Results<T> implements Serializable {
 	/**
 	 *
@@ -27,45 +26,45 @@ public class Results<T> implements Serializable {
 	/**
 	 * 操作结果
 	 */
-	@ApiModelProperty("操作结果")
+	@Schema(title="操作结果")
 	private boolean success;
 
 	/**
 	 * 结果编码
 	 */
-	@ApiModelProperty("结果编码")
+	@Schema(title="结果编码")
 	private Integer code;
 
 	/**
 	 * 响应消息
 	 */
-	@ApiModelProperty("响应消息")
+	@Schema(title="响应消息")
 	private String message;
 
 	/**
 	 * 响应数据
 	 */
-	@ApiModelProperty("响应数据")
+	@Schema(title="响应数据")
 	private T body;
 	
 	/**
 	 * 分页大小
 	 */
-	@ApiModelProperty("分页大小")
+	@Schema(title="分页大小")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer pageSize;
 
 	/**
 	 * 记录总数
 	 */
-	@ApiModelProperty("记录总数")
+	@Schema(title="记录总数")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Long total;
 
 	/**
 	 * 当前页
 	 */
-	@ApiModelProperty("当前页")
+	@Schema(title="当前页")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer page;
 	

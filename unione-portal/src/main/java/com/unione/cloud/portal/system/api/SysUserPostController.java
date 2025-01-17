@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "系统管理：用户岗位",description="SysUserPost")
+@Tag(name = "系统管理：用户岗位",description="SysUserPost")
 @RequestMapping("/api/system/userPost")	 //TreeFeignApi
 public class SysUserPostController implements PojoFeignApi<SysUserPost>{
 	

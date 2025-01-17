@@ -36,72 +36,72 @@ public class DocFile extends Pojo {
 	/**
 	* 文档目录ID
 	*/
-	@ApiModelProperty(value="文档目录ID",notes="长度为：19")
+	@Schema(title="文档目录ID",description="长度为：19")
 	private Long dirId;
 	/**
 	* 附件所有者ID
 	*/
-	@ApiModelProperty(value="附件所有者ID",notes="长度为：19")
+	@Schema(title="附件所有者ID",description="长度为：19")
 	private Long ownerId;
 	/**
 	* 应用编码
 	*/
-	@ApiModelProperty(value="应用编码",notes="长度为：20")
+	@Schema(title="应用编码",description="长度为：20")
 	private String appCode;
 	/**
 	* 附件标题
 	*/
-	@ApiModelProperty(value="附件标题",notes="长度为：400")
+	@Schema(title="附件标题",description="长度为：400")
 	private String title;
 	/**
 	* 附件名称（表单中的名称）
 	*/
-	@ApiModelProperty(value="附件名称（表单中的名称）",notes="长度为：50")
+	@Schema(title="附件名称（表单中的名称）",description="长度为：50")
 	private String name;
 	/**
 	* 附件大小(字节)
 	*/
-	@ApiModelProperty(value="附件大小(字节)",notes="长度为：12")
+	@Schema(title="附件大小(字节)",description="长度为：12")
 	private Long size;
 	/**
 	* 附件类型:jpg,doc,png
 	*/
-	@ApiModelProperty(value="附件类型:jpg,doc,png",notes="长度为：10")
+	@Schema(title="附件类型:jpg,doc,png",description="长度为：10")
 	private String type;
 	/**
 	* 附件路径
 	*/
-	@ApiModelProperty(value="附件路径",notes="长度为：250")
+	@Schema(title="附件路径",description="长度为：250")
 	private String path;
 	/**
 	* 显示顺序
 	*/
-	@ApiModelProperty(value="显示顺序",notes="长度为：10")
+	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
 	* 附件状态
 	*/
-	@ApiModelProperty(value="附件状态",notes="长度为：10")
+	@Schema(title="附件状态",description="长度为：10")
 	private Integer status;
 	/**
 	* 公开状态：0:不公开,1:公开
 	*/
-	@ApiModelProperty(value="公开状态：0:不公开,1:公开",notes="长度为：10")
+	@Schema(title="公开状态：0:不公开,1:公开",description="长度为：10")
 	private Integer isPublic;
 	/**
 	* 审核状态，公开或共享时的审核状态，字典DOCFILEAUDITSTS 1待审，2通过，3拒绝
 	*/
-	@ApiModelProperty(value="审核状态，公开或共享时的审核状态，字典DOCFILEAUDITSTS 1待审，2通过，3拒绝",notes="长度为：10")
+	@Schema(title="审核状态，公开或共享时的审核状态，字典DOCFILEAUDITSTS 1待审，2通过，3拒绝",description="长度为：10")
 	private Integer auditStatus;
 	/**
 	* 扩展信息，json存储{}
 	*/
-	@ApiModelProperty(value="扩展信息，json存储{}",notes="长度为：4000")
+	@Schema(title="扩展信息，json存储{}",description="长度为：4000")
 	private String extData;
 	/**
 	* 备注
 	*/
-	@ApiModelProperty(value="备注",notes="长度为：500")
+	@Schema(title="备注",description="长度为：500")
 	private String descs;
 
 	///////////////////
@@ -116,15 +116,15 @@ public class DocFile extends Pojo {
 	}
 	
 	@Default
-	@ApiModelProperty(value="文档权限集合")
+	@Schema(title="文档权限集合")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private List<DocPermis> permis=new ArrayList<>();
-	@ApiModelProperty(value="文档拥有者",notes="如果是文档拥有则，则为true否则为false")
+	@Schema(title="文档拥有者",description="如果是文档拥有则，则为true否则为false")
 	private boolean isOwner;
 	@JsonIgnore
-	@ApiModelProperty(value="共享文档",notes="如果设置成true，则查询有分配权限或公开的文档")
+	@Schema(title="共享文档",description="如果设置成true，则查询有分配权限或公开的文档")
 	private boolean shared;
-	@ApiModelProperty(value="附件所有者ID集合")
+	@Schema(title="附件所有者ID集合")
 	private List<Long> ownerIds;
 	@JsonIgnore
 	private boolean incPublic;		// 包含公开文件
@@ -143,10 +143,10 @@ public class DocFile extends Pojo {
 	private List<Long> permisOwners=new ArrayList<>();	// 文档权限查询，权限归属ID集合
 	@Default
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@ApiModelProperty(value="包含types集合",notes="通过types进行文件类型过滤")
+	@Schema(title="包含types集合",description="通过types进行文件类型过滤")
 	private List<String> incTypes=new ArrayList<>();
 	@Default
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@ApiModelProperty(value="不包含types集合",notes="通过types进行文件类型过滤")
+	@Schema(title="不包含types集合",description="通过types进行文件类型过滤")
 	private List<String> ninTypes=new ArrayList<>();
 }

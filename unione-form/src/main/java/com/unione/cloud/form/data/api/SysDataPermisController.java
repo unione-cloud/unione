@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Api(tags = "SysDataPermis sys_data_permis管理：系统管理：数据权限",description="SysDataPermis")
+@Tag(name = "SysDataPermis sys_data_permis管理：系统管理：数据权限",description="SysDataPermis")
 @RequestMapping("/api/data/sysDataPermis")	 //TreeFeignApi
 public class SysDataPermisController implements PojoFeignApi<SysDataPermis>{
 	

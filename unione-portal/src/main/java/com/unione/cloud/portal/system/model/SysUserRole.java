@@ -29,12 +29,12 @@ public class SysUserRole extends Pojo {
 	/**
 	* 角色ID
 	*/
-	@ApiModelProperty(value="角色ID",notes="长度为：19")
+	@Schema(title="角色ID",description="长度为：19")
 	private Long roleId;
 	/**
 	* 是否可传递授权，1是，0否
 	*/
-	@ApiModelProperty(value="是否可传递授权，1是，0否",notes="长度为：10")
+	@Schema(title="是否可传递授权，1是，0否",description="长度为：10")
 	private Integer enDilivery;
 
 }
