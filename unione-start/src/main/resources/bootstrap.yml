@@ -69,11 +69,51 @@ security:
    enabled: true
    filter:
       includes: /**
-      executions: /portal/,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/api/security/secret/encrypt,/portal/api/security/secret/pubkey,/portal/swagger-ui.html/**,/portal/webjars/**,/portal/swagger-resources/**,/portal/v2/api-docs,/portal/doc.html/**,/portal/druid/**
+      executions: /portal/,/portal/error,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**
    tcm:
       autoEnable: true
    jwt:
       expires: 360000
 
 
+#============================================
+#
+#knife4j config
+#
+#============================================
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+  group-configs:
+    - group: common
+      display-name: 通用接口
+      paths-to-match: /**
+      packages-to-scan: com.unione.cloud.portal.common.api
+    - group: security
+      display-name: 认证接口
+      paths-to-match: /**
+      packages-to-scan: com.unione.cloud.portal.security.api  
+    - group: system
+      display-name: 系统管理
+      paths-to-match: /**
+      packages-to-scan: com.unione.cloud.portal.system.api 
+    - group: formData
+      display-name: 表单数据
+      paths-to-match: /**
+      packages-to-scan: com.unione.cloud.form.data.api
+    - group: formPage
+      display-name: 表单页面
+      paths-to-match: /**
+      packages-to-scan: com.unione.cloud.form.page.api
+  default-flat-param-object: true
+knife4j:
+  enable: true
+#  production: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+  basic:
+    enable: true
+    username: admin
+    password: 123456
             
