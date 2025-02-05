@@ -2,12 +2,11 @@ package com.unione.cloud.portal.system.dto;
 
 import com.unione.cloud.core.security.UserPrincipal;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema("认证结果")
+@Schema(title="认证结果")
 public class LoginResult {
 	
 	@Schema(title="令牌")

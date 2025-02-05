@@ -28,8 +28,8 @@ import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -52,7 +52,7 @@ public class SysDataStorageV1Controller{
 	
 	
 	@PostMapping("/find")
-    @ApiOperation(value = "数据查询")
+	@Operation(description = "数据查询")
 	public DataResult<List<Map<String, Object>>> find(@RequestBody DataFind dataFind){
 		log.debug("进入：数据存储/数据查询接口,dsn:{},find:{}",dataFind.getDsn(),dataFind);
 		LogsUtil.set(LogType.Query, "数据存储/数据查询");
@@ -92,7 +92,7 @@ public class SysDataStorageV1Controller{
 	
 	
 	@PostMapping("/save")
-    @ApiOperation(value = "数据保存",description= "有主键进行更新，主键为空则新增")
+    @Operation(description = "数据保存",summary= "有主键进行更新，主键为空则新增")
 	public DataResult<Map<String, Object>> save(@RequestBody DataCommit dataCommit){
 		log.debug("进入：数据存储/数据保存接口,dsn:{},commit:{}",dataCommit.getDsn(),dataCommit);
 		AssertUtil.service().notNull(dataCommit, new String[] {"dsn"},"参数%s不能为空");	
@@ -122,7 +122,7 @@ public class SysDataStorageV1Controller{
 	
 	
 	@PostMapping("/detail")
-	@ApiOperation(value = "数据详情",description= "根据主键加载数据对象")
+	@Operation(description = "数据详情",summary= "根据主键加载数据对象")
 	public DataResult<Map<String, Object>> detail(@RequestBody DataLoad dataLoad) {
 		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dataLoad.getDsn(),dataLoad);
 		LogsUtil.set(LogType.Query, "数据存储/数据详情");
@@ -160,7 +160,7 @@ public class SysDataStorageV1Controller{
 	
 	
 	@PostMapping("/loadByIds")
-    @ApiOperation(value = "数据列表",description= "根据主键集合加载数据列表")
+    @Operation(description = "数据列表",summary= "根据主键集合加载数据列表")
 	public DataResult<List<Map<String, Object>>> loadByIds(@RequestBody DataLoad dataLoad) {
 		log.debug("进入：数据存储/数据详情接口,dsn:{},load:{}",dataLoad.getDsn(),dataLoad);
 		LogsUtil.set(LogType.Query, "数据存储/数据列表");
@@ -185,7 +185,7 @@ public class SysDataStorageV1Controller{
 	
 	
 	@PostMapping("/delete")
-    @ApiOperation(value = "删除数据",description= "根据主键集合删除数据")
+    @Operation(description = "删除数据",summary = "根据主键集合删除数据")
 	public DataResult<Integer> delete(@RequestBody DataDelete dataDelete){
 		log.debug("进入：数据存储/数据保存接口,dsn:{},dataDelete:{}",dataDelete.getDsn(),dataDelete);
 		LogsUtil.set(LogType.Delete, "数据存储/数据删除");

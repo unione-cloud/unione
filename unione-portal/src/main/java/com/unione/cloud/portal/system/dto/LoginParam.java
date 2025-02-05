@@ -1,11 +1,10 @@
 package com.unione.cloud.portal.system.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema("认证参数")
+@Schema(title="认证参数")
 public class LoginParam {
 
 	@Schema(title="帐号")

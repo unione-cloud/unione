@@ -2,7 +2,6 @@ package com.unione.cloud.portal.common.api;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +21,7 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.web.logs.model.SysLogs;
 
 import cn.hutool.core.util.ObjectUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**

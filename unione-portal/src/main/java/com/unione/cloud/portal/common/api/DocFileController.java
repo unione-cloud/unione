@@ -33,8 +33,8 @@ import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -80,7 +80,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	
 	@Override
-	@ApiOperation(value="文档查询",description="文档综合查询接口")
+	@Operation(description="文档查询",summary="文档综合查询接口")
 	public Results<List<DocFile>> find(Params<DocFile> params) {
 		log.debug("进入控制:查询文档文件列表方法,params:{}",params);
 		boolean logSaveFlag=false;
@@ -130,7 +130,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	
 	@PostMapping({"/find/mine"})
-	@ApiOperation(value="我的文件",description= "只查询自己上传的文件")
+	@Operation(description="我的文件",summary= "只查询自己上传的文件")
 	public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params) {
 		log.debug("进入控制:我的文件列表方法,params:{}",params);
 		boolean logSaveFlag=false;
@@ -155,7 +155,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	
 	@PostMapping("/find/mineShare")
-	@ApiOperation(value="我共享的文件",description="")
+	@Operation(description="我共享的文件",summary="")
 	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params) {
 		log.debug("进入控制:查询我的共享文档方法,params:{}",params);
 		boolean logSaveFlag=false;
@@ -182,7 +182,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 	 
 	@PostMapping("/find/shareMine")
-	@ApiOperation(value="共享给我的文件",description="")
+	@Operation(description="共享给我的文件",summary="")
 	public Results<List<DocFile>> findShareMine(@RequestBody Params<DocFile> params) {
 		log.debug("进入控制:查询共享给我的文档方法,params:{}",params);
 		boolean logSaveFlag=false;
@@ -226,8 +226,8 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	}
 
 	
-	@PostMapping({"/find/other"})
-	@ApiOperation(value="他人的公开文件",description= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
+	@PostMapping("/find/other")
+	@Operation(description="他人的公开文件",summary= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
 	public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params) {
 		log.debug("进入控制:他人的公开文件列表方法,params:{}",params);
 		boolean logSaveFlag=false;
@@ -302,8 +302,9 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	}
 
 
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) DocFile entity) {
+	@PostMapping("/update")
+	@Operation(description="更新文档信息",summary= "")
+	public Results<Long> update(@RequestBody @Validated(Validator.update.class) DocFile entity) {
 		log.debug("进入控制:修改文档文件信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
 		boolean logSaveFlag=false;
@@ -467,7 +468,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 
 	@PostMapping({"/set/owner/{ownerId}"})
-	@ApiOperation(value="设置文件归属",description= "参数body中未文件id集合，返回body为成功数")
+	@Operation(description="设置文件归属",summary = "参数body中未文件id集合，返回body为成功数")
 	public Results<Integer> setOwner(@RequestBody Set<Long> ids,@PathVariable("ownerId") Long ownerId){
 		log.debug("进入控制:设置文件归属方法，ids:{},ownerId:{}",ids,ownerId);
 		boolean logSaveFlag=false;

@@ -1,11 +1,10 @@
 package com.unione.cloud.portal.system.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema("用户注册")
+@Schema(title="用户注册")
 public class UserRegister {
 
 	@Schema(title="用户类型，字典USERTYPE 1管理员，2普通用户，9其他",description="字符长度为：10")

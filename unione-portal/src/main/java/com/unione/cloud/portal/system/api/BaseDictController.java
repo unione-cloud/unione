@@ -34,8 +34,8 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,7 +54,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	private DataBaseDao dataBaseDao;
 	
 	
-	@ApiOperation(value="加载字典")
+	@Operation(description="加载字典")
 	@GetMapping("/load/{name}")
 	public Results<List<BaseDict>> load(@PathVariable("name") String name){
 		log.debug("进入:加载基础字典信息方法,name:{}",name);
@@ -120,18 +120,14 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 			LogsUtil.add("新增数据,len:"+len);
+			if(parent!=null && Objects.equals(1, parent.getIsLeaf())) {
+				parent.setIsLeaf(0);
+				len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+				LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
+			}
+			AssertUtil.service().isTrue(len>0, "保存失败");
 		}else {
-			String[] fields = {"dictKey","dictValue","dictShow","ordered","status"};
-			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
-			len = dataBaseDao.updateById(sqlBuilder);
-			LogsUtil.add("更新数据,len:"+len);
-		}
-		AssertUtil.service().isTrue(len>0, "保存失败");
-		
-		if(parent!=null && Objects.equals(1, parent.getIsLeaf())) {
-			parent.setIsLeaf(0);
-			len = dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
-			LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
+			return update(entity);
 		}
 		
 		LogsUtil.success(entity.getId());
@@ -140,8 +136,8 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	}
 
 
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) BaseDict entity) {
+	
+	private Results<Long> update(@Validated(Validator.update.class) BaseDict entity) {
 		log.debug("进入:修改基础字典信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
 		LogsUtil.set(LogType.Update, "修改基础字典",entity.getId());
@@ -210,7 +206,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 
 
 	@PostMapping("/status")
-	@ApiOperation(value="启用/停用")
+	@Operation(description="启用/停用")
 	public Results<Void> setStatus(@RequestBody BaseDict entity){
 		log.debug("进入:启用/停用方法，id:{},status:{}",entity.getId(),entity.getStatus());
 		LogsUtil.set(LogType.Update, "启用/停用基础字典");

@@ -20,7 +20,7 @@ import com.unione.cloud.form.page.model.SysPageHis;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**

@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +47,10 @@ import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -121,7 +120,7 @@ public class DocStoreController{
 	private boolean FILE_PERMIS_ENABLE;
 	
 
-	@ApiOperation("上传文件[单个]")
+	@Operation(description="上传文件[单个]")
 	@PostMapping(value="/upload/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
 			@PathVariable("appCode") String appCode,
@@ -190,7 +189,7 @@ public class DocStoreController{
 	}
 
 
-	@ApiOperation(value="上传文件[单个]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@Operation(description="上传文件[单个]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
 			@PathVariable("appCode") String appCode,
@@ -203,7 +202,7 @@ public class DocStoreController{
 	}
 
 
-	@ApiOperation("上传文件[批量]")
+	@Operation(description="上传文件[批量]")
 	@PostMapping(value="/upload/batch/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
 			@PathVariable("appCode") String appCode,
@@ -289,7 +288,7 @@ public class DocStoreController{
 		return Results.success(list);
 	}
 
-	@ApiOperation(value="上传文件[批量]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@Operation(description="上传文件[批量]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/batch/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
 			@PathVariable("appCode") String appCode,
@@ -303,7 +302,7 @@ public class DocStoreController{
 
 
 	@PostMapping("/delete/{fileId}")
-	@ApiOperation(value="删除文件",description= "根据文件id删除")
+	@Operation(description="删除文件",summary= "根据文件id删除")
 	public Results<Void> delete(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:删除文件存储信息方法，fileId:{}",fileId);
 		Results<Void> results = new Results<>();
@@ -361,7 +360,7 @@ public class DocStoreController{
 
 
 	@PostMapping("/delete/owner/{ownerId}")
-	@ApiOperation(value="删除文件",description= "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
+	@Operation(description="删除文件",summary= "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
 	public Results<Integer[]> deleteByOwner(@PathVariable("ownerId") Long ownerId) {
 		log.debug("进入:删除文件存储信息方法，ownerId:{}",ownerId);
 		boolean logSaveFlag=false;
@@ -438,7 +437,7 @@ public class DocStoreController{
 
 
 	@GetMapping("/download/{fileId}")
-	@ApiOperation(value="下载文件",description= "根据文件id下载")
+	@Operation(description="下载文件",summary= "根据文件id下载")
 	public void download(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件下载方法，fileId:{}",fileId);
 		File file = this.downloadFile(fileId);
@@ -522,7 +521,7 @@ public class DocStoreController{
 
 	
 	@PostMapping("/download")
-	@ApiOperation(value="下载文件【批量】",description= "根据文件id下载")
+	@Operation(description="下载文件【批量】",summary= "根据文件id下载")
 	public void download(@RequestBody List<Long> fileIds) {
 		log.debug("进入:文件下载方法，fileIds:{}",fileIds);
 		boolean logSaveFlag=false;
@@ -629,7 +628,7 @@ public class DocStoreController{
 
 	
 	@PostMapping("/download/dir")
-	@ApiOperation(value="下载文档【批量】",description= "批量下载文件和文件夹")
+	@Operation(description="下载文档【批量】",summary= "批量下载文件和文件夹")
 	public void download(@RequestParam("fileIds") List<Long> fileIds,@RequestParam("dirIds") List<Long> dirIds) {
 		log.debug("进入:下载文档【批量】方法，fileIds:{},dirIds:{}",fileIds,dirIds);
 		boolean logSaveFlag=false;
@@ -726,7 +725,7 @@ public class DocStoreController{
 	
 
 	@GetMapping("/preview/{fileId}")
-	@ApiOperation(value="预览文件",description= "根据文件id下载")
+	@Operation(description="预览文件",summary= "根据文件id下载")
 	public void preview(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览方法，fileId:{}",fileId);
 		boolean logSaveFlag=false;
@@ -827,7 +826,7 @@ public class DocStoreController{
 	
 
 	@GetMapping("/preview/public/{fileId}")
-	@ApiOperation(value="预览文件【公开】",description= "根据文件id下载，公开文件，不进行验证")
+	@Operation(description="预览文件【公开】",summary= "根据文件id下载，公开文件，不进行验证")
 	public void previewPublic(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览【公开】方法，fileId:{}",fileId);
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");

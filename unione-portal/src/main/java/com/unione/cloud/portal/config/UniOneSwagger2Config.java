@@ -1,53 +1,56 @@
 package com.unione.cloud.portal.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
 /**
- * 应用接口服务Swagger配置
- * @author Jeking Yang
- * @version 1.0.0
+ * 	微应用接口服务Api Doc配置
+ * 
+ * @author Unione Cloud
+ * @version 5.0.0
+ * @since 2024-03-12
  */
-@EnableWebMvc
-@EnableSwagger2
 @Configuration
-@ConditionalOnProperty(name = "swagger.enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnMissingBean(Docket.class)
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@ConditionalOnProperty(name = "knife4j.enable", havingValue = "true", matchIfMissing = true)
 public class UniOneSwagger2Config {
 	
 	@Value("${spring.application.name}")
 	private String name;
-
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.unione.cloud"))
-                .paths(PathSelectors.any())
-                .build();
+	
+	@Value("${knife4j.author.name:Jeking 杨}")
+	private String authorName;
+	
+	@Value("${knife4j.author.email:dev@unione.cloud}")
+	private String authorEmail;
+	
+	@Bean
+    public OpenAPI springDocOpenAPI() {
+		Contact contact = new Contact();
+        contact.setName(authorName);
+        contact.setEmail(authorEmail);
+        return new OpenAPI()
+    		.components(new Components().addSecuritySchemes("token",new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("token")))
+            .info(new Info()
+            	.title("Unione Cloud "+name+" 接口文档")
+            	.description("Unione Cloud "+name+" 微应用开发平台接口说明文档")
+                .version("v1.0.0")
+                .contact(contact)
+                .license(new License().name("Apache 2.0")))
+                .externalDocs(new ExternalDocumentation()
+                .url("https://www.unione.cloud"));
     }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("Uin One Cloud "+name+" 接口文档")
-                .description("in One Cloud "+name+" 微应用开发平台接口说明文档")
-                .termsOfServiceUrl("https://doc.unione.cloud")
-                .version("1.0")
-                .contact(new Contact("Jeking Yang", "https://doc.unione.cloud", "dev@unione.cloud"))
-                .build();
-    }
 }

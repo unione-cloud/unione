@@ -32,8 +32,8 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -79,14 +79,14 @@ public class SysPageDefineController implements FeignDelete<SysPageDefine>,Feign
 	}
 
 	@PostMapping(value="/save")
-	@ApiOperation(value="保存页面定义")
+	@Operation(description="保存页面定义")
 	public Results<SysPageDefine> save(@Validated(Validator.save.class) @RequestBody PageDefine entity) {
 		return pageDefineService.saveDefine(entity);
 	}
 	
 
 	@PostMapping(value="/load/{sn}")
-	@ApiOperation(value="加载页面信息")
+	@Operation(description="加载页面信息")
 	public Results<SysPageDefine> load(@PathVariable("sn") String sn) {
 		log.debug("进入:加载页面信息方法，sn:{}",sn);
 		LogsUtil.set(LogType.Query, "加载页面信息");

@@ -1,17 +1,16 @@
 package com.unione.cloud.portal.system.model;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.hibernate.validator.constraints.NotBlank;
 
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

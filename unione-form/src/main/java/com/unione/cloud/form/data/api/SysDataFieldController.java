@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,18 +13,14 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
-import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.form.data.model.SysDataDefineHis;
 import com.unione.cloud.form.data.model.SysDataField;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
-import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**

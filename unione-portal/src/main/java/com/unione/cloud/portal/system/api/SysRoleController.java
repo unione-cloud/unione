@@ -21,7 +21,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -79,28 +79,6 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 		log.debug("退出:保存角色信息.entity:{},result:true",entity);
 		return Results.build(len>0, entity.getId());
 	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysRole entity) {
-		log.debug("进入:修改角色信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改角色",entity.getId());
-		
-		String[] fields = {"orgId","name","sn","types","status","descs"};
-		SqlBuilder<SysRole> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改角色信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
-	}
-
 
 
 	@Override

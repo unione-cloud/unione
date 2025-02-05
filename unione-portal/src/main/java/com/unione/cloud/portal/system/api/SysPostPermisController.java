@@ -21,7 +21,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -59,36 +59,22 @@ public class SysPostPermisController implements PojoFeignApi<SysPostPermis>{
 
 	@Override
 	public Results<Long> save(@Validated(Validator.save.class) SysPostPermis entity) {
-		log.debug("进入:新增岗位权限信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增岗位权限");
+		log.debug("进入:保存岗位权限.entity:{}",entity);
+		LogsUtil.set(LogType.Insert, "保存岗位权限");
 		// 参数处理
-		dataBaseDao.insert(entity);
+		int len = 0;
+		if(entity.getId()==null) {
+			len = dataBaseDao.insert(entity);
+		}else {
+			String[] fields = {"postId","appId","resId","resType","enDilivery"};
+			SqlBuilder<SysPostPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);
+		}
 		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增岗位权限信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
-	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysPostPermis entity) {
-		log.debug("进入:修改岗位权限信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改岗位权限",entity.getId());
-		
-		String[] fields = {"postId","appId","resId","resType","enDilivery"};
-		SqlBuilder<SysPostPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
 		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改岗位权限信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
+		log.debug("退出:保存岗位权限.entity:{},result:true",entity);
+		return Results.build(len>0, entity.getId());
 	}
+
 
 
 

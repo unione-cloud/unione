@@ -1,5 +1,4 @@
 package com.unione.cloud.portal.common.model;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.core.model.Pojo;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;

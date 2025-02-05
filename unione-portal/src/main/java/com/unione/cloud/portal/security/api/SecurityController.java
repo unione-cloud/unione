@@ -1,7 +1,5 @@
 package com.unione.cloud.portal.security.api;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +23,9 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.captcha.AbstractCaptcha;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -61,7 +60,7 @@ public class SecurityController {
 	 * 生成验证码图片
 	 */
 	@GetMapping("/captcha")
-	@ApiOperation(value="生成验证码图片",description="生成验证码并返回验证码图片")
+	@Operation(description="生成验证码图片",summary="生成验证码并返回验证码图片")
 	public void captcha(){
 		log.debug("进入->生成验证码图片控制器");
 		response.setContentType("image/jpeg");
@@ -83,7 +82,7 @@ public class SecurityController {
 	
 	
 	@PostMapping("/login")
-	@ApiOperation(value="用户登录",description="")
+	@Operation(description="用户登录",summary="")
 	public LoginResult login(@RequestBody LoginParam param) {
 		log.info("用户登录，usrename:{}",param.getUsername());
 		LogsUtil.set(LogType.Login, "用户登录");
@@ -101,7 +100,7 @@ public class SecurityController {
 	}
 	
 	@PostMapping("/logout")
-	@ApiOperation(value="用户注销",description="")
+	@Operation(description="用户注销",summary="")
 	public Results<Void> logout(){
 		log.info("用户注销，usrename:{}",sessionService.getUsername());
 		LogsUtil.set(LogType.Logout, "用户注销");
@@ -114,7 +113,7 @@ public class SecurityController {
 	
 	
 	@GetMapping("/isAuthed")
-	@ApiOperation(value="令牌验证",description="验证是否登录，token是否有效")
+	@Operation(description="令牌验证",summary="验证是否登录，token是否有效")
 	public LoginResult isAuthed() {
 		UserPrincipal principal=sessionService.getPrincipal();
 		if(principal!=null) {
@@ -125,7 +124,7 @@ public class SecurityController {
 	
 	
 	@PostMapping("/register")
-	@ApiOperation(value = "用户注册",description= "需要开启注册功能并设置默认分配角色等信息")
+	@Operation(description = "用户注册",summary = "需要开启注册功能并设置默认分配角色等信息")
 	public Results<Void> register(@RequestBody UserRegister param){
 		log.info("用户注册：usrename:{}",param.getUsername());
 		LogsUtil.set(LogType.Register, "用户注册");

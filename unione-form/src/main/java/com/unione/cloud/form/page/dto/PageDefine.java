@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import cn.hutool.core.util.RandomUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.unione.cloud.core.exception.ServiceException;
+import com.unione.cloud.core.util.JsonUtil;
 import com.unione.cloud.form.data.storage.model.DataDefine.ConditionStyle;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataConvert;
 import com.unione.cloud.form.data.storage.model.DataDefine.DataParam;
@@ -33,15 +33,14 @@ import com.unione.cloud.form.data.storage.model.DataDefine.FieldWidget;
 import com.unione.cloud.form.data.storage.model.DataDefine.ForeignKey;
 import com.unione.cloud.form.page.dto.PageDefine.PageConfig;
 import com.unione.cloud.form.page.model.SysPageDefine;
-import com.unione.cloud.core.util.JsonUtil;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import cn.hutool.core.util.RandomUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
-@Schema("页面定义")
+@Schema(title="页面定义")
 public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	/**
 	 * 
@@ -75,7 +74,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("页面配置")
+	@Schema(title="页面配置")
 	public static class PageConfig implements Serializable{
 		/**
 		 * 
@@ -125,7 +124,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("页面设置")
+	@Schema(title="页面设置")
 	public static class PageSetting implements Serializable{
 		/**
 		 * 
@@ -143,7 +142,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("Form页面定义")
+	@Schema(title="Form页面定义")
 	public static class FormPageDefine extends PageDefine<FormPageConfig>{
 		/**
 		 * 
@@ -157,7 +156,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("Form页面配置")
+	@Schema(title="Form页面配置")
 	public static class FormPageConfig extends PageConfig{
 		/**
 		 * 
@@ -190,7 +189,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表单事件")
+	@Schema(title="表单事件")
 	public static class FormEvent implements Serializable{
 		/**
 		 * 
@@ -213,7 +212,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("list页面定义")
+	@Schema(title="list页面定义")
 	public static class ListPageDefine extends PageDefine<ListPageConfig>{
 		/**
 		 * 
@@ -226,7 +225,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("Table页面配置")
+	@Schema(title="Table页面配置")
 	public static class ListPageConfig extends PageConfig{
 		/**
 		 * 
@@ -275,7 +274,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("组件定义")
+	@Schema(title="组件定义")
 	public static class Widget implements Serializable{
 		/**
 		 * 
@@ -359,7 +358,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("按钮组件")
+	@Schema(title="按钮组件")
 	public static class Button extends Widget {
 		/**
 		 * 
@@ -369,7 +368,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@Schema(title="按钮名称",description= "用户识别按钮点击事件名称，在一个组件内部，应该要保持唯一")
 		private String name;
 		
-		@Schema(title=" = "按钮icon图标")
+		@Schema(title="按钮icon图标")
 		private String icon;
 		
 		@Schema(title="是否显示")
@@ -396,23 +395,23 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("按钮属性")
+	@Schema(title="按钮属性")
 	public static class ButtonProps implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8392444232066625861L;
 		
-		@Schema(title=" = "按钮shape形状",description= "可选:default | circle | round")
+		@Schema(title="按钮shape形状",description= "可选:default | circle | round")
 		private String shape;
 		
-		@Schema(title=" = "按钮type类型",description= "可选:primary | ghost | dashed | link | text | default")
+		@Schema(title="按钮type类型",description= "可选:primary | ghost | dashed | link | text | default")
 		private String type;
 		
-		@Schema(title=" = "按钮size大小",description= "可选:large | middle | small")
+		@Schema(title="按钮size大小",description= "可选:large | middle | small")
 		private String size;
 		
-		@Schema(title=" = "按钮trigger事件触发",description= "可选:large | middle | small")
+		@Schema(title="按钮trigger事件触发",description= "可选:large | middle | small")
 		private String trigger;
 		
 		@Schema(title="是否危险按钮")
@@ -427,7 +426,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("表单组件配置")
+	@Schema(title="表单组件配置")
 	public static class FormWidget extends Widget {
 		/**
 		 * 
@@ -455,7 +454,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表单组件配置")
+	@Schema(title="表单组件配置")
 	public static class FormSetting implements Serializable{
 		/**
 		 * 
@@ -471,7 +470,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("表单项/控件")
+	@Schema(title="表单项/控件")
 	public static class FormItem extends Widget {
 		/**
 		 * 
@@ -526,7 +525,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("表单项view配置  ")
+	@Schema(title="表单项view配置  ")
 	public static class FormItemView implements Serializable{
 		/**
 		 * 
@@ -548,7 +547,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("表单项配置  ")
+	@Schema(title="表单项配置  ")
 	public static class FormItemProps implements Serializable{
 		/**
 		 * 
@@ -572,7 +571,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("下拉框组件")
+	@Schema(title="下拉框组件")
 	public static class SelectBox extends FormItem {
 		
 		
@@ -585,7 +584,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("查询组件配置")
+	@Schema(title="查询组件配置")
 	public static class QueryWidget extends Widget {
 		/**
 		 * 
@@ -614,7 +613,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("查询关键字")
+	@Schema(title="查询关键字")
 	public static class QueryKeywords implements Serializable{/**
 		 * 
 		 */
@@ -630,7 +629,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("查询字段")
+	@Schema(title="查询字段")
 	public static class QueryField implements Serializable{
 		
 		/**
@@ -676,7 +675,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 
 	@Data
-	@Schema("查询组件配置")
+	@Schema(title="查询组件配置")
 	public static class QueryWidgetProps implements Serializable{
 		/**
 		 * 
@@ -689,7 +688,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表格组件配置")
+	@Schema(title="表格组件配置")
 	public static class TableWidget extends Widget {
 		/**
 		 * 
@@ -731,7 +730,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表格组件属性")
+	@Schema(title="表格组件属性")
 	public static class TableWidgetProps implements Serializable{
 		/**
 		 * 
@@ -750,7 +749,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表格分页配置")
+	@Schema(title="表格分页配置")
 	public static class TableColumn implements Serializable{
 		/**
 		 * 
@@ -799,16 +798,16 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@Schema(title="显示宽度")
 		private Integer width;
 		
-		@Schema(title=" = "行合并开关",description= "数据列表页面")
+		@Schema(title="行合并开关",description= "数据列表页面")
 		private boolean rowMergeEnable;
 		
-		@Schema(title=" = "列合并开关",description= "数据列表页面")
+		@Schema(title="列合并开关",description= "数据列表页面")
 		private boolean colMergeEnable;
 		
 	}
 	
 	@Data
-	@Schema("表格分页配置")
+	@Schema(title="表格分页配置")
 	public static class TablePagination implements Serializable{
 		/**
 		 * 
@@ -827,7 +826,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@Schema(title="显示位置",description= "")
 		private String position;
 		
-		@Schema(title=" = "分页大小",description= "可选:large | middle | small")
+		@Schema(title="分页大小",description= "可选:large | middle | small")
 		private String   size;
 		
 		@Schema(title="当 size 未指定时，根据屏幕宽度自动调整尺寸",description= "")
@@ -839,7 +838,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表格行号配置")
+	@Schema(title="表格行号配置")
 	public static class TableRownum implements Serializable{
 		/**
 		 * 
@@ -864,7 +863,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表格行号配置")
+	@Schema(title="表格行号配置")
 	public static class TableOperation implements Serializable{
 		/**
 		 * 
@@ -900,7 +899,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("更多操作配置")
+	@Schema(title="更多操作配置")
 	public static class MoreOperation implements Serializable{
 		/**
 		 * 
@@ -913,10 +912,10 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		@Schema(title="触发方式",description= "默认：hover，可选：click|hover|contextmenu")
 		private String trigger;
 		
-		@Schema(title=" = "按钮size大小",description= "可选：large | middle | small")
+		@Schema(title="按钮size大小",description= "可选：large | middle | small")
 		private String size;
 		
-		@Schema(title=" = "显示布局",description= "可选：vertical | horizontal")
+		@Schema(title="显示布局",description= "可选：vertical | horizontal")
 		private String layout;
 		
 	}
@@ -927,7 +926,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("表单项事件")
+	@Schema(title="表单项事件")
 	public static class FormItemEvent implements Serializable {
 		/**
 		 * 
@@ -953,50 +952,50 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("按钮响应设置")
+	@Schema(title="按钮响应设置")
 	public static class ButtonAction implements Serializable{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -3653219835676601174L;
 
-		@Schema(title=" = "响应方式",description= "响应方式：link，route，dialog，drawer")
+		@Schema(title="响应方式",description= "响应方式：link，route，dialog，drawer")
 		private String type;
 		
-		@Schema(title=" = "连接url",description= "支持变量，动态设置参数")
+		@Schema(title="连接url",description= "支持变量，动态设置参数")
 		private String href;
 		
-		@Schema(title=" = "连接target",description= "连接跳转方式 _self,_blank")
+		@Schema(title="连接target",description= "连接跳转方式 _self,_blank")
 		private String target;
 		
-		@Schema(title=" = "抽屉显示位置",description= "抽屉：左侧：left，右侧：right")
+		@Schema(title="抽屉显示位置",description= "抽屉：左侧：left，右侧：right")
 		private String position;
 		
-		@Schema(title=" = "点击遮罩层是否关闭",description= "抽屉，对话框有效")
+		@Schema(title="点击遮罩层是否关闭",description= "抽屉，对话框有效")
 		private boolean maskClosable;
 		
-		@Schema(title=" = "响应组件名称",description= "不为空用组件渲染，否则iframe集成")
+		@Schema(title="响应组件名称",description= "不为空用组件渲染，否则iframe集成")
 		private String component;
 		
-		@Schema(title=" = "页面编码",description= "预留属性")
+		@Schema(title="页面编码",description= "预留属性")
 		private String psn;
 		
-		@Schema(title=" = "响应标题",description= "对话框，抽屉")
+		@Schema(title="响应标题",description= "对话框，抽屉")
 		private String title;
 		
-		@Schema(title=" = "显示宽度",description= "对话框，抽屉，单位：px,%,vw")
+		@Schema(title="显示宽度",description= "对话框，抽屉，单位：px,%,vw")
 		private String width;
 		
-		@Schema(title=" = "显示高度",description= "对话框单位：px,%,vw")
+		@Schema(title="显示高度",description= "对话框单位：px,%,vw")
 		private String height;
 		
-		@Schema(title=" = "响应参数集合",description= "")
+		@Schema(title="响应参数集合",description= "")
 		private List<DataParam> params;
 		
 	}
 	
 	@Data
-	@Schema("按钮事件")
+	@Schema(title="按钮事件")
 	public static class ButtonEvent implements Serializable{
 		/**
 		 * 
@@ -1018,7 +1017,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	}
 	
 	@Data
-	@Schema("事件定义")
+	@Schema(title="事件定义")
 	public static class EventDefine implements Serializable {
 		/**
 		 * 
@@ -1044,7 +1043,7 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 	
 	
 	@Data
-	@Schema("样式设置")
+	@Schema(title="样式设置")
 	public static class Css implements Serializable{
 		/**
 		 * 
@@ -1062,13 +1061,13 @@ public class PageDefine<T extends PageConfig> extends SysPageDefine{
 		
 	}
 	
-	@Schema("组件权限定义")
+	@Schema(title="组件权限定义")
 	public static enum WidgetPermis{
 		WRITE,READ,NONE
 	}
 	
 	
-	@Schema("页面类型")
+	@Schema(title="页面类型")
 	public static enum PageType{
 		CODE("code"),SETTING("setting"),DESGIN("design");
 		

@@ -21,7 +21,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.json.JSONUtil;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Tag(name = "SysDataDir sys_data_dir管理：系统管理：数据目录",description="SysDataDir")
+@Tag(name = "SysDataDir 数据目录管理：系统管理：数据目录",description="SysDataDir")
 @RequestMapping("/api/data/sysDataDir")	 //TreeFeignApi
 public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 	
@@ -42,8 +42,8 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 	
 	@Override
 	public Results<List<SysDataDir>> find(Params<SysDataDir> params) {
-		log.debug("进入:查询sys_data_dir列表方法,params:{}",params);
-		LogsUtil.set(LogType.Query, "查询sys_data_dir列表");
+		log.debug("进入:查询数据目录列表方法,params:{}",params);
+		LogsUtil.set(LogType.Query, "查询数据目录列表");
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
 		Results<List<SysDataDir>> results = dataBaseDao.findPages(SqlBuilder.build(params));
@@ -52,50 +52,35 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
 		LogsUtil.success();
-		log.debug("退出:查询sys_data_dir列表方法,params:{},result:{}",params,results.isSuccess());
+		log.debug("退出:查询数据目录列表方法,params:{},result:{}",params,results.isSuccess());
 		return results;
 	}
 
 
 	@Override
 	public Results<Long> save(@Validated(Validator.save.class) SysDataDir entity) {
-		log.debug("进入:新增sys_data_dir信息.entity:{}",entity);
-		LogsUtil.set(LogType.Insert, "新增sys_data_dir");
+		log.debug("进入:保存数据目录信息.entity:{}",entity);
+		LogsUtil.set(LogType.Insert, "新增数据目录");
 		// 参数处理
-		dataBaseDao.insert(entity);
+		int len = 0;
+		if(entity.getId()==null) {
+			len = dataBaseDao.insert(entity);
+		}else {
+			String[] fields = {"parentId","title","icon","iconPic","lvsn","level","status","ordered","descs","delFlag"};
+			SqlBuilder<SysDataDir> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+		}
 		
-		LogsUtil.success(entity.getId());
-		log.debug("退出:新增sys_data_dir信息.entity:{},result:true",entity);
-		return Results.success(entity.getId());
-	}
-
-
-	@Override
-	public Results<Long> update(@Validated(Validator.update.class) SysDataDir entity) {
-		log.debug("进入:修改sys_data_dir信息方法，entity:{}",entity);
-		Results<Long> results = new Results<>();
-		LogsUtil.set(LogType.Update, "修改sys_data_dir",entity.getId());
-		
-		String[] fields = {"parentId","title","icon","iconPic","lvsn","level","status","ordered","descs","delFlag"};
-		SqlBuilder<SysDataDir> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		int len = dataBaseDao.updateById(sqlBuilder);
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
 		LogsUtil.save(len>0, entity.getId());
-
-		log.debug("退出:修改sys_data_dir信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
+		log.debug("退出:保存数据目录信息.entity:{},result:true",entity);
+		return Results.build(len>0, entity.getId());
 	}
-
 
 
 	@Override
 	public Results<List<SysDataDir>> findByIds(Set<Long> ids) {
-		log.debug("进入:批量查询sys_data_dir信息方法，ids:{}",ids);
-		LogsUtil.set(LogType.Query, "批量查询sys_data_dir");
+		log.debug("进入:批量查询数据目录信息方法，ids:{}",ids);
+		LogsUtil.set(LogType.Query, "批量查询数据目录");
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
@@ -103,15 +88,15 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		LogsUtil.success();
-		log.debug("退出:批量查询sys_data_dir信息方法，ids:{},result:true",ids);
+		log.debug("退出:批量查询数据目录信息方法，ids:{},result:true",ids);
 		return Results.success(rows);
 	}
 
 
 	@Override
 	public Results<SysDataDir> detail(Long id) {
-		log.debug("进入:查看sys_data_dir详细信息方法，id:{}",id);
-		LogsUtil.set(LogType.Query, "查看sys_data_dir详细",id);
+		log.debug("进入:查看数据目录详细信息方法，id:{}",id);
+		LogsUtil.set(LogType.Query, "查看数据目录详细",id);
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
@@ -120,16 +105,16 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		LogsUtil.success(tmp.getId());
-		log.debug("退出:查看sys_data_dir详细信息方法，id:{},result:true",id);
+		log.debug("退出:查看数据目录详细信息方法，id:{},result:true",id);
 		return Results.success(tmp);
 	}
 	
 
 	@Override
 	public Results<Integer> delete(Set<Long> ids){
-		log.debug("进入:删除sys_data_dir信息方法，ids:{}",ids);
+		log.debug("进入:删除数据目录信息方法，ids:{}",ids);
 		Results<Integer> results = new Results<>();
-		LogsUtil.set(LogType.Delete, "删除sys_data_dir");
+		LogsUtil.set(LogType.Delete, "删除数据目录");
 		
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
@@ -144,29 +129,9 @@ public class SysDataDirController implements PojoFeignApi<SysDataDir>{
 		results.setBody(count);
 		LogsUtil.save(count>0);
 
-		log.debug("退出:删除sys_data_dir信息方法，ids:{},result:{}",ids,results.isSuccess());
+		log.debug("退出:删除数据目录信息方法，ids:{},result:{}",ids,results.isSuccess());
 		return results;
 	}
 
-
-//	@Override
-//	public Results<List<SysDataDir>> children(Long sid){
-//		log.debug("进入:加载下级sys_data_dir信息,sid:{}",sid);
-//		LogsUtil.set(LogType.Query, "加载下级sys_data_dir信息",sid);
-//		 //参数处理
-//		AssertUtil.service().notNull(sid, "参数sid不能为空");
-//		
-//		// 执行查询
-//		SysDataDir params = new SysDataDir();
-//		params.setParentId(sid);
-//		LogsUtil.add("parentId:%s",sid);
-//	
-//		List<SysDataDir> rows = dataBaseDao.findList(SqlBuilder.build(params));
-//		LogsUtil.add("下级sys_data_dir记录数量:"+rows.size());
-//		
-//		LogsUtil.success();
-//		log.debug("退出:加载下级sys_data_dir信息,sid:{},result:true",sid);
-//		return Results.success(rows);
-//	}
 
 }

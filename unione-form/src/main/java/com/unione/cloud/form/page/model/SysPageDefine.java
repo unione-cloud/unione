@@ -1,19 +1,9 @@
 package com.unione.cloud.form.page.model;
 import java.util.Date;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.beetl.sql.annotation.entity.*;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +11,15 @@ import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * @标题 	SysPageDefine Entity
