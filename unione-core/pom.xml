@@ -8,8 +8,8 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-core</artifactId>
-	
-	
+
+
 	<dependencies>
 		<!-- spring cloud -->
 		<dependency>
@@ -23,10 +23,10 @@
 			<version>${spring.boot.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+			<version>${spring.boot.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
@@ -49,11 +49,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-	 		<artifactId>spring-cloud-starter-bootstrap</artifactId>
-	 		<version>${spring.cloud.version}</version>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+			<version>${spring.cloud.version}</version>
 		</dependency>
 		<!-- spring cloud END -->
-		
+
 		<!-- redis -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -61,7 +61,7 @@
 			<version>${spring.boot.version}</version>
 		</dependency>
 		<!-- redis END -->
-		
+
 		<!-- feign -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -111,8 +111,8 @@
 				<exclusion>
 					<groupId>org.springframework.cloud</groupId>
 					<artifactId>
-		    			spring-cloud-netflix-archaius
-		    		</artifactId>
+						spring-cloud-netflix-archaius
+					</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
@@ -156,7 +156,7 @@
 			</exclusions>
 		</dependency>
 		<!-- feign END -->
-		
+
 		<!-- spring-boot-test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -164,7 +164,7 @@
 			<version>${spring.boot.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- common -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -179,7 +179,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-lang3</artifactId>
+			<artifactId>commons-lang3</artifactId>
 			<version>${lang.version}</version>
 		</dependency>
 		<dependency>
@@ -193,20 +193,18 @@
 			<version>${pool2.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>cn.hutool</groupId>
-		    <artifactId>hutool-all</artifactId>
-		    <version>${hutool.version}</version>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-all</artifactId>
+			<version>${hutool.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>${httpclient.version}</version>
+			<artifactId>httpclient</artifactId>
+			<version>${httpclient.version}</version>
 		</dependency>
 		<!-- common END -->
-		
-		
-		
-		
+
+
 		<!-- logback -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -224,7 +222,7 @@
 			<version>${logback.version}</version>
 		</dependency>
 		<!-- logback END -->
-		
+
 		<!-- nacos -->
 		<dependency>
 			<groupId>com.alibaba.cloud</groupId>
@@ -261,28 +259,16 @@
 			</exclusions>
 		</dependency>
 		<!-- nacos END -->
-		
-		<!-- thymeleaf -->
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
-			<version>${thymeleaf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-java8time</artifactId>
-			<version>${thymeleaf.extras.version}</version>
-		</dependency>
-		<!-- thymeleaf END -->
-		
+
+
 		<!-- jwt -->
 		<dependency>
-		    <groupId>com.auth0</groupId>
-		    <artifactId>java-jwt</artifactId>
-		    <version>${jwt.version}</version>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>${jwt.version}</version>
 		</dependency>
 		<!-- jwt END -->
-		
+
 		<!-- jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -300,14 +286,25 @@
 			<version>${jackson.version}</version>
 		</dependency>
 		<!-- jackson END-->
-		
+
 		<!-- jetcache:配置依赖信息 -->
 		<dependency>
-		  <groupId>com.alicp.jetcache</groupId>
-		  <artifactId>jetcache-starter-redis</artifactId>
-		  <version>${jetcache.version}</version>
+			<groupId>com.alicp.jetcache</groupId>
+			<artifactId>jetcache-starter-redis</artifactId>
+			<version>${jetcache.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>redis.clients</groupId>
+					<artifactId>jedis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>${jedis.version}</version>
+		</dependency>
+
 		<!-- knife4j 增强 -->
 		<dependency>
 			<groupId>cloud.unione</groupId>
@@ -321,9 +318,9 @@
 			</exclusions>
 		</dependency>
 		<!-- swagger ui END -->
-		
+
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -341,5 +338,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
