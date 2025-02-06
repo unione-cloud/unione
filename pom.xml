@@ -98,6 +98,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.4.2</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -110,7 +111,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.2</version>
+					<version>3.4.0</version>
 					<configuration>
 						<failOnMissingWebXml>false</failOnMissingWebXml>
 						<archive>
@@ -126,14 +127,20 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
+					<version>3.5.0</version>
 					<configuration>
 						<mainClass>${start-class}</mainClass>
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.3.1</version>
 					<configuration>
 						<encoding>${encoding}</encoding>
 						<delimiters>
@@ -146,7 +153,7 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>3.3.8</version>
+					<version>3.4.0</version>
 					<executions>
 						<execution>
 							<goals>
@@ -163,13 +170,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<dependencies>
-						<dependency>
-							<groupId>org.springframework.boot</groupId>
-							<artifactId>spring-boot-maven-plugin</artifactId>
-							<version>2.2.1.RELEASE</version>
-						</dependency>
-					</dependencies>
+					<version>3.6.0</version>
 					<configuration>
 						<keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
 						<createDependencyReducedPom>true</createDependencyReducedPom>
@@ -227,7 +228,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.5.2</version>
 				<configuration>
 					<check>true</check>
 				</configuration>
@@ -242,13 +242,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.6.0</version>
 			</plugin>
 			<!-- 生成Java API 帮助文档 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
 				<configuration>
 					<aggregate>true</aggregate>
 					<charset>${encoding}</charset>
