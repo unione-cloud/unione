@@ -263,7 +263,7 @@
 	<!-- unione cloud:基础版本 -->
 	<properties>
 		<encoding>UTF-8</encoding>
-		<jdk.version>21</jdk.version>
+		<jdk.version>23</jdk.version>
 		<spring.boot.skip>true</spring.boot.skip>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	
