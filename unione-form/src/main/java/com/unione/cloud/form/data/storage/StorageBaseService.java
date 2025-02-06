@@ -58,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Jeking 杨
  */
 @Slf4j
-@Service
+@Service("storageBaseService")
 public class StorageBaseService {
 	
 	/**

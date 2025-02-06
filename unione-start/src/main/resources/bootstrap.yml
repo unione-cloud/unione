@@ -87,24 +87,19 @@ springdoc:
   group-configs:
     - group: common
       display-name: 通用接口
-      paths-to-match: /**
       packages-to-scan: com.unione.cloud.portal.common.api
     - group: security
       display-name: 认证接口
-      paths-to-match: /**
-      packages-to-scan: com.unione.cloud.portal.security.api  
+      paths-to-match: /api/security/**
     - group: system
       display-name: 系统管理
-      paths-to-match: /**
-      packages-to-scan: com.unione.cloud.portal.system.api 
+      paths-to-match: /api/system/**
     - group: formData
       display-name: 表单数据
-      paths-to-match: /**
-      packages-to-scan: com.unione.cloud.form.data.api
+      paths-to-match: /api/data/**
     - group: formPage
       display-name: 表单页面
-      paths-to-match: /**
-      packages-to-scan: com.unione.cloud.form.page.api
+      paths-to-match: /api/page/**
   default-flat-param-object: true
 knife4j:
   enable: true

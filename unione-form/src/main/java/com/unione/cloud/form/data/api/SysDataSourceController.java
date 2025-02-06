@@ -16,7 +16,6 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.form.data.model.SysDataDir;
 import com.unione.cloud.form.data.model.SysDataSource;
 import com.unione.cloud.web.logs.LogsUtil;
 import com.unione.cloud.web.logs.LogsUtil.LogType;
@@ -32,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysDataSourceController")
 @Tag(name = "系统管理：数据源管理",description="SysDataSource")
 @RequestMapping("/api/data/source")	 //TreeFeignApi
 public class SysDataSourceController implements PojoFeignApi<SysDataSource>{

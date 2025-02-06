@@ -1,6 +1,5 @@
 package com.unione.cloud.form.data.service;
 
-import java.lang.reflect.AnnotatedArrayType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -79,7 +78,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Unione Cloud Jeking
  */
 @Slf4j
-@Service
+@Service("dataDefineService")
 public class DataDefineService {
 	
 	@Autowired

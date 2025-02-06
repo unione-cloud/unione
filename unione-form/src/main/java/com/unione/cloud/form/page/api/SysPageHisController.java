@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysPageHisController")
 @Tag(name = "页面管理：页面历史",description="SysPageHis")
 @RequestMapping("/api/page/his")	 //TreeFeignApi
 public class SysPageHisController implements FeignFind<SysPageHis>,FeignFindById<SysPageHis>,FeignDetail<SysPageHis> {

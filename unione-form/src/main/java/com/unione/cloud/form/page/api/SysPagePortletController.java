@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysPagePortletController")
 @Tag(name = "页面管理：信息组件",description="使用页面组件配置的具体信息组件，比如：通知公告")
 @RequestMapping("/api/page/portlet")	 //TreeFeignApi
 public class SysPagePortletController implements PojoFeignApi<SysPagePortlet>{

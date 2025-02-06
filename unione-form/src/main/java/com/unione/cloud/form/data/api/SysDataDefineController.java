@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysDataDefineController")
 @Tag(name = "数据管理：数据定义管理",description="SysDataModel")
 @RequestMapping("/api/data/define")	 //TreeFeignApi
 public class SysDataDefineController implements FeignDelete<SysDataDefine>,FeignFind<SysDataDefine>,FeignFindById<SysDataDefine>,FeignDetail<DataDefine>{

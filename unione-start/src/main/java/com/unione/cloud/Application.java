@@ -19,10 +19,12 @@ import com.alicp.jetcache.anno.config.EnableMethodCache;
 @EnableFeignClients("com.unione.cloud")
 @EnableMethodCache(basePackages = "com.unione.cloud")
 public class Application extends SpringBootServletInitializer {
+	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
+	
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}

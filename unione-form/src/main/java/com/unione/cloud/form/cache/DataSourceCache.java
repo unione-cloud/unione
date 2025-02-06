@@ -12,7 +12,7 @@ import com.unione.cloud.form.data.model.SysDataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Service("dataSourceCache")
 public class DataSourceCache {
 	
 	@Autowired

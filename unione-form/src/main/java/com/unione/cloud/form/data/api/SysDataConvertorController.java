@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RefreshScope
-@RestController
+@RestController("sysDataConvertorController")
 @Tag(name = "系统管理：数据转换器",description="SysDataConvertor")
 @RequestMapping("/api/data/convertor")	 //TreeFeignApi
 public class SysDataConvertorController implements PojoFeignApi<SysDataConvertor>{

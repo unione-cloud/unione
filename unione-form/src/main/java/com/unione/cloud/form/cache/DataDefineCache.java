@@ -17,7 +17,7 @@ import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Service("dataDefineCache")
 public class DataDefineCache {
 	
 	@Autowired

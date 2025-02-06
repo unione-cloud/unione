@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysPageWidgetController")
 @Tag(name = "页面管理：页面组件",description="SysPageWidget")
 @RequestMapping("/api/page/widget")	 //TreeFeignApi
 public class SysPageWidgetController implements PojoFeignApi<SysPageWidget>{

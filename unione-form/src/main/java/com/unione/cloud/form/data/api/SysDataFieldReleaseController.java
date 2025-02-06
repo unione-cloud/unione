@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysDataFieldReleaseController")
 @Tag(name = "系统管理：数据字段发布",description="SysDataFieldRelease")
 @RequestMapping("/api/data/field/release")	 //TreeFeignApi
 public class SysDataFieldReleaseController implements FeignFind<SysDataFieldRelease>,FeignFindById<SysDataFieldRelease>,FeignDetail<SysDataFieldRelease>{

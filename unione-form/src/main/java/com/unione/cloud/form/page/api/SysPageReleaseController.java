@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysPageReleaseController")
 @Tag(name = "页面管理：页面发布",description="SysPageRelease")
 @RequestMapping("/api/page/release")	 //TreeFeignApi
 public class SysPageReleaseController implements FeignFind<SysPageRelease>,FeignFindById<SysPageRelease>,FeignDetail<SysPageRelease> {

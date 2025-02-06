@@ -38,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
-@Service
 @RefreshScope
+@Service("pageDefineService")
 public class PageDefineService {
 
 	@Autowired

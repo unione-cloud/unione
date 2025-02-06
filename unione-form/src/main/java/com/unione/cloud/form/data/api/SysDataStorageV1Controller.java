@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
-@RestController
+@RestController("sysDataStorageV1Controller")
 @Tag(name = "系统管理：数据存储接口V1",description="SysDataDefineV1")
 @RequestMapping("/api/data/storage/v1")
 public class SysDataStorageV1Controller{
