@@ -16,6 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.core.audit.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;
@@ -112,22 +113,6 @@ public class LogsUtil {
 	private static ThreadLocal<SysLogs> entry=new ThreadLocal<>();
 	// 日志内容对象
 	private static ThreadLocal<StringBuffer> contents=new ThreadLocal<>();
-	
-	// 操作类型
-	public static enum LogType{
-		Query("query"),Insert("insert"),Update("update"),Delete("delete"),
-		Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd"),
-		Sensitive("sensitive"),
-		Other("other");
-		
-		private String value;
-		LogType(String value){
-			this.value=value;
-		}
-		public String value() {
-			return value;
-		}
-	}
 	
 	/**
 	 * 	获得请求对象
@@ -283,9 +268,9 @@ public class LogsUtil {
 	 * @param type				操作类型
 	 * @param title				操作标题
 	 */
-	public static void set(LogType type,String title) {
+	public static void set(ActionType type,String title) {
 		SysLogs log=getEntry();
-		log.setTypes(type.value);
+		log.setTypes(type.value());
 		log.setTitle(title);
 	}
 	
@@ -296,7 +281,7 @@ public class LogsUtil {
 	 * @param title				操作标题
 	 * @param targetId			目标ID
 	 */
-	public static void set(LogType type,String title,Long targetId) {
+	public static void set(ActionType type,String title,Long targetId) {
 		set(type, title);
 		setTarget(targetId);
 	}
@@ -615,7 +600,7 @@ public class LogsUtil {
 			
 			// 判断是否要保存日志
 			if(OPEN_STATUS && (NO_QUERY_LOG==false || 
-					!LogType.Query.value.equals(logs.getTypes()))) {
+					!ActionType.Query.value().equals(logs.getTypes()))) {
 				if(executionsPattern!=null) {
 					// 如果设置了 忽略表达式，则验证当前操作名称是否满足忽略条件
 					Matcher m = executionsPattern.matcher(logs.getTitle());

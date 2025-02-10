@@ -51,7 +51,7 @@ public interface UserRoles {
 	
 	
 	@ToString
-	public static class Roles{
+	public static final class Roles{
 		private String code;
 		private String name;
 		public Roles(String code, String name) {

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.core.audit.Action;
+import com.unione.cloud.core.audit.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
@@ -20,7 +22,6 @@ import com.unione.cloud.portal.system.dto.LoginResult;
 import com.unione.cloud.portal.system.dto.UserRegister;
 import com.unione.cloud.portal.system.service.RegisterService;
 import com.unione.cloud.web.logs.LogsUtil;
-import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,10 +83,10 @@ public class SecurityController {
 	
 	
 	@PostMapping("/login")
+	@Action(title="用户登录",type = ActionType.Login)
 	@Operation(description="用户登录",summary="")
 	public LoginResult login(@RequestBody LoginParam param) {
 		log.info("用户登录，usrename:{}",param.getUsername());
-		LogsUtil.set(LogType.Login, "用户登录");
 		LogsUtil.setUsername(param.getUsername());
 		AssertUtil.service()
 			.notNull(param, new String[] {"username","password"},"请求参数%s不能为空");
@@ -100,10 +101,10 @@ public class SecurityController {
 	}
 	
 	@PostMapping("/logout")
+	@Action(title="用户注销",type = ActionType.Logout)
 	@Operation(description="用户注销",summary="")
 	public Results<Void> logout(){
 		log.info("用户注销，usrename:{}",sessionService.getUsername());
-		LogsUtil.set(LogType.Logout, "用户注销");
 		
 		tokenService.clean4auth(sessionService.getToken());
 		
@@ -124,10 +125,10 @@ public class SecurityController {
 	
 	
 	@PostMapping("/register")
+	@Action(title="用户注册",type = ActionType.Register)
 	@Operation(description = "用户注册",summary = "需要开启注册功能并设置默认分配角色等信息")
 	public Results<Void> register(@RequestBody UserRegister param){
 		log.info("用户注册：usrename:{}",param.getUsername());
-		LogsUtil.set(LogType.Register, "用户注册");
 		LogsUtil.setUsername(param.getUsername());
 		
 		Results<Void> result=registerService.doRegister(param);

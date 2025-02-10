@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.audit.Action;
+import com.unione.cloud.core.audit.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
@@ -43,7 +45,6 @@ import com.unione.cloud.util.AttachUtil;
 import com.unione.cloud.util.AttachUtil.Attach;
 import com.unione.cloud.util.FileUtil;
 import com.unione.cloud.web.logs.LogsUtil;
-import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
@@ -120,6 +121,7 @@ public class DocStoreController{
 	private boolean FILE_PERMIS_ENABLE;
 	
 
+	@Action(title="上传文件",type=ActionType.Upload)
 	@Operation(description="上传文件[单个]")
 	@PostMapping(value="/upload/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
@@ -130,12 +132,6 @@ public class DocStoreController{
 			@RequestParam(value="isPublic",required=false) Integer isPublic,
 			@RequestParam(value="extData",required=false) String extData,
 			@RequestParam(value="descs",required=false) String descs) {
-		log.debug("进入:上传文件方法,appCode:{},ownerId:{}",appCode,ownerId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Insert, "上传文件");
-			logSaveFlag=true;
-		}
 		
 		LogsUtil.add("设置参数信息");
 		DocFile doc=new DocFile();
@@ -180,15 +176,11 @@ public class DocStoreController{
 			docPermisService.save(doc, Arrays.asList(permis));
 		}
 		
-		log.debug("退出:上传文件方法,appCode:{},ownerId:{}",appCode,ownerId);
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.save(len>0,doc.getId());
-		}
 		return Results.build(len>0, doc);
 	}
 
 
+	@Action(title="上传文件",type=ActionType.Upload)
 	@Operation(description="上传文件[单个]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
@@ -203,6 +195,7 @@ public class DocStoreController{
 
 
 	@Operation(description="上传文件[批量]")
+	@Action(title="上传文件",type=ActionType.Upload)
 	@PostMapping(value="/upload/batch/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
 			@PathVariable("appCode") String appCode,
@@ -212,12 +205,6 @@ public class DocStoreController{
 			@RequestParam(value="isPublic",required=false) Integer isPublic,
 			@RequestParam(value="extData",required=false) String extData,
 			@RequestParam(value="descs",required=false) String descs) {
-		log.debug("进入:上传文件方法,appCode:{},ownerId:{}",appCode,ownerId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Insert, "上传文件[批量]");
-			logSaveFlag=true;
-		}
 		List<DocFile> list=new ArrayList<>();
 		
 		LogsUtil.add("设置参数信息");
@@ -280,14 +267,11 @@ public class DocStoreController{
 			list.add(dfile);
 		}
 		
-		log.debug("退出:上传文件[批量]方法,appCode:{},ownerId:{}",appCode,ownerId);
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
 		return Results.success(list);
 	}
 
+	
+	@Action(title="上传文件",type=ActionType.Upload)
 	@Operation(description="上传文件[批量]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/batch/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
@@ -302,15 +286,10 @@ public class DocStoreController{
 
 
 	@PostMapping("/delete/{fileId}")
+	@Action(title="删除文件",type=ActionType.Delete)
 	@Operation(description="删除文件",summary= "根据文件id删除")
 	public Results<Void> delete(@PathVariable("fileId") Long fileId) {
-		log.debug("进入:删除文件存储信息方法，fileId:{}",fileId);
 		Results<Void> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Delete, "删除文档存储");
-			logSaveFlag=true;
-		}
 		
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
@@ -350,25 +329,14 @@ public class DocStoreController{
 		// 删除缓存
 		docCacheService.delDocData(tmp.getId());
 
-		log.debug("退出:删除文件存储信息方法，fileId:{}",fileId);
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.save(len>0);
-		}
 		return results.setSuccess(len>0);
 	}
 
 
 	@PostMapping("/delete/owner/{ownerId}")
+	@Action(title="删除文件",type=ActionType.Delete)
 	@Operation(description="删除文件",summary= "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
 	public Results<Integer[]> deleteByOwner(@PathVariable("ownerId") Long ownerId) {
-		log.debug("进入:删除文件存储信息方法，ownerId:{}",ownerId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Delete, "删除文档存储[ByOwner]");
-			logSaveFlag=true;
-		}
-		
 		LogsUtil.setTarget(ownerId, "归属Id:"+ownerId);
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(ownerId, "参数ownerId不能为空");
@@ -427,16 +395,12 @@ public class DocStoreController{
 		int len = dataBaseDao.deleteLogicById(SqlBuilder.build(DocFile.class, ids));
 		LogsUtil.add("成功删除记录数量:"+len);
 
-		log.debug("退出:删除文件存储信息方法，ownerId:{}",ownerId);
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
 		return Results.success(new Integer[] {list.size(),count});
 	}
 
 
 	@GetMapping("/download/{fileId}")
+	@Action(title="下载文件",type=ActionType.Download)
 	@Operation(description="下载文件",summary= "根据文件id下载")
 	public void download(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件下载方法，fileId:{}",fileId);
@@ -450,12 +414,6 @@ public class DocStoreController{
 	
 	
 	public File downloadFile(Long fileId) {
-		log.debug("进入:文件下载方法，fileId:{}",fileId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "文件下载");
-			logSaveFlag=true;
-		}
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 		
@@ -512,24 +470,14 @@ public class DocStoreController{
 			log.debug("退出:文件下载方法，fileId:{},path:{}",fileId,cache.getPath());
 		}
 		
-		if(logSaveFlag) {
-			// 保存日志
-			LogsUtil.success();
-		}
 		return file;
 	}
 
 	
 	@PostMapping("/download")
+	@Action(title="下载文件",type=ActionType.Download)
 	@Operation(description="下载文件【批量】",summary= "根据文件id下载")
 	public void download(@RequestBody List<Long> fileIds) {
-		log.debug("进入:文件下载方法，fileIds:{}",fileIds);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "文件下载【批量】");
-			logSaveFlag=true;
-		}
-		
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileIds, "参数fileIds不能为空")
 			.notEmpty(fileIds, "参数fileIds不能为空");
@@ -619,24 +567,13 @@ public class DocStoreController{
 		AttachUtil.download(zipFile,DateUtil.format(new Date(), "批量下载文件-yyyymmdd")+".zip", request, response);
 		
 		FileUtils.deleteQuietly(zipFile);
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
 	}
 
 	
 	@PostMapping("/download/dir")
+	@Action(title="下载文件[批量]",type=ActionType.Download)
 	@Operation(description="下载文档【批量】",summary= "批量下载文件和文件夹")
 	public void download(@RequestParam("fileIds") List<Long> fileIds,@RequestParam("dirIds") List<Long> dirIds) {
-		log.debug("进入:下载文档【批量】方法，fileIds:{},dirIds:{}",fileIds,dirIds);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "下载文档【批量】");
-			logSaveFlag=true;
-		}
-		
 		LogsUtil.add("参数验证");
 		AssertUtil.service().isTrue(fileIds!=null&&!fileIds.isEmpty() || 
 				dirIds!=null&&!dirIds.isEmpty(), "参数fileIds和dirIds不能都为空");
@@ -725,15 +662,9 @@ public class DocStoreController{
 	
 
 	@GetMapping("/preview/{fileId}")
+	@Action(title="文件预览",type = ActionType.Query)
 	@Operation(description="预览文件",summary= "根据文件id下载")
 	public void preview(@PathVariable("fileId") Long fileId) {
-		log.debug("进入:文件预览方法，fileId:{}",fileId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "文件预览");
-			logSaveFlag=true;
-		}
-		
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 		
@@ -816,16 +747,11 @@ public class DocStoreController{
 //			}
 			log.debug("退出:文件预览方法，fileId:{},path:{}",fileId,tmp.getPath());
 		}
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
-		log.debug("退出:文件预览方法，fileId:{}",fileId);
 	}
 	
 
 	@GetMapping("/preview/public/{fileId}")
+	@Action(title="文件预览",type = ActionType.Query)
 	@Operation(description="预览文件【公开】",summary= "根据文件id下载，公开文件，不进行验证")
 	public void previewPublic(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览【公开】方法，fileId:{}",fileId);

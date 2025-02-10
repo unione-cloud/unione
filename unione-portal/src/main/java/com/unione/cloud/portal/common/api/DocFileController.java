@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.audit.Action;
+import com.unione.cloud.core.audit.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -29,7 +31,6 @@ import com.unione.cloud.portal.common.model.DocFile;
 import com.unione.cloud.portal.common.service.DocPermisService;
 import com.unione.cloud.portal.system.model.SysApiInfo;
 import com.unione.cloud.web.logs.LogsUtil;
-import com.unione.cloud.web.logs.LogsUtil.LogType;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
@@ -79,15 +80,11 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	private boolean FILE_PERMIS_ENABLE;
 	
 	
+	
 	@Override
-	@Operation(description="文档查询",summary="文档综合查询接口")
+	@Action(title="查询文件列表",type = ActionType.Query)
+	@Operation(description="查询文件列表",summary="文档综合查询接口")
 	public Results<List<DocFile>> find(Params<DocFile> params) {
-		log.debug("进入控制:查询文档文件列表方法,params:{}",params);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "查询文档文件列表");
-			logSaveFlag=true;
-		}
 		// 参数处理
 		params.getBody().setPermisEnable(FILE_PERMIS_ENABLE);
 		if(FILE_PERMIS_ENABLE) {
@@ -118,52 +115,28 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 				params.getBody().getUserId()==null) {
 			docPermisService.loadFilePermis(result.getBody());
 		}
-		
-		if(logSaveFlag) {
-			// 保存日志
-			LogsUtil.success();
-		}
 
-		log.debug("退出控制:查询文档文件列表方法,params:{},result:{}",params,result.isSuccess());
 		return result;
 	}
 	
 	
 	@PostMapping({"/find/mine"})
-	@Operation(description="我的文件",summary= "只查询自己上传的文件")
+	@Action(title="查询我的文件",type = ActionType.Query)
+	@Operation(description="查询我的文件",summary= "只查询自己上传的文件")
 	public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params) {
-		log.debug("进入控制:我的文件列表方法,params:{}",params);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "我的文档");
-			logSaveFlag=true;
-		}
-		
 		// 参数处理
 		params.getBody().setUserId(sessionService.getUserId());
 		params.getBody().setDelFlag(0);
 		
-		
 		Results<List<DocFile>> result = dataBaseDao.findPages(params);
-		
-		if(logSaveFlag) {
-			LogsUtil.success();
-		}
-		log.debug("退出控制:我的文件列表方法,params:{}",params);
 		return result;
 	}
 	
 	
 	@PostMapping("/find/mineShare")
-	@Operation(description="我共享的文件",summary="")
+	@Operation(description="查询我共享的文件",summary="")
+	@Action(title="查询我共享的文件",type = ActionType.Query)
 	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params) {
-		log.debug("进入控制:查询我的共享文档方法,params:{}",params);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "我的共享文档");
-			logSaveFlag=true;
-		}
-		
 		// 参数处理
 		params.getBody().setUserId(sessionService.getUserId());
 		params.getBody().setShared(true);
@@ -172,24 +145,14 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		
 		Results<List<DocFile>> result = dataBaseDao.findPages(params);
 		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
-		log.debug("退出控制:查询我的共享文档方法");
 		return result;
 	}
 
 	 
 	@PostMapping("/find/shareMine")
-	@Operation(description="共享给我的文件",summary="")
+	@Operation(description="查询共享给我的文件",summary="")
+	@Action(title="查询共享给我的文件",type = ActionType.Query)
 	public Results<List<DocFile>> findShareMine(@RequestBody Params<DocFile> params) {
-		log.debug("进入控制:查询共享给我的文档方法,params:{}",params);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "共享给我的文档");
-			logSaveFlag=true;
-		}
 		// 参数处理
 		params.getBody().setUserId(null);
 		params.getBody().setUnUserId(sessionService.getUserId());
@@ -217,25 +180,14 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 			docPermisService.loadFilePermis(result.getBody());
 		}
 		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
-		log.debug("退出控制:查询共享给我的文档方法");
 		return result;
 	}
 
 	
 	@PostMapping("/find/other")
-	@Operation(description="他人的公开文件",summary= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
+	@Action(title="查询公开文件列表",type = ActionType.Query)
+	@Operation(description="查询公开文件列表",summary= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
 	public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params) {
-		log.debug("进入控制:他人的公开文件列表方法,params:{}",params);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "他人的公开文件列表");
-			logSaveFlag=true;
-		}
-		
 		// 参数处理
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
@@ -246,24 +198,14 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		
 		Results<List<DocFile>> result = dataBaseDao.findPages(params);
 		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
-		log.debug("退出控制:他人的公开文件列表方法,params:{}",params);
 		return result;
 	}
 
 
 	@Override
+	@Action(title="保存文件信息",type=ActionType.Save)
 	public Results<Long> save(@Validated(Validator.save.class) DocFile entity) {
-		log.debug("进入控制:新增文档文件信息.entity:{}",entity);
 		Results<Long> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Insert, "新增文档文件");
-			logSaveFlag=true;
-		}
 		
 		// 参数处理
 		//AssertUtil.service().notNull(entity, new String[] {"appId","name","title"},"参数%s不能为空");
@@ -291,27 +233,15 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		results.setBody(entity.getId());
 		results.setSuccess(len>0);
 		results.setMessage(len>0?"操作成功":"操作失败");
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.save(len>0, entity.getId());
-		}
-
-		log.debug("退出控制:新增文档文件信息.entity:{},result:{}",entity,results.isSuccess());
 		return results;
 	}
 
 
 	@PostMapping("/update")
-	@Operation(description="更新文档信息",summary= "")
+	@Action(title="更新文件信息",type=ActionType.Save)
+	@Operation(description="更新文件信息",summary= "")
 	public Results<Long> update(@RequestBody @Validated(Validator.update.class) DocFile entity) {
-		log.debug("进入控制:修改文档文件信息方法，entity:{}",entity);
 		Results<Long> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Update, "修改文档文件",entity.getId());
-			logSaveFlag=true;
-		}
 		
 		// 参数处理
 		//AssertUtil.service().notNull(entity, new String[] {"sid","appId","name","title"},"参数%s不能为空");
@@ -332,11 +262,6 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		results.setBody(entity.getId());
 		results.setSuccess(len>0);
 		results.setMessage(len>0?"操作成功":"操作失败");
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.save(len>0, entity.getId());
-		}
 
 		log.debug("退出控制:修改文档文件信息方法，entity:{},result:{}",entity,results.isSuccess());
 		return results;
@@ -348,11 +273,6 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	public Results<List<DocFile>> findByIds(Set<Long> ids) {
 		log.debug("进入控制:批量查询文档文件信息方法，ids:{}",ids);
 		Results<List<DocFile>> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "批量查询文档文件");
-			logSaveFlag=true;
-		}
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");
 		
@@ -374,25 +294,13 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		results.setSuccess(true);
 		results.setMessage("操作成功");
 		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
-
-		log.debug("退出控制:批量查询文档文件信息方法，ids:{},result:{}",ids,results.isSuccess());
 		return results;
 	}
 
 
 	@Override
 	public Results<DocFile> detail(Long sid) {
-		log.debug("进入控制:查看文档文件详细信息方法，sid:{}",sid);
 		Results<DocFile> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Query, "查看文档文件详细",sid);
-			logSaveFlag=true;
-		}
 		// 参数处理
 		AssertUtil.service().notNull(sid,"参数sid不能为空");
 		
@@ -414,27 +322,14 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		results.setBody(tmp);
 		results.setSuccess(true);
 		results.setMessage("操作成功");
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success(tmp.getId());
-		}
-
-		log.debug("退出控制:查看文档文件详细信息方法，sid:{},result:{}",sid,results.isSuccess());
 		return results;
 	}
 	
 
 	@Override
+	@Action(title="删除文件",type = ActionType.Delete)
 	public Results<Integer> delete(Set<Long> ids){
-		log.debug("进入控制:删除文档文件信息方法，ids:{}",ids);
 		Results<Integer> results = new Results<>();
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Delete, "删除文档文件");
-			logSaveFlag=true;
-		}
-		
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");	
 		
@@ -456,26 +351,14 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
 		results.setBody(count);
-		
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.save(count>0);
-		}
-
-		log.debug("退出控制:删除文档文件信息方法，ids:{},result:{}",ids,results.isSuccess());
 		return results;
 	}
 
 
 	@PostMapping({"/set/owner/{ownerId}"})
+	@Action(title="设置文件归属",type = ActionType.Save)
 	@Operation(description="设置文件归属",summary = "参数body中未文件id集合，返回body为成功数")
 	public Results<Integer> setOwner(@RequestBody Set<Long> ids,@PathVariable("ownerId") Long ownerId){
-		log.debug("进入控制:设置文件归属方法，ids:{},ownerId:{}",ids,ownerId);
-		boolean logSaveFlag=false;
-		if(LogsUtil.getEntry().getTypes()==null) {
-			LogsUtil.set(LogType.Update, "设置文件归属");
-			logSaveFlag=true;
-		}
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");
 		
@@ -497,11 +380,6 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 		Integer len = dataBaseDao.updateById(builder);
 		LogsUtil.add("设置文件归属,len:"+len);
 
-		log.debug("退出控制:设置文件归属方法，ids:{},ownerId:{}",ids,ownerId);
-		if(logSaveFlag) {
-			//保存日志
-			LogsUtil.success();
-		}
 		return Results.build(len>0, len);
 	}
 
