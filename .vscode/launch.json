@@ -12,10 +12,10 @@
         },
         {
             "type": "java",
-            "name": "UnionePortalApplication",
+            "name": "UnioneStartApplication",
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
-            "projectName": "unione-portal"
+            "projectName": "unione-start"
         }
     ]
 }
