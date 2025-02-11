@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.core.annotation.AliasFor;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.METHOD})
 public @interface Action {
@@ -15,7 +13,6 @@ public @interface Action {
 	 * 操作标题
 	 * @return
 	 */
-	@AliasFor("value")
 	String title() default "";
 	
 	/**
