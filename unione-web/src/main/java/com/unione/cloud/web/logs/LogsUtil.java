@@ -16,7 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.core.audit.ActionType;
+import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;

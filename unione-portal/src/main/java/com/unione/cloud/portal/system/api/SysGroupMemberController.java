@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
-import com.unione.cloud.core.audit.Action;
-import com.unione.cloud.core.audit.ActionType;
+import com.unione.cloud.core.annotation.Action;
+import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;

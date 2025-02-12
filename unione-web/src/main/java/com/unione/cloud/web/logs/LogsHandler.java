@@ -1,143 +1,86 @@
 package com.unione.cloud.web.logs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.beetl.sql.clazz.kit.BeetlSQLException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.multipart.MultipartException;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.exception.ServiceException;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
- * 	异常统一处理：业务日志
+ * 异常统一处理：业务日志
  */
 @Slf4j
-@RestControllerAdvice("com.unione.cloud")
+@Aspect
+@Component
 public class LogsHandler {
 
-	@ExceptionHandler(Exception.class)
-    public Results<?> exception(Exception e) {
-		log.error("========= 系统异常:500 ==========");
-		log.error(e.getMessage(), e);
-		Results<?> result=new Results<>();
-		result.setCode(500);
+    @Pointcut("@annotation(com.unione.cloud.core.annotation.Action)")
+    public void logPointcut() {}
+
+    @Before("logPointcut()")
+    public void logBefore(JoinPoint joinPoint) {
+        log.info("========= 方法:{}.{}开始执行 ==========", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
+		HttpServletRequest request=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		if(request!=null){
+			log.info("请求URL: {}", request.getRequestURL().toString());
+			log.info("请求方法: {}", request.getMethod());
+			log.info("请求参数: {}", request.getQueryString());
+			log.info("请求头: {}", request.getHeader("User-Agent"));
+		}
+    }
+
+    @After("logPointcut()")
+    public void logAfter(JoinPoint joinPoint) {
+		HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+		if(response!=null){
+			log.info("响应状态: {}", response.getStatus());
+		}
+		log.info("========= 方法:{}.{}执行完毕 ==========", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
+    }
+
+    @AfterReturning(pointcut = "logPointcut()", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+        log.info("========= 方法执行成功: {} ==========", joinPoint.getSignature().toShortString());
+        log.info("返回结果: {}", result);
+        LogsUtil.success();
+    }
+
+    @AfterThrowing(pointcut = "logPointcut()", throwing = "e")
+    public void logAfterThrowing(JoinPoint joinPoint, Exception e) {
+        log.error("========= 系统异常:500 ==========");
+        log.error(e.getMessage(), e);
+        Results<?> result = new Results<>();
+        result.setCode(500);
         result.setMessage("系统异常");
-        
-        if(e instanceof BeetlSQLException) {
-        	BeetlSQLException beetException=(BeetlSQLException)e;
-        	switch (beetException.code) {
-			case BeetlSQLException.UNIQUE_EXCEPT_ERROR:
-				result.setMessage("记录未找到");
-				break;
-			case BeetlSQLException.NOT_UNIQUE_ERROR:
-				result.setMessage("记录不唯一");
-				break;
-			default:
-				break;
-			}
+
+        if (e instanceof BeetlSQLException) {
+            BeetlSQLException beetException = (BeetlSQLException) e;
+            switch (beetException.code) {
+                case BeetlSQLException.UNIQUE_EXCEPT_ERROR:
+                    result.setMessage("记录未找到");
+                    break;
+                case BeetlSQLException.NOT_UNIQUE_ERROR:
+                    result.setMessage("记录不唯一");
+                    break;
+                default:
+                    break;
+            }
         }
-        
-        if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-        	// 如果未设置日志类型，则认为未记录业务日志
-        	LogsUtil.error(e);
-        }
-        return result;
+
+        LogsUtil.error(e);
     }
 
-	@ExceptionHandler(MultipartException.class)
-    public Results<?> multipartException(MultipartException e) {
-    	log.error("========= 附件上传失败:600 ==========");
-    	log.error(e.getMessage(), e);
-    	Results<?> result=new Results<>();
-		result.setCode(600);
-        result.setMessage("附件上传失败");
-        if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-        	// 如果未设置日志类型，则认为未记录业务日志
-        	LogsUtil.error(e);
-        }
-        return result;
-    }
 
-    @SuppressWarnings("rawtypes")
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-    public Results<?> httpMessageNotReadableException(HttpMessageNotReadableException e) {
-    	log.error("========= JSON转换异常:700 ==========");
-    	log.error(e.getMessage(), e);
-    	Results<?> result=new Results<>();
-		result.setCode(700);
-        result.setMessage("JSON转换异常");
-        if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-        	// 如果未设置日志类型，则认为未记录业务日志
-        	LogsUtil.error(e);
-        }
-        return result;
-    }
-
-	@ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public Results<?> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-		log.error("========= 参数验证失败:800 ==========");
-		log.error(e.getMessage(), e);
-		BindingResult bindingResult = e.getBindingResult();
-		List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-		List<String> data = new ArrayList<>();
-		StringBuilder sb = new StringBuilder("参数验证失败:");
-		for (FieldError error : fieldErrors) {
-			Object value = error.getRejectedValue();
-			sb.append(error.getField()).append("=").append(value == null ? "null" : value.toString())
-			.append("[").append(error.getDefaultMessage()).append("], ");
-			data.add(error.getField());
-		}
-		sb.delete(sb.length() - 2, sb.length());
-
-		Results<?> result=new Results<>();
-		result.setCode(800);
-		result.setMessage(sb.toString());
-		if (!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-			// 如果未设置日志类型，则认为未记录业务日志
-			LogsUtil.failure(e);
-		}
-		return result;
-    }
-    
-
-	@ExceptionHandler(value = BindException.class)
-    public Results<?> bindException(BindException e) {
-    	log.error("========= 参数绑定失败:800 ==========");
-    	log.error(e.getMessage(), e);
-    	Results<?> result=new Results<>();
-		result.setCode(800);
-        result.setMessage("参数绑定失败");
-        if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-        	// 如果未设置日志类型，则认为未记录业务日志
-        	LogsUtil.failure(e);
-        }
-        return result;
-    }
-	
-    
-	@ExceptionHandler(ServiceException.class)
-    public Results<?> businessException(ServiceException e) {
-    	log.error(e.getMessage(), e);
-		Results<?> result=new Results<>();
-		result.setCode(900);
-        result.setMessage(e.getMessage());
-        if(!StringUtils.isEmpty(LogsUtil.getEntry().getTypes())) {
-        	// 如果未设置日志类型，则认为未记录业务日志
-        	LogsUtil.failure(e);
-        }
-        return result;
-    }
-	
 }

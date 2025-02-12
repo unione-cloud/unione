@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.unione.cloud.core.audit.Action;
-import com.unione.cloud.core.audit.ActionType;
+import com.unione.cloud.core.annotation.Action;
+import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
@@ -61,7 +61,7 @@ public class SecurityController {
 	 * 生成验证码图片
 	 */
 	@GetMapping("/captcha")
-	@Operation(description="生成验证码图片",summary="生成验证码并返回验证码图片")
+	@Operation(summary="生成验证码图片",description="生成验证码并返回验证码图片")
 	public void captcha(){
 		log.debug("进入->生成验证码图片控制器");
 		response.setContentType("image/jpeg");
@@ -84,7 +84,7 @@ public class SecurityController {
 	
 	@PostMapping("/login")
 	@Action(title="用户登录",type = ActionType.Login)
-	@Operation(description="用户登录",summary="")
+	@Operation(summary="用户登录",description="")
 	public LoginResult login(@RequestBody LoginParam param) {
 		log.info("用户登录，usrename:{}",param.getUsername());
 		LogsUtil.setUsername(param.getUsername());
@@ -102,7 +102,7 @@ public class SecurityController {
 	
 	@PostMapping("/logout")
 	@Action(title="用户注销",type = ActionType.Logout)
-	@Operation(description="用户注销",summary="")
+	@Operation(summary="用户注销",description="")
 	public Results<Void> logout(){
 		log.info("用户注销，usrename:{}",sessionService.getUsername());
 		
@@ -114,7 +114,7 @@ public class SecurityController {
 	
 	
 	@GetMapping("/isAuthed")
-	@Operation(description="令牌验证",summary="验证是否登录，token是否有效")
+	@Operation(summary="令牌验证",description="验证是否登录，token是否有效")
 	public LoginResult isAuthed() {
 		UserPrincipal principal=sessionService.getPrincipal();
 		if(principal!=null) {
@@ -126,7 +126,7 @@ public class SecurityController {
 	
 	@PostMapping("/register")
 	@Action(title="用户注册",type = ActionType.Register)
-	@Operation(description = "用户注册",summary = "需要开启注册功能并设置默认分配角色等信息")
+	@Operation(summary= "用户注册",description = "需要开启注册功能并设置默认分配角色等信息")
 	public Results<Void> register(@RequestBody UserRegister param){
 		log.info("用户注册：usrename:{}",param.getUsername());
 		LogsUtil.setUsername(param.getUsername());
