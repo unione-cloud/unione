@@ -12,10 +12,11 @@
         },
         {
             "type": "java",
-            "name": "UnioneStartApplication",
+            "name": "UnioneStart",
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
-            "projectName": "unione-start"
+            "projectName": "unione-start",
+            "vmArgs": "-Dfile.encoding=UTF-8"
         }
     ]
 }
