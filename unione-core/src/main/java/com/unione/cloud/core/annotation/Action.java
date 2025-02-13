@@ -13,7 +13,7 @@ public @interface Action {
 	 * 操作标题
 	 * @return
 	 */
-	String title() default "";
+	String title();
 	
 	/**
 	 * 操作类型
