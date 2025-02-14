@@ -426,7 +426,6 @@ public class LogsUtil {
 		}
 		logs.setErrorMessage(e.getLocalizedMessage());
 		doSave(logs);
-		log.error(e.getMessage(),e);
 	}
 	
 	/**
@@ -451,7 +450,6 @@ public class LogsUtil {
 			logs.setErrorCode(ee.getErrorCode());
 		}
 		doSave(logs);
-		log.error(errorMessage,e);
 	}
 	
 	/**
@@ -512,7 +510,6 @@ public class LogsUtil {
 		logs.setErrorMessage(emsg.toString());
 		
 		doSave(logs);
-		log.error(e.getMessage(),e);
 	}
 	
 	/**
@@ -545,7 +542,6 @@ public class LogsUtil {
 		logs.setErrorMessage(emsg.toString());
 		
 		doSave(logs);
-		log.error(errorMessage,e);
 	}
 	
 	
@@ -617,7 +613,7 @@ public class LogsUtil {
 			log.error("异步保存日志失败",e);
 		}
 		
-		log.info("业务日志json：{}",JSONUtil.toJsonStr(logs));
+		log.debug("业务日志json：{}",JSONUtil.toJsonStr(logs));
 		log.debug("退出：保存日志信息	【异步】方法,logs:{},ThreadQueue:{}",logs,executor.getQueue().size());
 	}
 	

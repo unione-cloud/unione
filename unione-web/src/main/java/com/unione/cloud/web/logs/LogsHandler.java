@@ -40,13 +40,15 @@ public class LogsHandler {
 
     @Before("logPointcut()")
     public void logBefore(JoinPoint joinPoint) {
+        // 获得Action注解
+        Action action = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Action.class);
+        LogsUtil.set(action.type(),action.title());
+
+        // 获得方法名称
         String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
         log.info("========= 方法:{} 开始执行 ==========", methodName);
         LogsUtil.add("方法:%s 开始执行",methodName);
 
-        // 获得Action注解
-        Action action = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Action.class);
-        LogsUtil.set(action.type(),action.title());
 
         // 操作权限验证
         if(ObjectUtil.isNotEmpty(action.roles())){
@@ -68,8 +70,8 @@ public class LogsHandler {
 		}
     }
 
-    @After("logPointcut()")
-    public void logAfter(JoinPoint joinPoint) {
+    @AfterReturning(pointcut = "logPointcut()", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
         // 获取响应对象
         HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
 		if(response!=null){
@@ -77,22 +79,27 @@ public class LogsHandler {
             LogsUtil.add("响应状态: %s",response.getStatus());
 		}
         
+        // 获取方法名称
         String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
         LogsUtil.add("方法:%s 开始完毕",methodName);
-		log.info("========= 方法:%s 执行完毕 ==========", methodName);
-    }
+		log.info("========= 方法:{} 执行完毕 ==========", methodName);
 
-    @AfterReturning(pointcut = "logPointcut()", returning = "result")
-    public void logAfterReturning(JoinPoint joinPoint, Object result) {
-        log.info("========= 方法执行成功: {} ==========", joinPoint.getSignature().toShortString());
-        log.info("返回结果: {}", result);
-        LogsUtil.success();
+        //保存日志
+        if(result instanceof Results){
+            Results<?> res = (Results<?>)result;
+            if(res.getCode()==200){
+                LogsUtil.success();	
+            }else{
+                LogsUtil.error(String.format("%s",res.getCode()),res.getMessage());
+           }	
+        }else{
+            LogsUtil.success();
+        }
     }
 
     @AfterThrowing(pointcut = "logPointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Exception e) {
-        log.error("========= 系统异常:500 ==========");
-        log.error(e.getMessage(), e);
+        
         Results<?> result = new Results<>();
         result.setCode(500);
         result.setMessage("系统异常");
@@ -111,7 +118,31 @@ public class LogsHandler {
             }
         }
 
+        // 获取响应对象
+        HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+        if(response!=null){
+            log.info("响应状态: {}", response.getStatus());
+            LogsUtil.add("响应状态: %s",response.getStatus());
+        }
+      
+        // 获取方法名称
+        String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
+        LogsUtil.add("方法:%s 执行失败",methodName);
+        log.info("========= 方法:{} 执行失败 ==========", methodName,e);
+
+        //保存日志
         LogsUtil.error(e);
+
+        Object obj = joinPoint.getTarget();
+        log.info("target", obj);
+        //设置方法返回值
+        //判断返回值类型
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+       
+        if(methodSignature.getReturnType().equals(Results.class)){
+            // 设置返回值
+            
+        }
     }
 
 
