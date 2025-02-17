@@ -481,6 +481,14 @@ public class LogsUtil {
 		doSave(log);
 	}
 	
+	public static void error(Throwable e) {
+		if(e instanceof Exception) {
+			error((Exception)e);
+		}else {
+			error(new Exception(e));
+		}
+	}
+	
 	/**
 	 * 	保存异信息
 	 * @param e		异常信息
