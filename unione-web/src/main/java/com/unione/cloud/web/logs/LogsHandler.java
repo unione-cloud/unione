@@ -80,7 +80,7 @@ public class LogsHandler {
         
         // 获取方法名称
         String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
-        LogsUtil.add("方法:%s 开始完毕",methodName);
+        LogsUtil.add("方法:%s 执行完毕",methodName);
 		log.info("========= 方法:{} 执行完毕 ==========", methodName);
 
         //保存日志
