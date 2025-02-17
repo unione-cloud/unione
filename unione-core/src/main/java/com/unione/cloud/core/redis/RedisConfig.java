@@ -13,6 +13,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.unione.cloud.core.exception.ServiceException;
 
 import jakarta.annotation.PostConstruct;
@@ -48,23 +50,22 @@ public class RedisConfig {
 	private RedisTemplate redisTemplate;
 
 	
-	@SuppressWarnings({ "rawtypes", "deprecation", "unchecked", "null" })
+	@SuppressWarnings({ "unchecked", "null" })
 	@PostConstruct
 	public void postConstruct() {
 		// 默认redis库处理
-		Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-		objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),DefaultTyping.NON_FINAL);
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
-        
+        GenericJackson2JsonRedisSerializer jsonRedisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+		
         RedisSerializer<String> stringSerializer = new StringRedisSerializer();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
         
-        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate.setValueSerializer(jsonRedisSerializer);
+        redisTemplate.setHashValueSerializer(jsonRedisSerializer);
         redisTemplate.afterPropertiesSet();
         
 		if(redisTemplate.getConnectionFactory() instanceof LettuceConnectionFactory) {
@@ -92,15 +93,6 @@ public class RedisConfig {
 		return container;
 	}
 
-	@Bean
-	@SuppressWarnings("unchecked")
-	public RedisTemplate<String, Object> stringSerializerRedisTemplate() {
-		RedisSerializer<String> stringSerializer = new StringRedisSerializer();
-		redisTemplate.setKeySerializer(stringSerializer);
-		redisTemplate.setHashKeySerializer(stringSerializer);
-		return redisTemplate;
-	}
-	
 	
 	/**
 	 * 	获取指定redis db template

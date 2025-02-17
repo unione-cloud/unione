@@ -96,7 +96,6 @@ public class SecurityController {
 		// 执行登录
 		LoginResult result = loginService.doLogin(param);
 		
-		LogsUtil.save(result.isSuccess());
 		return result;
 	}
 	
@@ -108,7 +107,6 @@ public class SecurityController {
 		
 		tokenService.clean4auth(sessionService.getToken());
 		
-		LogsUtil.success();
 		return Results.success();
 	}
 	
@@ -133,7 +131,6 @@ public class SecurityController {
 		
 		Results<Void> result=registerService.doRegister(param);
 		
-		LogsUtil.save(result.isSuccess());
 		return result;
 	}
 	

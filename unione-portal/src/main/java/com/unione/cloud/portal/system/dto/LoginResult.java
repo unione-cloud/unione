@@ -1,5 +1,6 @@
 package com.unione.cloud.portal.system.dto;
 
+import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.security.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,19 +8,17 @@ import lombok.Data;
 
 @Data
 @Schema(title="认证结果")
-public class LoginResult {
-	
+public class LoginResult extends Results<Void>{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2586507538432233973L;
+
 	@Schema(title="令牌")
 	private String token;
 	
 	@Schema(title="凭证对象")
 	private UserPrincipal principal;
-	
-	@Schema(title="结果")
-	private boolean success;
-	
-	@Schema(title="消息")
-	private String message;
 	
 	private LoginResult() {}
 	
@@ -40,6 +39,7 @@ public class LoginResult {
 	public static LoginResult fail(String message) {
 		LoginResult result=new LoginResult();
 		result.setMessage(message);
+		result.setCode(500);
 		return result;
 	}
 
@@ -51,6 +51,7 @@ public class LoginResult {
 	 */
 	public static LoginResult success(String token,UserPrincipal principal) {
 		LoginResult result=new LoginResult();
+		result.setCode(200);
 		result.setSuccess(true);
 		result.setToken(token);
 		result.setPrincipal(principal);

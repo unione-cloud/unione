@@ -40,17 +40,17 @@ spring:
             login-password: unione@druid
 
 
+   data:
    #============================================
    #
    # Redis Config
    #
    #============================================
-   redis:
-      database: 0
-      host: 8.134.11.253
-      port: 2379
-      password: redis@jeking
-
+      redis:
+         database: 0
+         host: 8.134.11.253
+         port: 2379
+         password: redis@jeking
 
    #============================================
    #
@@ -89,9 +89,9 @@ jetcache:
             minIdle: 5
             maxIdle: 20
             maxTotal: 50
-         host: ${spring.redis.host}
-         port: ${spring.redis.port}
-         password: ${spring.redis.password}
+         host: ${spring.data.redis.host}
+         port: ${spring.data.redis.port}
+         password: ${spring.data.redis.password}
 
       
 #============================================
