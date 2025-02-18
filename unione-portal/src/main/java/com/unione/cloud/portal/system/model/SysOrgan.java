@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,11 +35,13 @@ public class SysOrgan extends Pojo {
 	/**
 	* 企业/机构名称
 	*/
+	@UniQueryKeyWord
 	@Schema(title="企业/机构名称",description="长度为：250")
 	private String name;
 	/**
 	* 企业/机构别名
 	*/
+	@UniQueryKeyWord
 	@Schema(title="企业/机构别名",description="长度为：250")
 	private String alias;
 	/**
@@ -54,6 +57,7 @@ public class SysOrgan extends Pojo {
 	/**
 	* 编码，携带层级属性的机构编码，不能为空，唯一
 	*/
+	@UniQueryKeyWord
 	@Schema(title="编码，携带层级属性的机构编码，不能为空，唯一",description="长度为：100")
 	private String sn;
 	/**
@@ -79,6 +83,7 @@ public class SysOrgan extends Pojo {
 	/**
 	* 联系电话
 	*/
+	@UniQueryKeyWord
 	@Schema(title="联系电话",description="长度为：50")
 	private String tel;
 	/**
@@ -104,6 +109,7 @@ public class SysOrgan extends Pojo {
 	/**
 	* 说明
 	*/
+	@UniQueryKeyWord
 	@Schema(title="说明",description="长度为：500")
 	private String descs;
 

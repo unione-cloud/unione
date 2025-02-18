@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,11 +35,13 @@ public class SysPost extends Pojo {
 	/**
 	* 岗位名称
 	*/
+	@UniQueryKeyWord
 	@Schema(title="岗位名称",description="长度为：200")
 	private String name;
 	/**
 	* 岗位编码，携带层级的岗位编码
 	*/
+	@UniQueryKeyWord
 	@Schema(title="岗位编码，携带层级的岗位编码",description="长度为：50")
 	private String sn;
 	/**
@@ -64,6 +67,7 @@ public class SysPost extends Pojo {
 	/**
 	* 岗位说明
 	*/
+	@UniQueryKeyWord
 	@Schema(title="岗位说明",description="长度为：1000")
 	private String descs;
 	/**

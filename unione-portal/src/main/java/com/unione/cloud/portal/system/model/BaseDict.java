@@ -49,6 +49,7 @@ public class BaseDict extends Pojo {
 	/**
 	* 应用名称
 	*/
+	@UniQueryKeyWord
 	@Schema(title="应用名称",description="长度为：50")
 	private String appName;
 	/**

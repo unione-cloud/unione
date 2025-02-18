@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,16 +45,19 @@ public class SysGroupMember extends Pojo {
 	/**
 	* 成员机构名称
 	*/
+	@UniQueryKeyWord
 	@Schema(title="成员机构名称",description="长度为：255")
 	private String orgName;
 	/**
 	* 成员标题
 	*/
+	@UniQueryKeyWord
 	@Schema(title="成员标题",description="长度为：100")
 	private String name;
 	/**
 	* 成员编码
 	*/
+	@UniQueryKeyWord
 	@Schema(title="成员编码",description="长度为：20")
 	private String sn;
 	/**
@@ -79,6 +83,7 @@ public class SysGroupMember extends Pojo {
 	/**
 	* 成员描述
 	*/
+	@UniQueryKeyWord
 	@Schema(title="成员描述",description="长度为：1000")
 	private String descs;
 
