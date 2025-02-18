@@ -79,7 +79,7 @@ public class Results<T> implements Serializable {
 		Results<T> result=new Results<>();
 		result.setSuccess(isSuccess);
 		result.setMessage(isSuccess?"操作成功":"操作失败");
-		result.setCode(200);
+		result.setCode(isSuccess?200:500);
 		return result;
 	}
 
@@ -94,7 +94,7 @@ public class Results<T> implements Serializable {
 		result.setSuccess(isSuccess);
 		result.setBody(isSuccess?body:null);
 		result.setMessage(isSuccess?"操作成功":"操作失败");
-		result.setCode(200);
+		result.setCode(isSuccess?200:500);
 		return result;
 	}
 	

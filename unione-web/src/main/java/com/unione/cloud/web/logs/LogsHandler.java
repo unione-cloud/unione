@@ -1,9 +1,10 @@
 package com.unione.cloud.web.logs;
 
+import java.util.Objects;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.beetl.sql.clazz.kit.BeetlSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class LogsHandler {
 			// 处理结果
 			if (result instanceof Results) {
 				Results<?> res = (Results<?>) result;
-				if (res.getCode() == 200) {
+				if (Objects.equals(res.getCode(), 200)) {
 					LogsUtil.success();
 				} else {
 					LogsUtil.error(String.format("%s", res.getCode()), res.getMessage());
