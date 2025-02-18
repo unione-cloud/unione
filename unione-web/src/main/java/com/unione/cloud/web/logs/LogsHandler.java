@@ -89,13 +89,36 @@ public class LogsHandler {
 			if (result instanceof Results) {
 				Results<?> res = (Results<?>) result;
 				if (Objects.equals(res.getCode(), 200)) {
+					log.debug("响应状态: {}", res.getCode());
+					LogsUtil.add("响应状态: %s",res.getCode());
+					 // 获取方法名称
+			        LogsUtil.add("方法:%s 执行结",methodName);
+			        log.debug("========= 方法:{} 执行结束 ==========", methodName);
+			        
 					LogsUtil.success();
 				} else {
+					log.debug("响应状态: {}", res.getCode());
+					LogsUtil.add("响应状态: %s",res.getCode());
+					 // 获取方法名称
+			        LogsUtil.add("方法:%s 执行结",methodName);
+			        log.debug("========= 方法:{} 执行结束 ==========", methodName);
+			        
 					LogsUtil.error(String.format("%s", res.getCode()), res.getMessage());
 				}
 			} else {
+				// 获取响应对象
+				HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+				if(response!=null){
+					log.debug("响应状态: {}", response.getStatus());
+					LogsUtil.add("响应状态: %s",response.getStatus());
+				}
+				// 获取方法名称
+		        LogsUtil.add("方法:%s 执行结",methodName);
+		        log.debug("========= 方法:{} 执行结束 ==========", methodName);
+		        
 				LogsUtil.success();
 			}
+	        
 			return result;
 		} catch (Throwable e) {
 			log.error("处理异常",e);
@@ -115,14 +138,10 @@ public class LogsHandler {
 	                    break;
 	            }
 	        }
-	
-	        // 获取响应对象
-	        HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
-	        if(response!=null){
-	            log.debug("响应状态: {}", response.getStatus());
-	            LogsUtil.add("响应状态: %s",response.getStatus());
-	        }
 	      
+			log.debug("响应状态: {}", result.getCode());
+            LogsUtil.add("响应状态: %s",result.getCode());
+            
 	        // 获取方法名称
 	        LogsUtil.add("方法:%s 执行失败",methodName);
 	        log.debug("========= 方法:{} 执行失败 ==========", methodName,e);
