@@ -41,17 +41,17 @@ public class LogsHandler {
 		// 获得方法名称
 		String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(),
 				joinPoint.getSignature().getName());
-		log.info("========= 方法:{} 开始执行 ==========", methodName);
+		log.debug("========= 方法:{} 开始执行 ==========", methodName);
 		LogsUtil.add("方法:%s 开始执行", methodName);
 
       	// 获取请求对象
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 		if (request != null) {
-			log.info("请求URL: {}", request.getRequestURL().toString());
-			log.info("请求方法: {}", request.getMethod());
-			log.info("请求参数: {}", request.getQueryString());
-			log.info("请求Agent: {}", request.getHeader("User-Agent"));
+			log.debug("请求URL: {}", request.getRequestURL().toString());
+			log.debug("请求方法: {}", request.getMethod());
+			log.debug("请求参数: {}", request.getQueryString());
+			log.debug("请求Agent: {}", request.getHeader("User-Agent"));
 
 			LogsUtil.add("请求URL: %s", request.getRequestURL().toString());
 			LogsUtil.add("请求方法: %s", request.getMethod());
@@ -118,13 +118,13 @@ public class LogsHandler {
 	        // 获取响应对象
 	        HttpServletResponse response=((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
 	        if(response!=null){
-	            log.info("响应状态: {}", response.getStatus());
+	            log.debug("响应状态: {}", response.getStatus());
 	            LogsUtil.add("响应状态: %s",response.getStatus());
 	        }
 	      
 	        // 获取方法名称
 	        LogsUtil.add("方法:%s 执行失败",methodName);
-	        log.info("========= 方法:{} 执行失败 ==========", methodName,e);
+	        log.debug("========= 方法:{} 执行失败 ==========", methodName,e);
 	
 	        //保存日志
 	        LogsUtil.error(e);
