@@ -1,0 +1,1 @@
+mvn clean package -Dspring.boot.skip=false
