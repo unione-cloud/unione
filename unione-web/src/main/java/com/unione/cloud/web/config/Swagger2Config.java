@@ -1,4 +1,4 @@
-package com.unione.cloud.portal.config;
+package com.unione.cloud.web.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +25,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ConditionalOnProperty(name = "knife4j.enable", havingValue = "true", matchIfMissing = true)
-public class UniOneSwagger2Config {
+public class Swagger2Config {
 	
 	@Value("${spring.application.name}")
 	private String name;
