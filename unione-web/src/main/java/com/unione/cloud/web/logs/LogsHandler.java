@@ -92,7 +92,7 @@ public class LogsHandler {
 					log.debug("响应状态: {}", res.getCode());
 					LogsUtil.add("响应状态: %s",res.getCode());
 					 // 获取方法名称
-			        LogsUtil.add("方法:%s 执行结",methodName);
+			        LogsUtil.add("方法:%s 执行结束",methodName);
 			        log.debug("========= 方法:{} 执行结束 ==========", methodName);
 			        
 					LogsUtil.success();
@@ -100,7 +100,7 @@ public class LogsHandler {
 					log.debug("响应状态: {}", res.getCode());
 					LogsUtil.add("响应状态: %s",res.getCode());
 					 // 获取方法名称
-			        LogsUtil.add("方法:%s 执行结",methodName);
+			        LogsUtil.add("方法:%s 执行结束",methodName);
 			        log.debug("========= 方法:{} 执行结束 ==========", methodName);
 			        
 					LogsUtil.error(String.format("%s", res.getCode()), res.getMessage());
