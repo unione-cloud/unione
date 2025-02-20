@@ -61,7 +61,7 @@ public class Params<T> implements Serializable {
 	 *	总记录数
 	 */
 	@Schema(hidden=true)
-	private Long total;
+	private Integer total;
 
 	@Schema(title="是否需要count统计",description = "前端查询条件无变化时，可以传入false，减少count统计时间消耗")
 	private boolean needCount=true;
@@ -105,6 +105,7 @@ public class Params<T> implements Serializable {
 	/**
 	 * @return the start
 	 */
+	@JsonIgnore
 	public int getStart() {
 		return (page - 1) * pageSize;
 	}

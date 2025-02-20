@@ -1,7 +1,11 @@
 package com.unione.cloud.portal.system.model;
+import java.util.Date;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
@@ -89,7 +93,9 @@ public class SysTenant extends Pojo {
 	* 开户时间
 	*/
 	@Schema(title="开户时间",description="长度为：19")
-	private Long openTime;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date openTime;
 	/**
 	* 最大用户数量
 	*/
@@ -111,9 +117,9 @@ public class SysTenant extends Pojo {
 	@Schema(title="每个结构最大用户数",description="长度为：10")
 	private Integer maxOrganUserCouint;
 	/**
-	* 租户状态,字典TENANTSTATUS 1新建，2开通，3关闭
+	* 租户状态,字典TENANTSTATUS 1试用，2开通，3关闭
 	*/
-	@Schema(title="租户状态,字典TENANTSTATUS 1新建，2开通，3关闭",description="长度为：10")
+	@Schema(title="租户状态,字典TENANTSTATUS 1试用，2开通，3关闭",description="长度为：10")
 	private Integer status;
 	/**
 	* 租户备注

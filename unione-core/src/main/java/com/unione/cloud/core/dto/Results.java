@@ -59,7 +59,7 @@ public class Results<T> implements Serializable {
 	 */
 	@Schema(title="记录总数")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Long total;
+	private Integer total;
 
 	/**
 	 * 当前页

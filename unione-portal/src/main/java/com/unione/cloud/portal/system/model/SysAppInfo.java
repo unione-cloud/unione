@@ -95,9 +95,14 @@ public class SysAppInfo extends Pojo {
 	@Schema(title="是否平台应用，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isPlatform;
 	/**
-	* 状态，字典，使用状态 USEORNOT 1使用，0停用
+	* 是否模版，字典 TUREORFALSE 1是，0否
 	*/
-	@Schema(title="状态，字典，使用状态 USEORNOT 1使用，0停用",description="长度为：10")
+	@Schema(title="是否模版，字典 TUREORFALSE 1是，0否",description="长度为：10")
+	private Integer isTmpl;
+	/**
+	* 状态，字典，使用状态 APPSTATUS 1新建，2内测，3发布，4撤销
+	*/
+	@Schema(title="状态，字典",description="使用状态 APPSTATUS 1新建，2内测，3发布，4撤销")
 	private Integer status;
 	/**
 	* 描述

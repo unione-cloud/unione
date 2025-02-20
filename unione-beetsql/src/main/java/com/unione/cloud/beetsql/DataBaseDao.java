@@ -607,7 +607,7 @@ public class DataBaseDao {
 		this.setDataPermis(params);
 		
 		if(params.isNeedCount()) {
-			Long total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), "count"), map, Long.class);
+			Integer total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), "count"), map, Integer.class);
 			results.setTotal(total);
 		}
 		
@@ -643,7 +643,7 @@ public class DataBaseDao {
 		// count 统计
 		if(builder.isNeedCount()) {
 			SqlId countsql=this.loadSql(builder, SqlType.COUNT);
-			Long total = this.sqlManager.selectUnique(countsql, builder.toParams(), Long.class);
+			Integer total = this.sqlManager.selectUnique(countsql, builder.toParams(), Integer.class);
 			results.setTotal(total);
 		}
 		
