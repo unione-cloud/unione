@@ -631,7 +631,8 @@ public class DataBaseDao {
 		map.put("query", query);
 		
 		List<T> rows = (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
-		
+		results.setPage(params.getPage());
+		results.setPageSize(params.getPageSize());
 		return results.setBody(rows);
 	}
 	
@@ -651,6 +652,8 @@ public class DataBaseDao {
 		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		
+		results.setPage(builder.getPage());
+		results.setPageSize(builder.getPageSize());
 		return results.setBody(rows);
 	}
 	

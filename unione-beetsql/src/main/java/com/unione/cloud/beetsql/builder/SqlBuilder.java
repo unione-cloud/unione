@@ -81,9 +81,9 @@ public class SqlBuilder<T> {
 	private boolean needCount=true;
 	
 	@Getter
-	private long pageSize = 10;
+	private int pageSize = 10;
 	@Getter
-	private long page = 1;
+	private int page = 1;
 	
 	
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
@@ -849,12 +849,12 @@ public class SqlBuilder<T> {
 //		return this;
 //	}
 	
-	public SqlBuilder<T> page(long page){
+	public SqlBuilder<T> page(int page){
 		this.page=page;
 		return this;
 	} 
 	
-	public SqlBuilder<T> pageSize(long pageSize){
+	public SqlBuilder<T> pageSize(int pageSize){
 		this.pageSize=pageSize;
 		return this;
 	} 
