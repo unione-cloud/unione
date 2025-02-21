@@ -23,6 +23,14 @@ public interface UserRoles {
 	 */
 	public static final Roles SYSOPS_USER=new Roles("SYSOPS-USER","系统运维人员");
 	public static final String SYSOPSUSER="SYSOPS-USER";
+
+	/**
+	 * 开发人员
+	 */
+	public static final Roles FORM_DEV=new Roles("FORM-DEV","表单开发人员");
+	public static final String FORMDEV="FORM-DEV";
+	public static final Roles ONLINE_DEV=new Roles("ONLINE-DEV","在线开发人员");
+	public static final String ONLINEDEV="ONLINE-DEV";
 	
 	/**
      *  系统三权管理

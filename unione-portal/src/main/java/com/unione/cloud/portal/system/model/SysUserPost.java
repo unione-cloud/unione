@@ -57,9 +57,9 @@ public class SysUserPost extends Pojo {
 	@Schema(title="离开时间",description="长度为：19")
 	private Long timeLeave;
 	/**
-	* 成员状态，字典UGROUPMENSTATUS 1正常，2离开
+	* 成员状态，字典MENBERSTATUS 1正常，2离开
 	*/
-	@Schema(title="成员状态，字典UGROUPMENSTATUS 1正常，2离开",description="长度为：10")
+	@Schema(title="成员状态，字典MENBERSTATUS 1正常，2离开",description="长度为：10")
 	private Integer status;
 	/**
 	* 显示顺序

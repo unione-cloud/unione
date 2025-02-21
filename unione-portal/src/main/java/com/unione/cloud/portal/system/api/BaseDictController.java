@@ -28,6 +28,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
 import com.unione.cloud.portal.system.dto.DictShowDto;
@@ -90,7 +91,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 
 
 	@Override
-	@Action(title="保存字典",type = ActionType.Save)
+	@Action(title="保存字典",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
 	public Results<Long> save(@Validated(Validator.save.class) BaseDict entity) {
 		// 验证字典名称是否已存在
 		BaseDict parent=null;
@@ -193,8 +194,8 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 
 
 	@PostMapping("/status")
-	@Action(title="字典启用/停用",type = ActionType.Save)
-	@Operation(description="启用/停用")
+	@Action(title="设置字典状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Operation(summary = "设置字典状态", description="USEORNOT 1 使用，0停用")
 	public Results<Void> setStatus(@RequestBody BaseDict entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[0,1]");
@@ -229,7 +230,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	
 
 	@Override
-	@Action(title="删除字典",type = ActionType.Delete)
+	@Action(title="删除字典",type = ActionType.Delete,roles = {UserRoles.SYSOPSUSER})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		// 参数处理

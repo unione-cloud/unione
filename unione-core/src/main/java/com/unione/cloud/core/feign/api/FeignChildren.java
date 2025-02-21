@@ -17,7 +17,7 @@ public interface FeignChildren<T> {
 	 * @return
 	 */
 	@PostMapping("/children")
-    @Operation(description = "子节点列表")
+    @Operation(summary = "子节点",description = "根据parentId加载子节点列表")
 	public Results<List<T>> children(@RequestBody Long sid);
 	
 	

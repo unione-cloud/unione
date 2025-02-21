@@ -15,7 +15,7 @@ public interface FeignSave<T> {
 	 * @return
 	 */
 	@PostMapping("/save")
-	@Operation(description = "新增")
+	@Operation(summary = "保存",description = "新增/更新")
 	public Results<Long> save(@RequestBody T entity);
 	
 }

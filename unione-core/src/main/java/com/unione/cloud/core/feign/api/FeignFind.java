@@ -18,7 +18,7 @@ public interface FeignFind<T> {
 	 * @return
 	 */
 	@PostMapping("/find")
-	@Operation(description = "查询")
+	@Operation(summary = "查询",description = "通用查询")
 	public Results<List<T>> find(@RequestBody Params<T> params);
 	
 }

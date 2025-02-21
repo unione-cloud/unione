@@ -15,7 +15,7 @@ public interface FeignDetail<T> {
 	 * @return
 	 */
 	@PostMapping("/detail")
-	@Operation(description = "详情")
+	@Operation(summary = "加载详情",description = "根据id加载数据详情")
 	public Results<T> detail(@RequestBody Long id);
 	
 	

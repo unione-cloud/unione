@@ -102,7 +102,7 @@ public class SysOrgan extends Pojo {
 	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
-	* 状态
+	* 状态，字典USEORNOT 1使用，0停用
 	*/
 	@Schema(title="状态",description="长度为：10")
 	private Integer status;

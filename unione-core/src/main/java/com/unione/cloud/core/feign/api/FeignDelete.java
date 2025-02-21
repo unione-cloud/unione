@@ -17,7 +17,7 @@ public interface FeignDelete<T> {
 	 * @return
 	 */
 	@PostMapping("/delete")
-	@Operation(description = "删除")
+	@Operation(summary = "删除",description = "根据id删除数据")
 	public Results<Integer> delete(@RequestBody Set<Long> ids);
 	
 	

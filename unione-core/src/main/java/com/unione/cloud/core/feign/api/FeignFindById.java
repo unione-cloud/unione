@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public interface FeignFindById<T> {
 
 	@PostMapping("/findByIds")
-	@Operation(description = "查询列表")
+	@Operation(summary = "加载列表",description = "根据id集合加载列表")
 	public Results<List<T>> findByIds(@RequestBody Set<Long> ids);
 	
 }

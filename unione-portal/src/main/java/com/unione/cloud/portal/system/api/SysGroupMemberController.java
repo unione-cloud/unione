@@ -1,11 +1,14 @@
 package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +26,7 @@ import com.unione.cloud.portal.system.model.SysGroupMember;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,7 +75,17 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 		return Results.build(len>0, entity.getId());
 	}
 
-
+	@PostMapping("/status")
+	@Action(title="设置分组成员状态",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
+	@Operation(summary = "设置分组成员状态", description="MENBERSTATUS 1正常，2离开")
+	public Results<Void> setStatus(@RequestBody SysGroupMember entity){
+		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
+			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[1,2]");
+		
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		
+		return Results.build(len>0);
+	}
 
 	@Override
 	public Results<List<SysGroupMember>> findByIds(Set<Long> ids) {
