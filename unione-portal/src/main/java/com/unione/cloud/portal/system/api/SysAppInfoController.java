@@ -81,7 +81,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	@Operation(summary = "设置应用状态", description="APPSTATUS 1新建，2内测，3发布，4撤销")
 	public Results<Void> setStatus(@RequestBody SysAppInfo entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
-			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[1,2,3,4]");
+			.notIn(entity.getStatus(), Arrays.asList(1,2,3,4), "参数status取值范围[1,2,3,4]");
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
 		

@@ -80,7 +80,7 @@ public class SysUserOrganController implements PojoFeignApi<SysUserOrgan>{
 	@Operation(summary = "设置状态", description="MENBERSTATUS 1正常，2离开")
 	public Results<Void> setStatus(@RequestBody SysUserOrgan entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
-			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[1,2]");
+			.notIn(entity.getStatus(), Arrays.asList(1,2), "参数status取值范围[1,2]");
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
 		
