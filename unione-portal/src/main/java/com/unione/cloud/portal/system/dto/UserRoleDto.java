@@ -16,7 +16,7 @@ public class UserRoleDto extends SysUserRole {
 	private static final long serialVersionUID = -7139264761199115507L;
 
 	@Schema(title="角色名称")
-	private String roleNname;
+	private String roleName;
 	
 	@Schema(title="角色编码")
 	private String roleSn;
