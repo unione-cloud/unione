@@ -3,8 +3,10 @@ package com.unione.cloud.portal.system.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,12 +24,12 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.model.SysResource;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -63,6 +65,16 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	@Action(title="保存资源",type = ActionType.Save)
 	public Results<Long> save(@Validated(Validator.save.class) SysResource entity) {
 		// 参数处理
+		BeanUtils.setDefaultValue(entity, "parentId",-1L);
+		if(!Objects.equals(-1L, entity.getParentId())) {
+			SysResource parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
+			AssertUtil.service().notNull(parent, "上级节点未找到");
+			if(!Objects.equals(parent.getIsLeaf(), 0)) {
+				parent.setIsLeaf(0);
+				dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+			}
+		}
+
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
