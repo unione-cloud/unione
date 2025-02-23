@@ -567,6 +567,7 @@ public class DataBaseDao {
 		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findList");
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
+		map.put("keywords", params.getKeywords());
 		
 		// 如果未手动设置排序，则从params中获取排序
 		if(sort.length==0 && !ObjectUtil.isEmpty(params.getSorts())) {
@@ -604,6 +605,7 @@ public class DataBaseDao {
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
+		map.put("keywords", params.getKeywords());
 		this.setDataPermis(params);
 		
 		if(params.isNeedCount()) {
