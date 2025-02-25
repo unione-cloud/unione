@@ -22,7 +22,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.portal.system.model.SysGroupMember;
+import com.unione.cloud.portal.system.dto.GroupMemberDto;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -31,16 +31,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @标题 	SysGroupMember Controller 服务
+ * @标题 	GroupMemberDto Controller 服务
  * @作者	Unione Cloud CodeGen
  * @日期	2024-03-25 21:18:02
  * @版本	1.0.0
  **/
 @Slf4j
 @RestController
-@Tag(name = "系统管理：分组成员",description="SysGroupMember")
+@Tag(name = "系统管理：分组成员",description="GroupMemberDto")
 @RequestMapping("/api/system/groupMember")	 //TreeFeignApi
-public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
+public class SysGroupMemberController implements PojoFeignApi<GroupMemberDto>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -48,10 +48,10 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 	
 	@Override
 	@Action(title="查询分组成员",type = ActionType.Query)
-	public Results<List<SysGroupMember>> find(Params<SysGroupMember> params) {
+	public Results<List<GroupMemberDto>> find(Params<GroupMemberDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysGroupMember>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<GroupMemberDto>> results = dataBaseDao.findPages(params);
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
@@ -61,14 +61,14 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 
 	@Override
 	@Action(title="保存分组成员",type = ActionType.Query,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
-	public Results<Long> save(@Validated(Validator.save.class) SysGroupMember entity) {
+	public Results<Long> save(@Validated(Validator.save.class) GroupMemberDto entity) {
 		// 参数处理
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"groupId","mbType","mbId","orgId","orgName","name","sn","timeJoin","timeLeave","status","ordered","descs"};
-			SqlBuilder<SysGroupMember> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			SqlBuilder<GroupMemberDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}
 		
@@ -78,7 +78,7 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 	@PostMapping("/status")
 	@Action(title="设置分组成员状态",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
 	@Operation(summary = "设置分组成员状态", description="MENBERSTATUS 1正常，2离开")
-	public Results<Void> setStatus(@RequestBody SysGroupMember entity){
+	public Results<Void> setStatus(@RequestBody GroupMemberDto entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(1,2), "参数status取值范围[1,2]");
 		
@@ -88,11 +88,11 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 	}
 
 	@Override
-	public Results<List<SysGroupMember>> findByIds(Set<Long> ids) {
+	public Results<List<GroupMemberDto>> findByIds(Set<Long> ids) {
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		List<SysGroupMember> rows = dataBaseDao.findByIds(SqlBuilder.build(SysGroupMember.class,new ArrayList<>(ids)));
+		List<GroupMemberDto> rows = dataBaseDao.findByIds(SqlBuilder.build(GroupMemberDto.class,new ArrayList<>(ids)));
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
 		return Results.success(rows);
@@ -100,11 +100,11 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 
 
 	@Override
-	public Results<SysGroupMember> detail(Long id) {
+	public Results<GroupMemberDto> detail(Long id) {
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
-		SysGroupMember tmp = dataBaseDao.findById(SqlBuilder.build(SysGroupMember.class,id));
+		GroupMemberDto tmp = dataBaseDao.findById(SqlBuilder.build(GroupMemberDto.class,id));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		return Results.success(tmp);
@@ -121,7 +121,7 @@ public class SysGroupMemberController implements PojoFeignApi<SysGroupMember>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.deleteById(SqlBuilder.build(SysGroupMember.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(GroupMemberDto.class,ids));
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");

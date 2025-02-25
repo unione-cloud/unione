@@ -37,11 +37,7 @@ public class SysGroupMember extends Pojo {
 	*/
 	@Schema(title="成员类型，字典GROUPTYPES 1用户分组，9其他",description="长度为：10")
 	private Integer mbType;
-	/**
-	* 成员ID
-	*/
-	@Schema(title="成员ID",description="长度为：19")
-	private Long mbId;
+	
 	/**
 	* 成员机构名称
 	*/

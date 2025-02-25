@@ -32,15 +32,10 @@ public class SysUserPost extends Pojo {
 	@Schema(title="岗位ID",description="长度为：19")
 	private Long postId;
 	/**
-	* 用户所属机构ID
-	*/
-	@Schema(title="用户所属机构ID",description="长度为：19")
-	private Long userOrgId;
-	/**
 	* 用户所属机构名称
 	*/
 	@Schema(title="用户所属机构名称",description="长度为：255")
-	private String userOrgName;
+	private String orgName;
 	/**
 	* 成员姓名
 	*/
