@@ -1,7 +1,11 @@
 package com.unione.cloud.portal.system.model;
+import java.util.Date;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
@@ -60,12 +64,16 @@ public class SysGroupMember extends Pojo {
 	* 加入时间
 	*/
 	@Schema(title="加入时间",description="长度为：19")
-	private Long timeJoin;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date timeJoin;
 	/**
 	* 离开时间
 	*/
 	@Schema(title="离开时间",description="长度为：19")
-	private Long timeLeave;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	private Date timeLeave;
 	/**
 	* 成员状态，字典MENBERSTATUS 1正常，2离开
 	*/
