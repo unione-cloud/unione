@@ -1,0 +1,34 @@
+package com.unione.cloud.portal.common.dto;
+
+import java.io.Serializable;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+/**
+ * @标题 	SelectorUser Dto
+ * @描述	用户查询Dto
+ * @作者	Unione Cloud
+ * @日期	2024-11-22 23:32:02
+ */
+@Data
+@Schema(title="用户选择Dto")
+public class SelectorUserDto extends SelectorNodeDto{
+    private static final long serialVersionUID = 1L;
+
+    @Schema(title="用户帐号",description="长度为：100")
+	private String username;
+
+    @Schema(title="用户头像",description="长度为：300")
+	private String avatar;
+
+    @Schema(title="用户性别，字典SEX 1女，2男",description="长度为：10")
+    private Integer sex;
+
+    @Schema(title="用户联系电话",description="长度为：30")
+    private String tel;
+
+    @Schema(title="用户邮箱",description="长度为：200")
+	private String email;
+
+}
