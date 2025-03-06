@@ -14,6 +14,7 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
+import com.unione.cloud.portal.common.dto.SelectorUserParam;
 import com.unione.cloud.portal.common.service.SelectorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,12 +46,12 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/{type}/user")
+    @PostMapping("/user/node")
     @Operation(summary = "选择器:用户节点", description = "参数：目标类型不能为空[organ,post,group,role]")
-    public Results<List<SelectorUserDto>> userNode(@PathVariable("type") String type, @RequestBody Params<Long> params) {
+    public Results<List<SelectorUserDto>> userNode(@RequestBody Params<SelectorUserParam> params) {
         log.debug("进入:用户节点查询接口,参数:{}", params);
 
-        Results<List<SelectorUserDto>> results = selectorService.userNode(type,params);
+        Results<List<SelectorUserDto>> results = selectorService.userNode(params);
 
         log.debug("退出:用户节点查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -63,7 +64,7 @@ public class SelectorController {
      */
     @PostMapping("/role/node/{type}")
     @Operation(summary = "选择器:角色节点", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorNodeDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
+    public Results<List<SelectorNodeDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Void> params) {
         log.debug("进入:角色节点查询接口,参数:{}", params);
 
         Results<List<SelectorNodeDto>> results = selectorService.roleNode(type, params);

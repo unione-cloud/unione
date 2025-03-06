@@ -22,7 +22,7 @@ whereField
 
 count
 ===
-```sqlUserRoleDto
+```sql
 SELECT COUNT(MB.ID) 
 FROM SYS_GROUP_MEMBER MB 
 LEFT JOIN SYS_USER U ON MB.USER_ID=U.ID 

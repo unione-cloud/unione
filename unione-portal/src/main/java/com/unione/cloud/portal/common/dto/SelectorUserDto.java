@@ -2,6 +2,8 @@ package com.unione.cloud.portal.common.dto;
 
 import java.io.Serializable;
 
+import org.beetl.sql.mapper.annotation.SqlResource;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @Schema(title="用户选择Dto")
+@SqlResource("system.userSelectorDto")
 public class SelectorUserDto extends SelectorNodeDto{
     private static final long serialVersionUID = 1L;
 

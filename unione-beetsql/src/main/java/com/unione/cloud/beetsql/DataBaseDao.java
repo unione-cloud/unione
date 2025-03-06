@@ -137,14 +137,22 @@ public class DataBaseDao {
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
 	}
 
-	
 	/**
 	 * 	更新数据,使用sql更新{ResoruceName}.update
 	 * @param updater
 	 * @return
 	 */
 	public <T> int update(Updater<T> updater) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "update");
+		return update("update", updater);
+	}
+	
+	/**
+	 * 	更新数据,使用sql更新{ResoruceName}.{sqlName}
+	 * @param updater
+	 * @return
+	 */
+	public <T> int update(String sqlName, Updater<T> updater) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
 		
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
@@ -168,14 +176,23 @@ public class DataBaseDao {
 		
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
-	
+
 	/**
 	 * 	更新数据,使用sql更新{ResoruceName}.updateById
 	 * @param updater
 	 * @return
 	 */
 	public <T> int updateById(Updater<T> updater) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), "updateById");
+		return updateById("updateById", updater);
+	}
+	
+	/**
+	 * 	更新数据,使用sql更新{ResoruceName}.{sqlName}
+	 * @param updater
+	 * @return
+	 */
+	public <T> int updateById(String sqlName, Updater<T> updater) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
 
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
@@ -223,7 +240,16 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "delete");
+		return delete("delete", params);
+	}
+
+	/**
+	 * 	删除数据,使用sql删除{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	public <T> int delete(String sqlName,T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		
@@ -277,14 +303,23 @@ public class DataBaseDao {
 		
 		return this.sqlManager.update(sqlId,builder.toParams());
 	}
-	
+
 	/**
-	 * 	逻辑删除
+	 * 	逻辑删除,使用sql统计{ResoruceName}.deleteLogic
 	 * @param params
 	 * @return
 	 */
 	public <T> int deleteLogic(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogic");
+		return deleteLogic("deleteLogic", params);
+	}
+	
+	/**
+	 * 	逻辑删除,使用sql统计{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogic(String sqlName,T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -295,14 +330,24 @@ public class DataBaseDao {
 		
 		return this.sqlManager.update(sqlId, map);
 	}
-	
+
+
 	/**
-	 * 	逻辑删除(根据id或ids集合删除数据)
+	 * 	逻辑删除(根据id或ids集合删除数据),使用sql统计{ResoruceName}.deleteLogicById
 	 * @param params
 	 * @return
 	 */
 	public <T> int deleteLogicById(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "deleteLogicById");
+		return deleteLogicById("deleteLogicById", params);
+	}
+	
+	/**
+	 * 	逻辑删除(根据id或ids集合删除数据),使用sql统计{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogicById(String sqlName,T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -344,16 +389,6 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 	
-	/**
-	 * 	统计数量
-	 * @param params
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> Map<String, Object> countSql(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
-		return this.sqlManager.selectUnique(sqlId, builder.toParams(),Map.class);
-	}
 	
 	/**
 	 * 	统计数量
@@ -364,14 +399,24 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.COUNT);
 		return (long) this.sqlManager.selectUnique(sqlId, builder.toParams(),Long.class);
 	}
-	
+
+
 	/**
 	 * 	统计数量,使用sql统计{ResoruceName}.count
 	 * @param params
 	 * @return
 	 */
 	public <T> long count(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "count");
+		return count("count",params);
+	}
+	
+	/**
+	 * 	统计数量,使用sql统计{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	public <T> long count(String sqlName,T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -388,15 +433,24 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_ONE);
 		return (T) this.sqlManager.selectUnique(sqlId, builder.toParams(), builder.targetClass());
 	}
-	
+
 	/**
 	 * 	查询唯一数据,使用sql查询{ResoruceName}.findUnique
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T findUnique(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findUnique");
+		return findUnique("findUnique", params);
+	}
+	
+	/**
+	 * 	查询唯一数据,使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findUnique(String sqlName, T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -414,14 +468,24 @@ public class DataBaseDao {
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
 	
+
 	/**
 	 * 	查询一条数据,使用sql查询{ResoruceName}.findOne
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T findOne(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findOne");
+		return findOne("findOne", params);
+	}
+
+	/**
+	 * 	查询一条数据,使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findOne(String sqlName, T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -452,31 +516,51 @@ public class DataBaseDao {
 		}
 		return list.get(0);
 	}
-	
+
+
 	/**
 	 * 	查询列表(根据id查询数据),使用sql查询{ResoruceName}.findById
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T findById(T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findById");
+		return findById("findById", params);
+	}
+	
+	/**
+	 * 	查询列表(根据id查询数据),使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T findById(String sqlName, T params) {
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
 	
-	
+
 	/**
 	 * 	查询列表(根据ids集合加载数据),使用sql查询{ResoruceName}.findById
 	 * @param params
 	 * @param sort
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(T params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findById");
+		return findByIds("findByIds", params, sort);
+	}
+	
+	/**
+	 * 	查询列表(根据ids集合加载数据),使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findByIds(String sqlName, T params,Sort ...sort){
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
@@ -518,16 +602,27 @@ public class DataBaseDao {
 		return rows;
 	}
 	
-	
+
 	/**
 	 * 	查询列表(不分页),使用sql查询{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(T params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), "findList");
+		return findList("findList", params, sort);
+	}
+	
+
+	/**
+	 * 	查询列表(不分页),使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findList(String sqlName, T params,Sort ...sort){
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -555,16 +650,26 @@ public class DataBaseDao {
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
 	}
-	
+
 	/**
 	 * 	查询列表(分页),不执行total统计,使用sql查询{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> List<T> findPageList(Params<T> params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findList");
+		return findPageList("findList", params, sort);
+	}
+	
+	/**
+	 * 	查询列表(分页),不执行total统计,使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findPageList(String sqlName, Params<T> params,Sort ...sort){
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), sqlName);
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
 		map.put("keywords", params.getKeywords());
@@ -592,16 +697,27 @@ public class DataBaseDao {
 		return (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
 	}
 	
+
 	/**
 	 * 	查询列表(分页),使用sql查询{ResoruceName}.count，{ResoruceName}.findList
 	 * @param params
 	 * @param sort
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> Results<List<T>> findPages(Params<T> params,Sort ...sort){
+		return findPages("findPages","count", params, sort);
+	}
+
+	/**
+	 * 	查询列表(分页),使用sql查询{ResoruceName}.{countSql}，{ResoruceName}.{listSql}
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Results<List<T>> findPages(String listSql,String countSql,Params<T> params,Sort ...sort){
 		Results<List<T>> results=Results.success();
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), "findPages");
+		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), listSql);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
@@ -609,7 +725,7 @@ public class DataBaseDao {
 		this.setDataPermis(params);
 		
 		if(params.isNeedCount()) {
-			Integer total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), "count"), map, Integer.class);
+			Integer total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), countSql), map, Integer.class);
 			results.setTotal(total);
 		}
 		

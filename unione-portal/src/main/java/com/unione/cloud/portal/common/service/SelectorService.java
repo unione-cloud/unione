@@ -1,7 +1,10 @@
 package com.unione.cloud.portal.common.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,8 +14,10 @@ import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
+import com.unione.cloud.portal.common.dto.SelectorUserParam;
 import com.unione.cloud.portal.system.model.SysGroup;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysPost;
@@ -36,15 +41,32 @@ public class SelectorService {
    
     /**
      * 查询用户节点
-     * @param type
      * @param params
      * @return
      */
-    public Results<List<SelectorUserDto>> userNode(String type,Params<Long> params){
+    public Results<List<SelectorUserDto>> userNode(Params<SelectorUserParam> params){
+        log.debug("进入：查询用户节点方法,target type:{},target id:{},keyword:{}",params.getBody().getNtype(),params.getBody(),params.getKeywords());
+        AssertUtil.service().notIn(params.getBody().getNtype(), Arrays.asList("organ","role","group","post"), "参数type有效值：organ-机构，role-角色，post-岗位,group-分组");
         
+        // 查询用户列表
+        Params<SelectorUserDto> query=Params.build(SelectorUserDto.class)
+            .setPage(params.getPage())
+            .setPageSize(params.getPageSize())
+            .setKeywords(params.getKeywords());
+        query.getBody().setPid(params.getBody().getPid());
+        query.getBody().setNtype(params.getBody().getNtype());
+        Results<List<SelectorUserDto>> results = dataBaseDao.findPages(String.format("find%sUserList", params.getBody().getNtype()),String.format("count%sUser", params.getBody().getNtype()),query);
 
+        // 验证用户是否已经在目标中
+        if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
+            List<Long> uids = results.getBody().stream().map(SelectorUserDto::getId).collect(Collectors.toList());
+            if(uids.size()>0){
+                
+            }
+        }
 
-        return Results.success();
+        log.debug("退出：查询用户节点方法,target type:{},target id:{},keyword:{},result:{}",params.getBody().getNtype(),params.getBody(),params.getKeywords(),results.isSuccess());
+        return results;
     }
 
 
@@ -54,8 +76,8 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> roleNode(Integer type,Params<Long> params){
-        log.debug("进入：查询角色节点方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+    public Results<List<SelectorNodeDto>> roleNode(Integer type,Params<Void> params){
+        log.debug("进入：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
         List<SelectorNodeDto> list=new ArrayList<>();
         
         Params<SysRole> queryOrgan = Params.build(SysRole.class);
@@ -66,7 +88,7 @@ public class SelectorService {
             queryOrgan.getBody().setTypes(type);
         }
         Results<List<SysRole>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
-            .field("name","id","parentId")
+            .field("name","id")
             .where("status=1 and types=? and name like [%?%]"));
 
         if(results.isSuccess()){
