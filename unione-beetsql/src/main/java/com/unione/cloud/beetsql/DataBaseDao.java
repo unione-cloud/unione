@@ -25,6 +25,7 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
+import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -152,8 +153,8 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int update(String sqlName, Updater<T> updater) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
-		
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
+
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
 		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
@@ -192,7 +193,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int updateById(String sqlName, Updater<T> updater) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(updater.getData().getClass()), sqlName);
 
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(updater.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
@@ -249,7 +250,8 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int delete(String sqlName,T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		
@@ -319,7 +321,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogic(String sqlName,T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -347,7 +349,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogicById(String sqlName,T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -416,7 +418,8 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> long count(String sqlName,T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -450,7 +453,8 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findUnique(String sqlName, T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -485,7 +489,8 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(String sqlName, T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -534,7 +539,8 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T findById(String sqlName, T params) {
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		this.setDataPermis(params);
@@ -560,7 +566,8 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findByIds(String sqlName, T params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
@@ -622,7 +629,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(String sqlName, T params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
@@ -636,6 +643,50 @@ public class DataBaseDao {
 		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
+	}
+
+
+	public <T> List<T> findList(String sqlName, Object params,Class<T> resultClass,Sort ...sort){
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", BeanUtil.getFieldValue(params, "keywords"));
+		query.put("id", BeanUtil.getFieldValue(params, "id"));
+		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
+		map.put("query", query);
+		
+		this.setDataPermis(params);
+		return (List<T>) this.sqlManager.select(sqlId, resultClass, map);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Map<String,Map> findMap(String sqlName, Object params,String keyField){
+		return findMap(sqlName, params, Map.class, keyField);
+	}
+
+	public <T> Map<String,T> findMap(String sqlName, Object params,Class<T> resultType,String keyField){
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("params", params);
+		
+		Map<String, Object> query=new HashMap<>();
+		query.put("keywords", BeanUtil.getFieldValue(params, "keywords"));
+		query.put("id", BeanUtil.getFieldValue(params, "id"));
+		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
+		map.put("query", query);
+		
+		this.setDataPermis(params);
+		List<T> list =  this.sqlManager.select(sqlId, resultType, map);
+		Map<String,T> result=new HashMap<>();
+		for(T m:list) {
+			result.put(BeanUtil.getFieldValue(m, keyField).toString(), m);
+		}
+		return result;
 	}
 
 	/**
@@ -669,7 +720,8 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findPageList(String sqlName, Params<T> params,Sort ...sort){
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), sqlName);
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getBody().getClass()), sqlName);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
 		map.put("keywords", params.getKeywords());
@@ -717,15 +769,16 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> Results<List<T>> findPages(String listSql,String countSql,Params<T> params,Sort ...sort){
 		Results<List<T>> results=Results.success();
-		SqlId sqlId=SqlId.of(this.getNameSpace(params.getBody().getClass()), listSql);
-		
+		SqlId sqlId=listSql.indexOf(".")>0?SqlId.of(listSql):SqlId.of(this.getNameSpace(params.getBody().getClass()), listSql);
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params.getBody());
 		map.put("keywords", params.getKeywords());
 		this.setDataPermis(params);
 		
 		if(params.isNeedCount()) {
-			Integer total = this.sqlManager.selectUnique(SqlId.of(this.getNameSpace(params.getBody().getClass()), countSql), map, Integer.class);
+			SqlId sqlCount=countSql.indexOf(".")>0?SqlId.of(countSql):SqlId.of(this.getNameSpace(params.getBody().getClass()), countSql);
+			Integer total = this.sqlManager.selectUnique(sqlCount, map, Integer.class);
 			results.setTotal(total);
 		}
 		
@@ -774,7 +827,7 @@ public class DataBaseDao {
 		results.setPageSize(builder.getPageSize());
 		return results.setBody(rows);
 	}
-	
+
 	
 	private void setDataPermis(Object obj) {
 		UniDataPermis dataPermis = obj.getClass().getAnnotation(UniDataPermis.class);
