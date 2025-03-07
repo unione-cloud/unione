@@ -27,4 +27,9 @@ public @interface Action {
 	 */
 	String[] roles() default {};
 	
+	/**
+	 * 是否不记录操作日志
+	 * @return
+	 */
+	boolean nolog() default false;
 }

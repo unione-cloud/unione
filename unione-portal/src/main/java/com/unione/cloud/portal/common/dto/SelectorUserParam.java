@@ -1,8 +1,11 @@
 package com.unione.cloud.portal.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.beetl.sql.mapper.annotation.SqlResource;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -31,5 +34,8 @@ public class SelectorUserParam implements Serializable{
     @Schema(title="目标ID",description="长度为：19")
     private Long targetId;
 
+    @JsonIgnore
+    @Schema(title="主键集合")
+    private List<Long> ids;
 
 }

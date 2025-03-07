@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.core.annotation.Action;
+import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
@@ -47,6 +49,7 @@ public class SelectorController {
      * @return
      */
     @PostMapping("/user/node")
+    @Action(title="选择器:用户节点",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:用户节点", description = "参数：目标类型不能为空[organ,post,group,role]")
     public Results<List<SelectorUserDto>> userNode(@RequestBody Params<SelectorUserParam> params) {
         log.debug("进入:用户节点查询接口,参数:{}", params);
@@ -63,6 +66,7 @@ public class SelectorController {
      * @return
      */
     @PostMapping("/role/node/{type}")
+    @Action(title="选择器:角色节点",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:角色节点", description = "参数：类型type<=0：全部，大于0：指定类型")
     public Results<List<SelectorNodeDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Void> params) {
         log.debug("进入:角色节点查询接口,参数:{}", params);
@@ -81,6 +85,7 @@ public class SelectorController {
      * @return
      */
     @PostMapping("/organ/tree")
+    @Action(title="选择器:机构树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:机构树", description = "")
     public Results<List<SelectorNodeDto>> organTree(@RequestBody Params<Long> params) {
         log.debug("进入:机构树查询接口,参数:{}", params);
@@ -97,6 +102,7 @@ public class SelectorController {
      * @return
      */
     @PostMapping("/group/tree/{type}")
+    @Action(title="选择器:分组树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:分组树", description = "参数：类型type<=0：全部，大于0：指定类型")
     public Results<List<SelectorNodeDto>> groupTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
         log.debug("进入:分组树查询接口,参数:{}", params);
@@ -113,6 +119,7 @@ public class SelectorController {
      * @return
      */
     @PostMapping("/post/tree/{type}")
+    @Action(title="选择器:岗位树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:岗位树", description = "参数：类型type<=0：全部，大于0：指定类型")
     public Results<List<SelectorNodeDto>> postTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
         log.debug("进入:岗位树查询接口,参数:{}", params);

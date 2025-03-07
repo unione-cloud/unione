@@ -3,6 +3,7 @@ package com.unione.cloud.portal.common.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -46,22 +47,29 @@ public class SelectorService {
      */
     public Results<List<SelectorUserDto>> userNode(Params<SelectorUserParam> params){
         log.debug("进入：查询用户节点方法,target type:{},target id:{},keyword:{}",params.getBody().getNtype(),params.getBody(),params.getKeywords());
-        AssertUtil.service().notIn(params.getBody().getNtype(), Arrays.asList("organ","role","group","post"), "参数type有效值：organ-机构，role-角色，post-岗位,group-分组");
+        AssertUtil.service()
+            .notIn(params.getBody().getNtype(), Arrays.asList("organ","role","group","post"), "参数type有效值：organ-机构，role-角色，post-岗位,group-分组")
+            .notNull(params.getBody().getPid(), "参数pid不能为空");
         
         // 查询用户列表
         Params<SelectorUserDto> query=Params.build(SelectorUserDto.class)
             .setPage(params.getPage())
             .setPageSize(params.getPageSize())
             .setKeywords(params.getKeywords());
-        query.getBody().setPid(params.getBody().getPid());
-        query.getBody().setNtype(params.getBody().getNtype());
+            query.getBody().setPid(params.getBody().getPid());
         Results<List<SelectorUserDto>> results = dataBaseDao.findPages(String.format("find%sUserList", params.getBody().getNtype()),String.format("count%sUser", params.getBody().getNtype()),query);
 
         // 验证用户是否已经在目标中
         if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
             List<Long> uids = results.getBody().stream().map(SelectorUserDto::getId).collect(Collectors.toList());
             if(uids.size()>0){
-                
+                params.getBody().setIds(uids);
+                Map<String,SelectorUserDto> hadMap = dataBaseDao.findMap(String.format("check%sUser", params.getBody().getTargetType()),params.getBody(),SelectorUserDto.class,"id");
+                results.getBody().forEach(user->{
+                    if(hadMap.containsKey(user.getId().toString())){
+                        user.setChecked(true);
+                    }
+                });
             }
         }
 

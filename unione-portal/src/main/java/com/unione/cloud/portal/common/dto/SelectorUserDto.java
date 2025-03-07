@@ -33,5 +33,5 @@ public class SelectorUserDto extends SelectorNodeDto{
 
     @Schema(title="用户邮箱",description="长度为：200")
 	private String email;
-
+    
 }

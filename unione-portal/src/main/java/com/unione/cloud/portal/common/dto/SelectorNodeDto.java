@@ -33,5 +33,5 @@ public class SelectorNodeDto implements Serializable{
 
     @Schema(title="是否选中",description="true：选中，false：未选中")
     private Boolean checked;
-
+   
 }

@@ -113,7 +113,15 @@ public class LogsUtil {
 	private static ThreadLocal<SysLogs> entry=new ThreadLocal<>();
 	// 日志内容对象
 	private static ThreadLocal<StringBuffer> contents=new ThreadLocal<>();
+	// 日志记录开关
+	private static ThreadLocal<Boolean> enable=new ThreadLocal<>();
 	
+
+	public static void enable(boolean flag) {
+		enable.set(flag);
+	}
+
+
 	/**
 	 * 	获得请求对象
 	 * @return
@@ -603,8 +611,8 @@ public class LogsUtil {
 			};
 			
 			// 判断是否要保存日志
-			if(OPEN_STATUS && (NO_QUERY_LOG==false || 
-					!ActionType.Query.value().equals(logs.getTypes()))) {
+			if(OPEN_STATUS && (enable.get() == null || enable.get()==true) && 
+				(NO_QUERY_LOG==false || !ActionType.Query.value().equals(logs.getTypes()))) {
 				if(executionsPattern!=null) {
 					// 如果设置了 忽略表达式，则验证当前操作名称是否满足忽略条件
 					Matcher m = executionsPattern.matcher(logs.getTitle());

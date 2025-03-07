@@ -14,6 +14,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.exception.DataBaseException;
+import com.unione.cloud.core.exception.RemoteException;
+import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.JsonUtil;
 
@@ -38,6 +41,7 @@ public class LogsHandler {
 		// 获得Action注解
 		Action action = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Action.class);
 		LogsUtil.set(action.type(), action.title());
+		LogsUtil.enable(!action.nolog());
 
 		// 获得方法名称
 		String methodName = String.format("%s.%s", joinPoint.getTarget().getClass().getName(),
@@ -137,6 +141,12 @@ public class LogsHandler {
 	                default:
 	                    break;
 	            }
+	        } else if(e instanceof ServiceException){
+	        	result.setMessage(e.getMessage());
+	        } else if(e instanceof RemoteException){
+	        	result.setMessage(e.getMessage());
+	        } else if(e instanceof DataBaseException){
+	        	result.setMessage(e.getMessage());
 	        }
 	      
 			log.debug("响应状态: {}", result.getCode());
