@@ -84,13 +84,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/organ/tree")
+    @PostMapping("/organ/tree/{type}")
     @Action(title="选择器:机构树",type = ActionType.Query,nolog = true)
-    @Operation(summary = "选择器:机构树", description = "")
-    public Results<List<SelectorNodeDto>> organTree(@RequestBody Params<Long> params) {
-        log.debug("进入:机构树查询接口,参数:{}", params);
+    @Operation(summary = "选择器:机构树", description = "参数：类型type<=0：全部，大于0：指定类型")
+    public Results<List<SelectorNodeDto>> organTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
+        log.debug("进入:机构树查询接口,参数:type:{}, params:{}",type, params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.organTree(params);
+        Results<List<SelectorNodeDto>> results = selectorService.organTree(type,params);
 
         log.debug("退出:机构树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -105,7 +105,7 @@ public class SelectorController {
     @Action(title="选择器:分组树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:分组树", description = "参数：类型type<=0：全部，大于0：指定类型")
     public Results<List<SelectorNodeDto>> groupTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
-        log.debug("进入:分组树查询接口,参数:{}", params);
+        log.debug("进入:分组树查询接口,参数:type:{},param:{}",type, params);
 
         Results<List<SelectorNodeDto>> results = selectorService.groupTree(type,params);
 
@@ -122,7 +122,7 @@ public class SelectorController {
     @Action(title="选择器:岗位树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:岗位树", description = "参数：类型type<=0：全部，大于0：指定类型")
     public Results<List<SelectorNodeDto>> postTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
-        log.debug("进入:岗位树查询接口,参数:{}", params);
+        log.debug("进入:岗位树查询接口,参数:type:{},param:{}",type, params);
 
         Results<List<SelectorNodeDto>> results = selectorService.postTree(type,params);
 

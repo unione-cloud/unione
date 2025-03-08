@@ -122,8 +122,8 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> organTree(Params<Long> params){
-        log.debug("进入：查询机构树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+    public Results<List<SelectorNodeDto>> organTree(Integer type,Params<Long> params){
+        log.debug("进入：查询机构树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         List<SelectorNodeDto> list=new ArrayList<>();
         
         Params<SysOrgan> queryOrgan = Params.build(SysOrgan.class);
@@ -131,6 +131,9 @@ public class SelectorService {
         queryOrgan.setPageSize(params.getPageSize());
         queryOrgan.getBody().setParentId(params.getBody());
         queryOrgan.getBody().setName(params.getKeywords());
+        if(type!=null && type>0){
+            queryOrgan.getBody().setTypes(type);
+        }
         Results<List<SysOrgan>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and name like [%?%]")
@@ -147,7 +150,7 @@ public class SelectorService {
             }
         }
 
-        log.debug("退出：查询机构树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+        log.debug("退出：查询机构树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
@@ -162,18 +165,18 @@ public class SelectorService {
      * @return
      */
     public Results<List<SelectorNodeDto>> groupTree(Integer type, Params<Long> params){
-        log.debug("进入：查询分组树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+        log.debug("进入：查询分组树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         List<SelectorNodeDto> list=new ArrayList<>();
         
-        Params<SysGroup> queryOrgan = Params.build(SysGroup.class);
-        queryOrgan.setPage(params.getPage());
-        queryOrgan.setPageSize(params.getPageSize());
-        queryOrgan.getBody().setParentId(params.getBody());
-        queryOrgan.getBody().setName(params.getKeywords());
+        Params<SysGroup> queryGroup = Params.build(SysGroup.class);
+        queryGroup.setPage(params.getPage());
+        queryGroup.setPageSize(params.getPageSize());
+        queryGroup.getBody().setParentId(params.getBody());
+        queryGroup.getBody().setName(params.getKeywords());
         if(type!=null && type>0){
-            queryOrgan.getBody().setTypes(type);
+            queryGroup.getBody().setTypes(type);
         }
-        Results<List<SysGroup>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
+        Results<List<SysGroup>> results=dataBaseDao.findPages(SqlBuilder.build(queryGroup)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
@@ -189,7 +192,7 @@ public class SelectorService {
             }
         }
 
-        log.debug("退出：查询分组树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+        log.debug("退出：查询分组树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
@@ -204,16 +207,16 @@ public class SelectorService {
      * @return
      */
     public Results<List<SelectorNodeDto>> postTree(Integer type, Params<Long> params){
-        log.debug("进入：查询岗位树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+        log.debug("进入：查询岗位树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         List<SelectorNodeDto> list=new ArrayList<>();
         
-        Params<SysPost> queryOrgan = Params.build(SysPost.class);
-        queryOrgan.setPage(params.getPage());
-        queryOrgan.setPageSize(params.getPageSize());
-        queryOrgan.getBody().setParentId(params.getBody());
-        queryOrgan.getBody().setName(params.getKeywords());
-        queryOrgan.getBody().setTypes(type);
-        Results<List<SysPost>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
+        Params<SysPost> queryPost = Params.build(SysPost.class);
+        queryPost.setPage(params.getPage());
+        queryPost.setPageSize(params.getPageSize());
+        queryPost.getBody().setParentId(params.getBody());
+        queryPost.getBody().setName(params.getKeywords());
+        queryPost.getBody().setTypes(type);
+        Results<List<SysPost>> results=dataBaseDao.findPages(SqlBuilder.build(queryPost)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
@@ -229,7 +232,7 @@ public class SelectorService {
             }
         }
 
-        log.debug("退出：查询岗位树方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
+        log.debug("退出：查询岗位树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
