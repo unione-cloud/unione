@@ -72,6 +72,9 @@ public class SelectorService {
                 });
             }
         }
+        results.getBody().forEach(user->{
+            user.setNtype("user");
+        });
 
         log.debug("退出：查询用户节点方法,target type:{},target id:{},keyword:{},result:{}",params.getBody().getNtype(),params.getBody(),params.getKeywords(),results.isSuccess());
         return results;
