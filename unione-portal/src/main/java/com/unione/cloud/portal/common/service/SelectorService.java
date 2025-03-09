@@ -190,7 +190,7 @@ public class SelectorService {
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
-                dto.setNtype("organ");
+                dto.setNtype("group");
                 list.add(dto);
             }
         }
