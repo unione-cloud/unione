@@ -1,8 +1,10 @@
 package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +21,15 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.dto.UserRoleDto;
+import com.unione.cloud.portal.system.model.SysGroup;
+import com.unione.cloud.portal.system.model.SysGroupMember;
+import com.unione.cloud.portal.system.model.SysRole;
+import com.unione.cloud.portal.system.model.SysUserRole;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +67,28 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 	@Action(title="保存用户角色",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
 	public Results<Long> save(@Validated(Validator.save.class) UserRoleDto entity) {
 		// 参数处理
+		SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
+		AssertUtil.service().notNull(role, "角色不存在");
+
 		int len = 0;
 		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
+			BeanUtils.setDefaultValue(entity,"enDilivery",0);
+			if(ObjectUtil.isEmpty(entity.getUsers())){
+				// 单个添加：
+				AssertUtil.service().notNull(entity.getRoleId(), "属性角色id不能为空");
+				AssertUtil.service().notNull(entity.getUserId(), "属性用户id不能为空");
+				len = dataBaseDao.insert(entity);
+			}else{
+				// 批量添加：
+				List<SysUserRole> members = entity.getUsers().stream().map(user->{
+					SysUserRole member=new SysUserRole();
+					BeanUtils.copyProperties(entity, member);
+					member.setUserId(user.getId());
+					return member;
+				}).collect(Collectors.toList());
+				int lens[] = dataBaseDao.insertBatch(members);
+				len = Arrays.stream(lens).sum();
+			}
 		}else {
 			String[] fields = {"userId","roleId","enDilivery"};
 			SqlBuilder<UserRoleDto> sqlBuilder=SqlBuilder.build(entity).field(fields);

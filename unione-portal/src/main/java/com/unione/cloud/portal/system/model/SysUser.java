@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
 import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
@@ -34,11 +36,12 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
-@SqlResource("system.SysUser")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_user")
+@SqlResource("system.SysUser")
+// @UniDataPermis(DataPermis.ORGANCODE)
 public class SysUser extends Pojo {
 	/**
 	* 用户类型，字典USERTYPE 1管理员，2普通用户，9其他
@@ -171,12 +174,5 @@ public class SysUser extends Pojo {
 	*/
 	@Schema(title="描述",description="长度为：400")
 	private String descs;
-
-	
-	////////////////
-	// 非持久化属性
-	@Schema(title="机构名称")
-	private String orgName;
-	
 	
 }

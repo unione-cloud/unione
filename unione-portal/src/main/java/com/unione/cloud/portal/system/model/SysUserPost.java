@@ -24,11 +24,11 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
-@SqlResource("system.SysUserPost")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_user_post")
+@SqlResource("system.SysUserPost")
 public class SysUserPost extends Pojo {
 	/**
 	* 岗位ID

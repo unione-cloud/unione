@@ -1,4 +1,6 @@
 package com.unione.cloud.portal.system.model;
+import java.util.Date;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
@@ -30,12 +32,12 @@ public class SysUserOrgan extends Pojo {
 	* 加入时间
 	*/
 	@Schema(title="加入时间",description="长度为：19")
-	private Long timeJoin;
+	private Date timeJoin;
 	/**
 	* 离开时间
 	*/
 	@Schema(title="离开时间",description="长度为：19")
-	private Long timeLeave;
+	private Date timeLeave;
 	/**
 	* 状态，字典MENBERSTATUS 1正常，2离开
 	*/

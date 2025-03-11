@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -22,9 +23,16 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.dto.UserPostDto;
+import com.unione.cloud.portal.system.model.SysGroup;
+import com.unione.cloud.portal.system.model.SysGroupMember;
+import com.unione.cloud.portal.system.model.SysPost;
+import com.unione.cloud.portal.system.model.SysUserPost;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,9 +71,35 @@ public class SysUserPostController implements PojoFeignApi<UserPostDto>{
 	@Action(title="保存用户岗位",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
 	public Results<Long> save(@Validated(Validator.save.class) UserPostDto entity) {
 		// 参数处理
+		SysPost post=dataBaseDao.findById(SqlBuilder.build(SysPost.class,entity.getPostId()));
+		AssertUtil.service().notNull(post, "岗位不存在");
+
 		int len = 0;
 		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
+			entity.setStatus(1);
+			entity.setTimeJoin(DateUtil.date());
+			BeanUtils.setDefaultValue(entity,"ordered",0);
+			if(ObjectUtil.isEmpty(entity.getUsers())){
+				// 单个添加：
+				AssertUtil.service().notNull(entity.getOrgId(), "属性机构id不能为空");
+				AssertUtil.service().notNull(entity.getOrgName(), "属性机构名称不能为空");
+				AssertUtil.service().notNull(entity.getUserId(), "属性用户id不能为空");
+				AssertUtil.service().notNull(entity.getName(), "属性成员名称不能为空");
+				len = dataBaseDao.insert(entity);
+			}else{
+				// 批量添加：
+				List<SysUserPost> members = entity.getUsers().stream().map(user->{
+					SysUserPost member=new SysUserPost();
+					BeanUtils.copyProperties(entity, member);
+					member.setOrgId(user.getId());
+					member.setOrgName(user.getOrgName());
+					member.setUserId(user.getId());
+					member.setName(user.getTitle());
+					return member;
+				}).collect(Collectors.toList());
+				int lens[] = dataBaseDao.insertBatch(members);
+				len = Arrays.stream(lens).sum();
+			}
 		}else {
 			String[] fields = {"postId","userId","userOrgId","userOrgName","name","timeJoin","timeLeave","status","ordered","descs"};
 			SqlBuilder<UserPostDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
@@ -83,7 +117,12 @@ public class SysUserPostController implements PojoFeignApi<UserPostDto>{
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(1,2), "参数status取值范围[1,2]");
 		
-		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		String fields[]= {"status"};
+		if(entity.getStatus()==2) {
+			entity.setTimeLeave(DateUtil.date());
+			fields = new String[] {"status","timeLeave"};
+		}
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		
 		return Results.build(len>0);
 	}

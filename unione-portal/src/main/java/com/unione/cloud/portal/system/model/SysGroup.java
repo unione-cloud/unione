@@ -2,7 +2,9 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,11 +23,12 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
-@SqlResource("system.SysGroup")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_group")
+@SqlResource("system.SysGroup")
+@UniDataPermis(DataPermis.ORGANID)
 public class SysGroup extends Pojo {
 	/**
 	* 上级分组ID

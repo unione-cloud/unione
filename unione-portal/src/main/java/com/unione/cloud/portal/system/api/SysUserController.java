@@ -21,11 +21,16 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
+import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.portal.cache.UnioneCacheService;
+import com.unione.cloud.portal.system.dto.UserInfoDto;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -47,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "系统管理：用户信息 管理服务",description="SysUser")
 @RequestMapping("/api/system/user")
-public class SysUserController implements PojoFeignApi<SysUser>{
+public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser>,FeignFind<UserInfoDto>,FeignFindById<SysUser>,FeignDetail<SysUser>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -61,10 +66,10 @@ public class SysUserController implements PojoFeignApi<SysUser>{
 	
 	@Override
 	@Action(title="查询用户",type = ActionType.Query)
-	public Results<List<SysUser>> find(Params<SysUser> params) {
+	public Results<List<UserInfoDto>> find(Params<UserInfoDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysUser>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<UserInfoDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		

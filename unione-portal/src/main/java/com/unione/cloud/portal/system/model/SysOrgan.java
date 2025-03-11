@@ -2,6 +2,8 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.UniDataPermis;
+import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
 import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
 import com.unione.cloud.core.model.Pojo;
 
@@ -21,11 +23,12 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
-@SqlResource("system.SysOrgan")
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Table(name="sys_organ")
+@SqlResource("system.SysOrgan")
+@UniDataPermis(DataPermis.ORGANCODE)
 public class SysOrgan extends Pojo {
 	/**
 	* 上级ID
