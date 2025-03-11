@@ -11,7 +11,7 @@ import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +37,7 @@ public class SysGroupMember extends Pojo {
 	* 分组ID
 	*/
 	@Schema(title="分组ID",description="长度为：19")
-	@NotEmpty(message = "分组ID不能为空",groups= {Validator.save.class,Validator.update.class})
+	@NotNull(message = "分组ID不能为空",groups= {Validator.save.class,Validator.update.class})
 	private Long groupId;
 	/**
 	* 成员类型，字典GROUPTYPES 1用户分组，9其他

@@ -18,6 +18,8 @@ import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.exception.RemoteException;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.security.UserRoles.Roles;
 import com.unione.cloud.core.util.JsonUtil;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -67,11 +69,30 @@ public class LogsHandler {
 		// 操作权限验证
 		if (ObjectUtil.isNotEmpty(action.roles())) {
 			boolean flag = false;
-			for (Object o : action.roles()) {
+			for (String o : action.roles()) {
 				if (sessionService.getUserRoles().contains(o)) {
 					flag = true;
 					break;
 				}
+			}
+			if(!flag){
+				for (String o : action.roles()) {
+					Roles prole = UserRoles.fromCode(o);
+					if(prole!=null){
+						for(String r:sessionService.getUserRoles()){
+							Roles arole = UserRoles.fromCode(r);
+							if(arole!=null && arole.level()<prole.level()){
+								flag = true;
+								break;	
+							}
+						}
+					}else if(sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN) || 
+						sessionService.getUserRoles().contains(UserRoles.SYSOPSUSER) ||
+						sessionService.getUserRoles().contains(UserRoles.TENANTADMIN)){
+						flag = true;
+						break;
+					}
+				}	
 			}
 			if (!flag) {
 				LogsUtil.add("无操作权限");
@@ -85,6 +106,7 @@ public class LogsHandler {
 				return res;
 			}
 		}
+		// 操作权限验证 END
     	
 		try {
 			// 开始处理
