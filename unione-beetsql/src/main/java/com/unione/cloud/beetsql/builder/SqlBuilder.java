@@ -674,10 +674,10 @@ public class SqlBuilder<T> {
 				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
 				break;	
 			case ORGANCODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%%'}", whereSql,BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
 				break;	
 			case AREACODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%'}", whereSql,BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
+				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%%'}", whereSql,BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
 				break;	
 			default:
 				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());

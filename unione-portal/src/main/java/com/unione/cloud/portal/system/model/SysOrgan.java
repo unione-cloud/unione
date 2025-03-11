@@ -28,7 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="sys_organ")
 @SqlResource("system.SysOrgan")
-@UniDataPermis(DataPermis.ORGANCODE)
+// @UniDataPermis(DataPermis.ORGANCODE)
 public class SysOrgan extends Pojo {
 	/**
 	* 上级ID
