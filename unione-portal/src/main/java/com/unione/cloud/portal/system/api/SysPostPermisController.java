@@ -96,7 +96,7 @@ public class SysPostPermisController implements PojoFeignApi<SysPostPermis>{
 	
 
 	@Override
-	@Action(title="删除岗位权限",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
+	@Action(title="删除岗位权限",type = ActionType.Delete,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		

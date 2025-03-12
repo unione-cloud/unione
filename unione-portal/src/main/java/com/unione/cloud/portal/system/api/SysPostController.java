@@ -124,7 +124,7 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 	
 
 	@Override
-	@Action(title="删除岗位",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
+	@Action(title="删除岗位",type = ActionType.Delete,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PCONFIG})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		
