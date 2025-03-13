@@ -12,7 +12,7 @@ import lombok.Data;
 public class CodeLvsnDto extends SysCodeLvsn {
 
 
-    @Schema(name = "缓存key")
+    @Schema(title = "缓存key")
     private String cacheKey;
 
 }
