@@ -70,6 +70,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 	}
 
 	@Override
+	@Action(title="加载${modelName}列表",type = ActionType.Query,nolog = true)
 	public Results<List<${className}>> findByIds(Set<Long> ids) {
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
@@ -82,6 +83,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 
 
 	@Override
+	@Action(title="加载${modelName}详情",type = ActionType.Query,nolog = true)
 	public Results<${className}> detail(Long id) {
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
@@ -115,6 +117,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 
 
 //	@Override
+//  @Action(title="加载${modelName}子级",type = ActionType.Query,nolog = true)
 //	public Results<List<${className}>> children(Long pid){
 //		 //参数处理
 //		AssertUtil.service().notNull(pid, "参数pid不能为空");
