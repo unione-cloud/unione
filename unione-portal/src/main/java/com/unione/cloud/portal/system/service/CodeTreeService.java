@@ -19,7 +19,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.HpdlProcess;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.portal.system.dto.CodeLvsnDto;
+import com.unione.cloud.portal.system.model.SysCodeLvsn;
 import com.unione.cloud.portal.system.model.SysCodeTree;
 
 import cn.hutool.core.date.DateUtil;
@@ -41,17 +41,17 @@ public class CodeTreeService {
     private SessionService sessionService;
 
 
-    private static final String CODE_LVSN_CACHEKEY="SYS:CODE:LVSN";
+    private static final String CODE_LVSN_CACHEKEY="SYSCODE:LVSNINFO";
 	
-	private static final String CODE_LVSN_VALUE_CACHEKEY="SYS:CODE:LVSN:VALUE:%s";
+	private static final String CODE_LVSN_VALUE_CACHEKEY="SYSCODE:LVSNVALUE:%s";
 
-    private static final String CODE_TREE_CACHEKEY="SYS:CODE:TREE";
+    private static final String CODE_TREE_CACHEKEY="SYSCODE:TREE";
 
-	private static final String CODE_ERROR_CACHEKEY="SYS:CODE:ERROR:%s";
+	private static final String CODE_ERROR_CACHEKEY="SYSCODE:ERROR:%s";
 
-	private static final String CODE_TREE_LOCK_CACHEKEY="SYS:CODE:TREELOCK:%s";
+	private static final String CODE_TREE_LOCK_CACHEKEY="SYSCODE:TREELOCK:%s";
 
-	private static final String CODE_LVSN_LOCK_CACHEKEY="SYS:CODE:LVSNLOCK:%s";
+	private static final String CODE_LVSN_LOCK_CACHEKEY="SYSCODE:LVSNLOCK:%s";
 
 	/**
 	 * 	code tree 错误缓存时间，单位分钟，默认5分钟
@@ -89,18 +89,19 @@ public class CodeTreeService {
 		String[] fields = {"lvLen","currentMaxLv","currentLvsn"};
 		log.info("同步保存到db：开始");
 		keys.stream().forEach(key->{
-			CodeLvsnDto lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, key);
+			SysCodeLvsn lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, key);
 			if(lvsn!=null) {
 				log.info("保存code lvsn信息到db，sid:{},sn:{},key:{}",lvsn.getId(),lvsn.getTreeSn(),key);
 				lvsn.setLastUpdated(DateUtil.date());
 				
+				String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,key);
 				String format="%0"+lvsn.getLvLen()+"d";
-				List<Long> list = redisService.getList(lvsn.getCacheKey());
+				List<Long> list = redisService.getList(lvsnValueKey);
 				lvsn.setCurrentMaxLv(list.size());
 				StringBuffer buf=new StringBuffer();
 				for(Long v:list) {
 					if(v==null) {
-						log.warn("缓存数据异常，请及时处理,code lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsn.getCacheKey());
+						log.warn("缓存数据异常，请及时处理,code lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsnValueKey);
 						continue;
 					}
 					String str=toStr(v);
@@ -136,21 +137,22 @@ public class CodeTreeService {
 		AssertUtil.service().notNull(tree, "code tree层级树定义信息未找到,sn:"+sn);
 		
 		//0全局，1租户级，2机构级 
-		String lvsnRedisKey=this.buildLvsnRedistKey(tree);
-		CodeLvsnDto lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnRedisKey);
+		String lvsnInfoKey=this.buildLvsnRedistKey(tree);
+		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnInfoKey);
+		SysCodeLvsn lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnInfoKey);
 		AssertUtil.service().notNull(lvsn, "code lvsn层级信息未找到");
 		
-		log.info("保存lvsn信息到db，id:{},sn:{},key:{}",lvsn.getId(),lvsn.getTreeSn(),lvsnRedisKey);
+		log.info("保存lvsn信息到db，id:{},sn:{},key:{}",lvsn.getId(),lvsn.getTreeSn(),lvsnInfoKey);
 		lvsn.setLastUpdated(DateUtil.date());
 		
 		String format="%0"+lvsn.getLvLen()+"d";
 		String[] fields = {"lvLen","currentMaxLv","currentLvsn"};
-		List<Long> list = redisService.getList(lvsn.getCacheKey());
+		List<Long> list = redisService.getList(lvsnValueKey);
 		lvsn.setCurrentMaxLv(list.size());
 		StringBuffer buf=new StringBuffer();
 		for(Long v:list) {
 			if(v==null) {
-				log.error("缓存数据异常，请及时处理,lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsn.getCacheKey());
+				log.error("缓存数据异常，请及时处理,lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsnValueKey);
 				return;
 			}
 			String str=toStr(v);
@@ -162,10 +164,10 @@ public class CodeTreeService {
 		lvsn.setCurrentLvsn(buf.toString());
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(lvsn).field(fields));
-		log.info("保存lvsn信息到db，id:{},sn:{},key:{},result:{}",lvsn.getId(),lvsn.getTreeSn(),lvsnRedisKey,len);
+		log.info("保存lvsn信息到db，id:{},sn:{},key:{},result:{}",lvsn.getId(),lvsn.getTreeSn(),lvsnInfoKey,len);
 		if(len>0) {
 			// 回写到redis
-			redisService.putMap(CODE_LVSN_CACHEKEY, lvsnRedisKey, lvsn);
+			redisService.putMap(CODE_LVSN_CACHEKEY, lvsnInfoKey, lvsn);
 		}
 		
 		log.info("退出:保存指定的层级编码信息,tree sn:{}",sn);
@@ -182,16 +184,17 @@ public class CodeTreeService {
 		AssertUtil.service().notNull(tree, "code tree层级树定义信息未找到,sn:"+sn);
 		
 		//0全局，1租户级，2机构级 
-		String lvsnRedisKey=this.buildLvsnRedistKey(tree);
-		CodeLvsnDto lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnRedisKey);
+		String lvsnInfoKey=this.buildLvsnRedistKey(tree);
+		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnInfoKey);
+		SysCodeLvsn lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnInfoKey);
 		AssertUtil.service().notNull(lvsn, "code lvsn层级信息未找到");
 		
-		long size = redisService.getListOps().size(lvsn.getCacheKey());
+		long size = redisService.getListOps().size(lvsnValueKey);
 		AssertUtil.service().isTrue(lv>=0, "lv参数不能小于0")
 			      .isTrue(lv<=size, "目前最大层级为:"+size);
 		
 		// 重置redis缓存
-		redisService.putListValue(lvsn.getCacheKey(), lv, 0);
+		redisService.putListValue(lvsnValueKey, lv, 0);
 		
 		this.save2db(sn);
 		
@@ -201,15 +204,28 @@ public class CodeTreeService {
 
 	private String buildLvsnRedistKey(SysCodeTree tree) {
 		//0全局，1租户级，2机构级 
-		String lvsnRedisKey=tree.getSn();
+		String lvsnKey=tree.getSn();
 		if(tree.getTypes()!=null) {
 			if(tree.getTypes()==1) {
-				return String.format("TENANT:%s:%s", sessionService.getTenantId(),tree.getSn());
+				return String.format("TENANT:%s:%s", sessionService.getTenantId(),lvsnKey);
 			}else if(tree.getTypes()==2) {
-				return String.format("ORGAN:%s:%s", sessionService.getOrgId(),tree.getSn());
+				return String.format("ORGAN:%s:%s", sessionService.getOrgId(),lvsnKey);
 			}
 		}
-		return lvsnRedisKey;
+		return lvsnKey;
+	}
+
+	private String buildLvsnRedistKey(SysCodeLvsn tree) {
+		//0全局，1租户级，2机构级 
+		String lvsnKey=tree.getTreeSn();
+		if(tree.getLvType()!=null) {
+			if(tree.getLvType()==1) {
+				return String.format("TENANT:%s:%s", sessionService.getTenantId(),lvsnKey);
+			}else if(tree.getLvType()==2) {
+				return String.format("ORGAN:%s:%s", sessionService.getOrgId(),lvsnKey);
+			}
+		}
+		return lvsnKey;
 	}
 
 	private String toStr(long number) {
@@ -252,14 +268,13 @@ public class CodeTreeService {
 	 * @param tree
 	 * @param lvsn
 	 */
-	private void initLvsnValue(SysCodeTree tree,CodeLvsnDto lvsn) {
+	private void initLvsnValue(SysCodeTree tree,SysCodeLvsn lvsn) {
 		log.debug("进入:初始化层级编码value方法,tree sn:{}",tree.getSn());
 		//0全局，1租户级，2机构级 
 		String lvsnRedisKey=this.buildLvsnRedistKey(tree);
 		
 		// 层级信息处理
 		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnRedisKey);
-		lvsn.setCacheKey(lvsnValueKey);
 		int lvlen = (tree.getLvLen()!=null?tree.getLvLen():3);
 		String currentLvsn = StringUtils.trimToNull(lvsn.getCurrentLvsn());
 		if(currentLvsn!=null) {
@@ -397,13 +412,13 @@ public class CodeTreeService {
 	 * @param sn
 	 * @return
 	 */
-	public CodeLvsnDto loadLvsn(String sn) {
+	public SysCodeLvsn loadLvsn(String sn) {
 		log.debug("进入:加载code lvsn方法,sn:{}",sn);
-		CodeLvsnDto lsvn = this.loadLvsn(sn, 4);
+		SysCodeLvsn lsvn = this.loadLvsn(sn, 4);
 		log.debug("退出:加载code lvsn方法,sn:{},lsvn:{}",sn,lsvn);
 		return lsvn;
 	}
-	private CodeLvsnDto loadLvsn(String sn,int time) {
+	private SysCodeLvsn loadLvsn(String sn,int time) {
 		log.debug("进入:加载code lvsn方法,sn:{},time:{}",sn,time);
 		SysCodeTree tree = loadTree(sn);
 		AssertUtil.service().isTrue(time>0, "系统繁忙,请稍后再试").notNull(tree, "code tree层级树定义信息未找到,sn:"+sn);
@@ -411,7 +426,7 @@ public class CodeTreeService {
 		//0全局，1租户级，2机构级 
 		String lvsnRedisKey=this.buildLvsnRedistKey(tree);
 				
-		CodeLvsnDto lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnRedisKey);
+		SysCodeLvsn lvsn=redisService.getMap(CODE_LVSN_CACHEKEY, lvsnRedisKey);
 		log.info("从redis中获取缓存,redis key:{},lvsn sn:{},lvsn:{}",CODE_LVSN_CACHEKEY,lvsnRedisKey,lvsn);
 		
 		// 如果lvsn依然为空，则从数据库中加载
@@ -422,7 +437,7 @@ public class CodeTreeService {
 			
 			if(lock) {
 				log.debug("成功获取到全局key，开始从数据库中加载code lvsn,sn:{}",sn);
-				CodeLvsnDto tmp=new CodeLvsnDto();
+				SysCodeLvsn tmp=new SysCodeLvsn();
 				tmp.setTreeSn(sn);
 				tmp.setLvType(tree.getTypes());
 				if(tree.getTypes()!=null && tree.getTypes()!=0) {
@@ -437,7 +452,7 @@ public class CodeTreeService {
 				
 				if(tmp==null) {
 					log.warn("从数据库中加载code lvsn,sn:{}失败,自动生成记录",sn);
-					tmp=new CodeLvsnDto();
+					tmp=new SysCodeLvsn();
 					tmp.setTreeSn(sn);
 					tmp.setTreeId(tree.getId());
 					tmp.setLvType(tree.getTypes());
@@ -478,7 +493,7 @@ public class CodeTreeService {
 	 * 	设置code lvsn缓存
 	 * @param lvsn
 	 */
-	public void putLvsn(CodeLvsnDto lvsn) {
+	public void putLvsn(SysCodeLvsn lvsn) {
 		AssertUtil.service()
 			.notNull(lvsn, "code lvsn对象不能为空")
 			.isTrue(!StringUtils.isEmpty(lvsn.getTreeSn()), "code lvsn Tree编码不能为空");
@@ -508,18 +523,17 @@ public class CodeTreeService {
 		AssertUtil.service().isTrue(!StringUtils.isEmpty(sn), "code tree对象编码不能为空");
 		SysCodeTree tree = loadTree(sn);
 		//0全局，1租户级，2机构级 
-		String lvsnRedisKey=this.buildLvsnRedistKey(tree);
+		String lvsnInfoKey=this.buildLvsnRedistKey(tree);
 		
 		// 删除层级value信息
-		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnRedisKey);
+		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnInfoKey);
 		redisService.delete(lvsnValueKey);
 		
 		
-		log.debug("进入:移除code lvsn缓存方法,redis key:{},sn:{}",CODE_LVSN_CACHEKEY,lvsnRedisKey);
-		redisService.deleteMapHash(CODE_LVSN_CACHEKEY, lvsnRedisKey);
-		log.debug("退出:移除code lvsn缓存方法,redis key:{},sn:{}",CODE_LVSN_CACHEKEY,lvsnRedisKey);
+		log.debug("进入:移除code lvsn缓存方法,redis key:{},sn:{}",CODE_LVSN_CACHEKEY,lvsnInfoKey);
+		redisService.deleteMapHash(CODE_LVSN_CACHEKEY, lvsnInfoKey);
+		log.debug("退出:移除code lvsn缓存方法,redis key:{},sn:{}",CODE_LVSN_CACHEKEY,lvsnInfoKey);
 	}
-	
 
 
 	
@@ -541,25 +555,28 @@ public class CodeTreeService {
 	 */
 	public String generate(String tsn,String parent,int lv) {
 		log.debug("进入:生成一个层级编码方法,tree sn:{},parent:{},lv:{}",tsn,parent,lv);
-		CodeLvsnDto lvsnObj = loadLvsn(tsn);
+		SysCodeLvsn lvsnObj = loadLvsn(tsn);
 		AssertUtil.service().notNull(lvsnObj, "code lvsn层级编码对象未找到,sn:"+tsn);
 		
+		String lvsnInfoKey=buildLvsnRedistKey(lvsnObj);
+		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnInfoKey);
+
 		String format="%0"+lvsnObj.getLvLen()+"d";
-		long size = redisService.getListOps().size(lvsnObj.getCacheKey());
+		long size = redisService.getListOps().size(lvsnValueKey);
 		AssertUtil.service().isTrue(lv>=0, "lv参数不能小于0")
 			      .isTrue(lv<=size, "目前最大层级为:"+size);
 		
 		// 生产层级编码
-		String lvsn=redisService.doHpdl(new HpdlProcess<String>(lvsnObj.getCacheKey()) {
+		String lvsn=redisService.doHpdl(new HpdlProcess<String>(lvsnValueKey) {
 			@Override
 			public String process() {
 				log.info("生成层级编码:开始,tree sn:{},parent:{},lv:{}",tsn,parent,lv);
 				String sn=null;
-				Object ovalue = redisService.getListValue(lvsnObj.getCacheKey(), lv);
+				Object ovalue = redisService.getListValue(lvsnValueKey, lv);
 				Long lvalue=1L;
 				if(ovalue==null) {
 					sn=String.format(format, lvalue);
-					redisService.putListValue(lvsnObj.getCacheKey(), lvalue);
+					redisService.putListValue(lvsnValueKey, lvalue);
 				}else {
 					lvalue = Long.valueOf(ovalue.toString());
 					lvalue=lvalue+1;
@@ -567,7 +584,7 @@ public class CodeTreeService {
 					if(sn.length()<lvsnObj.getLvLen()) {
 						sn = String.format(format, 0).substring(0,lvsnObj.getLvLen()-sn.length())+sn;
 					}
-					redisService.putListValue(lvsnObj.getCacheKey(), lv, lvalue);
+					redisService.putListValue(lvsnValueKey, lv, lvalue);
 				}
 				log.info("生成层级编码:完成,tree sn:{},parent:{},lv:{},lvsn:{}",tsn,parent,lv,sn);
 				return String.format("%s%s", parent,sn);
