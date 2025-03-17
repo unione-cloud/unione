@@ -29,10 +29,10 @@ import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.security.secret.SecretService;
-import com.unione.cloud.portal.cache.UnioneCacheService;
 import com.unione.cloud.portal.system.dto.UserInfoDto;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysUser;
+import com.unione.cloud.portal.system.service.OrganService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.RandomUtil;
@@ -61,7 +61,7 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 	private SecretService secretService;
 	
 	@Autowired
-	private UnioneCacheService unioneCacheService;
+	private OrganService organService;
 	
 	
 	@Override
@@ -75,7 +75,7 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 		
 		Set<Long> orgIds = results.getBody().stream().map(u->u.getOrgId()).filter(i->i!=null)
 			.collect(Collectors.toSet());
-		Map<Long, SysOrgan> orgMap=unioneCacheService.loadOrgan(orgIds);
+		Map<Long, SysOrgan> orgMap=organService.loadOrgan(orgIds);
 		
 		// 数据渲染
 		results.getBody().stream().forEach(row->{

@@ -1,4 +1,4 @@
-package com.unione.cloud.portal.cache;
+package com.unione.cloud.portal.system.service;
 
 import java.time.Duration;
 import java.util.List;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class UnioneCacheService {
+public class OrganService {
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -41,9 +41,9 @@ public class UnioneCacheService {
 	 */
 	@Cached(name="SYS:ORGAN",key = "#id",expire = 600,cacheType = CacheType.LOCAL,cacheNullValue = true)
 	public SysOrgan loadOrgan(Long id) {
-		log.debug("进入：加载机构信息方法，缓存未命中，从db中加载");
+		log.debug("进入：加载机构信息方法，缓存未命中，从db中加载,id:{}",id);
 		SysOrgan organ = dataBaseDao.findById(SqlBuilder.build(SysOrgan.class).id(id));
-		log.debug("退出：加载机构信息方法，缓存未命中，从db中加载,result:{}",organ);
+		log.debug("退出：加载机构信息方法，缓存未命中，从db中加载,id:{},result:{}",id,organ);
 		return organ;
 	}
 	

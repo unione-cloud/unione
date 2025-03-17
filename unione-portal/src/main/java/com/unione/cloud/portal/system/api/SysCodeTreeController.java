@@ -2,7 +2,9 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -20,9 +22,13 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.portal.system.model.SysCodeLvsn;
+import com.unione.cloud.portal.system.dto.CodeLvsnDto;
 import com.unione.cloud.portal.system.model.SysCodeTree;
+import com.unione.cloud.portal.system.model.SysOrgan;
+import com.unione.cloud.portal.system.model.SysTenant;
 import com.unione.cloud.portal.system.service.CodeTreeService;
+import com.unione.cloud.portal.system.service.OrganService;
+import com.unione.cloud.portal.system.service.TenantService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -46,6 +52,12 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 
 	@Autowired
 	private CodeTreeService codeTreeService;
+
+	@Autowired
+	private TenantService tenantService;
+
+	@Autowired
+	private OrganService organService;
 	
 	
 	@Override
@@ -63,18 +75,45 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 
 	@PostMapping("/lvsn")
 	@Action(title="查询层级编码",type = ActionType.Query,nolog = true)
-	public Results<List<SysCodeLvsn>> lvsn(@RequestBody Params<SysCodeLvsn> params) {
+	public Results<List<CodeLvsnDto>> lvsn(@RequestBody Params<CodeLvsnDto> params) {
 		AssertUtil.service()
 			.notNull(params.getBody(),"请求参数body不能为空")
 			.notNull(params.getBody().getTreeId(), "参数 treeId 不能为空");
 				
-		Results<List<SysCodeLvsn>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<CodeLvsnDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 
-		results.getBody().forEach(item -> {
-			codeTreeService.readLvsn(item);
-		});
+		if(results.getBody().size()>0){
+			// 加载树信息
+			SysCodeTree tree = codeTreeService.loadTree(results.getBody().get(0).getTreeSn());
+			
+			// 获取租户信息
+			Set<Long> tids = results.getBody().stream().map(CodeLvsnDto::getTenantId).collect(Collectors.toSet());
+			Map<Long,SysTenant> tmap = tenantService.loadOrgan(tids);
+			// 获取组织信息
+			Set<Long> oids = results.getBody().stream().map(CodeLvsnDto::getOrgId).collect(Collectors.toSet());
+			Map<Long,SysOrgan> omap = organService.loadOrgan(oids);
+
+			results.getBody().forEach(item -> {
+				codeTreeService.readLvsn(item);
+				//设置树信息
+				if(tree!=null){
+					item.setAppName(tree.getAppName());
+					item.setTreeTitle(tree.getTitle());
+				}
+				//设置租户信息
+				SysTenant tenant = tmap.get(item.getTenantId());
+				if(tenant!=null){
+					item.setTenantName(tenant.getName());
+				}
+				//设置组织信息
+				SysOrgan organ = omap.get(item.getOrgId());
+				if(organ!=null){
+					item.setOrgName(organ.getName());
+				}
+			});
+		}
 		
 		return results;
 	}
