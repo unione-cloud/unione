@@ -96,15 +96,15 @@ public class CodeTreeService {
 				
 				String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,key);
 				String format="%0"+lvsn.getLvLen()+"d";
-				List<Long> list = redisService.getList(lvsnValueKey);
+				List<Object> list = redisService.getList(lvsnValueKey);
 				lvsn.setCurrentMaxLv(list.size());
 				StringBuffer buf=new StringBuffer();
-				for(Long v:list) {
+				for(Object v:list) {
 					if(v==null) {
 						log.warn("缓存数据异常，请及时处理,code lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsnValueKey);
 						continue;
 					}
-					String str=toStr(v);
+					String str=toStr(Long.parseLong(v.toString()));
 					if(str.length()<lvsn.getLvLen()) {
 						str = String.format(format, 0).substring(0,lvsn.getLvLen()-str.length())+str;
 					}
@@ -147,15 +147,15 @@ public class CodeTreeService {
 		
 		String format="%0"+lvsn.getLvLen()+"d";
 		String[] fields = {"lvLen","currentMaxLv","currentLvsn"};
-		List<Long> list = redisService.getList(lvsnValueKey);
+		List<Object> list = redisService.getList(lvsnValueKey);
 		lvsn.setCurrentMaxLv(list.size());
 		StringBuffer buf=new StringBuffer();
-		for(Long v:list) {
+		for(Object v:list) {
 			if(v==null) {
 				log.error("缓存数据异常，请及时处理,lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsnValueKey);
 				return;
 			}
-			String str=toStr(v);
+			String str=toStr(Long.parseLong(v.toString()));
 			if(str.length()<lvsn.getLvLen()) {
 				str = String.format(format, 0).substring(0,lvsn.getLvLen()-str.length())+str;
 			}
@@ -488,6 +488,28 @@ public class CodeTreeService {
 		return lvsn;
 	}
 	
+	public void readLvsn(SysCodeLvsn lvsn) {
+		AssertUtil.service().notNull(lvsn, "code lvsn对象不能为空");
+		String lvsnInfoKey=this.buildLvsnRedistKey(lvsn);
+		String lvsnValueKey=String.format(CODE_LVSN_VALUE_CACHEKEY,lvsnInfoKey);
+		List<Object> list = redisService.getList(lvsnValueKey);
+		lvsn.setCurrentMaxLv(list.size());
+
+		String format="%0"+lvsn.getLvLen()+"d";
+		StringBuffer buf=new StringBuffer();
+		for(Object v:list) {
+			if(v==null) {
+				log.error("缓存数据异常，请及时处理,lvsn:{},redis key:{}",lvsn.getTreeSn(),lvsnValueKey);
+				return;
+			}
+			String str=toStr(Long.parseLong(v.toString()));
+			if(str.length()<lvsn.getLvLen()) {
+				str = String.format(format, 0).substring(0,lvsn.getLvLen()-str.length())+str;
+			}
+			buf.append(str);
+		}
+		lvsn.setCurrentLvsn(buf.toString());
+	}
 	
 	/**
 	 * 	设置code lvsn缓存

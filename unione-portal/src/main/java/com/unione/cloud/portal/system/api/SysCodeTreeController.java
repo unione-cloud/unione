@@ -20,7 +20,6 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
-import com.unione.cloud.portal.system.dto.CodeLvsnParam;
 import com.unione.cloud.portal.system.model.SysCodeLvsn;
 import com.unione.cloud.portal.system.model.SysCodeTree;
 import com.unione.cloud.portal.system.service.CodeTreeService;
@@ -72,6 +71,10 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 		Results<List<SysCodeLvsn>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+
+		results.getBody().forEach(item -> {
+			codeTreeService.readLvsn(item);
+		});
 		
 		return results;
 	}
@@ -138,11 +141,5 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 		return results;
 	}
 
-	@PostMapping("/generate")
-	@Action(title="生成层级编码",type = ActionType.Query,nolog = true)
-	public Results<String> generate(@RequestBody CodeLvsnParam param){
-		String lvsn = codeTreeService.generate(param.getSn(), param.getParent(), param.getLv());
-		return Results.success(lvsn);
-	}
 
 }

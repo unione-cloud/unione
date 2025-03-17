@@ -42,9 +42,9 @@ public class SysCodeTree extends Pojo {
 	@Schema(title="编码",description="长度为：20")
 	private String sn;
 	/**
-	* 类型，字典UIDTREETYPE 0全局，1租户级，2机构级
+	* 类型，字典CODETREETYPE 0全局，1租户级，2机构级
 	*/
-	@Schema(title="类型，字典UIDTREETYPE 0全局，1租户级，2机构级",description="长度为：10")
+	@Schema(title="类型，字典CODETREETYPE 0全局，1租户级，2机构级",description="长度为：10")
 	private Integer types;
 	/**
 	* 编码长度，默认3位，最小3位

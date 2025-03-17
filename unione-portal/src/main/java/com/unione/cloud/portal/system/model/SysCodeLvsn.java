@@ -37,9 +37,9 @@ public class SysCodeLvsn extends Pojo {
 	@Schema(title="树编码",description="长度为：20")
 	private String treeSn;
 	/**
-	* 编码类型，字典UIDTREETYPE 0全局，1租户级，2机构级
+	* 编码类型，字典CODETREETYPE 0全局，1租户级，2机构级
 	*/
-	@Schema(title="编码类型",description="字典UIDTREETYPE 0全局，1租户级，2机构级")
+	@Schema(title="编码类型",description="编码类型，字典CODETREETYPE 0全局，1租户级，2机构级")
 	private Integer lvType;
 	/**
 	* 编码长度，默认3位，最小3位
