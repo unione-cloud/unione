@@ -6,7 +6,7 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -48,19 +48,19 @@ public class SysGroupMember extends Pojo {
 	/**
 	* 成员机构名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="成员机构名称",description="长度为：255")
 	private String orgName;
 	/**
 	* 成员标题
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="成员标题",description="长度为：100")
 	private String name;
 	/**
 	* 成员编码
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="成员编码",description="长度为：20")
 	private String sn;
 	/**
@@ -90,7 +90,7 @@ public class SysGroupMember extends Pojo {
 	/**
 	* 成员描述
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="成员描述",description="长度为：1000")
 	private String descs;
 

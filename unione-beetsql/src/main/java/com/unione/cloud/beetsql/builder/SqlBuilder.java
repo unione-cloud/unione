@@ -18,13 +18,13 @@ import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.SQLManager;
 
 import com.unione.cloud.beetsql.Sort;
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataSensitive;
-import com.unione.cloud.beetsql.annotation.UniQueryAction;
-import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
-import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
+import com.unione.cloud.beetsql.annotation.DataSensitive;
+import com.unione.cloud.beetsql.annotation.KeyWords;
+import com.unione.cloud.beetsql.annotation.QueryAction;
+import com.unione.cloud.beetsql.annotation.QueryIgnore;
+import com.unione.cloud.beetsql.annotation.QueryIgnore.QueryType;
 import com.unione.cloud.beetsql.utils.SensitiveUtil;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -278,12 +278,12 @@ public class SqlBuilder<T> {
 				field.setType(pd.getPropertyType().getSimpleName());
 				
 				// 如果设置了数据脱敏
-				UniDataSensitive dataSensitive=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniDataSensitive.class);
+				DataSensitive dataSensitive=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),DataSensitive.class);
 				if(dataSensitive!=null && "String".contentEquals(field.getType())) {
 					field.setSensitive(SqlSensitive.build(dataSensitive));
 				}
 				
-				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryIgnore.class);
+				QueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),QueryIgnore.class);
 				field.setQueryIgnore(ignorQuery);
 				
 				if(!fieldLists.isEmpty()) {
@@ -359,14 +359,14 @@ public class SqlBuilder<T> {
 				}
 				
 				
-				UniQueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryIgnore.class);
+				QueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),QueryIgnore.class);
 				if(ignorQuery!=null) {
 					// 该字段已设置Ignore，忽略
 					return;
 				}
 				
 				// 关键字搜索解析
-				UniQueryKeyWord keywordQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryKeyWord.class);
+				KeyWords keywordQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),KeyWords.class);
 				if(keywordQuery!=null) {
 					SqlCondition keyword=new SqlCondition();
 					keyword.setFun(SqlFun.OR);
@@ -376,7 +376,7 @@ public class SqlBuilder<T> {
 				}
 				
 				// 常规搜索解析
-				UniQueryAction actionQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),UniQueryAction.class);
+				QueryAction actionQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),QueryAction.class);
 				SqlAction action=SqlAction.EQ;
 				if(actionQuery!=null) {
 					action=actionQuery.value();
@@ -613,8 +613,8 @@ public class SqlBuilder<T> {
 		params.put("query", query);
 		
 		// 数据权限处理
-		DataPermis dataPermis=this.loadDataPermis();
-		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
+		PermisRule dataPermis=this.loadDataPermis();
+		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
 			SessionService sessionService=SessionHolder.build();
 			switch (dataPermis) {
 			case TENANTID:
@@ -664,8 +664,8 @@ public class SqlBuilder<T> {
 			whereSql=whereSql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
 		}
 		
-		DataPermis dataPermis=this.loadDataPermis();
-		if(dataPermis!=null && !dataPermis.equals(DataPermis.ALL)) {
+		PermisRule dataPermis=this.loadDataPermis();
+		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
 			switch (dataPermis) {
 			case TENANTID:
 				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
@@ -749,14 +749,17 @@ public class SqlBuilder<T> {
 		return String.format("\n-- @if(varNotNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
 	}
 	
-	private DataPermis loadDataPermis() {
+	private PermisRule loadDataPermis() {
 		if(this.dataPermis==null && !(this.data instanceof Map)) {
-			UniDataPermis dataPermis = this.data.getClass().getAnnotation(UniDataPermis.class);
+			DataPermis dataPermis = this.data.getClass().getAnnotation(DataPermis.class);
 			if(dataPermis!=null) {
-				this.dataPermis=dataPermis.value();
+				this.dataPermis=dataPermis;
 			}
 		}
-		return this.dataPermis;
+		if(this.dataPermis!=null) {
+			return this.dataPermis.value();	
+		}
+		return null;
 	}
 	
 	/**

@@ -17,15 +17,14 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.beetsql.builder.SqlType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
-import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -830,8 +829,8 @@ public class DataBaseDao {
 
 	
 	private void setDataPermis(Object obj) {
-		UniDataPermis dataPermis = obj.getClass().getAnnotation(UniDataPermis.class);
-		if(dataPermis!=null && !dataPermis.value().equals(DataPermis.ALL)) {
+		DataPermis dataPermis = obj.getClass().getAnnotation(DataPermis.class);
+		if(dataPermis!=null && !dataPermis.value().equals(PermisRule.ALL)) {
 			SessionService sessionService=SessionHolder.build();
 			switch (dataPermis.value()) {
 			case TENANTID:

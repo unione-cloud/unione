@@ -4,7 +4,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -49,13 +49,13 @@ public class BaseDict extends Pojo {
 	/**
 	* 应用名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="应用名称",description="长度为：50")
 	private String appName;
 	/**
 	* 字典名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="字典名称",description="长度为：100")
 	@NotEmpty(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典名称不能为空",groups= {Validator.save.class,Validator.update.class})
@@ -76,7 +76,7 @@ public class BaseDict extends Pojo {
 	/**
 	* 字典值
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="字典值",description="长度为：1000")
 	@NotEmpty(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "字典值不能为空",groups= {Validator.save.class,Validator.update.class})

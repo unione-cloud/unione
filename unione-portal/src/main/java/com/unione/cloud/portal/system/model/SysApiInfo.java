@@ -2,7 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,19 +40,19 @@ public class SysApiInfo extends Pojo {
 	/**
 	* 名称（英文名称，一个应用中保持唯一）
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="名称（英文名称，一个应用中保持唯一）",description="长度为：50")
 	private String name;
 	/**
 	* 标题
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="标题",description="长度为：100")
 	private String title;
 	/**
 	* URL地址,/开头，不包含应用ctx
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="URL地址,/开头，不包含应用ctx",description="长度为：250")
 	private String url;
 	/**
@@ -93,7 +93,7 @@ public class SysApiInfo extends Pojo {
 	/**
 	* 描述
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="描述",description="长度为：500")
 	private String descs;
 	/**

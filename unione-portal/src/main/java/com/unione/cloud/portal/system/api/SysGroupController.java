@@ -79,7 +79,7 @@ public class SysGroupController implements TreeFeignApi<SysGroup>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"parentId","name","sn","level","types","iconFont","iconPic","descs","isLeaf","ordered","status"};
+			String[] fields = {"parentId","name","sn","types","iconFont","iconPic","descs","isLeaf","ordered","status"};
 			SqlBuilder<SysGroup> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}

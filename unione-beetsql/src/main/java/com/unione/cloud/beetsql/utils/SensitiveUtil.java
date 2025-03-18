@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unione.cloud.beetsql.annotation.UniDataSensitive.DataSensitive;
+import com.unione.cloud.beetsql.annotation.DataSensitive.SensitiveRule;
 import com.unione.cloud.beetsql.builder.SqlSensitive;
 import com.unione.cloud.core.security.secret.SecretService;
 
@@ -38,34 +38,34 @@ public class SensitiveUtil {
 		}
 		
 		// 数据加密
-		if(DataSensitive.ENCRYPT.name().equals(sensitive.getType())) {
+		if(SensitiveRule.ENCRYPT.name().equals(sensitive.getType())) {
 			return secretService.decrypt(value);
 		}
 		
 		// 正则表达式REGEX、TEL、IDCARD脱敏
-		if(DataSensitive.REGEX.name().equals(sensitive.getType()) || 
-				DataSensitive.TEL.name().equals(sensitive.getType()) ||
-				DataSensitive.IDCARD.name().equals(sensitive.getType())) {
+		if(SensitiveRule.REGEX.name().equals(sensitive.getType()) || 
+				SensitiveRule.TEL.name().equals(sensitive.getType()) ||
+				SensitiveRule.IDCARD.name().equals(sensitive.getType())) {
 			return value.replaceAll(sensitive.getExpress(), sensitive.getReplace());
 		}
 		
 		// 姓名UNAME脱敏
-		if(DataSensitive.UNAME.name().equals(sensitive.getType())) {
+		if(SensitiveRule.UNAME.name().equals(sensitive.getType())) {
 			return processUName(value);
 		}
 
 		// 车牌号CARLICENSE脱敏
-		if(DataSensitive.CARLICENSE.name().equals(sensitive.getType())) {
+		if(SensitiveRule.CARLICENSE.name().equals(sensitive.getType())) {
 			return DesensitizedUtil.carLicense(value);
 		}
 
 		// 银行号BANKCARD脱敏
-		if(DataSensitive.BANKCARD.name().equals(sensitive.getType())) {
+		if(SensitiveRule.BANKCARD.name().equals(sensitive.getType())) {
 			return DesensitizedUtil.bankCard(value);
 		}
 
 		// 地址ADDRESS脱敏
-		if(DataSensitive.ADDRESS.name().equals(sensitive.getType())) {
+		if(SensitiveRule.ADDRESS.name().equals(sensitive.getType())) {
 			return DesensitizedUtil.address(value, StringUtils.isEmpty(sensitive.getExpress())?10:Integer.parseInt(sensitive.getExpress()));
 		}
 		

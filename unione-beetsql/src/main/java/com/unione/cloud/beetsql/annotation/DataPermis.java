@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface UniDataPermis {
+public @interface DataPermis {
 	
-	DataPermis value() default DataPermis.TENANTID;
+	PermisRule value() default PermisRule.TENANTID;
 	
-	public static enum DataPermis{
+	public static enum PermisRule{
 		ALL,		//	所有权限：不启用数据权限
 		TENANTID,	// 	租户权限：默认情况下可以查看自己当前租户的数据
 		ORGANID,	// 	机构权限：默认情况下可以查看自己当前机构的数据

@@ -78,7 +78,7 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"parentId","name","alias","types","areaCode","areaLabel","sn","level","busiMain","busiScop","addr","tel","levels","isLeaf","ordered","status","descs"};
+			String[] fields = {"parentId","name","alias","types","areaCode","areaLabel","sn","busiMain","busiScop","addr","tel","levels","isLeaf","ordered","status","descs"};
 			SqlBuilder<SysOrgan> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}

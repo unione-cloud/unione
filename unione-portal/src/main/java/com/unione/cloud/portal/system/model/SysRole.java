@@ -2,7 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,13 +30,13 @@ public class SysRole extends Pojo {
 	/**
 	* 名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="名称",description="长度为：100")
 	private String name;
 	/**
 	* 编码
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="编码",description="长度为：20")
 	private String sn;
 	/**
@@ -52,7 +52,7 @@ public class SysRole extends Pojo {
 	/**
 	* 描述
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="描述",description="长度为：500")
 	private String descs;
 

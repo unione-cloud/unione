@@ -2,7 +2,9 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
+import com.unione.cloud.beetsql.annotation.QueryAction;
+import com.unione.cloud.beetsql.builder.SqlAction;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,15 +37,26 @@ public class SysPost extends Pojo {
 	/**
 	* 岗位名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="岗位名称",description="长度为：200")
 	private String name;
 	/**
-	* 岗位编码，携带层级的岗位编码
+	* 岗位编码
 	*/
-	@UniQueryKeyWord
-	@Schema(title="岗位编码，携带层级的岗位编码",description="长度为：50")
+	@KeyWords
+	@Schema(title="岗位编码",description="长度为：50")
 	private String sn;
+	/**
+	* 层级编码：自动生成
+	*/
+	@QueryAction(SqlAction.LIKER)
+	@Schema(title="层级编码",description="层级编码：自动生成，长度为：100")
+	private String lvSn;
+	/**
+	* 所在层级
+	*/
+	@Schema(title="所在层级",description="长度为：10")
+	private Integer lvNo;
 	/**
 	* 岗位类型，字典POSTTYPES 9其他
 	*/
@@ -67,7 +80,7 @@ public class SysPost extends Pojo {
 	/**
 	* 岗位说明
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="岗位说明",description="长度为：1000")
 	private String descs;
 	/**

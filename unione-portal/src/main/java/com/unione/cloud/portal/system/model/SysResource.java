@@ -2,7 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,19 +40,19 @@ public class SysResource extends Pojo {
 	/**
 	* 资源名称/编码，唯一
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="资源名称/编码，唯一",description="长度为：100")
 	private String name;
 	/**
 	* 资源标题
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="资源标题",description="长度为：100")
 	private String title;
 	/**
 	* 资源别名（授权树区别重复菜单名称）
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="资源别名（授权树区别重复菜单名称）",description="长度为：100")
 	private String alias;
 	/**
@@ -63,7 +63,7 @@ public class SysResource extends Pojo {
 	/**
 	* 资源URL地址
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="资源URL地址",description="长度为：250")
 	private String url;
 	/**
@@ -129,7 +129,7 @@ public class SysResource extends Pojo {
 	/**
 	* 描述
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="描述",description="长度为：500")
 	private String descs;
 	/**

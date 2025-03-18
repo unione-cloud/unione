@@ -2,9 +2,11 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.KeyWords;
+import com.unione.cloud.beetsql.annotation.QueryAction;
+import com.unione.cloud.beetsql.builder.SqlAction;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,7 +30,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="sys_group")
 @SqlResource("system.SysGroup")
-@UniDataPermis(DataPermis.ORGANID)
+@DataPermis(PermisRule.ORGANID)
 public class SysGroup extends Pojo {
 	/**
 	* 上级分组ID
@@ -38,20 +40,26 @@ public class SysGroup extends Pojo {
 	/**
 	* 分组名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="分组名称",description="长度为：200")
 	private String name;
 	/**
-	* 分组编码，携带层级的编码
+	* 分组编码
 	*/
-	@UniQueryKeyWord
-	@Schema(title="分组编码，携带层级的编码",description="长度为：30")
+	@KeyWords
+	@Schema(title="分组编码",description="长度为：30")
 	private String sn;
+	/**
+	* 层级编码：自动生成
+	*/
+	@QueryAction(SqlAction.LIKER)
+	@Schema(title="层级编码",description="层级编码：自动生成，长度为：100")
+	private String lvSn;
 	/**
 	* 所在层级
 	*/
 	@Schema(title="所在层级",description="长度为：10")
-	private Integer level;
+	private Integer lvNo;
 	/**
 	* 分组类型，字典GROUPTYPES 1用户分组，9其他
 	*/
@@ -70,7 +78,7 @@ public class SysGroup extends Pojo {
 	/**
 	* 分组说明
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="分组说明",description="长度为：1000")
 	private String descs;
 	/**

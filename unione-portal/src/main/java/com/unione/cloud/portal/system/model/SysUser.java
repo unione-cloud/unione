@@ -9,11 +9,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
-import com.unione.cloud.beetsql.annotation.UniQueryIgnore;
-import com.unione.cloud.beetsql.annotation.UniQueryIgnore.QueryType;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.QueryIgnore;
+import com.unione.cloud.beetsql.annotation.QueryIgnore.QueryType;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -52,7 +51,7 @@ public class SysUser extends Pojo {
 	/**
 	* 登录帐号
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="登录帐号",description="长度为：100")
 	@NotNull(message = "登录帐号不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "登录帐号不能为空",groups = {Validator.save.class})
@@ -61,7 +60,7 @@ public class SysUser extends Pojo {
 	* 用户密码
 	*/
 	@JsonProperty(access = Access.WRITE_ONLY)
-	@UniQueryIgnore(QueryType.SELECT_LIST)
+	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="用户密码",description="长度为：200")
 	@NotBlank(message = "用户密码不能为空",groups = {Validator.save.class})
 	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
@@ -70,19 +69,19 @@ public class SysUser extends Pojo {
 	* 密码加密盐
 	*/
 	@JsonIgnore
-	@UniQueryIgnore(QueryType.SELECT_LIST)
+	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="密码加密盐",description="长度为：50")
 	private String pwdSalt;
 	/**
 	* 真实姓名
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="真实姓名",description="长度为：50")
 	private String realName;
 	/**
 	* 别名
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="别名",description="长度为：50")
 	private String aliasName;
 	/**
@@ -115,19 +114,19 @@ public class SysUser extends Pojo {
 	/**
 	* 联系电话
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="联系电话",description="长度为：30")
 	private String tel;
 	/**
 	* 密保问题
 	*/
-	@UniQueryIgnore(QueryType.SELECT_LIST)
+	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="密保问题",description="长度为：200")
 	private String securityQuestion;
 	/**
 	* MFA设备标识
 	*/
-	@UniQueryIgnore(QueryType.SELECT_LIST)
+	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="MFA设备标识",description="长度为：100")
 	private String sucurityMfa;
 	/**

@@ -2,9 +2,9 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import com.unione.cloud.beetsql.annotation.UniDataPermis;
-import com.unione.cloud.beetsql.annotation.UniDataPermis.DataPermis;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
+import com.unione.cloud.beetsql.annotation.QueryAction;
+import com.unione.cloud.beetsql.builder.SqlAction;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,13 +38,13 @@ public class SysOrgan extends Pojo {
 	/**
 	* 企业/机构名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="企业/机构名称",description="长度为：250")
 	private String name;
 	/**
 	* 企业/机构别名
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="企业/机构别名",description="长度为：250")
 	private String alias;
 	/**
@@ -58,16 +58,22 @@ public class SysOrgan extends Pojo {
 	@Schema(title="区域label，eg：广州市->天河区",description="长度为：200")
 	private String areaLabel;
 	/**
-	* 编码，携带层级属性的机构编码，不能为空，唯一
+	* 机构编码，不能为空，唯一
 	*/
-	@UniQueryKeyWord
-	@Schema(title="编码，携带层级属性的机构编码，不能为空，唯一",description="长度为：100")
+	@KeyWords
+	@Schema(title="机构编码",description="机构编码，不能为空，唯一，长度为：100")
 	private String sn;
+	/**
+	* 层级编码：自动生成
+	*/
+	@QueryAction(SqlAction.LIKER)
+	@Schema(title="层级编码",description="层级编码：自动生成，长度为：100")
+	private String lvSn;
 	/**
 	* 所在层级
 	*/
 	@Schema(title="所在层级",description="长度为：10")
-	private Integer level;
+	private Integer lvNo;
 	/**
 	* 主营业务
 	*/
@@ -86,7 +92,7 @@ public class SysOrgan extends Pojo {
 	/**
 	* 联系电话
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="联系电话",description="长度为：50")
 	private String tel;
 	/**
@@ -112,7 +118,7 @@ public class SysOrgan extends Pojo {
 	/**
 	* 说明
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="说明",description="长度为：500")
 	private String descs;
 

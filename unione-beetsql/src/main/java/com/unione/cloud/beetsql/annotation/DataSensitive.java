@@ -12,13 +12,13 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface UniDataSensitive {
+public @interface DataSensitive {
 	
 	/**
 	 * 脱敏方式
 	 * @return
 	 */
-	DataSensitive value() default DataSensitive.ENCRYPT;
+	SensitiveRule value() default SensitiveRule.ENCRYPT;
 	
 	/**
 	 * 脱敏匹配表达式 
@@ -32,7 +32,7 @@ public @interface UniDataSensitive {
 	 */
 	String replace();
 
-	public static enum DataSensitive{
+	public static enum SensitiveRule{
 		// 正则表达式脱敏，配合自定义表达式
 		REGEX,
 		// 预设方式，手机号tel
@@ -47,8 +47,8 @@ public @interface UniDataSensitive {
 
 		private String express;
 		private String replace;
-		private DataSensitive(){}
-		private DataSensitive(String express,String replace){
+		private SensitiveRule(){}
+		private SensitiveRule(String express,String replace){
 			this.express=express;
 			this.replace=replace;
 		}

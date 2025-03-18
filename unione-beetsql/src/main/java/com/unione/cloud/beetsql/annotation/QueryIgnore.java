@@ -5,12 +5,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.unione.cloud.beetsql.builder.SqlAction;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD})
-public @interface UniQueryAction {
+public @interface QueryIgnore {
 	
-	SqlAction value() default SqlAction.EQ;
+	QueryType value() default QueryType.SELECT;
+	
+	public static enum QueryType{
+		SELECT,SELECT_LIST,SELECT_ONE
+	}
 	
 }

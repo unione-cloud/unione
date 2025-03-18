@@ -6,7 +6,7 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.unione.cloud.beetsql.annotation.UniQueryKeyWord;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,19 +34,19 @@ public class SysTenant extends Pojo {
 	/**
 	* 租户标识
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="租户标识",description="长度为：50")
 	private String sn;
 	/**
 	* 租户名称
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="租户名称",description="长度为：100")
 	private String name;
 	/**
 	* 租户域名,系统访问二级域名
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="租户域名,系统访问二级域名",description="长度为：30")
 	private String domain;
 	/**
@@ -124,7 +124,7 @@ public class SysTenant extends Pojo {
 	/**
 	* 租户备注
 	*/
-	@UniQueryKeyWord
+	@KeyWords
 	@Schema(title="租户备注",description="长度为：1000")
 	private String descs;
 
