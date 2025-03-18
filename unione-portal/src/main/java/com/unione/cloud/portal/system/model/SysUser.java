@@ -62,8 +62,6 @@ public class SysUser extends Pojo {
 	@JsonProperty(access = Access.WRITE_ONLY)
 	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="用户密码",description="长度为：200")
-	@NotBlank(message = "用户密码不能为空",groups = {Validator.save.class})
-	@NotEmpty(message = "用户密码不能为空",groups = {Validator.save.class})
 	private String pwdText;
 	/**
 	* 密码加密盐

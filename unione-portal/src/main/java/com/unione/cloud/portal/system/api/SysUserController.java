@@ -95,6 +95,7 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 		// 参数处理
 		int len = 0;
 		if(entity.getId()==null) {
+			AssertUtil.service().notNull(entity, new String[]{"pwdText"},"属性%s不能为空");
 			entity.setPwdSalt(RandomUtil.randomString(16));
 			entity.setPwdText(secretService.decrypt(entity.getPwdText()));
 			String pwd = SmUtil.sm4(entity.getPwdSalt().getBytes()).encryptHex(entity.getPwdText());
