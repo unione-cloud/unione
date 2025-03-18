@@ -25,6 +25,7 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.model.SysOrgan;
+import com.unione.cloud.portal.system.service.CodeTreeService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -46,6 +47,10 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private CodeTreeService codeTreeService;
+
 	
 	@Override
 	@Action(title="查询机构",type = ActionType.Query)
@@ -65,8 +70,9 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 	public Results<Long> save(@Validated(Validator.save.class) SysOrgan entity) {
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
+		SysOrgan parent = null;
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			SysOrgan parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
+			parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);
@@ -76,6 +82,13 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 
 		int len = 0;
 		if(entity.getId()==null) {
+			if(parent==null) {
+				entity.setLvNo(0);
+				entity.setLvSn(codeTreeService.generate("SYSORGAN"));
+			}else{
+				entity.setLvNo(parent.getLvNo()+1);
+				entity.setLvSn(codeTreeService.generate("SYSORGAN",parent.getLvSn(),parent.getLvNo()+1));
+			}
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"parentId","name","alias","types","areaCode","areaLabel","sn","busiMain","busiScop","addr","tel","levels","isLeaf","ordered","status","descs"};

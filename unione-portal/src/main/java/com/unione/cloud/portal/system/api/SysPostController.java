@@ -25,6 +25,7 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.model.SysPost;
+import com.unione.cloud.portal.system.service.CodeTreeService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -46,6 +47,10 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private CodeTreeService codeTreeService;
+	
 	
 	
 	@Override
@@ -67,8 +72,9 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 	public Results<Long> save(@Validated(Validator.save.class) SysPost entity) {
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
+		SysPost parent = null;
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			SysPost parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
+			parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);
@@ -78,6 +84,13 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 
 		int len = 0;
 		if(entity.getId()==null) {
+			if(parent==null) {
+				entity.setLvNo(0);
+				entity.setLvSn(codeTreeService.generate("SYSORGAN"));
+			}else{
+				entity.setLvNo(parent.getLvNo()+1);
+				entity.setLvSn(codeTreeService.generate("SYSORGAN",parent.getLvSn(),parent.getLvNo()+1));
+			}
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"orgId","parentId","name","sn","types","iconFont","iconPic","duty","descs","isLeaf","ordered","status"};
