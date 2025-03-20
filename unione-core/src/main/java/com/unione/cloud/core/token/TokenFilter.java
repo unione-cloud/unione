@@ -171,17 +171,6 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	}
 	
 
-	
-
-	
-	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			@Nullable ModelAndView modelAndView) throws Exception {
-		response.setHeader("_unione_actionid", SessionHolder.build().getVar("_unione_actionid"));
-		response.setHeader("_unione_requestid", SessionHolder.build().getVar("_unione_requestid"));
-	}
-
-
 
 	private void writeResult(ServletResponse servletResponse){
         if(servletResponse instanceof HttpServletResponse){
