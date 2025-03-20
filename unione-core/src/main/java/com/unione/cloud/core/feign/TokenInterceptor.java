@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionService;
 
 import cn.hutool.crypto.digest.DigestUtil;
@@ -54,7 +55,7 @@ public class TokenInterceptor implements RequestInterceptor {
 				}
 				
 				// 设置请求信息
-				Object _unione_actionid=sessionService.getVar("_unione_actionid");
+				String _unione_actionid=sessionService.getVar("_unione_actionid");
 				Object _unione_requestid=sessionService.getVar("_unione_requestid");
 				if(_unione_actionid!=null) {
 					template.header("_unione_actionid", _unione_actionid+"");

@@ -11,15 +11,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 
@@ -90,9 +93,24 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+				// 请求信息
 		String uri=request.getRequestURI();
-		log.debug("request uri:{},url:{}",uri,request.getRequestURL());
+		SessionHolder.build().setVar("_unione_pre_requestid", request.getHeader("_unione_requestid"));
+		String _unione_actionid = request.getHeader("_unione_actionid");
+		if(StringUtils.isEmpty(_unione_actionid)) {
+			_unione_actionid=IdGenHolder.generate()+"";
+			request.setAttribute("_unione_actionid", _unione_actionid);
+			request.setAttribute("_unione_requestid", _unione_actionid);
+			SessionHolder.build().setVar("_unione_requestid", _unione_actionid);
+		}else{
+			request.setAttribute("_unione_requestid", IdGenHolder.generate()+"");
+			SessionHolder.build().setVar("_unione_requestid", request.getHeader("_unione_requestid"));
+		}
+		SessionHolder.build().setVar("_unione_actionid", _unione_actionid);
+		log.debug("request uri:{},url:{},action id:{},pre request id,request id:{}",
+			uri,request.getRequestURL(),_unione_actionid,request.getHeader("_unione_pre_requestid"),request.getHeader("_unione_requestid"));
 
+			
 		// 首先清空当前线程中token信息
 		SessionHolder.setToken(null);
 		SessionHolder.setUserPrincipal(null);
@@ -154,6 +172,17 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	
 
 	
+
+	
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
+		response.setHeader("_unione_actionid", SessionHolder.build().getVar("_unione_actionid"));
+		response.setHeader("_unione_requestid", SessionHolder.build().getVar("_unione_requestid"));
+	}
+
+
+
 	private void writeResult(ServletResponse servletResponse){
         if(servletResponse instanceof HttpServletResponse){
             HttpServletResponse response = (HttpServletResponse) servletResponse;

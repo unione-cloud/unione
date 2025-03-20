@@ -27,6 +27,7 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.web.logs.model.SysLogs;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -132,42 +133,6 @@ public class LogsUtil {
 	}
 	
 	/**
-	 * 	获得响应对象
-	 * @return
-	 */
-	private static HttpServletResponse getResponse() {
-		HttpServletResponse res=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
-		return res;
-	}
-	
-	/**
-	 * 	设置响应cookie
-	 * @param name
-	 * @param value
-	 */
-	private static void setCookie(String name,String value) {
-		HttpServletResponse res=getResponse();
-		if(res==null) {
-			return;
-		}
-		Cookie ck=new Cookie(name,value);
-		res.addCookie(ck);
-	}
-	
-	private static String getCookie(String name) {
-		HttpServletRequest req=getRequest();
-		if(req==null || req.getCookies()==null) {
-			return null;
-		}
-		for(Cookie ck:req.getCookies()) {
-			if(name.equals(ck.getName())) {
-				return ck.getValue();
-			}
-		}
-		return null;
-	}
-	
-	/**
 	 * 	获得请求 IP 地址
 	 * @author YangGuangJian <br>
 	 * @return
@@ -223,37 +188,26 @@ public class LogsUtil {
 			}
 			entry.set(ent);
 			
-			// 从request中获取请求ID
-			HttpServletRequest req=getRequest();
-			if(req!=null) {
-				String actionid=req.getHeader("_unione_actionid");
-				if(StringUtils.isEmpty(actionid)) {
-					actionid=getCookie("_unione_actionid");
-				}
-				if(!StringUtils.isEmpty(actionid)) {
-					ent.setActionId(Long.parseLong(actionid));
-				}else {
-					ent.setActionId(IdGenHolder.generate());
-				}
-				setCookie("_unione_actionid", ent.getActionId()+"");
-				
-				String requestid=req.getHeader("_unione_requestid");
-				if(StringUtils.isEmpty(requestid)) {
-					requestid=getCookie("_unione_requestid");
-				}
-				if(!StringUtils.isEmpty(requestid)) {
-					ent.setPrequestId(Long.parseLong(requestid));
-				}
-				ent.setRequestId(IdGenHolder.generate());
-				setCookie("_unione_requestid", ent.getRequestId()+"");
+			Object actionid=sessionService.getVar("_unione_actionid");
+			if(!ObjectUtil.isEmpty(actionid)) {
+				ent.setActionId(Long.parseLong(actionid.toString()));
 			}else {
-				ent.setRequestId(IdGenHolder.generate());
 				ent.setActionId(IdGenHolder.generate());
+				sessionService.setVar("_unione_actionid", ent.getActionId()+"");
+			}
+
+			Object preRequestid=sessionService.getVar("_unione_pre_requestid");
+			if(!ObjectUtil.isEmpty(preRequestid)) {
+				ent.setPrequestId(Long.parseLong(preRequestid.toString()));
 			}
 			
-			// 保存请求信息到session
-			sessionService.setVar("_unione_actionid", ent.getActionId());
-			sessionService.setVar("_unione_requestid", ent.getRequestId());
+			Object requestid=sessionService.getVar("_unione_requestid");
+			if(!ObjectUtil.isEmpty(requestid)) {
+				ent.setRequestId(Long.parseLong(requestid.toString()));
+			}else{
+				ent.setRequestId(IdGenHolder.generate());
+				sessionService.setVar("_unione_requestid", ent.getRequestId()+"");
+			}
 		}
 		return ent;
 	} 
