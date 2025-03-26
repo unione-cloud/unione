@@ -78,6 +78,23 @@ public class SelectorController {
     }
 
 
+    /**
+     * 选择器:角色列表
+     * @param params
+     * @return
+     */
+    @PostMapping("/role/list/{type}")
+    @Action(title="选择器:角色列表",type = ActionType.Query,nolog = true)
+    @Operation(summary = "选择器:角色列表", description = "参数：类型type=permis授权,use:角色使用")
+    public Results<List<SelectorNodeDto>> roleList(@PathVariable("type") String type,@RequestBody Params<Long> params) {
+        log.debug("进入:角色列表查询接口,参数:{}", params);
+
+        Results<List<SelectorNodeDto>> results = selectorService.roleList(type, params);
+
+        log.debug("退出:角色列表查询接口,参数:{},result:{}", params,results.isSuccess());
+        return results;
+    }
+
 
     /**
      * 选择器:机构树

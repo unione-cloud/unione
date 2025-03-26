@@ -40,9 +40,9 @@ public class SysRole extends Pojo {
 	@Schema(title="编码",description="长度为：20")
 	private String sn;
 	/**
-	* 类型，字典ROLETYPE 1平台，2租户，3机构，9其他
+	* 类型，字典ROLETYPE 1平台，2租户，3机构
 	*/
-	@Schema(title="类型，字典ROLETYPE 1平台，2租户，3机构，9其他",description="长度为：10")
+	@Schema(title="类型，字典ROLETYPE 1平台，2租户，3机构",description="长度为：10")
 	private Integer types;
 	/**
 	* 状态，字典，使用状态 USEORNOT 1使用，0停用

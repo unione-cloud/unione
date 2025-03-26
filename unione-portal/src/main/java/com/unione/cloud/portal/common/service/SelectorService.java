@@ -2,6 +2,7 @@ package com.unione.cloud.portal.common.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +17,8 @@ import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
@@ -39,6 +42,8 @@ public class SelectorService {
     @Autowired
     private DataBaseDao dataBaseDao;
 
+    @Autowired
+    private SessionService sessionService;
    
     /**
      * 查询用户节点
@@ -103,10 +108,10 @@ public class SelectorService {
             .where("status=1 and types=? and name like [%?%]"));
 
         if(results.isSuccess()){
-            for(SysRole organ:results.getBody()){
+            for(SysRole row:results.getBody()){
                 SelectorNodeDto dto=new SelectorNodeDto();
-                dto.setId(organ.getId());
-                dto.setTitle(organ.getName());
+                dto.setId(row.getId());
+                dto.setTitle(row.getName());
                 dto.setNtype("role");
                 list.add(dto);
             }
@@ -117,6 +122,46 @@ public class SelectorService {
             .setTotal(results.getTotal())
             .setPage(results.getPage())
             .setPageSize(results.getPageSize());
+    }
+
+
+    
+    /**
+     * 查询角色列表
+     * @param type      类型type=permis授权,use:角色使用
+     * @param params
+     * @return
+     */
+    public Results<List<SelectorNodeDto>> roleList(String type,Params<Long> params){
+        log.debug("进入：查询角色列表方法,type:{},user id:{}",type,params.getBody());
+        List<SelectorNodeDto> list=new ArrayList<>();
+        
+        SqlBuilder<SysRole> builder=SqlBuilder.build(SysRole.class);
+        builder.params("tenantId", sessionService.getTenantId());
+        builder.params("orgId", sessionService.getOrgId());
+
+        String sqlName="selectRole4Use";
+        if(Objects.equals(type, "permis")){
+            sqlName="selectRole4Auth";
+            if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
+                builder.params("isTenantAdmin", true);
+            }else if(sessionService.hasRole(UserRoles.ORGAN_ADMIN)){
+                builder.params("isOrganAdmin", true);
+            }
+        }
+       
+        // 执行数据查询
+        List<SysRole> rows=dataBaseDao.findList(sqlName,builder);
+        for(SysRole row:rows){
+            SelectorNodeDto dto=new SelectorNodeDto();
+            dto.setId(row.getId());
+            dto.setTitle(row.getName());
+            dto.setNtype(String.valueOf(row.getTypes()));
+            list.add(dto);
+        }
+
+        log.debug("退出：查询角色列表方法,type:{},user id:{},len:{}",type,params.getBody(),list.size());
+        return Results.success(list).setTotal(list.size());
     }
     
 

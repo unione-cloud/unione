@@ -608,6 +608,18 @@ public class DataBaseDao {
 		return rows;
 	}
 	
+	/**
+	 * 	查询列表(不分页),使用sql查询{ResoruceName}.{sqlName}
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findList(String sqlName, SqlBuilder<T> builder){
+		SqlId findsql=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
+		return rows;
+	}
 
 	/**
 	 * 	查询列表(不分页),使用sql查询{ResoruceName}.findList
