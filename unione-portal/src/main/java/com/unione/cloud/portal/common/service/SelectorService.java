@@ -27,6 +27,7 @@ import com.unione.cloud.portal.system.model.SysGroup;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysPost;
 import com.unione.cloud.portal.system.model.SysRole;
+import com.unione.cloud.portal.system.model.SysUserRole;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -122,7 +123,7 @@ public class SelectorService {
      * @return
      */
     public Results<List<SelectorRoleDto>> roleList(String type,Params<Long> params){
-        log.debug("进入：查询角色列表方法,type:{},user id:{}",type,params.getBody());
+        log.debug("进入：查询角色列表方法,type:{},target id:{}",type,params.getBody());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
         builder.params("tenantId", sessionService.getTenantId());
@@ -140,8 +141,22 @@ public class SelectorService {
        
         // 执行数据查询
         List<SelectorRoleDto> rows=dataBaseDao.findList(sqlName,builder);
+
+        // 角色授权模式下，加载当前用户有角色列表
+        if(Objects.equals(type, "permis") && !Objects.isNull(params.getBody())){
+            // 加载当前用户有角色列表
+            SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
+            query.params("userId", params.getBody());
+            Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
+                .collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
+            rows.forEach(role->{
+                if(uRoles.containsKey(role.getId())){
+                    role.setChecked(true);
+                }
+            });
+        }
         
-        log.debug("退出：查询角色列表方法,type:{},user id:{},len:{}",type,params.getBody(),rows.size());
+        log.debug("退出：查询角色列表方法,type:{},target id:{},len:{}",type,params.getBody(),rows.size());
         return Results.success(rows).setTotal(rows.size());
     }
     
