@@ -5,6 +5,7 @@ import java.util.List;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.portal.common.dto.SelectorRoleDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.system.model.SysUserRole;
 
@@ -49,8 +50,10 @@ public class UserRoleDto extends SysUserRole {
 	
 	@Schema(title="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",description="长度为：10")
 	private Integer status;
-	
 
-	@Schema(title="用户列表",description="批量保存用户")
+	@Schema(title="用户列表",description="批量添加用户,参数roleId不能为空")
 	private List<SelectorUserDto> users;
+
+	@Schema(title="用户列表",description="批量分配角色，参数userId不能为空")
+	private List<SelectorRoleDto> roles;
 }

@@ -42,5 +42,8 @@ public class SelectorUserDto extends SelectorNodeDto{
 
     @Schema(title="用户邮箱",description="长度为：200")
 	private String email;
+
+    @Schema(title="是否可传递授权，1是，0否",description="角色授权，添加用户时，是否可传递授权，1是，0否")
+	private Integer enDilivery;
     
 }

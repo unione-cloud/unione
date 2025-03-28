@@ -27,5 +27,8 @@ public class SelectorRoleDto extends SelectorNodeDto{
 
     @Schema(title="角色描述",description="")
 	private String descs;
+
+    @Schema(title="是否可传递授权，1是，0否",description="用户角色分配时，是否可传递授权，1是，0否")
+	private Integer enDilivery;
     
 }

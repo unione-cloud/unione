@@ -26,6 +26,7 @@ import com.unione.cloud.portal.system.dto.UserRoleDto;
 import com.unione.cloud.portal.system.model.SysGroup;
 import com.unione.cloud.portal.system.model.SysGroupMember;
 import com.unione.cloud.portal.system.model.SysRole;
+import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.portal.system.model.SysUserRole;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -64,33 +65,57 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 
 
 	@Override
-	@Action(title="保存用户角色",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
+	@Action(title="保存用户角色",type = ActionType.Save,roles = {UserRoles.TENANTADMIN,UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
 	public Results<Long> save(@Validated(Validator.save.class) UserRoleDto entity) {
 		// 参数处理
-		SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
-		AssertUtil.service().notNull(role, "角色不存在");
-
 		int len = 0;
 		if(entity.getId()==null) {
-			BeanUtils.setDefaultValue(entity,"enDilivery",0);
 			if(ObjectUtil.isEmpty(entity.getUsers())){
-				// 单个添加：
-				AssertUtil.service().notNull(entity.getRoleId(), "属性角色id不能为空");
-				AssertUtil.service().notNull(entity.getUserId(), "属性用户id不能为空");
-				len = dataBaseDao.insert(entity);
+				if(ObjectUtil.isEmpty(entity.getRoles())){
+					// 单个添加：
+					BeanUtils.setDefaultValue(entity,"enDilivery",0);
+					AssertUtil.service().notNull(entity.getRoleId(), "属性角色id不能为空");
+					AssertUtil.service().notNull(entity.getUserId(), "属性用户id不能为空");
+					SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
+					AssertUtil.service().notNull(role, "角色不存在");
+					SysUser user=dataBaseDao.findById(SqlBuilder.build(SysUser.class,entity.getUserId()));
+					AssertUtil.service().notNull(user, "用户不存在");
+					
+					len = dataBaseDao.insert(entity);
+				}else{
+					// 批量添加角色：	
+					AssertUtil.service().notNull(entity.getUserId(), "属性用户id不能为空");
+					SysUser user=dataBaseDao.findById(SqlBuilder.build(SysUser.class,entity.getUserId()));
+					AssertUtil.service().notNull(user, "用户不存在");
+
+					List<SysUserRole> members = entity.getRoles().stream().map(role->{
+						SysUserRole member=new SysUserRole();
+						BeanUtils.copyProperties(entity, member);
+						member.setRoleId(role.getId());
+						BeanUtils.setDefaultValue(member,"enDilivery",0);
+						return member;
+					}).collect(Collectors.toList());
+					int lens[] = dataBaseDao.insertBatch(members);
+					len = Arrays.stream(lens).sum();
+				}
 			}else{
-				// 批量添加：
+				// 批量添加用户：
+				AssertUtil.service().notNull(entity.getRoleId(), "属性角色id不能为空");
+				SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
+				AssertUtil.service().notNull(role, "角色不存在");
+
 				List<SysUserRole> members = entity.getUsers().stream().map(user->{
 					SysUserRole member=new SysUserRole();
 					BeanUtils.copyProperties(entity, member);
 					member.setUserId(user.getId());
+					BeanUtils.setDefaultValue(member,"enDilivery",0);
 					return member;
 				}).collect(Collectors.toList());
 				int lens[] = dataBaseDao.insertBatch(members);
 				len = Arrays.stream(lens).sum();
 			}
 		}else {
-			String[] fields = {"userId","roleId","enDilivery"};
+			String[] fields = {"enDilivery"};
 			SqlBuilder<UserRoleDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}
