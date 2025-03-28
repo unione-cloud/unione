@@ -28,9 +28,6 @@ public class SelectorNodeDto implements Serializable{
     @Schema(title="节点标题",description="长度为：100")
     private String title;
 
-    @Schema(title="用户数量",description="当前节点，包括的用户数量")
-    private Integer userCount;
-
     @Schema(title="是否选中",description="true：选中，false：未选中")
     private Boolean checked;
    

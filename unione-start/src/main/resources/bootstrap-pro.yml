@@ -51,7 +51,11 @@ spring:
          host: 8.134.11.253
          port: 2379
          password: redis@jeking
-
+         timeout: 100s
+         pool:
+            max-active: 10
+            max-wait: -1
+            max-idle: 8
    #============================================
    #
    # Spring Multipart Config

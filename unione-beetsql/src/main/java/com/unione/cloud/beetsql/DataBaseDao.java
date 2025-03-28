@@ -839,6 +839,26 @@ public class DataBaseDao {
 		return results.setBody(rows);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> Results<List<T>> findPages(String listSql,String countSql,SqlBuilder<T> builder){
+		SqlId $listSql=listSql.indexOf(".")>0?SqlId.of(listSql):SqlId.of(this.getNameSpace(builder.targetClass()), listSql);
+		SqlId $countSql=countSql.indexOf(".")>0?SqlId.of(countSql):SqlId.of(this.getNameSpace(builder.targetClass()), countSql);
+		Results<List<T>> results=Results.success();
+		
+		// count 统计
+		if(builder.isNeedCount()) {
+			Integer total = this.sqlManager.selectUnique($countSql, builder.toParams(), Integer.class);
+			results.setTotal(total);
+		}
+		
+		// 数据查询
+		List<T> rows = (List<T>) this.sqlManager.select($listSql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
+		
+		results.setPage(builder.getPage());
+		results.setPageSize(builder.getPageSize());
+		return results.setBody(rows);
+	}
+
 	
 	private void setDataPermis(Object obj) {
 		DataPermis dataPermis = obj.getClass().getAnnotation(DataPermis.class);

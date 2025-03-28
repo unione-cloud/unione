@@ -19,6 +19,9 @@ import lombok.Data;
 public class SelectorUserDto extends SelectorNodeDto{
     private static final long serialVersionUID = 1L;
 
+    @Schema(title="用户数量",description="当前节点，包括的用户数量")
+    private Integer userCount;
+
     @Schema(title="机构ID",description="长度为：10")
     private Long orgId;
 

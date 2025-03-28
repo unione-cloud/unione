@@ -20,6 +20,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
+import com.unione.cloud.portal.common.dto.SelectorRoleDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
 import com.unione.cloud.portal.system.model.SysGroup;
@@ -92,36 +93,21 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> roleNode(Integer type,Params<Void> params){
+    public Results<List<SelectorRoleDto>> roleNode(Integer type,Params<Void> params){
         log.debug("进入：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
-        List<SelectorNodeDto> list=new ArrayList<>();
         
-        Params<SysRole> queryOrgan = Params.build(SysRole.class);
-        queryOrgan.setPage(params.getPage());
-        queryOrgan.setPageSize(params.getPageSize());
-        queryOrgan.getBody().setName(params.getKeywords());
+        SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
+        builder.params("tenantId", sessionService.getTenantId());
+        builder.params("orgId", sessionService.getOrgId());
+        builder.params("keywords", params.getKeywords());
+        builder.page(params.getPage()).pageSize(params.getPageSize());
         if(type!=null && type>0){
-            queryOrgan.getBody().setTypes(type);
+            builder.params("types", type);
         }
-        Results<List<SysRole>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
-            .field("name","id")
-            .where("status=1 and types=? and name like [%?%]"));
+        Results<List<SelectorRoleDto>> results=dataBaseDao.findPages("selectRolePage4Use","countRole4Use",builder);
 
-        if(results.isSuccess()){
-            for(SysRole row:results.getBody()){
-                SelectorNodeDto dto=new SelectorNodeDto();
-                dto.setId(row.getId());
-                dto.setTitle(row.getName());
-                dto.setNtype("role");
-                list.add(dto);
-            }
-        }
-
-        log.debug("退出：查询角色节点方法,parentId:{},keyword:{}",params.getBody(),params.getKeywords());
-        return Results.success(list)
-            .setTotal(results.getTotal())
-            .setPage(results.getPage())
-            .setPageSize(results.getPageSize());
+        log.debug("退出：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
+        return results;
     }
 
 
@@ -132,11 +118,10 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> roleList(String type,Params<Long> params){
+    public Results<List<SelectorRoleDto>> roleList(String type,Params<Long> params){
         log.debug("进入：查询角色列表方法,type:{},user id:{}",type,params.getBody());
-        List<SelectorNodeDto> list=new ArrayList<>();
         
-        SqlBuilder<SysRole> builder=SqlBuilder.build(SysRole.class);
+        SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
         builder.params("tenantId", sessionService.getTenantId());
         builder.params("orgId", sessionService.getOrgId());
 
@@ -151,17 +136,10 @@ public class SelectorService {
         }
        
         // 执行数据查询
-        List<SysRole> rows=dataBaseDao.findList(sqlName,builder);
-        for(SysRole row:rows){
-            SelectorNodeDto dto=new SelectorNodeDto();
-            dto.setId(row.getId());
-            dto.setTitle(row.getName());
-            dto.setNtype(String.valueOf(row.getTypes()));
-            list.add(dto);
-        }
-
-        log.debug("退出：查询角色列表方法,type:{},user id:{},len:{}",type,params.getBody(),list.size());
-        return Results.success(list).setTotal(list.size());
+        List<SelectorRoleDto> rows=dataBaseDao.findList(sqlName,builder);
+        
+        log.debug("退出：查询角色列表方法,type:{},user id:{},len:{}",type,params.getBody(),rows.size());
+        return Results.success(rows).setTotal(rows.size());
     }
     
 

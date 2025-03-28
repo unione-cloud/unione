@@ -15,6 +15,7 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.portal.common.dto.SelectorNodeDto;
+import com.unione.cloud.portal.common.dto.SelectorRoleDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
 import com.unione.cloud.portal.common.service.SelectorService;
@@ -68,10 +69,10 @@ public class SelectorController {
     @PostMapping("/role/node/{type}")
     @Action(title="选择器:角色节点",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:角色节点", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorNodeDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Void> params) {
+    public Results<List<SelectorRoleDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Void> params) {
         log.debug("进入:角色节点查询接口,参数:{}", params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.roleNode(type, params);
+        Results<List<SelectorRoleDto>> results = selectorService.roleNode(type, params);
 
         log.debug("退出:角色节点查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -86,10 +87,10 @@ public class SelectorController {
     @PostMapping("/role/list/{type}")
     @Action(title="选择器:角色列表",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:角色列表", description = "参数：类型type=permis授权,use:角色使用")
-    public Results<List<SelectorNodeDto>> roleList(@PathVariable("type") String type,@RequestBody Params<Long> params) {
+    public Results<List<SelectorRoleDto>> roleList(@PathVariable("type") String type,@RequestBody Params<Long> params) {
         log.debug("进入:角色列表查询接口,参数:{}", params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.roleList(type, params);
+        Results<List<SelectorRoleDto>> results = selectorService.roleList(type, params);
 
         log.debug("退出:角色列表查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
