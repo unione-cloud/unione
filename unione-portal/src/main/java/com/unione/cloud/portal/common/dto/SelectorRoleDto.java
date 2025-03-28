@@ -22,6 +22,9 @@ public class SelectorRoleDto extends SelectorNodeDto{
     @Schema(title="角色编码",description="")
     private String sn;
 
+    @Schema(title="角色类型",description="")
+    private Integer rtype;
+
     @Schema(title="角色描述",description="")
 	private String descs;
     

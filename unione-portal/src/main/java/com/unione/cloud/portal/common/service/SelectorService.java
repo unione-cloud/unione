@@ -105,6 +105,9 @@ public class SelectorService {
             builder.params("types", type);
         }
         Results<List<SelectorRoleDto>> results=dataBaseDao.findPages("selectRolePage4Use","countRole4Use",builder);
+        results.getBody().forEach(role->{
+            role.setNtype("role");
+        });
 
         log.debug("退出：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
         return results;
