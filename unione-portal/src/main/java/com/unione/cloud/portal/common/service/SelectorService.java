@@ -244,7 +244,9 @@ public class SelectorService {
         queryPost.setPageSize(params.getPageSize());
         queryPost.getBody().setParentId(params.getBody());
         queryPost.getBody().setName(params.getKeywords());
-        queryPost.getBody().setTypes(type);
+        if(type!=null && type>0){
+            queryPost.getBody().setTypes(type);
+        }
         Results<List<SysPost>> results=dataBaseDao.findPages(SqlBuilder.build(queryPost)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and types=? and name like [%?%]")
