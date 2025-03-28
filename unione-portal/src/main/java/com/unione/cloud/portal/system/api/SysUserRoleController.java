@@ -3,6 +3,7 @@ package com.unione.cloud.portal.system.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,15 +89,47 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 					SysUser user=dataBaseDao.findById(SqlBuilder.build(SysUser.class,entity.getUserId()));
 					AssertUtil.service().notNull(user, "用户不存在");
 
-					List<SysUserRole> members = entity.getRoles().stream().map(role->{
-						SysUserRole member=new SysUserRole();
-						BeanUtils.copyProperties(entity, member);
-						member.setRoleId(role.getId());
-						BeanUtils.setDefaultValue(member,"enDilivery",0);
-						return member;
-					}).collect(Collectors.toList());
-					int lens[] = dataBaseDao.insertBatch(members);
-					len = Arrays.stream(lens).sum();
+					SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
+					query.params("userId", entity.getUserId());
+					Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
+						.collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
+
+					List<SysUserRole> adds = new ArrayList<>();
+					List<SysUserRole> upds = new ArrayList<>();
+					entity.getRoles().stream().forEach(role->{
+						SysUserRole member=uRoles.remove(role.getId());
+						if(ObjectUtil.isEmpty(member)){
+							member=new SysUserRole();
+							BeanUtils.copyProperties(entity, member);
+							member.setRoleId(role.getId());
+							BeanUtils.setDefaultValue(member,"enDilivery",0);
+							adds.add(member);
+						}else{
+							if(ObjectUtil.isNotEmpty(role.getEnDilivery()) && 
+								!ObjectUtil.equal(role.getEnDilivery(), member.getEnDilivery())){
+								member.setEnDilivery(role.getEnDilivery());
+								upds.add(member);
+							}
+						}
+					});
+					// 新增角色
+					if(ObjectUtil.isNotEmpty(adds)){
+						int lens[] = dataBaseDao.insertBatch(adds);
+						len += Arrays.stream(lens).sum();
+					}
+					// 更新角色
+					if(ObjectUtil.isNotEmpty(upds)){
+						len += upds.stream().map(row->{
+							SqlBuilder<SysUserRole> sqlBuilder=SqlBuilder.build(row).field("enDilivery");
+							return dataBaseDao.updateById(sqlBuilder);
+						}).reduce(0,Integer::sum);
+					}
+					// 删除角色
+					if(!uRoles.isEmpty()){
+						List<Long> ids = uRoles.values().stream().map(row->row.getId()).collect(Collectors.toList());
+						SqlBuilder<SysUserRole> sqlBuilder=SqlBuilder.build(SysUserRole.class,ids);
+						len += dataBaseDao.deleteById(sqlBuilder);
+					}
 				}
 			}else{
 				// 批量添加用户：
@@ -104,15 +137,47 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 				SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
 				AssertUtil.service().notNull(role, "角色不存在");
 
-				List<SysUserRole> members = entity.getUsers().stream().map(user->{
-					SysUserRole member=new SysUserRole();
-					BeanUtils.copyProperties(entity, member);
-					member.setUserId(user.getId());
-					BeanUtils.setDefaultValue(member,"enDilivery",0);
-					return member;
-				}).collect(Collectors.toList());
-				int lens[] = dataBaseDao.insertBatch(members);
-				len = Arrays.stream(lens).sum();
+				SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
+				query.params("roleId", entity.getRoleId());
+				Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
+					.collect(Collectors.toMap(SysUserRole::getUserId, row->row));
+
+				List<SysUserRole> adds = new ArrayList<>();
+				List<SysUserRole> upds = new ArrayList<>();
+				entity.getUsers().stream().forEach(user->{
+					SysUserRole member=uRoles.remove(user.getId());
+					if(ObjectUtil.isEmpty(member)){
+						member=new SysUserRole();
+						BeanUtils.copyProperties(entity, member);
+						member.setUserId(user.getId());
+						BeanUtils.setDefaultValue(member,"enDilivery",0);
+						adds.add(member);
+					}else{
+						if(ObjectUtil.isNotEmpty(user.getEnDilivery()) && 
+							!ObjectUtil.equal(user.getEnDilivery(), member.getEnDilivery())){
+							member.setEnDilivery(user.getEnDilivery());
+							upds.add(member);
+						}
+					}
+				});
+				// 新增用户
+				if(ObjectUtil.isNotEmpty(adds)){
+					int lens[] = dataBaseDao.insertBatch(adds);
+					len += Arrays.stream(lens).sum();
+				}
+				// 更新角色
+				if(ObjectUtil.isNotEmpty(upds)){
+					len += upds.stream().map(row->{
+						SqlBuilder<SysUserRole> sqlBuilder=SqlBuilder.build(row).field("enDilivery");
+						return dataBaseDao.updateById(sqlBuilder);
+					}).reduce(0,Integer::sum);
+				}
+				// 删除用户
+				if(!uRoles.isEmpty()){
+					List<Long> ids = uRoles.values().stream().map(row->row.getId()).collect(Collectors.toList());
+					SqlBuilder<SysUserRole> sqlBuilder=SqlBuilder.build(SysUserRole.class,ids);
+					len += dataBaseDao.deleteById(sqlBuilder);
+				}
 			}
 		}else {
 			String[] fields = {"enDilivery"};
