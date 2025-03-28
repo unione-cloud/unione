@@ -150,8 +150,10 @@ public class SelectorService {
             Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
                 .collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
             rows.forEach(role->{
-                if(uRoles.containsKey(role.getId())){
+                SysUserRole uRole=uRoles.get(role.getId());
+                if(uRole!=null){
                     role.setChecked(true);
+                    role.setEnDilivery(uRole.getEnDilivery());
                 }
             });
         }
