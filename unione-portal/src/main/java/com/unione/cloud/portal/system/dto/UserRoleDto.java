@@ -45,7 +45,7 @@ public class UserRoleDto extends SysUserRole {
 	@Schema(title="用户头像")
 	private String avatar;
 	
-	@Schema(title="用户机构")
+	@Schema(title="机构名称")
 	private String orgName;
 	
 	@Schema(title="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",description="长度为：10")
