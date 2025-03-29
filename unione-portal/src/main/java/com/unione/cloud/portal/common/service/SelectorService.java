@@ -130,7 +130,7 @@ public class SelectorService {
         builder.params("orgId", sessionService.getOrgId());
 
         String sqlName="selectRole4Use";
-        if(Objects.equals(type, "permis")){
+        if(Objects.equals(type, "permis") || Objects.equals(type, "assign")){
             sqlName="selectRole4Auth";
             if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
                 builder.params("isTenantAdmin", true);
@@ -141,6 +141,9 @@ public class SelectorService {
        
         // 执行数据查询
         List<SelectorRoleDto> rows=dataBaseDao.findList(sqlName,builder);
+        rows.forEach(role->{
+            role.setNtype("role");
+        });
 
         // 角色授权模式下，加载当前用户有角色列表
         if(Objects.equals(type, "permis") && !Objects.isNull(params.getBody())){

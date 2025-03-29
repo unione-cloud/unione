@@ -172,12 +172,6 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 						return dataBaseDao.updateById(sqlBuilder);
 					}).reduce(0,Integer::sum);
 				}
-				// 删除用户
-				if(!uRoles.isEmpty()){
-					List<Long> ids = uRoles.values().stream().map(row->row.getId()).collect(Collectors.toList());
-					SqlBuilder<SysUserRole> sqlBuilder=SqlBuilder.build(SysUserRole.class,ids);
-					len += dataBaseDao.deleteById(sqlBuilder);
-				}
 			}
 		}else {
 			String[] fields = {"enDilivery"};
