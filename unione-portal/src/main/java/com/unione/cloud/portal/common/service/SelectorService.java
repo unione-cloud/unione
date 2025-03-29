@@ -19,7 +19,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.portal.common.dto.SelectorNodeDto;
+import com.unione.cloud.portal.common.dto.TreeNodeDto;
 import com.unione.cloud.portal.common.dto.SelectorRoleDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
@@ -171,9 +171,9 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> organTree(Integer type,Params<Long> params){
+    public Results<List<TreeNodeDto>> organTree(Integer type,Params<Long> params){
         log.debug("进入：查询机构树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<SelectorNodeDto> list=new ArrayList<>();
+        List<TreeNodeDto> list=new ArrayList<>();
         
         Params<SysOrgan> queryOrgan = Params.build(SysOrgan.class);
         queryOrgan.setPage(params.getPage());
@@ -190,7 +190,7 @@ public class SelectorService {
 
         if(results.isSuccess()){
             for(SysOrgan organ:results.getBody()){
-                SelectorNodeDto dto=new SelectorNodeDto();
+                TreeNodeDto dto=new TreeNodeDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
@@ -213,9 +213,9 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> groupTree(Integer type, Params<Long> params){
+    public Results<List<TreeNodeDto>> groupTree(Integer type, Params<Long> params){
         log.debug("进入：查询分组树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<SelectorNodeDto> list=new ArrayList<>();
+        List<TreeNodeDto> list=new ArrayList<>();
         
         Params<SysGroup> queryGroup = Params.build(SysGroup.class);
         queryGroup.setPage(params.getPage());
@@ -232,7 +232,7 @@ public class SelectorService {
 
         if(results.isSuccess()){
             for(SysGroup organ:results.getBody()){
-                SelectorNodeDto dto=new SelectorNodeDto();
+                TreeNodeDto dto=new TreeNodeDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
@@ -255,9 +255,9 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorNodeDto>> postTree(Integer type, Params<Long> params){
+    public Results<List<TreeNodeDto>> postTree(Integer type, Params<Long> params){
         log.debug("进入：查询岗位树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<SelectorNodeDto> list=new ArrayList<>();
+        List<TreeNodeDto> list=new ArrayList<>();
         
         Params<SysPost> queryPost = Params.build(SysPost.class);
         queryPost.setPage(params.getPage());
@@ -274,7 +274,7 @@ public class SelectorService {
 
         if(results.isSuccess()){
             for(SysPost organ:results.getBody()){
-                SelectorNodeDto dto=new SelectorNodeDto();
+                TreeNodeDto dto=new TreeNodeDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());

@@ -14,7 +14,7 @@ import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.portal.common.dto.SelectorNodeDto;
+import com.unione.cloud.portal.common.dto.TreeNodeDto;
 import com.unione.cloud.portal.common.dto.SelectorRoleDto;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
@@ -105,10 +105,10 @@ public class SelectorController {
     @PostMapping("/organ/tree/{type}")
     @Action(title="选择器:机构树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:机构树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorNodeDto>> organTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
+    public Results<List<TreeNodeDto>> organTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
         log.debug("进入:机构树查询接口,参数:type:{}, params:{}",type, params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.organTree(type,params);
+        Results<List<TreeNodeDto>> results = selectorService.organTree(type,params);
 
         log.debug("退出:机构树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -122,10 +122,10 @@ public class SelectorController {
     @PostMapping("/group/tree/{type}")
     @Action(title="选择器:分组树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:分组树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorNodeDto>> groupTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
+    public Results<List<TreeNodeDto>> groupTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
         log.debug("进入:分组树查询接口,参数:type:{},param:{}",type, params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.groupTree(type,params);
+        Results<List<TreeNodeDto>> results = selectorService.groupTree(type,params);
 
         log.debug("退出:分组树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -139,10 +139,10 @@ public class SelectorController {
     @PostMapping("/post/tree/{type}")
     @Action(title="选择器:岗位树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:岗位树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorNodeDto>> postTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
+    public Results<List<TreeNodeDto>> postTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
         log.debug("进入:岗位树查询接口,参数:type:{},param:{}",type, params);
 
-        Results<List<SelectorNodeDto>> results = selectorService.postTree(type,params);
+        Results<List<TreeNodeDto>> results = selectorService.postTree(type,params);
 
         log.debug("退出:岗位树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;

@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 @Schema(title="用户选择Dto")
 @SqlResource("system.userSelectorDto")
-public class SelectorUserDto extends SelectorNodeDto{
+public class SelectorUserDto extends TreeNodeDto{
     private static final long serialVersionUID = 1L;
 
     @Schema(title="用户数量",description="当前节点，包括的用户数量")

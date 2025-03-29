@@ -2,12 +2,16 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,11 +26,20 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.portal.system.dto.ResTreeNodeDto;
+import com.unione.cloud.portal.system.model.SysAppInfo;
+import com.unione.cloud.portal.system.model.SysGroupPermis;
+import com.unione.cloud.portal.system.model.SysOrganPermis;
+import com.unione.cloud.portal.system.model.SysPostPermis;
 import com.unione.cloud.portal.system.model.SysResource;
+import com.unione.cloud.portal.system.model.SysRolePermis;
+import com.unione.cloud.portal.system.model.SysUserPermis;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +59,9 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
@@ -152,5 +168,114 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		
 		return Results.success(rows);
 	}
+
+
+	/**
+	 * 加载资源树：同步
+	 * @param params
+	 * @return
+	 */
+	@PostMapping("/tree/{type}")
+	@Operation(summary = "加载资源树：同步", description = "参数：类型type=permisOrgan,permisRole,permisUser,permisGroup,permisPost授权,view查看")
+	public Results<List<ResTreeNodeDto>> tree(@PathVariable("type") String type,@RequestBody Params<Long> params){
+		List<ResTreeNodeDto> nodes=new ArrayList<>();
+		AssertUtil.service().notNull(type, "参数type不能为空")
+			.notIn(type, Arrays.asList("permisOrgan","permisRole","permisUser","permisGroup","permisPost","view"), "参数type取值范围[permisOrgan,permisRole,permisUser,permisGroup,permisPost,view]");
+
+		// 加载应用列表
+		SqlBuilder<SysAppInfo> appBuilder = SqlBuilder.build(SysAppInfo.class)
+			.where("status in (2,3) and isTmpl=0 and (isPlatform=1 or tenantId=?)")
+			.params("status",1)
+			.params("tenantId",sessionService.getTenantId());
+		List<SysAppInfo> appList = dataBaseDao.findList(appBuilder);
+			
+		// 获得应用id集合
+		Set<Long> appIds = appList.stream().map(SysAppInfo::getId).collect(Collectors.toSet());
+		if(ObjectUtil.isEmpty(appIds)) {
+			return Results.success(nodes);	
+		}
+		
+		// 加载资源列表
+		SqlBuilder<SysResource> resBuilder = SqlBuilder.build(SysResource.class)
+			.where("status=? and (isPlatform=1 or tenantId=?) and appId in [appIds]")
+			.params("status",1)
+			.params("tenantId",sessionService.getTenantId())
+			.params("appIds", appIds);
+		List<SysResource> resList = dataBaseDao.findList(resBuilder);
+
+		Map<Long,Boolean> hadResMap=new HashMap<>();
+		// 加载机构资源权限
+		if(ObjectUtil.equal(type, "permisOrgan") && params.getBody()!=null) {
+			SqlBuilder<SysOrganPermis> permisBuilder = SqlBuilder.build(SysOrganPermis.class)
+				.params("orgId", params.getBody());
+			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));
+			});
+		}
+		// 加载角色资源权限
+		if(ObjectUtil.equal(type, "permisRole") && params.getBody()!=null) {
+			SqlBuilder<SysRolePermis> permisBuilder = SqlBuilder.build(SysRolePermis.class)
+				.params("roleId", params.getBody());	
+			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+			});
+		}
+		// 加载用户资源权限
+		if(ObjectUtil.equal(type, "permisUser") && params.getBody()!=null) {
+			SqlBuilder<SysUserPermis> permisBuilder = SqlBuilder.build(SysUserPermis.class)
+				.params("userId", params.getBody());
+			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+			});
+		}
+		// 加载分组资源权限
+		if(ObjectUtil.equal(type, "permisGroup") && params.getBody()!=null) {
+			SqlBuilder<SysGroupPermis> permisBuilder = SqlBuilder.build(SysGroupPermis.class)
+				.params("groupId", params.getBody());	
+			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+			});
+		}
+		// 加载岗位资源权限
+		if(ObjectUtil.equal(type, "permisPost") && params.getBody()!=null) {
+			SqlBuilder<SysPostPermis> permisBuilder = SqlBuilder.build(SysPostPermis.class)
+				.params("groupId", params.getBody());
+			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+			});
+		}
+
+		// 数据转换
+		appList.stream().forEach(row->{
+			ResTreeNodeDto node = new ResTreeNodeDto();
+			node.setId(row.getId());
+			node.setNtype("app");
+			node.setPid(-1L);
+			node.setTitle(row.getName());
+			node.setIcon(row.getIcon());
+			nodes.add(node);
+		});
+		resList.stream().forEach(row->{
+			ResTreeNodeDto node = new ResTreeNodeDto();
+			BeanUtils.copyProperties(row,node);
+			node.setNtype(row.getTypes());
+			node.setPid(row.getParentId());
+			if(ObjectUtil.equal(-1L, row.getParentId())){
+				node.setPid(row.getAppId());
+			}
+			if(hadResMap.get(row.getId())!=null){
+				node.setChecked(true);
+				if(hadResMap.get(row.getId())){
+					node.setEnDilivery(1);
+				}else{
+					node.setEnDilivery(0);
+				}
+			}
+			nodes.add(node);
+		});
+
+		return Results.success(nodes);
+	}
+
 
 }

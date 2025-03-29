@@ -6,14 +6,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * @标题 	SelectorNode Dto
- * @描述	选择器节点Dto
+ * @标题 	TreeNode Dto
+ * @描述	树节点Dto
  * @作者	Unione Cloud
  * @日期	2024-11-22 23:32:02
  */
 @Data
-@Schema(title="选择器节点Dto")
-public class SelectorNodeDto implements Serializable{
+@Schema(title="树节点Dto")
+public class TreeNodeDto implements Serializable{
     private static final long serialVersionUID = 1L;
 
     @Schema(title="主键ID",description="长度为：19")
@@ -22,7 +22,7 @@ public class SelectorNodeDto implements Serializable{
     @Schema(title="上级主键ID",description="长度为：19")
     private Long pid;
 
-    @Schema(title="节点类型",description="organ：机构，role：角色，group：分组，post：岗位，user：用户")
+    @Schema(title="节点类型",description="eg:organ：机构，role：角色，group：分组，post：岗位，user：用户")
     private String ntype;
 
     @Schema(title="节点标题",description="长度为：100")
