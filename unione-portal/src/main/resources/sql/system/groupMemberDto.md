@@ -15,7 +15,7 @@ whereField
    AND MB.GROUP_ID = #{params.groupId}
 -- @}
 -- @if(isNotEmpty(keywords) && !isBlank(keywords)){
-   AND (MB.NAME LIKE #{'%'+keywords+'%'} OR MB.ORG_NAME LIKE #{'%'+keywords+'%'} OR U.USERNAME LIKE #{'%'+keywords+'%'} OR U.REAL_NAME LIKE #{'%'+keywords+'%'})
+   AND (MB.NAME LIKE #{'%'+keywords+'%'} OR U.USERNAME LIKE #{'%'+keywords+'%'} OR U.REAL_NAME LIKE #{'%'+keywords+'%'})
 -- @}
 ```
 

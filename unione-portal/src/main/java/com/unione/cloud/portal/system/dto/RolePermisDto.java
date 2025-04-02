@@ -13,6 +13,9 @@ import lombok.Data;
 @Table(name="sys_role_permis")
 @SqlResource("system.rolePermisDto")
 public class RolePermisDto extends SysRolePermis{
+
+	@Schema(title="机构名称")
+	private String orgName;
    
 	@Schema(title="名称",description="长度为：100")
 	private String name;

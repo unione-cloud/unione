@@ -19,23 +19,23 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.portal.system.model.SysOrganPermis;
+import com.unione.cloud.portal.system.dto.OrganPermisDto;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @标题 	SysOrganPermis Controller 服务
+ * @标题 	OrganPermisDto Controller 服务
  * @作者	Unione Cloud CodeGen
  * @日期	2024-03-22 08:03:37
  * @版本	1.0.0
  **/
 @Slf4j
 @RestController
-@Tag(name = "系统管理：机构权限",description="SysOrganPermis")
+@Tag(name = "系统管理：机构权限",description="OrganPermisDto")
 @RequestMapping("/api/system/organPermis")	 //TreeFeignApi
-public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
+public class SysOrganPermisController implements PojoFeignApi<OrganPermisDto>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -43,10 +43,10 @@ public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
 	
 	@Override
 	@Action(title="查询机构权限",type = ActionType.Query)
-	public Results<List<SysOrganPermis>> find(Params<SysOrganPermis> params) {
+	public Results<List<OrganPermisDto>> find(Params<OrganPermisDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysOrganPermis>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<OrganPermisDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
@@ -56,14 +56,14 @@ public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
 
 	@Override
 	@Action(title="保存机构权限",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
-	public Results<Long> save(@Validated(Validator.save.class) SysOrganPermis entity) {
+	public Results<Long> save(@Validated(Validator.save.class) OrganPermisDto entity) {
 		// 参数处理
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"orgId","appId","resId","resType","enDilivery"};
-			SqlBuilder<SysOrganPermis> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			SqlBuilder<OrganPermisDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}
 		
@@ -74,21 +74,21 @@ public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
 
 
 	@Override
-	public Results<List<SysOrganPermis>> findByIds(Set<Long> ids) {
+	public Results<List<OrganPermisDto>> findByIds(Set<Long> ids) {
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		
-		List<SysOrganPermis> rows = dataBaseDao.findByIds(SqlBuilder.build(SysOrganPermis.class,new ArrayList<>(ids)));
+		List<OrganPermisDto> rows = dataBaseDao.findByIds(SqlBuilder.build(OrganPermisDto.class,new ArrayList<>(ids)));
 		return Results.success(rows);
 	}
 
 
 	@Override
-	public Results<SysOrganPermis> detail(Long id) {
+	public Results<OrganPermisDto> detail(Long id) {
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
-		SysOrganPermis tmp = dataBaseDao.findById(SqlBuilder.build(SysOrganPermis.class,id));
+		OrganPermisDto tmp = dataBaseDao.findById(SqlBuilder.build(OrganPermisDto.class,id));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		return Results.success(tmp);
@@ -103,7 +103,7 @@ public class SysOrganPermisController implements PojoFeignApi<SysOrganPermis>{
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 		// 执行删除
-		int count = dataBaseDao.deleteById(SqlBuilder.build(SysOrganPermis.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(OrganPermisDto.class,ids));
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");

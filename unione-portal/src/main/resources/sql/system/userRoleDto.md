@@ -15,7 +15,7 @@ whereField
    AND R.STATUS = #{params.roleStatus}
 -- @}
 -- @if(isNotEmpty(keywords) && !isBlank(keywords)){
-   AND (R.NAME LIKE #{'%'+keywords+'%'} OR R.DESCS LIKE #{'%'+keywords+'%'} OR U.USERNAME LIKE #{'%'+keywords+'%'} OR U.REAL_NAME LIKE #{'%'+keywords+'%'} OR O.NAME LIKE #{'%'+keywords+'%'})
+   AND (R.NAME LIKE #{'%'+keywords+'%'} OR R.DESCS LIKE #{'%'+keywords+'%'} OR U.USERNAME LIKE #{'%'+keywords+'%'} OR U.REAL_NAME LIKE #{'%'+keywords+'%'})
 -- @}
 ```
 
