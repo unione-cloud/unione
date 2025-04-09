@@ -4,6 +4,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
@@ -39,6 +40,7 @@ public class BaseDict extends Pojo {
 	/**
 	* 上级ID
 	*/
+	@JsonProperty("pid")
 	@Schema(title="上级ID",description="长度为：19")
 	private Long parentId;
 	/**

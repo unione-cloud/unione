@@ -2,11 +2,12 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.beetsql.annotation.QueryAction;
 import com.unione.cloud.beetsql.builder.SqlAction;
-import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +36,7 @@ public class SysGroup extends Pojo {
 	/**
 	* 上级分组ID
 	*/
+	@JsonProperty("pid")
 	@Schema(title="上级分组ID",description="长度为：19")
 	private Long parentId;
 	/**

@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
@@ -35,6 +36,7 @@ public class SysResource extends Pojo {
 	/**
 	* 上级菜单ID(根节点为-1)
 	*/
+	@JsonProperty("pid")
 	@Schema(title="上级菜单ID(根节点为-1)",description="长度为：19")
 	private Long parentId;
 	/**

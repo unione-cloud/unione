@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.beetsql.annotation.QueryAction;
 import com.unione.cloud.beetsql.builder.SqlAction;
@@ -32,6 +33,7 @@ public class SysPost extends Pojo {
 	/**
 	* 上级岗位ID
 	*/
+	@JsonProperty("pid")
 	@Schema(title="上级岗位ID",description="长度为：19")
 	private Long parentId;
 	/**
