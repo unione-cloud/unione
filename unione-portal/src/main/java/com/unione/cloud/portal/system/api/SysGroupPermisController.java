@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,9 +27,11 @@ import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.dto.GroupPermisDto;
 import com.unione.cloud.portal.system.model.SysGroup;
+import com.unione.cloud.portal.system.model.SysGroupPermis;
 import com.unione.cloud.portal.system.model.SysResource;
 import com.unione.cloud.portal.system.model.SysRole;
 import com.unione.cloud.portal.system.model.SysRolePermis;
+import com.unione.cloud.portal.system.model.SysUserPermis;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -99,13 +102,30 @@ public class SysGroupPermisController implements PojoFeignApi<GroupPermisDto>{
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前分组已有权限列表
+						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(rids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysGroupPermis.class)
+								.where("groupId=? and resId in [resIds]")
+								.params("groupId", entity.getGroupId())
+								.params("resIds", rids))
+								.stream().forEach(row->{
+									hdMap.add(row.getResId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysGroupPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setGroupId(entity.getGroupId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增分组权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
@@ -146,22 +166,39 @@ public class SysGroupPermisController implements PojoFeignApi<GroupPermisDto>{
 						}
 					}
 				}else{
-					// 资源分配，批量添加用户：
+					// 资源分配，批量添加分组：
 					SysResource target=dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getResId()));
 					AssertUtil.service().notNull(target, "资源不存在");
 					LogsUtil.setTarget(target.getId(), target.getTitle());
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前资源已有分组列表
+						Set<Long> uids = entity.getAddPermis().stream().map(row->row.getGroupId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(uids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysGroupPermis.class)
+								.where("resId=? and groupId in [groupIds]")
+								.params("resId", entity.getResId())
+								.params("groupId", uids))
+								.stream().forEach(row->{
+									hdMap.add(row.getUserId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysGroupPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getGroupId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setResId(entity.getResId());
 							row.setResType(entity.getResType());
 							row.setAppId(entity.getAppId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增分组权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){

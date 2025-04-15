@@ -2,9 +2,11 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +30,8 @@ import com.unione.cloud.portal.system.dto.UserPermisDto;
 import com.unione.cloud.portal.system.model.SysResource;
 import com.unione.cloud.portal.system.model.SysUser;
 import com.unione.cloud.portal.system.model.SysUserPermis;
-import com.unione.cloud.portal.system.model.SysUserPost;
 import com.unione.cloud.web.logs.LogsUtil;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -101,13 +101,30 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前用户已有权限列表
+						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(rids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
+								.where("userId=? and resId in [resIds]")
+								.params("userId", entity.getUserId())
+								.params("resIds", rids))
+								.stream().forEach(row->{
+									hdMap.add(row.getResId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysUserPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setUserId(entity.getUserId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增用户权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
@@ -155,15 +172,32 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前资源已有用户列表
+						Set<Long> uids = entity.getAddPermis().stream().map(row->row.getUserId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(uids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
+								.where("resId=? and userId in [userIds]")
+								.params("resId", entity.getResId())
+								.params("userIds", uids))
+								.stream().forEach(row->{
+									hdMap.add(row.getUserId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysUserPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getUserId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setResId(entity.getResId());
 							row.setResType(entity.getResType());
 							row.setAppId(entity.getAppId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增用户权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){

@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +29,7 @@ import com.unione.cloud.portal.system.dto.RolePermisDto;
 import com.unione.cloud.portal.system.model.SysResource;
 import com.unione.cloud.portal.system.model.SysRole;
 import com.unione.cloud.portal.system.model.SysRolePermis;
+import com.unione.cloud.portal.system.model.SysUserPermis;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -92,20 +94,37 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 			}else{
 				// 批量添加：
 				if(entity.getRoleId()!=null){
-					// 权限分配，批量添加用户权限
+					// 权限分配，批量添加角色权限
 					SysRole target=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
 					AssertUtil.service().notNull(target, "角色不存在");
 					LogsUtil.setTarget(target.getId(), target.getName());
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前角色已有权限列表
+						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(rids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
+								.where("roleId=? and resId in [resIds]")
+								.params("roleId", entity.getRoleId())
+								.params("resIds", rids))
+								.stream().forEach(row->{
+									hdMap.add(row.getResId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysRolePermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setRoleId(entity.getRoleId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增角色权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
@@ -153,15 +172,32 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前资源已有角色列表
+						Set<Long> uids = entity.getAddPermis().stream().map(row->row.getRoleId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(uids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
+								.where("resId=? and roleId in [roleIds]")
+								.params("resId", entity.getResId())
+								.params("roleIds", uids))
+								.stream().forEach(row->{
+									hdMap.add(row.getRoleId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysRolePermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getRoleId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setResId(entity.getResId());
 							row.setResType(entity.getResType());
 							row.setAppId(entity.getAppId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增角色权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){

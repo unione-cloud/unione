@@ -2,6 +2,7 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +30,7 @@ import com.unione.cloud.portal.system.model.SysPost;
 import com.unione.cloud.portal.system.model.SysPostPermis;
 import com.unione.cloud.portal.system.model.SysResource;
 import com.unione.cloud.portal.system.model.SysRolePermis;
+import com.unione.cloud.portal.system.model.SysUserPermis;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -93,20 +95,37 @@ public class SysPostPermisController implements PojoFeignApi<PostPermisDto>{
 			}else{
 				// 批量添加：
 				if(entity.getPostId()!=null){
-					// 权限分配，批量添加用户权限
+					// 权限分配，批量添加岗位权限
 					SysPost target=dataBaseDao.findById(SqlBuilder.build(SysPost.class,entity.getPostId()));
 					AssertUtil.service().notNull(target, "岗位不存在");
 					LogsUtil.setTarget(target.getId(), target.getName());
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前岗位已有权限列表
+						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(rids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysPostPermis.class)
+								.where("postId=? and resId in [resIds]")
+								.params("postId", entity.getPostId())
+								.params("resIds", rids))
+								.stream().forEach(row->{
+									hdMap.add(row.getResId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysPostPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setPostId(entity.getPostId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增岗位权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
@@ -154,15 +173,32 @@ public class SysPostPermisController implements PojoFeignApi<PostPermisDto>{
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
-						entity.getAddPermis().stream().forEach(row->{
+						// 加载当前资源已有岗位列表
+						Set<Long> uids = entity.getAddPermis().stream().map(row->row.getPostId()).collect(Collectors.toSet());
+						Set<Long> hdMap=new HashSet<>();
+						if(uids.size()>0) {
+							dataBaseDao.findList(SqlBuilder.build(SysPostPermis.class)
+								.where("resId=? and postId in [postIds]")
+								.params("resId", entity.getResId())
+								.params("postIds", uids))
+								.stream().forEach(row->{
+									hdMap.add(row.getPostId());
+								});
+						}
+						// 过滤已存在的权限
+						List<SysPostPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getPostId())).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setResId(entity.getResId());
 							row.setResType(entity.getResType());
 							row.setAppId(entity.getAppId());
-						});
-						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
-						int len = Arrays.stream(lens).sum();
-						addCount.addAndGet(len);
+							return row;
+						}).collect(Collectors.toList());
+						LogsUtil.add("新增岗位权限，数量：%s,可新增:%s",entity.getAddPermis().size(),adds.size());
+						if(adds.size()>0) {
+							int lens[] = dataBaseDao.insertBatch(adds);
+							int len = Arrays.stream(lens).sum();
+							addCount.addAndGet(len);
+						}
 					}
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
