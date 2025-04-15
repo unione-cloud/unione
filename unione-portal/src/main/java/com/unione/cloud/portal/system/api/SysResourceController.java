@@ -253,6 +253,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setPid(-1L);
 			node.setTitle(row.getName());
 			node.setIcon(row.getIcon());
+			node.setAppId(row.getId());
 			nodes.add(node);
 		});
 		resList.stream().forEach(row->{
@@ -260,6 +261,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			BeanUtils.copyProperties(row,node);
 			node.setNtype(row.getTypes());
 			node.setPid(row.getParentId());
+			node.setAppId(row.getAppId());
 			if(ObjectUtil.equal(-1L, row.getParentId())){
 				node.setPid(row.getAppId());
 			}
