@@ -59,7 +59,7 @@ public class SysPostPermisController implements PojoFeignApi<PostPermisDto>{
 	public Results<List<PostPermisDto>> find(Params<PostPermisDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<PostPermisDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<PostPermisDto>> results = dataBaseDao.findPages(params);
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
