@@ -1,5 +1,7 @@
 package com.unione.cloud.portal.system.dto;
 
+import java.util.List;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
@@ -27,5 +29,14 @@ public class PostPermisDto extends SysPostPermis{
 
     @Schema(title="岗位状态，字典USEORNOT 1使用，0停用",description="长度为：10")
 	private Integer status;
+
+	@Schema(title="新增资源权限列表",description="")
+	private List<SysPostPermis> addPermis;
+
+	@Schema(title="删除资源权限列表",description="")
+	private List<Long> delPermis;
+
+	@Schema(title="修改资源权限列表",description="")
+	private List<SysPostPermis> editPermis;
 
 }

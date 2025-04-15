@@ -1,8 +1,11 @@
 package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -18,10 +21,18 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.portal.system.dto.UserPermisDto;
+import com.unione.cloud.portal.system.model.SysResource;
+import com.unione.cloud.portal.system.model.SysUser;
+import com.unione.cloud.portal.system.model.SysUserPermis;
+import com.unione.cloud.portal.system.model.SysUserPost;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +51,9 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
@@ -58,17 +72,149 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 	@Override
 	@Action(title="保存用户权限",type = ActionType.Save,roles = {UserRoles.ORGANADMIN,UserRoles.SYS3PAUTH})
 	public Results<Long> save(@Validated(Validator.save.class) UserPermisDto entity) {
-		// 参数处理
-		int len = 0;
+		Results<Long> results=Results.success();
+		AtomicInteger addCount = new AtomicInteger(0);
+		AtomicInteger editCount = new AtomicInteger(0);
+		AtomicInteger delCount = new AtomicInteger(0);
 		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
+			// 参数处理
+			if(entity.getUserId()!=null && entity.getResId()!=null){
+				// 单个添加：
+				AssertUtil.service().notNull(entity.getAppId(), "资源id不能为空");
+				AssertUtil.service().notNull(entity.getResType(), "资源类型不能为空");
+				BeanUtils.setDefaultValue(entity, "enDilivery",0);
+				
+				SysUser user=dataBaseDao.findById(SqlBuilder.build(SysUser.class,entity.getUserId()));
+				AssertUtil.service().notNull(user, "用户不存在");
+				SysResource res=dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getResId()));
+				AssertUtil.service().notNull(res, "资源不存在");
+				
+				int len = dataBaseDao.insert(entity);
+				addCount.addAndGet(len);
+			}else{
+				// 批量添加：
+				if(entity.getUserId()!=null){
+					// 权限分配，批量添加用户权限
+					SysUser target=dataBaseDao.findById(SqlBuilder.build(SysUser.class,entity.getUserId()));
+					AssertUtil.service().notNull(target, "用户不存在");
+					LogsUtil.setTarget(target.getId(), target.getUsername());
+
+					// 批量添加：
+					if(entity.getAddPermis()!=null){
+						entity.getAddPermis().stream().forEach(row->{
+							BeanUtils.setDefaultValue(row, "enDilivery",0);
+							row.setUserId(entity.getUserId());
+						});
+						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
+						int len = Arrays.stream(lens).sum();
+						addCount.addAndGet(len);
+					}
+					// 批量修改：
+					if(entity.getEditPermis()!=null){
+						entity.getEditPermis().stream()
+							.filter(row->ObjectUtil.equal(row.getUserId(), entity.getUserId()))
+							.filter(row->row.getId()!=null)
+							.forEach(row->{
+							BeanUtils.setDefaultValue(row, "enDilivery",0);
+							if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+								row.setTenantId(sessionService.getTenantId());
+								if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+									!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+									row.setOrgId(sessionService.getOrgId());
+								}
+							}
+							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
+							editCount.addAndGet(len);
+						});
+					}
+					// 批量删除：
+					if(entity.getDelPermis()!=null){
+						SysUserPermis ups=new SysUserPermis();
+						if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+							ups.setTenantId(sessionService.getTenantId());
+							if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+								!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+								ups.setOrgId(sessionService.getOrgId());
+							}
+						}
+						List<SysUserPermis> list = dataBaseDao.findByIds(SqlBuilder.build(ups).ids(entity.getDelPermis()));
+						List<Long> dels = list.stream()
+							.filter(row->ObjectUtil.equal(row.getUserId(), entity.getUserId()))
+							.map(SysUserPermis::getId).collect(Collectors.toList());
+						LogsUtil.add("删除用户权限，数量：%s,可删除:%s",entity.getDelPermis().size(),dels.size());
+						if(dels.size()>0) {
+							int len = dataBaseDao.deleteById(SqlBuilder.build(SysUserPermis.class, dels));
+							delCount.addAndGet(len);
+						}
+					}
+				}else{
+					// 资源分配，批量添加用户：
+					SysResource target=dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getResId()));
+					AssertUtil.service().notNull(target, "资源不存在");
+					LogsUtil.setTarget(target.getId(), target.getTitle());
+
+					// 批量添加：
+					if(entity.getAddPermis()!=null){
+						entity.getAddPermis().stream().forEach(row->{
+							BeanUtils.setDefaultValue(row, "enDilivery",0);
+							row.setResId(entity.getResId());
+						});
+						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
+						int len = Arrays.stream(lens).sum();
+						addCount.addAndGet(len);
+					}
+					// 批量修改：
+					if(entity.getEditPermis()!=null){
+						entity.getEditPermis().stream()
+							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId()))
+							.filter(row->row.getId()!=null)
+							.forEach(row->{
+							BeanUtils.setDefaultValue(row, "enDilivery",0);
+							if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+								row.setTenantId(sessionService.getTenantId());
+								if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+									!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+									row.setOrgId(sessionService.getOrgId());
+								}
+							}
+							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
+							editCount.addAndGet(len);
+						});
+					}
+					// 批量删除：
+					if(entity.getDelPermis()!=null){
+						SysUserPermis ups=new SysUserPermis();
+						if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+							ups.setTenantId(sessionService.getTenantId());
+							if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+								!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+								ups.setOrgId(sessionService.getOrgId());
+							}
+						}
+						List<SysUserPermis> list = dataBaseDao.findByIds(SqlBuilder.build(ups).ids(entity.getDelPermis()));
+						List<Long> dels = list.stream()
+							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId()))
+							.map(SysUserPermis::getId).collect(Collectors.toList());
+						LogsUtil.add("删除用户权限，数量：%s,可删除:%s",entity.getDelPermis().size(),dels.size());
+						if(dels.size()>0) {
+							int len = dataBaseDao.deleteById(SqlBuilder.build(SysUserPermis.class, dels));
+							delCount.addAndGet(len);
+						}
+					}
+				}
+			}
 		}else {
-			String[] fields = {"userId","appId","resId","resType","enDilivery"};
+			// 权限单独修改
+			String[] fields = {"enDilivery"};
 			SqlBuilder<UserPermisDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
-			len = dataBaseDao.updateById(sqlBuilder);
+			int len = dataBaseDao.updateById(sqlBuilder);
+			editCount.addAndGet(len);
 		}
 		
-		return Results.build(len>0, entity.getId());
+		String message=String.format("新增:%s,修改:%s,删除:%s",addCount.get(),editCount.get(),delCount.get());
+		results.setMessage(message);
+		LogsUtil.add(message);
+		return results;
 	}
 
 

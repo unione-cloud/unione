@@ -1,8 +1,11 @@
 package com.unione.cloud.portal.system.dto;
 
+import java.util.List;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.system.model.SysUserPermis;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,4 +31,13 @@ public class UserPermisDto extends SysUserPermis{
 
     @Schema(title="用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定",description="长度为：10")
 	private Integer status;
+
+	@Schema(title="新增资源权限列表",description="")
+	private List<SysUserPermis> addPermis;
+
+	@Schema(title="删除资源权限列表",description="")
+	private List<Long> delPermis;
+
+	@Schema(title="修改资源权限列表",description="")
+	private List<SysUserPermis> editPermis;
 }
