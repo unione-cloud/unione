@@ -156,6 +156,8 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 						entity.getAddPermis().stream().forEach(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setResId(entity.getResId());
+							row.setResType(entity.getResType());
+							row.setAppId(entity.getAppId());
 						});
 						int lens[] = dataBaseDao.insertBatch(entity.getAddPermis());
 						int len = Arrays.stream(lens).sum();
