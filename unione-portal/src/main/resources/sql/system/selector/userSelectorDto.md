@@ -142,3 +142,12 @@ FROM SYS_USER U
 LEFT JOIN SYS_USER_POST UP ON UP.USER_ID=U.ID 
 WHERE U.STATUS=1 AND U.ID IN (#{join(params.ids)}) AND (UP.POST_ID=#{params.targetId} AND UP.STATUS=1)
 ```
+
+checkpermisUser
+===
+```sql
+SELECT U.ID
+FROM SYS_USER U
+LEFT JOIN SYS_USER_PERMIS UP ON UP.USER_ID=U.ID 
+WHERE U.STATUS=1 AND U.ID IN (#{join(params.ids)}) AND UP.RES_ID=#{params.targetId}
+```

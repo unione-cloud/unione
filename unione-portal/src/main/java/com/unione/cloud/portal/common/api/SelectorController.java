@@ -14,10 +14,17 @@ import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.portal.common.dto.TreeNodeDto;
+import com.unione.cloud.portal.common.dto.SelectorGroupDto;
+import com.unione.cloud.portal.common.dto.SelectorGroupParam;
+import com.unione.cloud.portal.common.dto.SelectorOrganDto;
+import com.unione.cloud.portal.common.dto.SelectorOrganParam;
+import com.unione.cloud.portal.common.dto.SelectorPostDto;
+import com.unione.cloud.portal.common.dto.SelectorPostParam;
 import com.unione.cloud.portal.common.dto.SelectorRoleDto;
+import com.unione.cloud.portal.common.dto.SelectorRoleParam;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
+import com.unione.cloud.portal.common.dto.TreeNodeDto;
 import com.unione.cloud.portal.common.service.SelectorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,13 +73,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/role/node/{type}")
+    @PostMapping("/role/node")
     @Action(title="选择器:角色节点",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:角色节点", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<SelectorRoleDto>> roleNode(@PathVariable("type") Integer type,@RequestBody Params<Void> params) {
+    public Results<List<SelectorRoleDto>> roleNode(@RequestBody Params<SelectorRoleParam> params) {
         log.debug("进入:角色节点查询接口,参数:{}", params);
 
-        Results<List<SelectorRoleDto>> results = selectorService.roleNode(type, params);
+        Results<List<SelectorRoleDto>> results = selectorService.roleNode(params);
 
         log.debug("退出:角色节点查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -102,13 +109,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/organ/tree/{type}")
+    @PostMapping("/organ/tree")
     @Action(title="选择器:机构树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:机构树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<TreeNodeDto>> organTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
-        log.debug("进入:机构树查询接口,参数:type:{}, params:{}",type, params);
+    public Results<List<SelectorOrganDto>> organTree(@RequestBody Params<SelectorOrganParam> params) {
+        log.debug("进入:机构树查询接口,参数:type:{}, params:{}",params.getBody().getOtype(), params);
 
-        Results<List<TreeNodeDto>> results = selectorService.organTree(type,params);
+        Results<List<SelectorOrganDto>> results = selectorService.organTree(params);
 
         log.debug("退出:机构树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -119,13 +126,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/group/tree/{type}")
+    @PostMapping("/group/tree")
     @Action(title="选择器:分组树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:分组树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<TreeNodeDto>> groupTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
-        log.debug("进入:分组树查询接口,参数:type:{},param:{}",type, params);
+    public Results<List<SelectorGroupDto>> groupTree(@RequestBody Params<SelectorGroupParam> params) {
+        log.debug("进入:分组树查询接口,参数:type:{},param:{}",params.getBody().getGtype(), params);
 
-        Results<List<TreeNodeDto>> results = selectorService.groupTree(type,params);
+        Results<List<SelectorGroupDto>> results = selectorService.groupTree(params);
 
         log.debug("退出:分组树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
@@ -136,13 +143,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/post/tree/{type}")
+    @PostMapping("/post/tree")
     @Action(title="选择器:岗位树",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:岗位树", description = "参数：类型type<=0：全部，大于0：指定类型")
-    public Results<List<TreeNodeDto>> postTree(@PathVariable("type") Integer type,@RequestBody Params<Long> params) {
-        log.debug("进入:岗位树查询接口,参数:type:{},param:{}",type, params);
+    public Results<List<SelectorPostDto>> postTree(@RequestBody Params<SelectorPostParam> params) {
+        log.debug("进入:岗位树查询接口,参数:type:{},param:{}",params.getBody().getPtype(), params);
 
-        Results<List<TreeNodeDto>> results = selectorService.postTree(type,params);
+        Results<List<SelectorPostDto>> results = selectorService.postTree(params);
 
         log.debug("退出:岗位树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;

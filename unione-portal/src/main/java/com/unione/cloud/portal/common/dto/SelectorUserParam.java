@@ -1,6 +1,5 @@
 package com.unione.cloud.portal.common.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.beetl.sql.mapper.annotation.SqlResource;
@@ -18,24 +17,13 @@ import lombok.Data;
  */
 @Data
 @Schema(title="用户选择查询对象")
-@SqlResource("system.userSelectorDto")
-public class SelectorUserParam implements Serializable{
-    private static final long serialVersionUID = 1L;
-
-    @Schema(title="上级主键ID",description="长度为：19")
-    private Long pid;
-
-    @Schema(title="节点类型",description="organ：机构，role：角色，group：分组，post：岗位，user：用户")
+@SqlResource("system.selector.userSelectorDto")
+public class SelectorUserParam extends SelectorParam{
+    
+    @Schema(title="节点类型",description="organ：机构，role：角色，group：分组，post：岗位，user：用户,permis:权限")
     private String ntype;
-
-    @Schema(title="目标类型",description="organ：机构，role：角色，group：分组，post：岗位")
-    private String targetType;
-
-    @Schema(title="目标ID",description="长度为：19")
-    private Long targetId;
-
+    
     @JsonIgnore
     @Schema(title="主键集合")
     private List<Long> ids;
-
 }

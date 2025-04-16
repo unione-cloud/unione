@@ -67,3 +67,12 @@ WHERE STATUS=1 AND TENANT_ID = #{params.tenantId} AND (
   AND TYPES = #{params.types}
 -- @}
 ```
+
+checkpermisRole
+===
+```sql
+SELECT R.ID
+FROM SYS_ROLE R
+LEFT JOIN SYS_ROLE_PERMIS RP ON RP.ROLE_ID=R.ID 
+WHERE R.STATUS=1 AND R.ID IN (#{join(params.ids)}) AND RP.RES_ID=#{params.targetId}
+```

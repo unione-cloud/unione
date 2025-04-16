@@ -15,7 +15,7 @@ import lombok.Data;
  */
 @Data
 @Schema(title="角色选择Dto")
-@SqlResource("system.roleSelectorDto")
+@SqlResource("system.selector.roleSelectorDto")
 public class SelectorRoleDto extends TreeNodeDto{
     private static final long serialVersionUID = 1L;
 

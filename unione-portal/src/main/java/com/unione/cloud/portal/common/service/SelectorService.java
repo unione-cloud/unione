@@ -19,14 +19,20 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.portal.common.dto.TreeNodeDto;
+import com.unione.cloud.portal.common.dto.SelectorGroupDto;
+import com.unione.cloud.portal.common.dto.SelectorGroupParam;
+import com.unione.cloud.portal.common.dto.SelectorOrganDto;
+import com.unione.cloud.portal.common.dto.SelectorOrganParam;
+import com.unione.cloud.portal.common.dto.SelectorPostDto;
+import com.unione.cloud.portal.common.dto.SelectorPostParam;
 import com.unione.cloud.portal.common.dto.SelectorRoleDto;
+import com.unione.cloud.portal.common.dto.SelectorRoleParam;
 import com.unione.cloud.portal.common.dto.SelectorUserDto;
 import com.unione.cloud.portal.common.dto.SelectorUserParam;
+import com.unione.cloud.portal.common.dto.TreeNodeDto;
 import com.unione.cloud.portal.system.model.SysGroup;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysPost;
-import com.unione.cloud.portal.system.model.SysRole;
 import com.unione.cloud.portal.system.model.SysUserRole;
 
 import lombok.extern.slf4j.Slf4j;
@@ -94,23 +100,37 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorRoleDto>> roleNode(Integer type,Params<Void> params){
-        log.debug("进入：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
+    public Results<List<SelectorRoleDto>> roleNode(Params<SelectorRoleParam> params){
+        log.debug("进入：查询角色节点方法,type:{},keyword:{}",params.getBody().getRtype(),params.getKeywords());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
         builder.params("tenantId", sessionService.getTenantId());
         builder.params("orgId", sessionService.getOrgId());
         builder.params("keywords", params.getKeywords());
         builder.page(params.getPage()).pageSize(params.getPageSize());
-        if(type!=null && type>0){
-            builder.params("types", type);
+        if(params.getBody().getRtype()!=null && params.getBody().getRtype()>0){
+            builder.params("types", params.getBody().getRtype());
         }
         Results<List<SelectorRoleDto>> results=dataBaseDao.findPages("selectRolePage4Use","countRole4Use",builder);
+       
+        // 验证角色是否已经在目标中
+        if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
+            List<Long> uids = results.getBody().stream().map(SelectorRoleDto::getId).collect(Collectors.toList());
+            if(uids.size()>0){
+                params.getBody().setIds(uids);
+                Map<String,SelectorRoleDto> hadMap = dataBaseDao.findMap(String.format("check%sRole", params.getBody().getTargetType()),params.getBody(),SelectorRoleDto.class,"id");
+                results.getBody().forEach(user->{
+                    if(hadMap.containsKey(user.getId().toString())){
+                        user.setChecked(true);
+                    }
+                });
+            }
+        }
         results.getBody().forEach(role->{
             role.setNtype("role");
         });
 
-        log.debug("退出：查询角色节点方法,type:{},keyword:{}",type,params.getKeywords());
+        log.debug("退出：查询角色节点方法,type:{},keyword:{}",params.getBody().getRtype(),params.getKeywords());
         return results;
     }
 
@@ -171,35 +191,48 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<TreeNodeDto>> organTree(Integer type,Params<Long> params){
-        log.debug("进入：查询机构树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<TreeNodeDto> list=new ArrayList<>();
+    public Results<List<SelectorOrganDto>> organTree(Params<SelectorOrganParam> params){
+        log.debug("进入：查询机构树方法,type:{},parentId:{},keyword:{}",params.getBody().getOtype(),params.getBody(),params.getKeywords());
+        List<SelectorOrganDto> list=new ArrayList<>();
         
         Params<SysOrgan> queryOrgan = Params.build(SysOrgan.class);
         queryOrgan.setPage(params.getPage());
         queryOrgan.setPageSize(params.getPageSize());
-        queryOrgan.getBody().setParentId(params.getBody());
+        queryOrgan.getBody().setParentId(params.getBody().getPid());
         queryOrgan.getBody().setName(params.getKeywords());
-        if(type!=null && type>0){
-            queryOrgan.getBody().setTypes(type);
+        if(params.getBody().getOtype()!=null && params.getBody().getOtype()>0){
+            queryOrgan.getBody().setTypes(params.getBody().getOtype());
         }
         Results<List<SysOrgan>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
+         // 验证机构是否已经在目标中
+         Map<String,SelectorOrganDto> hadMap = null;
+         if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
+            List<Long> uids = results.getBody().stream().map(SysOrgan::getId).collect(Collectors.toList());
+            if(uids.size()>0){
+                params.getBody().setIds(uids);
+                hadMap = dataBaseDao.findMap(String.format("check%sOrgan", params.getBody().getTargetType()),params.getBody(),SelectorOrganDto.class,"id");
+            }
+        }
+
         if(results.isSuccess()){
             for(SysOrgan organ:results.getBody()){
-                TreeNodeDto dto=new TreeNodeDto();
+                SelectorOrganDto dto=new SelectorOrganDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
                 dto.setNtype("organ");
+                if(hadMap!=null && hadMap.containsKey(organ.getId().toString())){
+                    dto.setChecked(true);
+                }
                 list.add(dto);
             }
         }
 
-        log.debug("退出：查询机构树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
+        log.debug("退出：查询机构树方法,type:{},parentId:{},keyword:{}",params.getBody().getOtype(),params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
@@ -213,35 +246,47 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<TreeNodeDto>> groupTree(Integer type, Params<Long> params){
-        log.debug("进入：查询分组树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<TreeNodeDto> list=new ArrayList<>();
+    public Results<List<SelectorGroupDto>> groupTree(Params<SelectorGroupParam> params){
+        log.debug("进入：查询分组树方法,type:{},parentId:{},keyword:{}",params.getBody().getGtype(),params.getBody(),params.getKeywords());
+        List<SelectorGroupDto> list=new ArrayList<>();
         
         Params<SysGroup> queryGroup = Params.build(SysGroup.class);
         queryGroup.setPage(params.getPage());
         queryGroup.setPageSize(params.getPageSize());
-        queryGroup.getBody().setParentId(params.getBody());
+        queryGroup.getBody().setParentId(params.getBody().getPid());
         queryGroup.getBody().setName(params.getKeywords());
-        if(type!=null && type>0){
-            queryGroup.getBody().setTypes(type);
+        if(params.getBody().getGtype()!=null && params.getBody().getGtype()>0){
+            queryGroup.getBody().setTypes(params.getBody().getGtype());
         }
         Results<List<SysGroup>> results=dataBaseDao.findPages(SqlBuilder.build(queryGroup)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
+         // 验证分组是否已经在目标中
+         Map<String,SelectorGroupDto> hadMap = null;
+         if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
+            List<Long> uids = results.getBody().stream().map(SysGroup::getId).collect(Collectors.toList());
+            if(uids.size()>0){
+                params.getBody().setIds(uids);
+                hadMap = dataBaseDao.findMap(String.format("check%sGroup", params.getBody().getTargetType()),params.getBody(),SelectorGroupDto.class,"id");
+            }
+        }    
         if(results.isSuccess()){
             for(SysGroup organ:results.getBody()){
-                TreeNodeDto dto=new TreeNodeDto();
+                SelectorGroupDto dto=new SelectorGroupDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
                 dto.setNtype("group");
+                if(hadMap!=null && hadMap.containsKey(organ.getId().toString())){
+                    dto.setChecked(true); 
+                }
                 list.add(dto);
             }
         }
 
-        log.debug("退出：查询分组树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
+        log.debug("退出：查询分组树方法,type:{},parentId:{},keyword:{}",params.getBody().getGtype(),params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
@@ -255,35 +300,48 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<TreeNodeDto>> postTree(Integer type, Params<Long> params){
-        log.debug("进入：查询岗位树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
-        List<TreeNodeDto> list=new ArrayList<>();
+    public Results<List<SelectorPostDto>> postTree(Params<SelectorPostParam> params){
+        log.debug("进入：查询岗位树方法,type:{},parentId:{},keyword:{}",params.getBody().getPtype(),params.getBody(),params.getKeywords());
+        List<SelectorPostDto> list=new ArrayList<>();
         
         Params<SysPost> queryPost = Params.build(SysPost.class);
         queryPost.setPage(params.getPage());
         queryPost.setPageSize(params.getPageSize());
-        queryPost.getBody().setParentId(params.getBody());
+        queryPost.getBody().setParentId(params.getBody().getPid());
         queryPost.getBody().setName(params.getKeywords());
-        if(type!=null && type>0){
-            queryPost.getBody().setTypes(type);
+        if(params.getBody().getPtype()!=null && params.getBody().getPtype()>0){
+            queryPost.getBody().setTypes(params.getBody().getPtype());
         }
         Results<List<SysPost>> results=dataBaseDao.findPages(SqlBuilder.build(queryPost)
             .field("name","id","parentId")
             .where("status=1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
+        // 验证分组是否已经在目标中
+        Map<String,SelectorPostDto> hadMap = null;
+         if(Objects.nonNull(params.getBody().getTargetType()) && Objects.nonNull(params.getBody().getTargetId())){
+            List<Long> uids = results.getBody().stream().map(SysPost::getId).collect(Collectors.toList());
+            if(uids.size()>0){
+                params.getBody().setIds(uids);
+                hadMap = dataBaseDao.findMap(String.format("check%sPost", params.getBody().getTargetType()),params.getBody(),SelectorPostDto.class,"id");
+            }
+        }    
+
         if(results.isSuccess()){
             for(SysPost organ:results.getBody()){
-                TreeNodeDto dto=new TreeNodeDto();
+                SelectorPostDto dto=new SelectorPostDto();
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
                 dto.setNtype("organ");
+                if(hadMap!=null && hadMap.containsKey(organ.getId().toString())){
+                    dto.setChecked(true); 
+                }
                 list.add(dto);
             }
         }
 
-        log.debug("退出：查询岗位树方法,type:{},parentId:{},keyword:{}",type,params.getBody(),params.getKeywords());
+        log.debug("退出：查询岗位树方法,type:{},parentId:{},keyword:{}",params.getBody().getPtype(),params.getBody(),params.getKeywords());
         return Results.success(list)
             .setTotal(results.getTotal())
             .setPage(results.getPage())
