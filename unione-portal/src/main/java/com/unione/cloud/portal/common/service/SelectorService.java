@@ -224,6 +224,9 @@ public class SelectorService {
                 dto.setId(organ.getId());
                 dto.setPid(organ.getParentId());
                 dto.setTitle(organ.getName());
+                dto.setSn(organ.getSn());
+                dto.setOtype(organ.getTypes());
+                dto.setDescs(organ.getDescs());
                 dto.setNtype("organ");
                 if(hadMap!=null && hadMap.containsKey(organ.getId().toString())){
                     dto.setChecked(true);
