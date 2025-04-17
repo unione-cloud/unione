@@ -204,7 +204,7 @@ public class SelectorService {
             queryOrgan.getBody().setTypes(params.getBody().getOtype());
         }
         Results<List<SysOrgan>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
-            .field("name","id","parentId")
+            .field("name","id","parentId","sn","types","descs")
             .where("status=1 and parentId=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
