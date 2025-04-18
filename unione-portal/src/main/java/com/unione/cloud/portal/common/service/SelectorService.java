@@ -142,15 +142,15 @@ public class SelectorService {
      * @param params
      * @return
      */
-    public Results<List<SelectorRoleDto>> roleList(String type,Params<Long> params){
-        log.debug("进入：查询角色列表方法,type:{},target id:{}",type,params.getBody());
+    public Results<List<SelectorRoleDto>> roleList(Params<SelectorRoleParam> params){
+        log.debug("进入：查询角色列表方法,type:{},target id:{}",params.getBody().getTargetType(),params.getBody());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
         builder.params("tenantId", sessionService.getTenantId());
         builder.params("orgId", sessionService.getOrgId());
 
         String sqlName="selectRole4Use";
-        if(Objects.equals(type, "permis") || Objects.equals(type, "assign")){
+        if(Objects.equals(params.getBody().getTargetType(), "permis") || Objects.equals(params.getBody().getTargetType(), "assign")){
             sqlName="selectRole4Auth";
             if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
                 builder.params("isTenantAdmin", true);
@@ -166,7 +166,7 @@ public class SelectorService {
         });
 
         // 角色授权模式下，加载当前用户有角色列表
-        if(Objects.equals(type, "permis") && !Objects.isNull(params.getBody())){
+        if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody())){
             // 加载当前用户有角色列表
             SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
             query.params("userId", params.getBody());
@@ -181,7 +181,7 @@ public class SelectorService {
             });
         }
         
-        log.debug("退出：查询角色列表方法,type:{},target id:{},len:{}",type,params.getBody(),rows.size());
+        log.debug("退出：查询角色列表方法,type:{},target id:{},len:{}",params.getBody().getTargetType(),params.getBody(),rows.size());
         return Results.success(rows).setTotal(rows.size());
     }
     

@@ -91,13 +91,13 @@ public class SelectorController {
      * @param params
      * @return
      */
-    @PostMapping("/role/list/{type}")
+    @PostMapping("/role/list")
     @Action(title="选择器:角色列表",type = ActionType.Query,nolog = true)
     @Operation(summary = "选择器:角色列表", description = "参数：类型type=permis授权,use:角色使用")
-    public Results<List<SelectorRoleDto>> roleList(@PathVariable("type") String type,@RequestBody Params<Long> params) {
+    public Results<List<SelectorRoleDto>> roleList(@RequestBody Params<SelectorRoleParam> params) {
         log.debug("进入:角色列表查询接口,参数:{}", params);
 
-        Results<List<SelectorRoleDto>> results = selectorService.roleList(type, params);
+        Results<List<SelectorRoleDto>> results = selectorService.roleList(params);
 
         log.debug("退出:角色列表查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
