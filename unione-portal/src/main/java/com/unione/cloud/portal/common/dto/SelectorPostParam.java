@@ -2,6 +2,8 @@ package com.unione.cloud.portal.common.dto;
 
 import java.util.List;
 
+import org.beetl.sql.mapper.annotation.SqlResource;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +17,7 @@ import lombok.Data;
  */
 @Data
 @Schema(title="岗位选择查询对象")
+@SqlResource("system.selector.postSelectorDto")
 public class SelectorPostParam extends SelectorParam{
     
     @Schema(title="岗位类型",description = "小于等于0：全部，大于0：指定类型")

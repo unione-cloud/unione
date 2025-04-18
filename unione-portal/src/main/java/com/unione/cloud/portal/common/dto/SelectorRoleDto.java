@@ -1,9 +1,5 @@
 package com.unione.cloud.portal.common.dto;
 
-import java.io.Serializable;
-
-import org.beetl.sql.mapper.annotation.SqlResource;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -15,7 +11,6 @@ import lombok.Data;
  */
 @Data
 @Schema(title="角色选择Dto")
-@SqlResource("system.selector.roleSelectorDto")
 public class SelectorRoleDto extends TreeNodeDto{
     private static final long serialVersionUID = 1L;
 
