@@ -143,7 +143,7 @@ public class SelectorService {
      * @return
      */
     public Results<List<SelectorRoleDto>> roleList(Params<SelectorRoleParam> params){
-        log.debug("进入：查询角色列表方法,type:{},target id:{}",params.getBody().getTargetType(),params.getBody());
+        log.debug("进入：查询角色列表方法,type:{},target id:{}",params.getBody().getTargetType(),params.getBody().getTargetId());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
         builder.params("tenantId", sessionService.getTenantId());
@@ -166,10 +166,10 @@ public class SelectorService {
         });
 
         // 角色授权模式下，加载当前用户有角色列表
-        if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody())){
+        if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody().getTargetId())){
             // 加载当前用户有角色列表
             SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
-            query.params("userId", params.getBody());
+            query.params("userId", params.getBody().getTargetId());
             Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
                 .collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
             rows.forEach(role->{
@@ -181,7 +181,7 @@ public class SelectorService {
             });
         }
         
-        log.debug("退出：查询角色列表方法,type:{},target id:{},len:{}",params.getBody().getTargetType(),params.getBody(),rows.size());
+        log.debug("退出：查询角色列表方法,type:{},target id:{},len:{}",params.getBody().getTargetType(),params.getBody().getTargetId(),rows.size());
         return Results.success(rows).setTotal(rows.size());
     }
     
