@@ -33,6 +33,7 @@ import com.unione.cloud.portal.common.dto.TreeNodeDto;
 import com.unione.cloud.portal.system.model.SysGroup;
 import com.unione.cloud.portal.system.model.SysOrgan;
 import com.unione.cloud.portal.system.model.SysPost;
+import com.unione.cloud.portal.system.model.SysRolePermis;
 import com.unione.cloud.portal.system.model.SysUserRole;
 
 import lombok.extern.slf4j.Slf4j;
@@ -165,8 +166,8 @@ public class SelectorService {
             role.setNtype("role");
         });
 
-        // 角色授权模式下，加载当前用户有角色列表
-        if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody().getTargetId())){
+        // 角色分配模式下，加载当前用户已有角色列表
+        if(Objects.equals(params.getBody().getTargetType(), "assign") && !Objects.isNull(params.getBody().getTargetId())){
             // 加载当前用户有角色列表
             SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
             query.params("userId", params.getBody().getTargetId());
@@ -177,6 +178,22 @@ public class SelectorService {
                 if(uRole!=null){
                     role.setChecked(true);
                     role.setEnDilivery(uRole.getEnDilivery());
+                }
+            });
+        }
+
+        // 角色授权模式下，加载目标资源已有角色列表
+        if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody().getTargetId())){
+            // 加载当前资源有角色列表
+            SqlBuilder<SysRolePermis> query=SqlBuilder.build(SysRolePermis.class);
+            query.params("resId", params.getBody().getTargetId());
+            Map<Long,SysRolePermis> uRoles=dataBaseDao.findList(query).stream()
+                .collect(Collectors.toMap(SysRolePermis::getRoleId, role->role));
+            rows.forEach(role->{
+                SysRolePermis rpermis=uRoles.get(role.getId());
+                if(rpermis!=null){
+                    role.setChecked(true);
+                    role.setEnDilivery(rpermis.getEnDilivery());
                 }
             });
         }
