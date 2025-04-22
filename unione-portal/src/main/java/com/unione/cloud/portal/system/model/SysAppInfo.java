@@ -90,6 +90,16 @@ public class SysAppInfo extends Pojo {
 	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
 	/**
+	* 行业分类
+	*/
+	@Schema(title="行业分类",description="行业分类，多个逗号分隔")
+	private String trades;
+	/**
+	* 应用类型
+	*/
+	@Schema(title="应用类型",description="字典APPTYPES pc：PC，app：APP")
+	private String types;
+	/**
 	* 是否平台应用，字典 TUREORFALSE 1是，0否
 	*/
 	@Schema(title="是否平台应用，字典 TUREORFALSE 1是，0否",description="长度为：10")

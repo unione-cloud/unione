@@ -68,7 +68,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","isPlatform","status","descs"};
+			String[] fields = {"name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","trades","types","isPlatform","status","descs"};
 			SqlBuilder<SysAppInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}

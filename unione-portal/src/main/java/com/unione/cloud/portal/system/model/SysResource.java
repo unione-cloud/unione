@@ -63,6 +63,11 @@ public class SysResource extends Pojo {
 	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
 	private String types;
 	/**
+	* 资源发布，字典APPTYPES pc：PC，app：APP
+	*/
+	@Schema(title="资源发布，字典APPTYPES pc：PC，app：APP具",description="长度为：20")
+	private String release;
+	/**
 	* 资源URL地址
 	*/
 	@KeyWords
