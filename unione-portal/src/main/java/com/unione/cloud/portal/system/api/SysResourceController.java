@@ -82,6 +82,13 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	public Results<Long> save(@Validated(Validator.save.class) SysResource entity) {
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
+		BeanUtils.setDefaultValue(entity, "isLeaf",1);
+		BeanUtils.setDefaultValue(entity, "isHide",0);
+		BeanUtils.setDefaultValue(entity, "isNeedPermis",1);
+		BeanUtils.setDefaultValue(entity, "isPlatform",0);
+		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "ordered",0);
+
 		if(!Objects.equals(-1L, entity.getParentId())) {
 			SysResource parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
@@ -95,7 +102,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"appId","parentId","name","title","alias","types","release","url","isIframe","isExternal","isHide","isLeaf","isNeedPermis","isPlatform","icon","picMax","picMid","picMix","ordered","status","descs","configs"};
+			String[] fields = {"appId","parentId","name","title","alias","types","url","isIframe","isExternal","isHide","isLeaf","isNeedPermis","isPlatform","icon","picMax","picMid","picMix","ordered","status","descs","configs"};
 			SqlBuilder<SysResource> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}
