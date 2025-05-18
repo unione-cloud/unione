@@ -2,11 +2,12 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,22 +100,31 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 					AssertUtil.service().notNull(target, "用户不存在");
 					LogsUtil.setTarget(target.getId(), target.getUsername());
 
+					// 加载用户已有权限集合
+					Map<Long,SysUserPermis> hdMap=new HashMap<>();
+					dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
+						.where("userId=?")
+						.params("userId", entity.getUserId()))
+						.stream().forEach(row->{
+							if(hdMap.containsKey(row.getResId())){
+								entity.getDelPermis().add(row.getId());
+							}
+							hdMap.put(row.getResId(),row);
+						});
+
 					// 批量添加：
-					if(entity.getAddPermis()!=null){
-						// 加载当前用户已有权限列表
-						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
-						Set<Long> hdMap=new HashSet<>();
-						if(rids.size()>0) {
-							dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
-								.where("userId=? and resId in [resIds]")
-								.params("userId", entity.getUserId())
-								.params("resIds", rids))
-								.stream().forEach(row->{
-									hdMap.add(row.getResId());
-								});
-						}
+					if(ObjectUtil.isNotEmpty(entity.getAddPermis())){
 						// 过滤已存在的权限
-						List<SysUserPermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
+						List<SysUserPermis> adds = entity.getAddPermis().stream().filter(row->{
+							SysUserPermis hdup=hdMap.remove(row.getResId());
+							if(hdup!=null){
+								if(!ObjectUtil.equal(hdup.getEnDilivery(), row.getEnDilivery())){
+									entity.getEditPermis().add(row);
+								}
+								return false;
+							}
+							return true;
+						}).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setUserId(entity.getUserId());
 							return row;
@@ -127,7 +137,7 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 						}
 					}
 					// 批量修改：
-					if(entity.getEditPermis()!=null){
+					if(ObjectUtil.isNotEmpty(entity.getEditPermis())){
 						entity.getEditPermis().stream()
 							.filter(row->ObjectUtil.equal(row.getUserId(), entity.getUserId()))
 							.filter(row->row.getId()!=null)
@@ -142,10 +152,16 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 							}
 							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
 							editCount.addAndGet(len);
+
+							hdMap.remove(row.getResId());
 						});
 					}
+					if(hdMap.size()>0) {
+						entity.getDelPermis().addAll(hdMap.values().stream().map(SysUserPermis::getId).collect(Collectors.toList()));
+					}
+
 					// 批量删除：
-					if(entity.getDelPermis()!=null){
+					if(ObjectUtil.isNotEmpty(entity.getDelPermis())){
 						SysUserPermis ups=new SysUserPermis();
 						if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
 							ups.setTenantId(sessionService.getTenantId());

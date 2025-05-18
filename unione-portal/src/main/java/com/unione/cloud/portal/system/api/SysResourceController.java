@@ -262,6 +262,14 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setIcon(row.getIcon());
 			node.setAppId(row.getId());
 			nodes.add(node);
+			if(hadResMap.get(row.getId())!=null){
+				node.setChecked(true);
+				if(hadResMap.get(row.getId())){
+					node.setEnDilivery(1);
+				}else{
+					node.setEnDilivery(0);
+				}
+			}
 		});
 		resList.stream().forEach(row->{
 			ResTreeNodeDto node = new ResTreeNodeDto();
