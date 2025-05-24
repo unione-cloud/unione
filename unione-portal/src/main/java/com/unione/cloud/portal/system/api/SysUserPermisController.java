@@ -260,6 +260,13 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 		}else {
 			// 权限单独修改
 			String[] fields = {"enDilivery"};
+			if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+				entity.setTenantId(sessionService.getTenantId());
+				if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+					!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+					entity.setOrgId(sessionService.getOrgId());
+				}
+			}
 			SqlBuilder<UserPermisDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			int len = dataBaseDao.updateById(sqlBuilder);
 			editCount.addAndGet(len);

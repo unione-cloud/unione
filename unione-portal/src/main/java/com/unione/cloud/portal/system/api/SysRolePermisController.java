@@ -262,6 +262,13 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 		}else {
 			// 权限单独修改
 			String[] fields = {"enDilivery"};
+			if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
+				entity.setTenantId(sessionService.getTenantId());
+				if(!sessionService.hasRole(UserRoles.TENANT_ADMIN) && 
+					!sessionService.hasRole(UserRoles.SYSOPS_USER)) {
+					entity.setOrgId(sessionService.getOrgId());
+				}
+			}
 			int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 			editCount.addAndGet(len);
 		}
