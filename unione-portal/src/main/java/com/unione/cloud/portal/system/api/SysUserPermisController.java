@@ -107,6 +107,7 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 						.params("userId", entity.getUserId()))
 						.stream().forEach(row->{
 							if(hdMap.containsKey(row.getResId())){
+								// 删除多余授权记录
 								entity.getDelPermis().add(row.getId());
 							}
 							hdMap.put(row.getResId(),row);

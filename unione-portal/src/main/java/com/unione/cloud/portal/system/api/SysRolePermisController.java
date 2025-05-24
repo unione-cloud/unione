@@ -2,8 +2,10 @@ package com.unione.cloud.portal.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -92,29 +94,39 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 				int len = dataBaseDao.insert(entity);
 				addCount.addAndGet(len);
 			}else{
-				// 批量添加：
+				// 批量添加： 
 				if(entity.getRoleId()!=null){
 					// 权限分配，批量添加角色权限
 					SysRole target=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
 					AssertUtil.service().notNull(target, "角色不存在");
 					LogsUtil.setTarget(target.getId(), target.getName());
 
+					// 加载用户已有权限集合
+					Map<Long,SysRolePermis> hdMap=new HashMap<>();
+					dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
+						.where("roleId=?")
+						.params("roleId", entity.getRoleId()))
+						.stream().forEach(row->{
+							if(hdMap.containsKey(row.getResId())){
+								// 删除多余授权记录
+								entity.getDelPermis().add(row.getId());
+							}
+							hdMap.put(row.getResId(),row);
+						});
+
 					// 批量添加：
-					if(entity.getAddPermis()!=null){
-						// 加载当前角色已有权限列表
-						Set<Long> rids = entity.getAddPermis().stream().map(row->row.getResId()).collect(Collectors.toSet());
-						Set<Long> hdMap=new HashSet<>();
-						if(rids.size()>0) {
-							dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
-								.where("roleId=? and resId in [resIds]")
-								.params("roleId", entity.getRoleId())
-								.params("resIds", rids))
-								.stream().forEach(row->{
-									hdMap.add(row.getResId());
-								});
-						}
+					if(ObjectUtil.isNotEmpty(entity.getAddPermis())){
 						// 过滤已存在的权限
-						List<SysRolePermis> adds = entity.getAddPermis().stream().filter(row->!hdMap.contains(row.getResId())).map(row->{
+						List<SysRolePermis> adds = entity.getAddPermis().stream().filter(row->{
+							SysRolePermis hdup=hdMap.remove(row.getResId());
+							if(hdup!=null){
+								if(!ObjectUtil.equal(hdup.getEnDilivery(), row.getEnDilivery())){
+									entity.getEditPermis().add(row);
+								}
+								return false;
+							}
+							return true;
+						}).map(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
 							row.setRoleId(entity.getRoleId());
 							return row;
@@ -127,9 +139,9 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 						}
 					}
 					// 批量修改：
-					if(entity.getEditPermis()!=null){
+					if(ObjectUtil.isNotEmpty(entity.getEditPermis())){
 						entity.getEditPermis().stream()
-							.filter(row->ObjectUtil.equal(row.getUserId(), entity.getUserId()))
+							.filter(row->ObjectUtil.equal(row.getRoleId(), entity.getRoleId()))
 							.filter(row->row.getId()!=null)
 							.forEach(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
@@ -142,10 +154,17 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 							}
 							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
 							editCount.addAndGet(len);
+
+							hdMap.remove(row.getResId());
 						});
+						LogsUtil.add("修改角色权限，数量：%s",entity.getAddPermis().size());
 					}
+					if(hdMap.size()>0) {
+						entity.getDelPermis().addAll(hdMap.values().stream().map(SysRolePermis::getId).collect(Collectors.toList()));
+					}
+
 					// 批量删除：
-					if(entity.getDelPermis()!=null){
+					if(ObjectUtil.isNotEmpty(entity.getDelPermis())){
 						SysRolePermis rps=new SysRolePermis();
 						if(!sessionService.isAdmin() && !sessionService.hasRole(UserRoles.SUPPER_ADMIN)) {
 							rps.setTenantId(sessionService.getTenantId());
@@ -156,7 +175,7 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 						}
 						List<SysRolePermis> list = dataBaseDao.findByIds(SqlBuilder.build(rps).ids(entity.getDelPermis()));
 						List<Long> dels = list.stream()
-							.filter(row->ObjectUtil.equal(row.getUserId(), entity.getUserId()))
+							.filter(row->ObjectUtil.equal(row.getRoleId(), entity.getRoleId()))
 							.map(SysRolePermis::getId).collect(Collectors.toList());
 						LogsUtil.add("删除角色权限，数量：%s,可删除:%s",entity.getDelPermis().size(),dels.size());
 						if(dels.size()>0) {

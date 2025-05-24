@@ -1,5 +1,6 @@
 package com.unione.cloud.portal.system.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
@@ -32,11 +33,11 @@ public class RolePermisDto extends SysRolePermis{
 	private Integer status;
 
 	@Schema(title="新增资源权限列表",description="")
-	private List<SysRolePermis> addPermis;
+	private List<SysRolePermis> addPermis=new ArrayList<>();
 
 	@Schema(title="删除资源权限列表",description="")
-	private List<Long> delPermis;
+	private List<Long> delPermis=new ArrayList<>();
 
 	@Schema(title="修改资源权限列表",description="")
-	private List<SysRolePermis> editPermis;
+	private List<SysRolePermis> editPermis=new ArrayList<>();
 }
