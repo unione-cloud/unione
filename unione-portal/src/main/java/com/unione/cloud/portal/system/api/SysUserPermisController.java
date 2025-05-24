@@ -120,7 +120,8 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 							SysUserPermis hdup=hdMap.remove(row.getResId());
 							if(hdup!=null){
 								if(!ObjectUtil.equal(hdup.getEnDilivery(), row.getEnDilivery())){
-									entity.getEditPermis().add(row);
+									hdup.setEnDilivery(row.getEnDilivery());
+									entity.getEditPermis().add(hdup);
 								}
 								return false;
 							}
@@ -153,9 +154,9 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 							}
 							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
 							editCount.addAndGet(len);
-
 							hdMap.remove(row.getResId());
 						});
+						LogsUtil.add("修改用户权限，数量：%s,成功修改数量:%s",entity.getAddPermis().size(),editCount.get());
 					}
 					if(hdMap.size()>0) {
 						entity.getDelPermis().addAll(hdMap.values().stream().map(SysUserPermis::getId).collect(Collectors.toList()));
