@@ -14,7 +14,7 @@ OR EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on 
 loadResorucePermisForUser
 ===
 ```
-SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND res.RELEASE = #{params.type} AND (
+SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND APP_ID IN (#{join(params.appIds)}) AND (
 EXISTS (SELECT 1 FROM SYS_USER_PERMIS WHERE RES_ID = res.ID AND USER_ID=#{params.user.id})
 -- @if(isNotEmpty(params.user.userRoles)){
 OR EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp LEFT JOIN SYS_ROLE SR ON srp.ROLE_ID = sr.ID WHERE RES_ID = res.ID AND sr.SN IN (#{join(params.user.userRoles)}))

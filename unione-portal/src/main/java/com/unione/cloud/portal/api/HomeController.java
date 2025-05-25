@@ -58,58 +58,61 @@ public class HomeController {
 		LogsUtil.add("加载用户应用列表,app count:%s",appList.size());
 		
 		LogsUtil.add("加载用户资源列表");
-		List<ResourceDto> resList = dataBaseDao.findList("portal.permision.loadResorucePermisForUser",params, ResourceDto.class);
-		List<ResourceDto> menuList=resList.stream()
-				.filter(res->appIdsList.contains(res.getAppId()))
-				.filter(res->ObjectUtil.equal(res.getTypes(),"btn") || ObjectUtil.equal(res.getTypes(),"menu"))
-				.collect(Collectors.toList());
-		List<ResourceDto> toolList=resList.stream()
-				.filter(res->appIdsList.contains(res.getAppId()))
-				.filter(res->ObjectUtil.equal(res.getTypes(),"tool"))
-				.collect(Collectors.toList());
-		
-		LogsUtil.add("应用菜单数据处理,menu count:%s",menuList.size());
-		Map<Long, ResourceDto> menuMap=new HashMap<>();
-		Map<Long, List<ResourceDto>> appMenuMap=new HashMap<>();
-		menuList.stream().forEach(res->{
-			menuMap.put(res.getId(), res);
-		});
-		menuList.stream().forEach(res->{
-			ResourceDto parent=menuMap.get(res.getParentId());
-			if(parent!=null) {
-				parent.getChildren().add(res);
-			}else if(ObjectUtil.equal(res.getTypes(), "menu")){
-				List<ResourceDto> list=appMenuMap.get(res.getAppId());
+		if(!ObjectUtil.isEmpty(appIdsList)){
+			params.put("appIds", appIdsList);	
+			List<ResourceDto> resList = dataBaseDao.findList("portal.permision.loadResorucePermisForUser",params, ResourceDto.class);
+			List<ResourceDto> menuList=resList.stream()
+					.filter(res->appIdsList.contains(res.getAppId()))
+					.filter(res->ObjectUtil.equal(res.getTypes(),"btn") || ObjectUtil.equal(res.getTypes(),"menu"))
+					.collect(Collectors.toList());
+			List<ResourceDto> toolList=resList.stream()
+					.filter(res->appIdsList.contains(res.getAppId()))
+					.filter(res->ObjectUtil.equal(res.getTypes(),"tool"))
+					.collect(Collectors.toList());
+			
+			LogsUtil.add("应用菜单数据处理,menu count:%s",menuList.size());
+			Map<Long, ResourceDto> menuMap=new HashMap<>();
+			Map<Long, List<ResourceDto>> appMenuMap=new HashMap<>();
+			menuList.stream().forEach(res->{
+				menuMap.put(res.getId(), res);
+			});
+			menuList.stream().forEach(res->{
+				ResourceDto parent=menuMap.get(res.getParentId());
+				if(parent!=null) {
+					parent.getChildren().add(res);
+				}else if(ObjectUtil.equal(res.getTypes(), "menu")){
+					List<ResourceDto> list=appMenuMap.get(res.getAppId());
+					if(list==null) {
+						list=new ArrayList<>();
+						appMenuMap.put(res.getAppId(), list);
+					}
+					list.add(res);
+				}
+			});
+			
+			LogsUtil.add("应用工具数据处理,menu count:%s",toolList.size());
+			Map<Long, List<ResourceDto>> appToolMap=new HashMap<>();
+			toolList.stream().forEach(res->{
+				List<ResourceDto> list=appToolMap.get(res.getAppId());
 				if(list==null) {
 					list=new ArrayList<>();
-					appMenuMap.put(res.getAppId(), list);
+					appToolMap.put(res.getAppId(), list);
 				}
 				list.add(res);
-			}
-		});
-		
-		LogsUtil.add("应用工具数据处理,menu count:%s",toolList.size());
-		Map<Long, List<ResourceDto>> appToolMap=new HashMap<>();
-		toolList.stream().forEach(res->{
-			List<ResourceDto> list=appToolMap.get(res.getAppId());
-			if(list==null) {
-				list=new ArrayList<>();
-				appToolMap.put(res.getAppId(), list);
-			}
-			list.add(res);
-		});
-		
-		LogsUtil.add("应用数据处理");
-		appList.stream().forEach(app->{
-			List<ResourceDto> menus=appMenuMap.get(app.getId());
-			if(menus!=null) {
-				app.setMenus(menus);
-			}
-			List<ResourceDto> tools=appToolMap.get(app.getId());
-			if(tools!=null) {
-				app.setTools(tools);
-			}
-		});
+			});
+			
+			LogsUtil.add("应用数据处理");
+			appList.stream().forEach(app->{
+				List<ResourceDto> menus=appMenuMap.get(app.getId());
+				if(menus!=null) {
+					app.setMenus(menus);
+				}
+				List<ResourceDto> tools=appToolMap.get(app.getId());
+				if(tools!=null) {
+					app.setTools(tools);
+				}
+			});
+		}
 		
 		return Results.success(appList);
 	}

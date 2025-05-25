@@ -88,6 +88,8 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		BeanUtils.setDefaultValue(entity, "isPlatform",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
 		BeanUtils.setDefaultValue(entity, "ordered",0);
+		BeanUtils.setDefaultValue(entity, "release","pc");
+
 
 		if(!Objects.equals(-1L, entity.getParentId())) {
 			SysResource parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));

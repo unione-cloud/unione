@@ -22,6 +22,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysAppInfo;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -63,11 +64,20 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	@Override
 	@Action(title = "保存应用",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
 	public Results<Long> save(@Validated(Validator.save.class) SysAppInfo entity) {
+		BeanUtils.setDefaultValue(entity, "ordered",0);
+		BeanUtils.setDefaultValue(entity, "types","pc");
+		BeanUtils.setDefaultValue(entity, "isPlatform",0);
+		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "isTmpl",0);
+
 		// 参数处理
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
+			SysAppInfo tmp = dataBaseDao.findById(SqlBuilder.build(SysAppInfo.class,entity.getId()));
+			AssertUtil.service().notNull(tmp, "记录未找到");
+
 			String[] fields = {"name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","trades","types","isPlatform","status","descs"};
 			SqlBuilder<SysAppInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
