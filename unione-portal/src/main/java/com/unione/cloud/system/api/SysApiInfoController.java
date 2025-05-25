@@ -67,7 +67,7 @@ public class SysApiInfoController implements TreeFeignApi<SysApiInfo>{
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			SysApiInfo parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
+			SysApiInfo parent = dataBaseDao.findById(SqlBuilder.build(entity,entity.getParentId()));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);

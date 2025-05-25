@@ -74,7 +74,7 @@ public class SysPostController implements TreeFeignApi<SysPost>{
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
 		SysPost parent = null;
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			parent = dataBaseDao.findOne(SqlBuilder.build(entity).where("id=?"));
+			parent = dataBaseDao.findById(SqlBuilder.build(entity,entity.getParentId()));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);

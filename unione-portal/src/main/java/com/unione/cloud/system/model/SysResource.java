@@ -5,8 +5,11 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +35,7 @@ public class SysResource extends Pojo {
 	* 应用ID
 	*/
 	@Schema(title="应用ID",description="长度为：19")
+	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long appId;
 	/**
 	* 上级菜单ID(根节点为-1)
@@ -44,12 +48,16 @@ public class SysResource extends Pojo {
 	*/
 	@KeyWords
 	@Schema(title="资源名称/编码，唯一",description="长度为：100")
+	@NotBlank(message="资源名称不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotNull(message="资源名称不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String name;
 	/**
 	* 资源标题
 	*/
 	@KeyWords
 	@Schema(title="资源标题",description="长度为：100")
+	@NotBlank(message="资源标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotNull(message="资源标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String title;
 	/**
 	* 资源别名（授权树区别重复菜单名称）
@@ -61,6 +69,8 @@ public class SysResource extends Pojo {
 	* 资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具
 	*/
 	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
+	@NotBlank(message="资源类型不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotNull(message="资源类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
 	/**
 	* 资源PATH
