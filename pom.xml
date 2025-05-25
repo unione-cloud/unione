@@ -321,6 +321,7 @@
 		<module>unione-portal</module>
 		<module>unione-util</module>
 		<module>unione-start</module>
+		<module>unione-codegen</module>
 	</modules>
 	
 </project>

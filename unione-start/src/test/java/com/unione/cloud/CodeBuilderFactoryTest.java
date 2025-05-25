@@ -21,11 +21,11 @@ import org.beetl.sql.gen.SourceFilter;
 import org.beetl.sql.gen.simple.EntitySourceBuilder;
 
 import com.unione.cloud.beetsql.ext.FunIsBaseField;
-import com.unione.cloud.portal.codegen.ApiSourceBuilder;
-import com.unione.cloud.portal.codegen.BuilderFactory;
-import com.unione.cloud.portal.codegen.PojoSourceBuilder;
-import com.unione.cloud.portal.codegen.SimpleUnioneProject;
-import com.unione.cloud.portal.codegen.SqlMdSourceBuilder;
+import com.unione.cloud.codegen.ApiSourceBuilder;
+import com.unione.cloud.codegen.BuilderFactory;
+import com.unione.cloud.codegen.PojoSourceBuilder;
+import com.unione.cloud.codegen.SimpleUnioneProject;
+import com.unione.cloud.codegen.SqlMdSourceBuilder;
 import com.zaxxer.hikari.HikariDataSource;
 
 import cn.hutool.core.date.DateUtil;
@@ -80,7 +80,7 @@ public class CodeBuilderFactoryTest {
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
 		
-		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud.portal");
+		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud");
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 		
 		//可以在控制台看到生成的所有代码
