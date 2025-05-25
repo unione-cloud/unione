@@ -94,7 +94,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		AssertUtil.service().isTrue(tmp==null, String.format("资源名称[%s]已存在", entity.getName()));
 
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			SysResource parent = dataBaseDao.findById(SqlBuilder.build(entity,entity.getParentId()));
+			SysResource parent = dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getParentId()));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);

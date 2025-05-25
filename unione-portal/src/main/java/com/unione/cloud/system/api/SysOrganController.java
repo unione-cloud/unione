@@ -72,7 +72,7 @@ public class SysOrganController implements TreeFeignApi<SysOrgan>{
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
 		SysOrgan parent = null;
 		if(!Objects.equals(-1L, entity.getParentId())) {
-			parent = dataBaseDao.findById(SqlBuilder.build(entity,entity.getParentId()));
+			parent = dataBaseDao.findById(SqlBuilder.build(SysOrgan.class,entity.getParentId()));
 			AssertUtil.service().notNull(parent, "上级节点未找到");
 			if(!Objects.equals(parent.getIsLeaf(), 0)) {
 				parent.setIsLeaf(0);
