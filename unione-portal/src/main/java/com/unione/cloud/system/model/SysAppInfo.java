@@ -95,7 +95,7 @@ public class SysAppInfo extends Pojo {
 	@Schema(title="行业分类",description="行业分类，多个逗号分隔")
 	private String trades;
 	/**
-	* 应用类型
+	* 应用类型 字典APPTYPES pc：PC，app：APP
 	*/
 	@Schema(title="应用类型",description="字典APPTYPES pc：PC，app：APP")
 	private String types;

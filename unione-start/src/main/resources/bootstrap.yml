@@ -91,6 +91,9 @@ springdoc:
     - group: security
       display-name: 认证接口
       paths-to-match: /api/security/**
+    - group: portal
+      display-name: 门户接口
+      paths-to-match: /api/portal/**      
     - group: system
       display-name: 系统管理
       paths-to-match: /api/system/**
