@@ -90,7 +90,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		BeanUtils.setDefaultValue(entity, "ordered",0);
 
 		LogsUtil.add("验证资源名称是否已存在,name:%s",entity.getName());
-		SysResource tmp = dataBaseDao.findOne(SqlBuilder.build(entity).where("name=? and id!=?"));
+		SysResource tmp = dataBaseDao.findOne(SqlBuilder.build(entity).where("name=? and parentId=?"));
 		AssertUtil.service().isTrue(tmp==null, String.format("资源名称[%s]已存在", entity.getName()));
 
 		if(!Objects.equals(-1L, entity.getParentId())) {
