@@ -118,7 +118,7 @@ public class SysResource extends Pojo {
 	* 图标（字体图标）
 	*/
 	@Schema(title="图标（字体图标）",description="长度为：100")
-	private String icon;
+	private String iconName;
 	/**
 	* 大图标(图片图标)
 	*/
