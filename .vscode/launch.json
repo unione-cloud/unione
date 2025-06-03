@@ -6,16 +6,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeBuilderFactoryTest",
-            "request": "launch",
-            "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
-            "projectName": "unione-start"
-        },
-        {
-            "type": "java",
             "name": "Current File",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "${file}",
+            "vmArgs": "-Dfile.encoding=UTF-8"
         },
         {
             "type": "java",

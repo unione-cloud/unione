@@ -165,7 +165,7 @@ public class SessionHolder implements SessionService {
 
 	@Override
 	public boolean isAdmin() {
-		return administrator!=null && administrator.equals(this.getUsername());
+		return administrator!=null && administrator.equals(this.getUsername()) || this.hasRole(UserRoles.SUPPER_ADMIN);
 	}
 	
 	@Override

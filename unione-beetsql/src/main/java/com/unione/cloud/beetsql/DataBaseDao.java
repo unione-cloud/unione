@@ -659,7 +659,10 @@ public class DataBaseDao {
 
 	public <T> List<T> findList(String sqlName, Object params,Class<T> resultClass,Sort ...sort){
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
-		
+		if(params instanceof Map){
+			sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(resultClass), sqlName);
+		}
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
@@ -681,7 +684,10 @@ public class DataBaseDao {
 
 	public <T> Map<String,T> findMap(String sqlName, Object params,Class<T> resultType,String keyField){
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(params.getClass()), sqlName);
-		
+		if(params instanceof Map){
+			sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(resultType), sqlName);	
+		}
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		

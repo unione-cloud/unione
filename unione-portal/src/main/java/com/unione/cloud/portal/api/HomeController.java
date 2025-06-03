@@ -52,6 +52,7 @@ public class HomeController {
 		Map<String, Object> params=new HashMap<>();
 		params.put("user", sessionService.getPrincipal());
 		params.put("type", type);	
+		params.put("isAdmin", sessionService.isAdmin());
 		
 		List<AppDto> appList = dataBaseDao.findList("portal.permision.loadAppPermisForUser",params, AppDto.class);
 		List<Long> appIdsList = appList.stream().map(AppDto::getId).collect(Collectors.toList());

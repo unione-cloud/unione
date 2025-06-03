@@ -39,6 +39,7 @@ import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserPermis;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -207,12 +208,16 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		}
 		
 		// 加载资源列表
-		SqlBuilder<SysResource> resBuilder = SqlBuilder.build(SysResource.class)
-			.where("status=? and (isPlatform=1 or tenantId=?) and appId in [appIds]")
-			.params("status",1)
-			.params("tenantId",sessionService.getTenantId())
-			.params("appIds", appIds);
-		List<SysResource> resList = dataBaseDao.findList(resBuilder);
+		List<SysResource> resList = new ArrayList<>();
+		if(!ObjectUtil.isEmpty(appIds)) {
+			Map<String,Object> paramsMap = new HashMap<>();
+			paramsMap.put("tenantId", sessionService.getTenantId());
+			paramsMap.put("appIds", appIds);
+			paramsMap.put("type", type);
+			paramsMap.put("userId", sessionService.getUserId());
+			paramsMap.put("isAdmin", sessionService.isAdmin());
+			resList = dataBaseDao.findList("loadSysResourceTree", paramsMap, SysResource.class);
+		}
 
 		Map<Long,Boolean> hadResMap=new HashMap<>();
 		// 加载机构资源权限
@@ -265,13 +270,17 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setTitle(row.getName());
 			node.setIcon(row.getIcon());
 			node.setAppId(row.getId());
-			nodes.add(node);
-			if(hadResMap.get(row.getId())!=null){
-				node.setChecked(true);
-				if(hadResMap.get(row.getId())){
-					node.setEnDilivery(1);
-				}else{
-					node.setEnDilivery(0);
+			if("view".equalsIgnoreCase(type)){
+				nodes.add(node);
+			}else{
+				if(hadResMap.get(row.getId())!=null){
+					node.setChecked(true);
+					if(hadResMap.get(row.getId())){
+						node.setEnDilivery(1);
+					}else{
+						node.setEnDilivery(0);
+					}
+					nodes.add(node);
 				}
 			}
 		});
