@@ -36,7 +36,8 @@ public class ResourceDto {
 	@Schema(title="是否叶子节点，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isLeaf;
 	@Schema(title="图标（字体图标）",description="长度为：100")
-	private String icon;
+	@JsonProperty("icon")
+	private String iconName;
 	@Schema(title="大图标(图片图标)",description="长度为：250")
 	private String picMax;
 	@Schema(title="中图标(图片图标)",description="长度为：250")
