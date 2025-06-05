@@ -107,7 +107,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"appId","parentId","name","title","alias","types","url","isIframe","isExternal","isHide","isLeaf","isNeedPermis","isPlatform","iconName","picMax","picMid","picMix","ordered","status","descs","configs"};
+			String[] fields = {"appId","parentId","name","title","alias","types","path","url","isIframe","isExternal","isHide","isLeaf","isNeedPermis","isPlatform","iconName","picMax","picMid","picMix","ordered","status","descs","configs"};
 			SqlBuilder<SysResource> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}
