@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.beetl.sql.clazz.SQLType;
@@ -20,9 +21,11 @@ import org.springframework.stereotype.Service;
 import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.beetsql.builder.SqlField;
 import com.unione.cloud.beetsql.builder.SqlType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionHolder;
@@ -368,6 +371,12 @@ public class DataBaseDao {
 	public <T> int deleteLogic(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
 
+		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
+		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
+		SqlField delField = optional.get();
+		BeanUtils.setDefaultValue(builder.getData(), delField.getAlias(), 1);
+		builder.field(delField.getAlias());
+
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED_BY.getName(), sessionService.getUserId());
@@ -382,6 +391,12 @@ public class DataBaseDao {
 	 */
 	public <T> int deleteLogicById(SqlBuilder<T> builder) {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
+
+		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
+		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
+		SqlField delField = optional.get();
+		BeanUtils.setDefaultValue(builder.getData(), delField.getAlias(), 1);
+		builder.field(delField.getAlias());
 
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());

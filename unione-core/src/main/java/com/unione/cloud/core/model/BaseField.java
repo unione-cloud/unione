@@ -37,6 +37,10 @@ public enum BaseField {
 		return column;
 	}
 
+	public boolean is(String field) {
+		return name.equals(field) || column.equals(field);
+	}
+
 	public static BaseField isBase(String field) {
 		return isBase(field, null);
 	}

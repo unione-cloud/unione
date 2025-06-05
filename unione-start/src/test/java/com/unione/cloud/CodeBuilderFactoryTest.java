@@ -91,8 +91,8 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("sys_code_lvsn",mavenProject);
-		factory.gen("sys_code_tree",mavenProject);
+		factory.gen("sys_config_define",mavenProject);
+		factory.gen("sys_config_value",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

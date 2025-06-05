@@ -18,6 +18,7 @@ import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.SQLManager;
 
 import com.unione.cloud.beetsql.Sort;
+import com.unione.cloud.beetsql.annotation.DataDelFlag;
 import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.annotation.DataSensitive;
@@ -49,6 +50,7 @@ public class SqlBuilder<T> {
 	private SQLManager sqlManager;
 	private String nameSpace;
 	
+	@Getter
 	private SqlEntity entity=new SqlEntity();
 	private String where;			// 数据过滤条件定义
 	private String[] fieldList;		// 数据查询/更新字段
@@ -273,6 +275,10 @@ public class SqlBuilder<T> {
 				// 判断是否为基础字段
 				BaseField stsField=BaseField.isBaseColumn(field.getColumn());
 				field.setStsField(stsField);
+				DataDelFlag dataDelFlag=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),DataDelFlag.class);
+				if(dataDelFlag!=null) {
+					field.setStsField(BaseField.DEL_FLAG);
+				}
 				
 				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
 				field.setType(pd.getPropertyType().getSimpleName());
@@ -865,7 +871,5 @@ public class SqlBuilder<T> {
 	public long getStart() {
 		return (page - 1) * pageSize;
 	}
-	
-	
 	
 }
