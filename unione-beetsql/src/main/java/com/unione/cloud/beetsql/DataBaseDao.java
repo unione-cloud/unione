@@ -369,6 +369,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogic(SqlBuilder<T> builder) {
+		builder.init(this.sqlManager);
 		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
 		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
 		SqlField delField = optional.get();
@@ -390,6 +391,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogicById(SqlBuilder<T> builder) {
+		builder.init(this.sqlManager);
 		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
 		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
 		SqlField delField = optional.get();
