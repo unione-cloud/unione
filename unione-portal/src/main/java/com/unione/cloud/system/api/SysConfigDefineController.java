@@ -1,10 +1,10 @@
 package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -25,6 +24,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.dto.SysConfigNodeDto;
 import com.unione.cloud.system.model.SysConfigDefine;
@@ -142,6 +142,18 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
 		return Results.build(len>0, entity.getId());
+	}
+
+	@PostMapping("/status")
+	@Action(title="设置配置状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Operation(summary = "设置配置状态", description="USEORNOT 1 使用，0停用")
+	public Results<Void> setStatus(@RequestBody SysConfigDefine entity){
+		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
+			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[0,1]");
+		
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		
+		return Results.build(len>0);
 	}
 
 	@Override
