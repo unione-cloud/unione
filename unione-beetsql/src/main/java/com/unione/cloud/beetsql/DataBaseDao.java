@@ -369,13 +369,13 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogic(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
-
 		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
 		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
 		SqlField delField = optional.get();
 		BeanUtils.setDefaultValue(builder.getData(), delField.getAlias(), 1);
 		builder.field(delField.getAlias());
+
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
 
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
@@ -390,13 +390,13 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogicById(SqlBuilder<T> builder) {
-		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
-
 		Optional<SqlField> optional = builder.getEntity().getFields().stream().filter(f->BaseField.DEL_FLAG.equals(f.getStsField())).findAny();
 		AssertUtil.database().isTrue(optional.isPresent(), "未设置逻辑删除字段");
 		SqlField delField = optional.get();
 		BeanUtils.setDefaultValue(builder.getData(), delField.getAlias(), 1);
 		builder.field(delField.getAlias());
+
+		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
 
 		SessionService sessionService=SessionHolder.build();
 		BeanUtils.setDefaultValue(builder.getData(), BaseField.LAST_UPDATED.getName(), DateUtil.date());
