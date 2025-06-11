@@ -28,6 +28,11 @@ public class SqlEntity {
 	 * 	主键字段
 	 */
 	private SqlField keyField;
+
+	/**
+	 * 数据查询/更新字段
+	 */
+	private List<String> fieldList=new ArrayList<>();		
 	
 	/**
 	 * 	查询字段列表，为空则是 *
@@ -105,5 +110,6 @@ public class SqlEntity {
 		}
 		return list;
 	}
-	
+
+
 }

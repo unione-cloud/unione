@@ -27,6 +27,11 @@ public class SqlField {
 	 * 	是否主键
 	 */
 	private boolean isPk;
+
+	/**
+	 * 	是否在目标字段列表中
+	 */
+	private boolean tFlist=true;
 	
 	/**
 	 * 	是否为基础字段，baseField!=null 是，baseField==null 否

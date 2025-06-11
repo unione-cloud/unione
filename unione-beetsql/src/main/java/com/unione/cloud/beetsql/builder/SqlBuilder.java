@@ -52,9 +52,15 @@ public class SqlBuilder<T> {
 	
 	@Getter
 	private SqlEntity entity=new SqlEntity();
-	private String where;			// 数据过滤条件定义
-	private String[] fieldList;		// 数据查询/更新字段
-	private String keyField;		// 主键字段名称
+	/**
+	 * 自定义主键字段，例如：id
+	 */
+	private String keyField;
+	/**
+	 * 自定义查询条件，例如：where 1=1 and id=#{id}
+	 */
+	private String where;
+
 	/**
 	 * 	更新操作的数据对象
 	 */
@@ -233,84 +239,24 @@ public class SqlBuilder<T> {
 		ClassDesc classDesc=null;
 		if(!(this.data instanceof Map)) {
 			
-			List<String> fieldLists=new ArrayList<>();
-			if(this.fieldList!=null && this.fieldList.length>0) {
-				String[] list=this.fieldList;
-				if(fieldList.length==1 && fieldList[0].indexOf(",")>0) {
-					list=fieldList[0].split(",");
-				}
-				for(int i=0;i<list.length;i++) {
-					String column=list[i].trim(); 
-					Integer asIndex = column.toUpperCase().indexOf(" AS ");
-					if(asIndex > 0) {
-						String alias = column.substring(asIndex+4);
-						column=column.substring(0, asIndex);
-						fieldLists.add(alias);
-						fieldLists.add(column);
-					}else {
-						fieldLists.add(column);
-					}
-				}
-			}
-			
+			List<String> fieldList=this.entity.getFieldList();
 			// 如果是model sql操作
 			classDesc = tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
-			List<String> idCols = classDesc.getIdCols();
-			Iterator<String> cols = classDesc.getInCols().iterator();
-			Iterator<String> props = classDesc.getAttrs().iterator();
-			while (cols.hasNext() && props.hasNext()) {
-				SqlField field=new SqlField();
-				field.setAlias(props.next());
-				field.setColumn(cols.next());
-				if(idCols.contains(field.getColumn())) {
-					field.setPk(true);
-					this.keyField=field.getColumn();
-				}else if(StringUtils.isEmpty(this.keyField)) {
-					if(ObjectUtil.equal(this.keyField, field.getColumn()) || 
-							ObjectUtil.equal(this.keyField, field.getAlias())) {
-						field.setPk(true);
-					}
+			List<SqlField> fields=SqlKit.loadFields(sqlManager, this.data.getClass(), tableName);
+			this.entity.setFields(fields);
+			fields.stream().forEach(field->{
+				// 判断是否在目标字段列表中
+				if(!ObjectUtil.isEmpty(fieldList) && !fieldList.contains(field.getColumn()) && !fieldList.contains(field.getAlias())) {
+					field.setTFlist(false);
 				}
-				
-				// 判断是否为基础字段
-				BaseField stsField=BaseField.isBaseColumn(field.getColumn());
-				field.setStsField(stsField);
-				DataDelFlag dataDelFlag=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),DataDelFlag.class);
-				if(dataDelFlag!=null) {
-					field.setStsField(BaseField.DEL_FLAG);
-				}
-				
-				PropertyDescriptor pd = BeanUtil.getPropertyDescriptor(this.data.getClass(), field.getAlias());
-				field.setType(pd.getPropertyType().getSimpleName());
-				
-				// 如果设置了数据脱敏
-				DataSensitive dataSensitive=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),DataSensitive.class);
-				if(dataSensitive!=null && "String".contentEquals(field.getType())) {
-					field.setSensitive(SqlSensitive.build(dataSensitive));
-				}
-				
-				QueryIgnore ignorQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),QueryIgnore.class);
-				field.setQueryIgnore(ignorQuery);
-				
-				if(!fieldLists.isEmpty()) {
-					if(field.isPk() || fieldLists.contains(field.getAlias()) || fieldLists.contains(field.getColumn())) {
-						this.entity.getFields().add(field);
-					}
-				}else {
-					this.entity.getFields().add(field);
-				}
-			}
-			
+			});
 		}else {
 			// 如果是动态sql，从字段列表中解析字段信息
-			if(this.fieldList!=null && this.fieldList.length>0) {
-				String[] list=this.fieldList;
-				if(fieldList.length==1 && fieldList[0].indexOf(",")>0) {
-					list=fieldList[0].split(",");
-				}
-				for(int i=0;i<list.length;i++) {
+			List<String> fieldList=this.entity.getFieldList();
+			if(!ObjectUtil.isEmpty(fieldList)) {
+				for(int i=0;i<fieldList.size();i++) {
 					SqlField field=new SqlField();
-					String column=list[i].trim(); 
+					String column=fieldList.get(i).trim(); 
 					Integer asIndex = column.toUpperCase().indexOf(" AS ");
 					if(asIndex > 0) {
 						String alias = column.substring(asIndex+4);
@@ -318,10 +264,14 @@ public class SqlBuilder<T> {
 						field.setAlias(alias);
 					}
 					field.setColumn(column);
+
+					// 判断是否为主键字段
 					if(ObjectUtil.equal(this.keyField, field.getColumn()) || 
 							ObjectUtil.equal(this.keyField, field.getAlias())) {
 						field.setPk(true);
+						this.entity.setKeyField(field);
 					}
+
 					this.entity.getFields().add(field);
 				}
 			}
@@ -417,7 +367,7 @@ public class SqlBuilder<T> {
 			buffer.append("SELECT ");
 			// 查询字段处理
 			StringBuffer fieldBuf=new StringBuffer();
-			this.entity.getFields().stream().filter(field->{
+			this.entity.getFields().stream().filter(field->field.isTFlist()).filter(field->{
 				// 如果字段设置了过滤
 				if(field.getQueryIgnore()!=null) {
 					if(QueryType.SELECT.equals(field.getQueryIgnore().value())) {
@@ -464,7 +414,7 @@ public class SqlBuilder<T> {
 			buffer.append(this.entity.getTable()).append(" SET \n")
 			.append("-- @sqlTrim(){\n");
 			
-			this.entity.getFields().stream().filter(field->!field.isPk()).forEach(field->{
+			this.entity.getFields().stream().filter(field->field.isTFlist()).filter(field->!field.isPk()).forEach(field->{
 				if(field.getStsField()!=null && (
 						BaseField.ID.getName().equals(field.getStsField().getName()) || 
 						BaseField.TENANT_ID.getName().equals(field.getStsField().getName()) ||
@@ -500,7 +450,7 @@ public class SqlBuilder<T> {
 		
 		// 如果是findById,updateById,deleteById并且未设置查询条件，生成更新条件
 		if(StringUtils.isEmpty(this.entity.getWhere()) && 
-				(SqlType.UPDATE_BYID.equals(type) || SqlType.DELETE_BYID.equals(type) || 
+				(SqlType.UPDATE_BYID.equals(type) || SqlType.DELETE_BYID.equals(type) || SqlType.DELETE_LOGIC_BYID.equals(type) ||
 						SqlType.SELECT_BYID.equals(type))) {
 			SqlField idField=this.entity.getKeyField();
 			AssertUtil.service().notNull(idField,"主键字段不能为空");
@@ -779,7 +729,21 @@ public class SqlBuilder<T> {
 	}
 	
 	public SqlBuilder<T> field(String... fieldList){
-		this.fieldList=fieldList;
+		for(String field:fieldList){
+			String[] list=field.split(",");
+			for(int i=0;i<list.length;i++) {
+				String column=list[i].trim(); 
+				Integer asIndex = column.toUpperCase().indexOf(" AS ");
+				if(asIndex > 0) {
+					String alias = column.substring(asIndex+4);
+					column=column.substring(0, asIndex);
+					this.entity.getFieldList().add(alias);
+					this.entity.getFieldList().add(column);
+				}else {
+					this.entity.getFieldList().add(column);
+				}
+			}
+		}
 		return this;
 	} 
 	
