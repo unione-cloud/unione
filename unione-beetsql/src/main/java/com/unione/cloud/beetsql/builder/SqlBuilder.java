@@ -238,18 +238,10 @@ public class SqlBuilder<T> {
 		TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 		ClassDesc classDesc=null;
 		if(!(this.data instanceof Map)) {
-			
-			List<String> fieldList=this.entity.getFieldList();
 			// 如果是model sql操作
 			classDesc = tableDesc.genClassDesc(this.data.getClass(), sqlManager.getNc());
 			List<SqlField> fields=SqlKit.loadFields(sqlManager, this.data.getClass(), tableName);
 			this.entity.setFields(fields);
-			fields.stream().forEach(field->{
-				// 判断是否在目标字段列表中
-				if(!ObjectUtil.isEmpty(fieldList) && !fieldList.contains(field.getColumn()) && !fieldList.contains(field.getAlias())) {
-					field.setTFlist(false);
-				}
-			});
 		}else {
 			// 如果是动态sql，从字段列表中解析字段信息
 			List<String> fieldList=this.entity.getFieldList();
@@ -367,7 +359,9 @@ public class SqlBuilder<T> {
 			buffer.append("SELECT ");
 			// 查询字段处理
 			StringBuffer fieldBuf=new StringBuffer();
-			this.entity.getFields().stream().filter(field->field.isTFlist()).filter(field->{
+			this.entity.getFields().stream()
+			.filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))
+			.filter(field->{
 				// 如果字段设置了过滤
 				if(field.getQueryIgnore()!=null) {
 					if(QueryType.SELECT.equals(field.getQueryIgnore().value())) {
@@ -414,7 +408,9 @@ public class SqlBuilder<T> {
 			buffer.append(this.entity.getTable()).append(" SET \n")
 			.append("-- @sqlTrim(){\n");
 			
-			this.entity.getFields().stream().filter(field->field.isTFlist()).filter(field->!field.isPk()).forEach(field->{
+			this.entity.getFields().stream()
+				.filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))
+				.filter(field->!field.isPk()).forEach(field->{
 				if(field.getStsField()!=null && (
 						BaseField.ID.getName().equals(field.getStsField().getName()) || 
 						BaseField.TENANT_ID.getName().equals(field.getStsField().getName()) ||

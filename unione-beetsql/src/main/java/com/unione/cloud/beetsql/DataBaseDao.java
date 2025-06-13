@@ -561,10 +561,9 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogic(SqlBuilder<T> builder) {
-		builder.init(this.sqlManager);
 
 		SessionService sessionService=SessionHolder.build();
-		SqlEntity sqlEntity=builder.getEntity();
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
 		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
@@ -572,12 +571,12 @@ public class DataBaseDao {
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdated!=null) {
 			BeanUtils.setDefaultValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
-			sqlEntity.getFieldList().add(lastUpdated.getAlias());
+			builder.getEntity().getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
 		if(lastUpdatedBy!=null) {
 			BeanUtils.setDefaultValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
-			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
+			builder.getEntity().getFieldList().add(lastUpdatedBy.getAlias());
 		}
 
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
@@ -590,23 +589,23 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogicById(SqlBuilder<T> builder) {
-		builder.init(this.sqlManager);
 
 		SessionService sessionService=SessionHolder.build();
-		SqlEntity sqlEntity=builder.getEntity();
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
 		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		builder.getEntity().getFieldList().add(delFlag.getAlias());
 
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdated!=null) {
 			BeanUtils.setDefaultValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
-			sqlEntity.getFieldList().add(lastUpdated.getAlias());
+			builder.getEntity().getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
 		if(lastUpdatedBy!=null) {
 			BeanUtils.setDefaultValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
-			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
+			builder.getEntity().getFieldList().add(lastUpdatedBy.getAlias());
 		}
 
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC_BYID);
