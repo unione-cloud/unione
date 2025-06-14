@@ -453,14 +453,14 @@ public class SqlBuilder<T> {
 			StringBuffer where=new StringBuffer();
 			where.append("\n-- @sqlWhere(){\n");
 			
-			where.append("-- @if(varNotNull(params.id) || varNotNull(query.id) || varNotNull(query.ids)){\n");
-			where.append("-- @if(varNotNull(params.id) && !varNotNull(query.ids)){\n")
-		      .append(idField.getColumn()).append(" = #{params.id}\n")
+			where.append("-- @if(varNotNull(params.").append(idField.getAlias()).append(") || varNotNull(query.id) || varNotNull(query.ids)){\n");
+			where.append("-- @if(varNotNull(params.").append(idField.getAlias()).append(") && !varNotNull(query.id) && !varNotNull(query.ids)){\n")
+		      .append(idField.getColumn()).append(" = #{params.").append(idField.getAlias()).append("}\n")
 		      .append("-- @}\n");
 			where.append("-- @if(varNotNull(query.id) && !varNotNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" = #{query.id}\n")
 		      .append("-- @}\n");
-			where.append("-- @if(!varNotNull(params.id) && !varNotNull(query.id) && varNotNull(query.ids)){\n")
+			where.append("-- @if(!varNotNull(params.").append(idField.getAlias()).append(") && !varNotNull(query.id) && varNotNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" IN (#{join(query.ids)})\n")
 		      .append("-- @}\n");
 			
