@@ -7,7 +7,8 @@ public enum ActionType {
 	
 	Query("query"),Save("save"),Delete("delete"),
 	Upload("upload"),Download("download"),Import("import"),Export("export"),
-	Register("register"),Login("login"),Logout("logout"),ResetPwd("resetpwd"),
+	Register("register"),Login("login"),Logout("logout"),
+	ResetPwd("resetpwd"),ForgetPwd("forgetpwd"),
 	Sensitive("sensitive"),
 	Other("other");
 	

@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RefreshScope
 @RestController
-@Tag(name = "门户首页")
+@Tag(name = "统一门户: 门户首页")
 @RequestMapping("/api/portal")
 public class HomeController {
 
