@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -85,7 +84,7 @@ public class UserCenterController {
 		
 		String fields[] = {"realName","aliasName","avatar","birthday","sex","qq","email","qq","descs"};
 		entity.setId(sessionService.getUserId());
-		int count = dataBaseDao.updateById(Updater.build(entity).fields(fields));
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		
 		return Results.build(count>0);
 	}
@@ -117,7 +116,7 @@ public class UserCenterController {
 		SysUser entity = new SysUser();
 		entity.setId(sessionService.getUserId());
 		entity.setTel(newTel);
-		int count = dataBaseDao.updateById(Updater.build(entity).fields(fields));
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		
 		return Results.build(count>0);
 	}
@@ -139,7 +138,7 @@ public class UserCenterController {
 		SysUser entity = new SysUser();
 		entity.setId(sessionService.getUserId());
 		entity.setSecurityQuestion(securityQuestion);
-		int count = dataBaseDao.updateById(Updater.build(entity).fields(fields));
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 			
 		return Results.build(count>0);
 	}
@@ -160,7 +159,7 @@ public class UserCenterController {
 		SysUser entity = new SysUser();
 		entity.setId(sessionService.getUserId());
 		entity.setSucurityMfa(sucurityMfa);
-		int count = dataBaseDao.updateById(Updater.build(entity).fields(fields));
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 			
 		return Results.build(count>0);
 	}
@@ -197,7 +196,7 @@ public class UserCenterController {
 
 		LogsUtil.add("修改密码");
 		user.setPwdText(SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(newPwd));
-		int len=dataBaseDao.updateById(Updater.build(user).fields("pwdText"));
+		int len=dataBaseDao.updateById(SqlBuilder.build(user).field("pwdText"));
 
 		return Results.build(len>0);
 	}
@@ -281,7 +280,7 @@ public class UserCenterController {
 		LogsUtil.add("设置新密码");
 		String newPwd=secretService.decrypt(pwd);
 		tmp.setPwdText(SmUtil.sm4(tmp.getPwdSalt().getBytes()).encryptHex(newPwd));
-		int len=dataBaseDao.updateById(Updater.build(tmp).fields("pwdText"));
+		int len=dataBaseDao.updateById(SqlBuilder.build(tmp).field("pwdText"));
 		
 		return Results.build(len>0);
 	}
