@@ -87,7 +87,7 @@ springdoc:
   group-configs:
     - group: common
       display-name: 通用接口
-      packages-to-scan: com.unione.cloud.portal.common.api
+      paths-to-match: /api/common/**
     - group: security
       display-name: 认证接口
       paths-to-match: /api/security/**

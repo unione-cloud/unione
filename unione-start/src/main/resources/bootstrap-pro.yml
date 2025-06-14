@@ -118,3 +118,17 @@ security:
       enable: false
 
 
+#============================================
+#
+# Attach Config
+#
+#============================================ 
+attach:
+   file:
+      server:
+         type: minio
+minio:
+   server:
+      url: http://8.134.11.253:9000
+      key: admin
+      secret: jeking@admin

@@ -64,7 +64,7 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 @RestController
 @Tag(name = "doc管理：文件存储 管理服务")
-@RequestMapping("/api/store")
+@RequestMapping("/api/common/store")
 public class DocStoreController{
 	/**
 	 * 	数据访问对象
@@ -122,7 +122,7 @@ public class DocStoreController{
 	
 
 	@Action(title="上传文件",type=ActionType.Upload)
-	@Operation(description="上传文件[单个]")
+	@Operation(summary="上传文件[单个]-ownerId")
 	@PostMapping(value="/upload/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
 			@PathVariable("appCode") String appCode,
@@ -181,7 +181,7 @@ public class DocStoreController{
 
 
 	@Action(title="上传文件",type=ActionType.Upload)
-	@Operation(description="上传文件[单个]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@Operation(summary="上传文件[单个]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
 			@PathVariable("appCode") String appCode,
@@ -194,7 +194,7 @@ public class DocStoreController{
 	}
 
 
-	@Operation(description="上传文件[批量]")
+	@Operation(summary="上传文件[批量]-ownerId")
 	@Action(title="上传文件",type=ActionType.Upload)
 	@PostMapping(value="/upload/batch/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
@@ -272,7 +272,7 @@ public class DocStoreController{
 
 	
 	@Action(title="上传文件",type=ActionType.Upload)
-	@Operation(description="上传文件[批量]",summary= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
+	@Operation(summary="上传文件[批量]",description= "该接口上传的文档无ownerId属性，如需要则调用接口进行根据文件id设置")
 	@PostMapping(value="/upload/batch/{appCode}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Results<List<DocFile>> uploadBatch(@RequestPart("file") List<MultipartFile> files,
 			@PathVariable("appCode") String appCode,
@@ -287,7 +287,7 @@ public class DocStoreController{
 
 	@PostMapping("/delete/{fileId}")
 	@Action(title="删除文件",type=ActionType.Delete)
-	@Operation(description="删除文件",summary= "根据文件id删除")
+	@Operation(summary="删除文件",description = "根据文件id删除")
 	public Results<Void> delete(@PathVariable("fileId") Long fileId) {
 		Results<Void> results = new Results<>();
 		
@@ -335,7 +335,7 @@ public class DocStoreController{
 
 	@PostMapping("/delete/owner/{ownerId}")
 	@Action(title="删除文件",type=ActionType.Delete)
-	@Operation(description="删除文件",summary= "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
+	@Operation(summary="删除文件-ownerId",description = "根据文件归属id删除,响应数据body中的数据定义为[文件总数,成功总数]")
 	public Results<Integer[]> deleteByOwner(@PathVariable("ownerId") Long ownerId) {
 		LogsUtil.setTarget(ownerId, "归属Id:"+ownerId);
 		LogsUtil.add("参数验证");
@@ -401,7 +401,7 @@ public class DocStoreController{
 
 	@GetMapping("/download/{fileId}")
 	@Action(title="下载文件",type=ActionType.Download)
-	@Operation(description="下载文件",summary= "根据文件id下载")
+	@Operation(summary="下载文件",description = "根据文件id下载")
 	public void download(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件下载方法，fileId:{}",fileId);
 		File file = this.downloadFile(fileId);
@@ -476,7 +476,7 @@ public class DocStoreController{
 	
 	@PostMapping("/download")
 	@Action(title="下载文件",type=ActionType.Download)
-	@Operation(description="下载文件【批量】",summary= "根据文件id下载")
+	@Operation(summary="下载文件【批量】",description = "根据文件id下载")
 	public void download(@RequestBody List<Long> fileIds) {
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileIds, "参数fileIds不能为空")
@@ -570,100 +570,10 @@ public class DocStoreController{
 	}
 
 	
-	@PostMapping("/download/dir")
-	@Action(title="下载文件[批量]",type=ActionType.Download)
-	@Operation(description="下载文档【批量】",summary= "批量下载文件和文件夹")
-	public void download(@RequestParam("fileIds") List<Long> fileIds,@RequestParam("dirIds") List<Long> dirIds) {
-		LogsUtil.add("参数验证");
-		AssertUtil.service().isTrue(fileIds!=null&&!fileIds.isEmpty() || 
-				dirIds!=null&&!dirIds.isEmpty(), "参数fileIds和dirIds不能都为空");
-		
-		List<DocDir> docDirs=new ArrayList<>();
-		List<DocFile> docFiles=new ArrayList<>();
-//		if(dirIds!=null && !dirIds.isEmpty()) {
-//			LogsUtil.add("查询文件夹列表");
-//			DocDir entity=new DocDir();
-//			entity.setTenantId(sessionService.getTenantId());
-////			entity.setIds(dirIds);
-//			entity.setDelFlag(0);
-//			
-//			if(FILE_PERMIS_ENABLE) {
-//				entity.setPermisUser(sessionService.getUserId());
-//				if(ORG_PERMIS) {
-//					entity.setPermisOrg(sessionService.getOrgId());
-//				}
-//				entity.getPermisOwners().add(sessionService.getUserId());
-//				if(sessionService.getOrgId()!=null) {
-//					entity.getPermisOwners().add(sessionService.getOrgId());
-//				}
-//				if(sessionService.getUserRoles()!=null) {
-//					entity.getPermisOwners().addAll(sessionService.getUserRoles());
-//				}
-//			}
-//			
-//			docDirs=dataBaseDao.selectList("findByIdsDocDir",entity);
-//		}
-//		
-//		if(download.getFileIds()!=null&&!download.getFileIds().isEmpty()) {
-//			LogsUtil.add("查询文件列表");
-//			DocFile entity=new DocFile();
-//			entity.setTenantId(sessionService.getTenantId());
-//			entity.setIds(download.getFileIds());
-//			entity.setDelFlag(0);
-//			entity.setIncPublic(true);
-//			
-//			if(FILE_PERMIS_ENABLE) {
-//				entity.setPermisUser(sessionService.getUserId());
-//				if(ORG_PERMIS) {
-//					entity.setPermisOrg(sessionService.getOrgId());
-//				}
-//				entity.getPermisOwners().add(sessionService.getUserId());
-//				if(sessionService.getOrgId()!=null) {
-//					entity.getPermisOwners().add(sessionService.getOrgId());
-//				}
-//				if(sessionService.getUserRoles()!=null) {
-//					entity.getPermisOwners().addAll(sessionService.getUserRoles());
-//				}
-//			}
-//			
-//			docFiles=dataBaseDao.selectList("findByIdsDocFile",entity);
-//		}
-//		
-//		if(docDirs.isEmpty() && docFiles.isEmpty()) {
-//			LogsUtil.add("文件夹信息和文件信息都为空");
-//			AttachUtil.sendScriptMessage("文件夹信息和文件信息都为空", response);
-//			LogsUtil.failure(new ServiceException("文件夹信息和文件信息都为空"));
-//			return;
-//		}
-//		
-//		File zipFileDir = docService.download(docDirs, docFiles,"批量下载文件",null);
-//		if(zipFileDir==null) {
-//			LogsUtil.add("文件下载失败");
-//			AttachUtil.sendScriptMessage("文件下载失败", response);
-//			LogsUtil.failure(new ServiceException("文件下载失败"));
-//			return;
-//		}
-//		
-//		LogsUtil.add("压缩文件：开始");
-//		File zipFile=FileUtil.zip(zipFileDir);
-//		LogsUtil.add("压缩文件：完成");
-//		
-//		LogsUtil.add("下载压缩文件");
-//		AttachUtil.download(zipFile,DateUtil.formatCharacter(new Date(), "批量下载文件-yyyymmdd")+".zip", request, response);
-//		
-//		FileUtils.deleteQuietly(zipFile);
-//		FileUtils.deleteQuietly(zipFileDir);
-//		
-//		if(logSaveFlag) {
-//			// 保存日志
-//			LogsUtil.success();
-//		}
-	}
-	
 
 	@GetMapping("/preview/{fileId}")
 	@Action(title="文件预览",type = ActionType.Query)
-	@Operation(description="预览文件",summary= "根据文件id下载")
+	@Operation(summary="预览文件",description = "根据文件id下载")
 	public void preview(@PathVariable("fileId") Long fileId) {
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
@@ -752,7 +662,7 @@ public class DocStoreController{
 
 	@GetMapping("/preview/public/{fileId}")
 	@Action(title="文件预览",type = ActionType.Query)
-	@Operation(description="预览文件【公开】",summary= "根据文件id下载，公开文件，不进行验证")
+	@Operation(summary="预览文件【公开】",description = "根据文件id下载，公开文件，不进行验证")
 	public void previewPublic(@PathVariable("fileId") Long fileId) {
 		log.debug("进入:文件预览【公开】方法，fileId:{}",fileId);
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");

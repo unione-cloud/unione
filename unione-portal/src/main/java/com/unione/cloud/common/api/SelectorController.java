@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 @RestController
 @Tag(name = "公共服务：选择器组件")
-@RequestMapping("/api/selector")
+@RequestMapping("/api/common/selector")
 public class SelectorController {
 
    

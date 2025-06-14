@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 @RestController
 @Tag(name = "doc管理：文件信息 管理服务")
-@RequestMapping("/api/file")
+@RequestMapping("/api/common/file")
 public class DocFileController implements PojoFeignApi<DocFile>{
 	/**
 	 * 数据访问对象
@@ -83,7 +83,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	@Override
 	@Action(title="查询文件列表",type = ActionType.Query)
-	@Operation(description="查询文件列表",summary="文档综合查询接口")
+	@Operation(summary="查询文件列表",description="文档综合查询接口")
 	public Results<List<DocFile>> find(Params<DocFile> params) {
 		// 参数处理
 		params.getBody().setPermisEnable(FILE_PERMIS_ENABLE);
@@ -122,7 +122,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	@PostMapping({"/find/mine"})
 	@Action(title="查询我的文件",type = ActionType.Query)
-	@Operation(description="查询我的文件",summary= "只查询自己上传的文件")
+	@Operation(summary="查询我的文件",description= "只查询自己上传的文件")
 	public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params) {
 		// 参数处理
 		params.getBody().setUserId(sessionService.getUserId());
@@ -134,7 +134,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	
 	@PostMapping("/find/mineShare")
-	@Operation(description="查询我共享的文件",summary="")
+	@Operation(summary="查询我共享的文件",description="")
 	@Action(title="查询我共享的文件",type = ActionType.Query)
 	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params) {
 		// 参数处理
@@ -150,7 +150,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 	 
 	@PostMapping("/find/shareMine")
-	@Operation(description="查询共享给我的文件",summary="")
+	@Operation(summary="查询共享给我的文件",description="")
 	@Action(title="查询共享给我的文件",type = ActionType.Query)
 	public Results<List<DocFile>> findShareMine(@RequestBody Params<DocFile> params) {
 		// 参数处理
@@ -186,7 +186,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 	
 	@PostMapping("/find/other")
 	@Action(title="查询公开文件列表",type = ActionType.Query)
-	@Operation(description="查询公开文件列表",summary= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
+	@Operation(summary="查询公开文件列表",description= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
 	public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params) {
 		// 参数处理
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
@@ -239,7 +239,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 	@PostMapping("/update")
 	@Action(title="更新文件信息",type=ActionType.Save)
-	@Operation(description="更新文件信息",summary= "")
+	@Operation(summary="更新文件信息",description= "")
 	public Results<Long> update(@RequestBody @Validated(Validator.update.class) DocFile entity) {
 		Results<Long> results = new Results<>();
 		
@@ -357,7 +357,7 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 	@PostMapping({"/set/owner/{ownerId}"})
 	@Action(title="设置文件归属",type = ActionType.Save)
-	@Operation(description="设置文件归属",summary = "参数body中未文件id集合，返回body为成功数")
+	@Operation(summary="设置文件归属",description = "参数body中未文件id集合，返回body为成功数")
 	public Results<Integer> setOwner(@RequestBody Set<Long> ids,@PathVariable("ownerId") Long ownerId){
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");

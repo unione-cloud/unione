@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @Tag(name = "公共服务：层级树")
-@RequestMapping("/api/code/tree")	
+@RequestMapping("/api/common/code/tree")	
 public class CodeTreeController {
 
 	@Autowired
