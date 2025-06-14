@@ -186,7 +186,7 @@ public class SqlBuilder<T> {
 	public static <T> SqlBuilder<T> build(Class<T> cls,Set<Long> ids) {
 		try {
 			T obj=cls.newInstance();
-			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
 			buildr.ids=new ArrayList<>(ids);
 			return buildr;
 		} catch (Exception e) {
@@ -198,7 +198,7 @@ public class SqlBuilder<T> {
 	public static <T> SqlBuilder<T> build(Class<T> cls,Long id) {
 		try {
 			T obj=BeanKit.newInstance(cls);
-			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
 			buildr.id(id);
 			return buildr;
 		} catch (Exception e) {
@@ -211,7 +211,7 @@ public class SqlBuilder<T> {
 	public static <T> SqlBuilder<T> build(Class<T> cls,List<Long> ids) {
 		try {
 			T obj=BeanKit.newInstance(cls);
-			SqlBuilder<T> buildr=new SqlBuilder(obj);
+			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
 			buildr.ids(ids);
 			return buildr;
 		} catch (Exception e) {

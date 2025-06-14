@@ -46,7 +46,7 @@ public class SysConfigService {
 
         SysConfigDefine configDefine=new SysConfigDefine();
         if(!Objects.equals("root", name)){
-			configDefine.setSn(String.format("%s%", name));
+			configDefine.setSn(name+"%");
 		}
 		if(!Objects.equals(-1, type)){
 			configDefine.setTypes(type);
