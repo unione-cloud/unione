@@ -19,6 +19,7 @@ import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.common.model.DocFile;
+import com.unione.cloud.common.service.DocFileService;
 import com.unione.cloud.common.service.DocPermisService;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -49,7 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "doc管理：文件信息 管理服务")
 @RequestMapping("/api/common/file")
-public class DocFileController implements PojoFeignApi<DocFile>{
+public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
+
 	/**
 	 * 数据访问对象
 	 */
@@ -382,6 +384,5 @@ public class DocFileController implements PojoFeignApi<DocFile>{
 
 		return Results.build(len>0, len);
 	}
-
 
 }

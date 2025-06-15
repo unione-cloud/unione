@@ -28,12 +28,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
-import com.unione.cloud.common.model.DocDir;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.common.model.DocPermis;
 import com.unione.cloud.common.service.DocCacheService;
-import com.unione.cloud.common.service.DocPermisService;
 import com.unione.cloud.common.service.DocCacheService.DocData;
+import com.unione.cloud.common.service.DocPermisService;
+import com.unione.cloud.common.service.DocStoreService;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
@@ -65,7 +65,8 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "doc管理：文件存储 管理服务")
 @RequestMapping("/api/common/store")
-public class DocStoreController{
+public class DocStoreController implements DocStoreService{
+
 	/**
 	 * 	数据访问对象
 	 */

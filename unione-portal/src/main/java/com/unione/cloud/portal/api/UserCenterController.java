@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.model.DocFile;
+import com.unione.cloud.common.service.DocStoreService;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
@@ -48,6 +52,9 @@ public class UserCenterController {
 
 	@Autowired
 	private SecretService secretService;
+
+	@Autowired
+	private DocStoreService docStoreService;
 	
 	@Autowired
 	private TokenService tokenService;
@@ -82,13 +89,37 @@ public class UserCenterController {
 		// 参数处理
 		AssertUtil.service().notNull(entity, new String[] {"id"},"参数%s不能为空");
 		
-		String fields[] = {"realName","aliasName","avatar","birthday","sex","qq","email","qq","descs"};
+		String fields[] = {"realName","aliasName","birthday","sex","qq","email","qq","descs"};
 		entity.setId(sessionService.getUserId());
 		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		
 		return Results.build(count>0);
 	}
 
+	@PostMapping("/profile/avatar")
+	@Action(title="修改我的信息:头像",type = ActionType.Save)
+	@Operation(summary="修改我的信息:头像",description="修改手机号逻辑：首先验证旧手机号是否一致，然后再验证手机短信验证码是否正确，如果都正确才执行更新")
+	public Results<Long> saveProfileAvatar(@RequestPart("file") MultipartFile file){
+		LogsUtil.setTarget(sessionService.getUserId(), sessionService.getRealname());
+			
+		// 参数处理
+		AssertUtil.service().notNull(file,"参数file不能为空")
+			.isTrue(file.getSize()>0, "文件不能为空");
+		
+		// 上传附件
+		Results<DocFile> result = docStoreService.upload(file, "portal", sessionService.getUserId(), null, "avatar", 1, null, null);
+		AssertUtil.service().isTrue(result.isSuccess(), result.getMessage());
+		DocFile docFile=result.getBody();
+			
+		String fields[] = {"avatar"};
+		SysUser entity = new SysUser();
+		entity.setId(sessionService.getUserId());
+		entity.setAvatar(docFile.getId().toString());
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
+		AssertUtil.service().isTrue(count>0, "更新失败");
+		
+		return Results.success(docFile.getId());
+	}
 
 	@PostMapping("/profile/tel")
 	@Action(title="修改我的信息:手机号",type = ActionType.Save)
@@ -98,7 +129,7 @@ public class UserCenterController {
 		LogsUtil.add("修改电话号码，newTel:%s,oldTel:%s,smsCode:%s",oldTel,newTel,smsCode);
 			
 		// 参数处理
-		AssertUtil.service().notNull("newTel", "参数newTel不能为空");
+		AssertUtil.service().notNull(newTel, "参数newTel不能为空");
 		
 		// 判断预留号码
 		Long userId = sessionService.getUserId();
