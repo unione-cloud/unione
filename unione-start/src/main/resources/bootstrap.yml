@@ -94,6 +94,9 @@ springdoc:
     - group: portal
       display-name: 门户接口
       paths-to-match: /api/portal/**,/api/ucenter/**
+    - group: ums
+      display-name: 统一消息
+      paths-to-match: /api/ums/**    
     - group: system
       display-name: 系统管理
       paths-to-match: /api/system/**
