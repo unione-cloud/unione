@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -52,6 +53,7 @@ public class UmsMessage extends Pojo {
 	/**
 	* 标题
 	*/
+	@KeyWords
 	@Schema(title="标题",description="长度为：250")
 	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
@@ -59,6 +61,7 @@ public class UmsMessage extends Pojo {
 	/**
 	* 内容
 	*/
+	@KeyWords
 	@Schema(title="内容",description="长度为：65535")
 	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})

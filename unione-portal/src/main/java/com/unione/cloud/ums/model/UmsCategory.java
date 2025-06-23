@@ -2,6 +2,7 @@ package com.unione.cloud.ums.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -32,6 +33,7 @@ public class UmsCategory extends Pojo {
 	/**
 	* 标题
 	*/
+	@KeyWords
 	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@Schema(title="标题",description="长度为：50")
@@ -39,7 +41,7 @@ public class UmsCategory extends Pojo {
 	/**
 	* 消息类别 notice：通知，msg：消息 todo：待办
 	*/
-	@Schema(title="消息类别 notice：通知，msg：消息 todo：待办",description="长度为：10")
+	@Schema(title="消息类别 字典：UMSTYPES notice：通知，msg：消息 todo：待办",description="长度为：10")
 	private String types;
 	/**
 	* 链接地址
@@ -49,6 +51,7 @@ public class UmsCategory extends Pojo {
 	/**
 	* 备注
 	*/
+	@KeyWords
 	@Schema(title="备注",description="长度为：500")
 	private String remark;
 	/**

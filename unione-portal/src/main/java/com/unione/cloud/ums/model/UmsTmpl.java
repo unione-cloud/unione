@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -41,6 +42,7 @@ public class UmsTmpl extends Pojo {
 	/**
 	* 模版标题
 	*/
+	@KeyWords
 	@Schema(title="模版标题",description="长度为：200")
 	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
@@ -48,16 +50,19 @@ public class UmsTmpl extends Pojo {
 	/**
 	* 模版编码，唯一验证
 	*/
+	@KeyWords
 	@Schema(title="模版编码，唯一验证",description="长度为：50")
 	private String sn;
 	/**
 	* HTML模版，用于站内信，邮件等富文本场景
 	*/
+	@KeyWords
 	@Schema(title="HTML模版，用于站内信，邮件等富文本场景",description="长度为：65535")
 	private String bodyHtml;
 	/**
 	* SMS模版，用于短信，推送等场景
 	*/
+	@KeyWords
 	@Schema(title="SMS模版，用于短信，推送等场景",description="长度为：65535")
 	private String bodySms;
 	/**
