@@ -5,6 +5,8 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	UmsTmpl Entity
@@ -32,11 +35,15 @@ public class UmsTmpl extends Pojo {
 	* 模版分类，字典UMSTMPLTYPE workflow：工作流，other：其他
 	*/
 	@Schema(title="模版分类，字典UMSTMPLTYPE workflow：工作流，other：其他",description="长度为：20")
+	@NotNull(message = "分类不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "分类不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
 	/**
 	* 模版标题
 	*/
 	@Schema(title="模版标题",description="长度为：200")
+	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String title;
 	/**
 	* 模版编码，唯一验证

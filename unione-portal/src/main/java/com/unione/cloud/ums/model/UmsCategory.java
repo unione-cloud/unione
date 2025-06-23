@@ -1,17 +1,18 @@
 package com.unione.cloud.ums.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	UmsCategory Entity
@@ -31,6 +32,8 @@ public class UmsCategory extends Pojo {
 	/**
 	* 标题
 	*/
+	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	@Schema(title="标题",description="长度为：50")
 	private String title;
 	/**

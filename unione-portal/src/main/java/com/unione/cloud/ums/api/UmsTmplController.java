@@ -18,9 +18,11 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.ums.model.UmsTmpl;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +61,13 @@ public class UmsTmplController implements PojoFeignApi<UmsTmpl>{
 	public Results<Long> save(@Validated(Validator.save.class) UmsTmpl entity) {
 		// 参数处理
 		int len = 0;
+		BeanUtils.setDefaultValue(entity, "sn",RandomUtil.randomString(10));
+		BeanUtils.setDefaultValue(entity, "ways","site");
+		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "delFlag",0);
+		BeanUtils.setDefaultValue(entity, "ordered",0);
+		BeanUtils.setDefaultValue(entity, "usel",1);
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
@@ -105,7 +114,7 @@ public class UmsTmplController implements PojoFeignApi<UmsTmpl>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(UmsTmpl.class,ids));
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(UmsTmpl.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);

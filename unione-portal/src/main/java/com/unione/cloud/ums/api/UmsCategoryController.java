@@ -18,6 +18,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.ums.model.UmsCategory;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -59,6 +60,12 @@ public class UmsCategoryController implements PojoFeignApi<UmsCategory>{
 	public Results<Long> save(@Validated(Validator.save.class) UmsCategory entity) {
 		// 参数处理
 		int len = 0;
+		BeanUtils.setDefaultValue(entity, "types","notice");
+		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "delFlag",0);
+		BeanUtils.setDefaultValue(entity, "ordered",0);
+		BeanUtils.setDefaultValue(entity, "usel",1);
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
@@ -105,7 +112,7 @@ public class UmsCategoryController implements PojoFeignApi<UmsCategory>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(UmsCategory.class,ids));
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(UmsCategory.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);

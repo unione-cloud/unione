@@ -5,6 +5,8 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	UmsMessage Entity
@@ -37,21 +40,28 @@ public class UmsMessage extends Pojo {
 	* 分类ID
 	*/
 	@Schema(title="分类ID",description="长度为：19")
+	@NotNull(message = "分类不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long categoryId;
 	/**
 	* 类别 notice：通知，msg：消息
 	*/
 	@Schema(title="类别 notice：通知，msg：消息",description="长度为：10")
+	@NotNull(message = "类别不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "类别不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
 	/**
 	* 标题
 	*/
 	@Schema(title="标题",description="长度为：250")
+	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String title;
 	/**
 	* 内容
 	*/
 	@Schema(title="内容",description="长度为：65535")
+	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String content;
 	/**
 	* 来源名称，字典UMSMSGFROM 
