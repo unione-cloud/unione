@@ -35,7 +35,7 @@ public class UmsTmpl extends Pojo {
 	/**
 	* 模版分类，字典UMSTMPLTYPE workflow：工作流，other：其他
 	*/
-	@Schema(title="模版分类，字典UMSTMPLTYPE workflow：工作流，other：其他",description="长度为：20")
+	@Schema(title="模版分类，字典UMSTMPLTYPE workflow：流程，normal：通用，other：其他",description="长度为：20")
 	@NotNull(message = "分类不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "分类不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
@@ -90,5 +90,10 @@ public class UmsTmpl extends Pojo {
 	*/
 	@Schema(title="显示顺序",description="长度为：10")
 	private Integer ordered;
-
+	/**
+	* 备注
+	*/
+	@KeyWords
+	@Schema(title="备注",description="长度为：500")
+	private String remark;
 }
