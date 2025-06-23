@@ -3,6 +3,7 @@ import java.util.Date;
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
@@ -46,7 +48,7 @@ public class UmsMessage extends Pojo {
 	/**
 	* 类别 notice：通知，msg：消息
 	*/
-	@Schema(title="类别 notice：通知，msg：消息",description="长度为：10")
+	@Schema(title="类别，字典UMSTYPES notice：通知，msg：消息",description="长度为：10")
 	@NotNull(message = "类别不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotBlank(message = "类别不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
@@ -79,7 +81,7 @@ public class UmsMessage extends Pojo {
 	/**
 	* 确认类型 1:只有确认按钮 2:拒绝/接受
 	*/
-	@Schema(title="确认类型 1:只有确认按钮 2:拒绝/接受",description="长度为：10")
+	@Schema(title="确认类型,字典UMSCONFIRMTYPE 1:只有确认按钮 2:拒绝/接受",description="长度为：10")
 	private Integer confirmType;
 	/**
 	* 业务ID
@@ -100,11 +102,15 @@ public class UmsMessage extends Pojo {
 	* 发布时间
 	*/
 	@Schema(title="发布时间",description="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date publicDate;
 	/**
 	* 下线时间
 	*/
 	@Schema(title="下线时间",description="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date offlineDate;
 
 }

@@ -91,7 +91,7 @@ public class SysUser extends Pojo {
 	* 生日，YYYY-MM-DD
 	*/
 	@Schema(title="生日，YYYY-MM-DD",description="长度为：10")
-	@JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
 	/**
@@ -131,7 +131,7 @@ public class SysUser extends Pojo {
 	* 上次登录时间
 	*/
 	@Schema(title="上次登录时间",description="yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date lastLoginTime;
 	/**
@@ -163,7 +163,7 @@ public class SysUser extends Pojo {
 	* 锁定时间，锁定时间后才能继续登录
 	*/
 	@Schema(title="锁定时间，锁定时间后才能继续登录",description="yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date lockTime;
 	/**

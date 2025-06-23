@@ -43,6 +43,8 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
     serialization-inclusion: NON_EMPTY
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
             
             
 #============================================

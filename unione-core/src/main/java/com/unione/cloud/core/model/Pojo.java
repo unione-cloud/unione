@@ -56,7 +56,7 @@ public class Pojo implements Serializable {
 	 */
 	@Schema(title="创建时间",description = "时间格式:yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date created;
 	
 	/**
@@ -70,7 +70,7 @@ public class Pojo implements Serializable {
 	 */
 	@Schema(title="修改时间",description = "时间格式:yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date lastUpdated;
 	
 	/**

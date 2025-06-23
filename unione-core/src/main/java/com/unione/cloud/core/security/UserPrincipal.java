@@ -78,7 +78,7 @@ public class UserPrincipal implements Serializable {
 	/**
 	 * 上次登录时间：时间戳
 	 */
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date lastLoginTime;
 

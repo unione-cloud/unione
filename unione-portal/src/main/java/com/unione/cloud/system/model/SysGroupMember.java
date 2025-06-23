@@ -68,14 +68,14 @@ public class SysGroupMember extends Pojo {
 	*/
 	@Schema(title="加入时间",description="长度为：19")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date timeJoin;
 	/**
 	* 离开时间
 	*/
 	@Schema(title="离开时间",description="长度为：19")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date timeLeave;
 	/**
 	* 成员状态，字典MENBERSTATUS 1正常，2离开
