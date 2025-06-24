@@ -44,6 +44,16 @@ public class UmsCategory extends Pojo {
 	@Schema(title="消息类别 字典：UMSTYPES notice：通知，msg：消息 todo：待办",description="长度为：10")
 	private String types;
 	/**
+	* 需要用户进行手动确认  0:不需要 1:需要
+	*/
+	@Schema(title="需要用户进行手动确认  0:不需要 1:需要",description="长度为：10")
+	private Integer isConfirm;
+	/**
+	* 确认类型 1:只有确认按钮 2:拒绝/接受
+	*/
+	@Schema(title="确认类型,字典UMSCONFIRMTYPE 1:只有确认按钮 2:拒绝/接受",description="长度为：10")
+	private Integer confirmType;	
+	/**
 	* 链接地址
 	*/
 	@Schema(title="链接地址",description="长度为：250")

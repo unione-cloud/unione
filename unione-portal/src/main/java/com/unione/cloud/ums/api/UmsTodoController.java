@@ -47,7 +47,7 @@ public class UmsTodoController implements PojoFeignApi<UmsTodo>{
 	@Action(title="查询用户待办",type = ActionType.Query)
 	public Results<List<UmsTodo>> find(Params<UmsTodo> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
-				
+		params.getBody().setDelFlag(0);			
 		Results<List<UmsTodo>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());

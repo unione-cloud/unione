@@ -51,7 +51,7 @@ public class UmsCategoryController implements PojoFeignApi<UmsCategory>{
 	@Action(title="查询消息分类",type = ActionType.Query)
 	public Results<List<UmsCategory>> find(Params<UmsCategory> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
-				
+		params.getBody().setDelFlag(0);			
 		Results<List<UmsCategory>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -66,6 +66,8 @@ public class UmsCategoryController implements PojoFeignApi<UmsCategory>{
 		// 参数处理
 		int len = 0;
 		BeanUtils.setDefaultValue(entity, "types","notice");
+		BeanUtils.setDefaultValue(entity, "isConfirm",0);
+		BeanUtils.setDefaultValue(entity, "confirmType",1);
 		BeanUtils.setDefaultValue(entity, "status",1);
 		BeanUtils.setDefaultValue(entity, "delFlag",0);
 		BeanUtils.setDefaultValue(entity, "ordered",0);
