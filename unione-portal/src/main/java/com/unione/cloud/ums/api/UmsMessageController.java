@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,6 +57,17 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 
 	@Autowired
 	private UmsMessageService umsMessageService;
+
+	@PostMapping("/send")
+	@Operation(summary = "发送消息",description = "")
+	@Action(title="发送统一消息",type = ActionType.Save)
+	public Results<Long> send(@RequestBody @Validated(Validator.save.class) UmsMessageDto entity) {
+		Results<Long> results=umsMessageService.save(entity);
+		if(results.isSuccess()){
+			umsMessageService.send(entity.getId());
+		}
+		return results;
+	}
 	
 	
 	@Override
@@ -68,18 +80,6 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
-		return results;
-	}
-
-
-	@PostMapping("/save")
-	@Operation(summary = "保存",description = "新增/更新")
-	@Action(title="保存统一消息",type = ActionType.Save)
-	public Results<Long> save(@Validated(Validator.save.class) UmsMessageDto entity) {
-		Results<Long> results=umsMessageService.save(entity);
-		if(results.isSuccess()){
-			umsMessageService.send(entity.getId());
-		}
 		return results;
 	}
 

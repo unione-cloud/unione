@@ -5,6 +5,8 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	UmsMessageTarget Entity
@@ -32,21 +35,26 @@ public class UmsMessageTarget extends Pojo {
 	* 消息ID
 	*/
 	@Schema(title="消息ID",description="长度为：19")
+	@NotNull(message = "消息ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long messageId;
 	/**
 	* 目标类型，字典UMSMSGTARGET 1：全局，2：租户，3：机构，4：用户，5：角色
 	*/
+	@NotNull(message = "目标类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	@Schema(title="目标类型，字典UMSMSGTARGET 1：全局，2：租户，3：机构，4：用户，5：角色",description="长度为：10")
 	private Integer targetType;
 	/**
 	* 目标ID
 	*/
 	@Schema(title="目标ID",description="长度为：19")
+	@NotNull(message = "目标ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long targetId;
 	/**
 	* 目标名称
 	*/
 	@Schema(title="目标名称",description="长度为：200")
-	private Long targetName;
+	@NotNull(message = "目标名称不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "目标名称不能为空",groups = {Validator.save.class,Validator.update.class})
+	private String targetName;
 
 }

@@ -77,6 +77,8 @@ public class UmsMessage extends Pojo {
 	* 来源名称，字典UMSMSGFROM 
 	*/
 	@Schema(title="来源名称，字典UMSMSGFROM ",description="长度为：50")
+	@NotNull(message = "消息来源不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "消息来源不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String fromId;
 	/**
 	* 需要用户进行手动确认  0:不需要 1:需要

@@ -172,7 +172,7 @@ public class UmsMessageService {
         UmsMessageTarget target = new UmsMessageTarget();
         target.setMessageId(mid);
         List<UmsMessageTarget> targets=dataBaseDao.findList(SqlBuilder.build(target));
-        Set<Long> tuids=targets.stream().filter(t->ObjectUtil.equal(t.getTargetType(), 2))
+        Set<Long> tuids=targets.stream().filter(t->ObjectUtil.equal(t.getTargetType(), 4))
             .map(t->t.getTargetId())
             .filter(t->t!=null)
             .collect(Collectors.toSet());
@@ -181,11 +181,9 @@ public class UmsMessageService {
             Map<String,SysUser> umap=dataBaseDao.findMap(SqlBuilder.build(SysUser.class,tuids),"id");
 
             // 加载通知状态
-            UmsMessageStatus status=new UmsMessageStatus();
-            status.setMessageId(mid);
             Map<Long,UmsMessageStatus> smap=new HashMap<>();
-            dataBaseDao.findList(SqlBuilder.build(status,tuids).field("userId,viewSts")
-                .where("messageId=? and userId in [ids]"))
+            dataBaseDao.findList(SqlBuilder.build(UmsMessageStatus.class,tuids).field("userId,viewSts")
+                .where("messageId=? and userId in [ids]").params("messageId",mid))
                 .stream().forEach(s->{
                     smap.put(s.getUserId(), s);
                 });
