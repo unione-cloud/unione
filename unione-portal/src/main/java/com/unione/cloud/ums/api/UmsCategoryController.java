@@ -76,7 +76,7 @@ public class UmsCategoryController implements PojoFeignApi<UmsCategory>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"title","types","url","remark","usel","status","ordered"};
+			String[] fields = {"title","types","isConfirm","confirmType","url","remark","usel","status","ordered"};
 			SqlBuilder<UmsCategory> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
