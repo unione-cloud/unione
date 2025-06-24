@@ -61,13 +61,18 @@ public class UmsMessage extends Pojo {
 	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String title;
 	/**
-	* 内容
+	* 内容html
+	*/
+	@Schema(title="内容html",description="长度为：65535")
+	private String bodyHtml;
+	/**
+	* 内容text
 	*/
 	@KeyWords
-	@Schema(title="内容",description="长度为：65535")
-	@NotNull(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
-	@NotBlank(message = "标题不能为空",groups = {Validator.save.class,Validator.update.class})
-	private String content;
+	@Schema(title="内容text",description="长度为：65535")
+	@NotNull(message = "内容text不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "内容text不能为空",groups = {Validator.save.class,Validator.update.class})
+	private String bodyText;
 	/**
 	* 来源名称，字典UMSMSGFROM 
 	*/

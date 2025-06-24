@@ -43,5 +43,10 @@ public class UmsMessageTarget extends Pojo {
 	*/
 	@Schema(title="目标ID",description="长度为：19")
 	private Long targetId;
+	/**
+	* 目标名称
+	*/
+	@Schema(title="目标名称",description="长度为：200")
+	private Long targetName;
 
 }

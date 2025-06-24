@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,13 +18,21 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.ums.dto.UmsMessageDto;
 import com.unione.cloud.ums.model.UmsMessage;
+import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,10 +46,16 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "统一消息：消息",description="UmsMessage")
 @RequestMapping("/api/ums/message")	 //TreeFeignApi
-public class UmsMessageController implements PojoFeignApi<UmsMessage>{
+public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<UmsMessage>,FeignFindById<UmsMessage>,FeignDetail<UmsMessage>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
+
+	@Autowired
+	private UmsMessageService umsMessageService;
 	
 	
 	@Override
@@ -48,6 +63,7 @@ public class UmsMessageController implements PojoFeignApi<UmsMessage>{
 	public Results<List<UmsMessage>> find(Params<UmsMessage> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 		params.getBody().setDelFlag(0);		
+		params.getBody().setUserId(sessionService.getUserId());
 		Results<List<UmsMessage>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -56,25 +72,15 @@ public class UmsMessageController implements PojoFeignApi<UmsMessage>{
 	}
 
 
-	@Override
+	@PostMapping("/save")
+	@Operation(summary = "保存",description = "新增/更新")
 	@Action(title="保存统一消息",type = ActionType.Save)
-	public Results<Long> save(@Validated(Validator.save.class) UmsMessage entity) {
-		// 参数处理
-		int len = 0;
-		BeanUtils.setDefaultValue(entity, "isConfirm",0);
-		BeanUtils.setDefaultValue(entity, "confirmType",1);
-		BeanUtils.setDefaultValue(entity, "priority",4);
-		BeanUtils.setDefaultValue(entity, "delFlag",0);
-		BeanUtils.setDefaultValue(entity, "publicDate",DateUtil.date());
-
-		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
-		}else {
-			String[] fields = {"title","content","fromId","isConfirm","confirmType","bizId","bizParam","priority","offlineDate"};
-			SqlBuilder<UmsMessage> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		 	len = dataBaseDao.updateById(sqlBuilder);
+	public Results<Long> save(@Validated(Validator.save.class) UmsMessageDto entity) {
+		Results<Long> results=umsMessageService.save(entity);
+		if(results.isSuccess()){
+			umsMessageService.send(entity.getId());
 		}
-		return Results.build(len>0, entity.getId());
+		return results;
 	}
 
 	@Override

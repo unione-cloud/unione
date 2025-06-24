@@ -899,6 +899,24 @@ public class DataBaseDao {
 		return (List<T>) this.sqlManager.select(sqlId, resultClass, map);
 	}
 
+	/**
+	 * 查询数据集合
+	 * @param <T>
+	 * @param builder
+	 * @param keyField
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Map<String,T> findMap(SqlBuilder<T> builder,String keyField){
+		Map<String,T> result=new HashMap<>();
+		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
+		for(T m:rows) {
+			result.put(BeanUtil.getFieldValue(m, keyField).toString(), m);
+		}
+		return result;
+	}
+
 	@SuppressWarnings("rawtypes")
 	public Map<String,Map> findMap(String sqlName, Object params,String keyField){
 		return findMap(sqlName, params, Map.class, keyField);
