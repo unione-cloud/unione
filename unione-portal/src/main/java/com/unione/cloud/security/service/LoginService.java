@@ -32,6 +32,7 @@ import com.unione.cloud.system.dto.LoginParam;
 import com.unione.cloud.system.dto.LoginResult;
 import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.system.model.SysUser;
+import com.unione.cloud.system.model.SysUserOrgan;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -364,6 +365,19 @@ public class LoginService {
 		Set<String> roleCodes = roles.stream().map(row->row.getSn()).filter(row->row!=null).collect(Collectors.toSet());
 		principal.setUserRoles(new ArrayList<>(roleCodes));
 		LogsUtil.add("加载用户角色,role list:%s",roleCodes);
+
+		// 加载用户机构
+		SysUserOrgan userOrgan=new SysUserOrgan();
+		userOrgan.setUserId(user.getId());
+		userOrgan.setStatus(1);
+		userOrgan.setDelFlag(0);
+		List<Long> orgIds = dataBaseDao.findList(SqlBuilder.build(userOrgan).field("orgId")).stream()
+			.map(row->row.getOrgId()).filter(orgId->orgId!=null).collect(Collectors.toList());
+		if(principal.getOrgId()!=null){
+			orgIds.remove(principal.getOrgId());
+			orgIds.add(0,principal.getOrgId());
+		}
+		principal.setOrgIds(orgIds);
 		
 		// 更新用户登录信息
 		user.setLastLoginIp(LogsUtil.getClientIp());

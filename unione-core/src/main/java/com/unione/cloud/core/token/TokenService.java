@@ -299,7 +299,7 @@ public class TokenService{
 	 * @return
 	 */
     @SuppressWarnings("unchecked")
-	public UserPrincipal toPrincipal(String token,TcmEntry tcm) {
+	private UserPrincipal toPrincipal(String token,TcmEntry tcm) {
     	log.debug("进入服务:验证token并获取UserPrincipal信息,token:{}",token);
     	AssertUtil.service().notNull(token, "token不能为空")
 			.notNull(tcm, "tcm对象为空");

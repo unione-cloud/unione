@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.security.UserPrincipal;
 
 
 /**
@@ -16,6 +17,7 @@ public class Updater<T> {
 	private Map<String, Boolean> fields=new HashMap<>();
 	private T data;
 	private T params;
+	private UserPrincipal principal;
 	
 	private Updater(T data) {
 		this.data=data;
@@ -69,6 +71,12 @@ public class Updater<T> {
 	}
 	public T getParams() {
 		return params;
+	}
+	public UserPrincipal getPrincipal() {
+		return principal;
+	}
+	public void setPrincipal(UserPrincipal principal) {
+		this.principal = principal;
 	}
 
 	public Long getId() {

@@ -277,7 +277,8 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(updater.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			updater.getFields().put(lastUpdatedBy.getAlias(), true);
 		}
-		
+		updater.setPrincipal(sessionService.getPrincipal());
+
 		this.setDataPermis(updater.getData());
 		return this.sqlManager.update(sqlId, updater);
 	}
@@ -336,8 +337,9 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(updater.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			updater.getFields().put(lastUpdatedBy.getAlias(), true);
 		}
-		
+		updater.setPrincipal(sessionService.getPrincipal());
 		this.setDataPermis(updater.getData());
+
 		return this.sqlManager.update(sqlId, updater);
 	}
 	
@@ -420,6 +422,7 @@ public class DataBaseDao {
 		if(lastUpdatedBy!=null) {
 			BeanUtils.setDefaultValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
+		map.put("principal", sessionService.getPrincipal());
 		
 		this.setDataPermis(params);
 		return this.sqlManager.update(sqlId, map);
@@ -516,6 +519,7 @@ public class DataBaseDao {
 		if(lastUpdatedBy!=null) {
 			BeanUtils.setDefaultValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
+		map.put("principal", sessionService.getPrincipal());
 		
 		return this.sqlManager.update(sqlId, map);
 	}
@@ -551,6 +555,7 @@ public class DataBaseDao {
 		if(lastUpdatedBy!=null) {
 			BeanUtils.setDefaultValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
+		map.put("principal", sessionService.getPrincipal());
 		
 		return this.sqlManager.update(sqlId, map);
 	}
@@ -643,6 +648,7 @@ public class DataBaseDao {
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		map.put("principal", SessionHolder.build().getPrincipal());
 		this.setDataPermis(params);
 		return this.sqlManager.selectUnique(sqlId, map, Long.class);
 	}
@@ -678,6 +684,8 @@ public class DataBaseDao {
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		this.setDataPermis(params);
 		return (T) this.sqlManager.selectUnique(sqlId, map, params.getClass());
 	}
@@ -714,6 +722,8 @@ public class DataBaseDao {
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		this.setDataPermis(params);
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
@@ -764,6 +774,8 @@ public class DataBaseDao {
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		this.setDataPermis(params);
 		return (T) this.sqlManager.selectSingle(sqlId, map, params.getClass());
 	}
@@ -792,6 +804,8 @@ public class DataBaseDao {
 		Map<String,Object> map = new HashMap<>();
 		map.put("params", params);
 		map.put("sorts", (sort.length==0?null:Sort.use(sort)));
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
 	}
@@ -873,6 +887,7 @@ public class DataBaseDao {
 		query.put("id", BeanUtil.getFieldValue(params, "id"));
 		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
 		map.put("query", query);
+		map.put("principal", SessionHolder.build().getPrincipal());
 		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, params.getClass(), map);
@@ -894,6 +909,8 @@ public class DataBaseDao {
 		query.put("id", BeanUtil.getFieldValue(params, "id"));
 		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
 		map.put("query", query);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, resultClass, map);
@@ -936,6 +953,8 @@ public class DataBaseDao {
 		query.put("id", BeanUtil.getFieldValue(params, "id"));
 		query.put("ids", BeanUtil.getFieldValue(params, "ids"));
 		map.put("query", query);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		
 		this.setDataPermis(params);
 		List<T> list =  this.sqlManager.select(sqlId, resultType, map);
@@ -1001,6 +1020,8 @@ public class DataBaseDao {
 		query.put("id", params.getId());
 		query.put("ids", params.getIds());
 		map.put("query", query);
+		map.put("principal", SessionHolder.build().getPrincipal());
+
 		
 		this.setDataPermis(params);
 		return (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
@@ -1057,6 +1078,7 @@ public class DataBaseDao {
 		query.put("id", params.getId());
 		query.put("ids", params.getIds());
 		map.put("query", query);
+		map.put("principal", SessionHolder.build().getPrincipal());
 		
 		List<T> rows = (List<T>) this.sqlManager.select(sqlId, map, params.getBody().getClass(),(long)params.getStart()+1,(long)params.getPageSize());
 		results.setPage(params.getPage());

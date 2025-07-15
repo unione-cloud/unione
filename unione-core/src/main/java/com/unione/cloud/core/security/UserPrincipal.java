@@ -87,6 +87,10 @@ public class UserPrincipal implements Serializable {
 	 */
 	private List<String> userRoles=new ArrayList<String>();
 	/**
+	 * 用户所属机构集合
+	 */
+	private List<Long> orgIds=new ArrayList<Long>();
+	/**
 	 * 扩展属性
 	 */
 	private Map<String, Object> attr=new HashMap<String, Object>();

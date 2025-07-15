@@ -562,6 +562,7 @@ public class SqlBuilder<T> {
 			query.put("id", BeanUtil.getFieldValue(this.params, keyField));
 		}
 		query.put("ids", this.ids);
+		params.put("principal", SessionHolder.build().getPrincipal());
 		params.put("query", query);
 		
 		// 数据权限处理
