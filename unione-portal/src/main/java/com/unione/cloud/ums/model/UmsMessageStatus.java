@@ -3,6 +3,7 @@ import java.util.Date;
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.core.model.Pojo;
 
 /**
@@ -42,6 +44,8 @@ public class UmsMessageStatus extends Pojo {
 	* 查阅时间
 	*/
 	@Schema(title="查阅时间",description="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date viewTime;
 	/**
 	* 回复内容
@@ -62,6 +66,8 @@ public class UmsMessageStatus extends Pojo {
 	* 确认时间
 	*/
 	@Schema(title="确认时间",description="长度为：19")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date confirmDate;
 	/**
 	* 发送日志

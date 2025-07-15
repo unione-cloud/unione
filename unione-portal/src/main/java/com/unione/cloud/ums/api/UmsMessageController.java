@@ -26,7 +26,8 @@ import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.ums.dto.UmsMessageDto;
+import com.unione.cloud.ums.dto.UmsMessageSend;
+import com.unione.cloud.ums.dto.UmsMessageMine;
 import com.unione.cloud.ums.model.UmsMessage;
 import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -61,7 +62,7 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 	@PostMapping("/send")
 	@Operation(summary = "发送消息",description = "")
 	@Action(title="发送统一消息",type = ActionType.Save)
-	public Results<Long> send(@RequestBody @Validated(Validator.save.class) UmsMessageDto entity) {
+	public Results<Long> send(@RequestBody @Validated(Validator.save.class) UmsMessageSend entity) {
 		Results<Long> results=umsMessageService.save(entity);
 		if(results.isSuccess()){
 			umsMessageService.send(entity.getId());
@@ -69,6 +70,12 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		return results;
 	}
 	
+	@PostMapping("/mine")
+	@Operation(summary = "我的消息",description = "")
+	public Results<List<UmsMessageMine>> mine(@RequestBody Params<UmsMessageMine> params) {
+		return umsMessageService.mine(params);
+	}
+
 	
 	@Override
 	@Action(title="查询统一消息",type = ActionType.Query)

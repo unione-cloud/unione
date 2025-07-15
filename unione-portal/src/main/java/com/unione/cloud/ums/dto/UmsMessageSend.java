@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-public class UmsMessageDto extends UmsMessage{
+public class UmsMessageSend extends UmsMessage{
 
     @Schema(title="通知目标集合",description="")
     private List<UmsMessageTarget> targets;

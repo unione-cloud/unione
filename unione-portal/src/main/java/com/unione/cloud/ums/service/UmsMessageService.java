@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysUser;
-import com.unione.cloud.ums.dto.UmsMessageDto;
+import com.unione.cloud.ums.dto.UmsMessageSend;
+import com.unione.cloud.ums.dto.UmsMessageMine;
 import com.unione.cloud.ums.model.UmsMessage;
 import com.unione.cloud.ums.model.UmsMessageStatus;
 import com.unione.cloud.ums.model.UmsMessageTarget;
@@ -43,7 +45,7 @@ public class UmsMessageService {
      * @param entity
      * @return
      */
-    public Results<Long> save(UmsMessageDto entity) {
+    public Results<Long> save(UmsMessageSend entity) {
         // 参数验证
         AssertUtil.service().notEmpty(entity.getWays(), "通知方式不能为空");
 
@@ -212,5 +214,22 @@ public class UmsMessageService {
 
         log.info("退出：发送消息方法,message id:{}", mid);
     }
+
+
+    /**
+     * 加载我的消息
+     * @param params
+     * @return
+     */
+    public Results<List<UmsMessageMine>> mine(Params<UmsMessageMine> params) {
+        log.debug("进入：加载我的消息");
+
+        // 加载我的消息
+        Results<List<UmsMessageMine>> result = dataBaseDao.findPages("loadMine","countMine",SqlBuilder.build(params));
+
+        log.debug("退出：加载我的消息");
+        return result;
+    }
+
 
 }
