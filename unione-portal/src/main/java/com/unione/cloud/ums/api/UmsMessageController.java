@@ -18,21 +18,20 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.feign.api.FeignDelete;
 import com.unione.cloud.core.feign.api.FeignDetail;
 import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
-import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.ums.dto.UmsMessageSend;
 import com.unione.cloud.ums.dto.UmsMessageMine;
+import com.unione.cloud.ums.dto.UmsMessageSend;
 import com.unione.cloud.ums.model.UmsMessage;
+import com.unione.cloud.ums.model.UmsMessageStatus;
 import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -76,6 +75,26 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		return umsMessageService.mine(params);
 	}
 
+	@PostMapping("/viwe")
+	@Operation(summary = "查看消息",description = "获取消息详情，并更新消息状态，参数id不能为空")
+	public Results<UmsMessageMine> viwe(@RequestBody UmsMessageMine mine) {
+		UmsMessage tmp = dataBaseDao.findById(SqlBuilder.build(UmsMessage.class,mine.getId()));
+		AssertUtil.service().notNull(tmp, "记录未找到").notEq(tmp.getTenantId(), sessionService.getTenantId(), "记录未找到");
+
+		UmsMessageStatus status=new UmsMessageStatus();
+		status.setMessageId(mine.getId());
+		status.setUserId(sessionService.getUserId());
+		status = dataBaseDao.findOne(SqlBuilder.build(status));
+		if(status!=null && ObjectUtil.equal(status.getDelFlag(), 1)){
+			return Results.failure("消息已删除");
+		}
+
+		
+
+		
+		return Results.success();
+	}
+
 	
 	@Override
 	@Action(title="查询统一消息",type = ActionType.Query)
@@ -110,7 +129,7 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
 		UmsMessage tmp = dataBaseDao.findById(SqlBuilder.build(UmsMessage.class,id));
-		AssertUtil.service().notNull(tmp, "记录未找到");
+		AssertUtil.service().notNull(tmp, "记录未找到").notEq(tmp.getTenantId(), sessionService.getTenantId(), "记录未找到");
 		
 		return Results.success(tmp);
 	}
