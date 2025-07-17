@@ -265,6 +265,7 @@
 		<jdk.version>21</jdk.version>
 		<spring.boot.skip>true</spring.boot.skip>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	
 		<jakarta.version>6.1.0</jakarta.version>
 		<!-- spring boot,cloud index -->
