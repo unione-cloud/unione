@@ -700,6 +700,12 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.SELECT_ONE);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T findOne(String sqlName, SqlBuilder<T> builder) {
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
+	}
 	
 
 	/**
