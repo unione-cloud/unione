@@ -24,6 +24,7 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.ums.dto.UmsMessageMine;
 import com.unione.cloud.ums.dto.UmsMessageSend;
 import com.unione.cloud.ums.model.UmsMessage;
@@ -31,6 +32,7 @@ import com.unione.cloud.ums.model.UmsMessageStatus;
 import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,21 +80,71 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 	@PostMapping("/viwe")
 	@Operation(summary = "查看消息",description = "获取消息详情，并更新消息状态，参数id不能为空")
 	public Results<UmsMessageMine> viwe(@RequestBody UmsMessageMine mine) {
-		UmsMessage tmp = dataBaseDao.findById(SqlBuilder.build(UmsMessage.class,mine.getId()));
-		AssertUtil.service().notNull(tmp, "记录未找到").notEq(tmp.getTenantId(), sessionService.getTenantId(), "记录未找到");
 
-		UmsMessageStatus status=new UmsMessageStatus();
-		status.setMessageId(mine.getId());
-		status.setUserId(sessionService.getUserId());
-		status = dataBaseDao.findOne(SqlBuilder.build(status));
-		if(status!=null && ObjectUtil.equal(status.getDelFlag(), 1)){
-			return Results.failure("消息已删除");
+		UmsMessageMine tmp = dataBaseDao.findOne("loadMine",SqlBuilder.build(UmsMessageMine.class,mine.getId()));
+		AssertUtil.service().notNull(tmp, "记录未找到");
+		if(tmp.getMineId()==null){
+			// 保存消息状态
+			UmsMessageStatus status=new UmsMessageStatus();
+			status.setMessageId(tmp.getId());
+			status.setUserId(sessionService.getUserId());
+			status.setDelFlag(0);
+			status.setViewSts(1);
+			status.setViewTime(DateUtil.date());
+			dataBaseDao.insert(status);
+			tmp.setMineId(status.getId());
+			tmp.setViewSts(1);
+			tmp.setViewTime(status.getViewTime());
 		}
 
-		
+		return Results.success(tmp);
+	}
 
-		
-		return Results.success();
+
+	@PostMapping("/confirm")
+	@Operation(summary = "确认消息",description = "参数id不能为空")
+	public Results<Void> confirm(@RequestBody UmsMessageStatus entity) {
+		AssertUtil.service().isTrue(!(entity.getId()==null&&entity.getMessageId()==null), "参数id和messageId不能都为空");
+
+		BeanUtils.setDefaultValue(entity, "confirmStatus",1);
+		if(entity.getId()==null && entity.getMessageId()!=null){
+			// 加载消息对象
+			UmsMessageMine tmp = dataBaseDao.findOne("loadMine",SqlBuilder.build(UmsMessageMine.class,entity.getMessageId()));
+			AssertUtil.service().notNull(tmp, "记录未找到");
+
+			// 保存消息状态
+			if(tmp.getMineId()==null){
+				// 保存消息状态
+				UmsMessageStatus status=new UmsMessageStatus();
+				status.setMessageId(tmp.getId());
+				status.setUserId(sessionService.getUserId());
+				status.setDelFlag(0);
+				status.setViewSts(1);
+				status.setViewTime(DateUtil.date());
+				status.setConfirmDate(DateUtil.date());
+				status.setConfirmResult(entity.getConfirmResult());
+				status.setConfirmStatus(entity.getConfirmStatus());
+				status.setReplyInfo(entity.getReplyInfo());
+				int len = dataBaseDao.insert(status);
+				return Results.build(len>0);
+			}else{
+				entity.setId(tmp.getMineId());
+			}
+		}
+		AssertUtil.service().notNull(entity.getId(), "参数id不能为空");
+		UmsMessageStatus status=new UmsMessageStatus();
+		status.setId(entity.getId());
+		status.setUserId(sessionService.getUserId());
+		status=dataBaseDao.findOne(SqlBuilder.build(status));
+		AssertUtil.service().notNull(status, "记录未找到");
+
+		status.setConfirmDate(DateUtil.date());
+		status.setConfirmResult(entity.getConfirmResult());
+		status.setConfirmStatus(entity.getConfirmStatus());
+		status.setReplyInfo(entity.getReplyInfo());
+		int len = dataBaseDao.updateById(SqlBuilder.build(status).field("confirmDate","confirmResult","confirmStatus","replyInfo"));
+
+		return Results.build(len>0);
 	}
 
 	

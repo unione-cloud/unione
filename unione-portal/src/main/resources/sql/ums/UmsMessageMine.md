@@ -16,6 +16,9 @@ whereField
  ))
 ) OR stats.DEL_FLAG=0 AND stats.USER_ID=#{principal.id})
 
+-- @if(isNotEmpty(query.id)){
+AND msg.ID=#{query.id}
+-- @}  
 -- @if(isNotEmpty(params.fromId)){
 AND msg.FROM_ID=#{params.fromId}
 -- @}    
@@ -56,7 +59,7 @@ loadMine
 ===
 ```sql
 SELECT msg.*, 
-stats.id as MINE_ID,stats.VIEW_STS,stats.VIEW_TIME,stats.CONFIRM_STATUS,stats.CONFIRM_DATE,stats.CONFIRM_RESULT
+stats.id as MINE_ID,stats.VIEW_STS,stats.VIEW_TIME,stats.CONFIRM_STATUS,stats.CONFIRM_DATE,stats.CONFIRM_RESULT,stats.REPLY_INFO
 FROM UMS_MESSAGE msg 
 left JOIN (SELECT * from UMS_MESSAGE_STATUS WHERE USER_ID=#{principal.id}) stats ON msg.ID=stats.MESSAGE_ID
 WHERE msg.DEL_FLAG=0 AND #{use("whereField")}
