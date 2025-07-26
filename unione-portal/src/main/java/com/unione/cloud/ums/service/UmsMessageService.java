@@ -47,7 +47,8 @@ public class UmsMessageService {
      */
     public Results<Long> save(UmsMessageSend entity) {
         // 参数验证
-        AssertUtil.service().notEmpty(entity.getWays(), "通知方式不能为空");
+        AssertUtil.service().notEmpty(entity.getWays(), "通知方式不能为空")
+            .notEmpty(entity.getTargets(), "通知目标不能为空");
 
         // 消息初始化
         int len = 0;

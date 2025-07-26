@@ -43,4 +43,6 @@ public class UmsMessageMine extends UmsMessage{
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date timeEnd;
 
+	@Schema(title="消息分类名称",description="")
+	private String categoryName;
 }

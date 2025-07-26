@@ -2,7 +2,9 @@ package com.unione.cloud.ums.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -25,15 +27,16 @@ import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.ums.dto.UmsMessageDto;
 import com.unione.cloud.ums.dto.UmsMessageMine;
 import com.unione.cloud.ums.dto.UmsMessageSend;
+import com.unione.cloud.ums.model.UmsCategory;
 import com.unione.cloud.ums.model.UmsMessage;
 import com.unione.cloud.ums.model.UmsMessageStatus;
 import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "统一消息：消息",description="UmsMessage")
 @RequestMapping("/api/ums/message")	 //TreeFeignApi
-public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<UmsMessage>,FeignFindById<UmsMessage>,FeignDetail<UmsMessage>{
+public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<UmsMessageDto>,FeignFindById<UmsMessage>,FeignDetail<UmsMessage>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -74,7 +77,20 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 	@PostMapping("/mine")
 	@Operation(summary = "我的消息",description = "")
 	public Results<List<UmsMessageMine>> mine(@RequestBody Params<UmsMessageMine> params) {
-		return umsMessageService.mine(params);
+		Results<List<UmsMessageMine>> results=umsMessageService.mine(params);
+		if(results.getBody()!=null){
+			Set<Long> cids = results.getBody().stream().map(r->r.getCategoryId()).filter(i->i!=null).collect(Collectors.toSet());
+			if(!cids.isEmpty()){
+				Map<String,UmsCategory> map = dataBaseDao.findMap(SqlBuilder.build(UmsCategory.class, cids), "id");
+				results.getBody().stream().filter(r->r.getCategoryId()!=null).forEach(r->{
+					UmsCategory category=map.get(r.getCategoryId().toString());
+					if(category!=null){
+						r.setCategoryName(category.getTitle());
+					}
+				});
+			}
+		}
+		return results;
 	}
 
 	@PostMapping("/viwe")
@@ -138,11 +154,12 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		status=dataBaseDao.findOne(SqlBuilder.build(status));
 		AssertUtil.service().notNull(status, "记录未找到");
 
+		status.setViewSts(1);
 		status.setConfirmDate(DateUtil.date());
 		status.setConfirmResult(entity.getConfirmResult());
 		status.setConfirmStatus(entity.getConfirmStatus());
 		status.setReplyInfo(entity.getReplyInfo());
-		int len = dataBaseDao.updateById(SqlBuilder.build(status).field("confirmDate","confirmResult","confirmStatus","replyInfo"));
+		int len = dataBaseDao.updateById(SqlBuilder.build(status).field("viewSts","confirmDate","confirmResult","confirmStatus","replyInfo"));
 
 		return Results.build(len>0);
 	}
@@ -150,13 +167,26 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 	
 	@Override
 	@Action(title="查询统一消息",type = ActionType.Query)
-	public Results<List<UmsMessage>> find(Params<UmsMessage> params) {
+	public Results<List<UmsMessageDto>> find(Params<UmsMessageDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 		params.getBody().setDelFlag(0);		
 		params.getBody().setUserId(sessionService.getUserId());
-		Results<List<UmsMessage>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<UmsMessageDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+
+		if(results.getBody()!=null){
+			Set<Long> cids = results.getBody().stream().map(r->r.getCategoryId()).filter(i->i!=null).collect(Collectors.toSet());
+			if(!cids.isEmpty()){
+				Map<String,UmsCategory> map = dataBaseDao.findMap(SqlBuilder.build(UmsCategory.class, cids), "id");
+				results.getBody().stream().filter(r->r.getCategoryId()!=null).forEach(r->{
+					UmsCategory category=map.get(r.getCategoryId().toString());
+					if(category!=null){
+						r.setCategoryName(category.getTitle());
+					}
+				});
+			}
+		}
 		
 		return results;
 	}
