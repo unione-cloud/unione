@@ -38,7 +38,7 @@ AND msg.PUBLIC_DATE <= #{params.timeEnd}
 AND stats.VIEW_STS=1
 -- @}   
 -- @if(isNotEmpty(params.viewSts) && params.viewSts==0){
-AND (stats.VIEW_STS=0 OR stats.CONFIRM_STATUS=0)
+AND (stats.ID IS NULL OR stats.VIEW_STS=0 OR stats.CONFIRM_STATUS=0)
 -- @}   
 -- @if(isNotEmpty(keywords)){
 AND (msg.TITLE LIKE #{'%'+keywords+'%'} OR msg.BODY_HTML like #{'%'+keywords+'%'})
