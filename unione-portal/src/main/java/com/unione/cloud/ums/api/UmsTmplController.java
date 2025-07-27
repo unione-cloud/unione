@@ -76,7 +76,7 @@ public class UmsTmplController implements PojoFeignApi<UmsTmpl>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"types","title","bodyHtml","bodySms","vars","usel","ways","status","ordered"};
+			String[] fields = {"types","title","bodyHtml","bodyText","vars","usel","ways","status","ordered"};
 			SqlBuilder<UmsTmpl> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}

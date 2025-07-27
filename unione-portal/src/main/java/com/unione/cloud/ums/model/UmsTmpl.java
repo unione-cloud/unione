@@ -54,17 +54,17 @@ public class UmsTmpl extends Pojo {
 	@Schema(title="模版编码，唯一验证",description="长度为：50")
 	private String sn;
 	/**
-	* HTML模版，用于站内信，邮件等富文本场景
+	* 模版HTML
 	*/
 	@KeyWords
-	@Schema(title="HTML模版，用于站内信，邮件等富文本场景",description="长度为：65535")
+	@Schema(title="模版HTML",description="长度为：65535")
 	private String bodyHtml;
 	/**
-	* SMS模版，用于短信，推送等场景
+	* 模版内容
 	*/
 	@KeyWords
-	@Schema(title="SMS模版，用于短信，推送等场景",description="长度为：65535")
-	private String bodySms;
+	@Schema(title="模版内容",description="长度为：65535")
+	private String bodyText;
 	/**
 	* 模版变量,json数组存储[{name,title,dataType,defaultValue}]
 	*/
