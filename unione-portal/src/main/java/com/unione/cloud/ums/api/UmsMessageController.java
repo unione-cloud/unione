@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +41,7 @@ import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -171,19 +174,45 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 	@Action(title="删除我的消息",type = ActionType.Delete)
 	public Results<Integer> remove(@RequestBody Set<Long> ids){
 		Results<Integer> results = new Results<>();
-		
-		// 参数处理
-		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
-		
-		// 执行删除
-		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(UmsMessageStatus.class,ids));
-		LogsUtil.add("成功删除记录数量:"+count);
-		
-		results.setSuccess(count>0);
-		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody(count);
+		AssertUtil.service().notEmpty(ids, "参数ids不能为空");
+		AtomicInteger total=new AtomicInteger();
 
+		Params<UmsMessageMine> params=new Params<>();
+        params.setBody(new UmsMessageMine());
+        params.setIds(new ArrayList<>(ids));
+        params.setPage(1);
+        params.setPageSize(2000);
+        List<UmsMessageMine> list=dataBaseDao.findPageList("loadMine",params);
+
+		Set<Long> mineIds = list.stream().map(r->r.getMineId()).filter(r->r!=null).collect(Collectors.toSet());
+		// 删除我的消息
+		if(ObjectUtil.isNotEmpty(mineIds)){
+			LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(mineIds));
+			int len = dataBaseDao.deleteLogicById(SqlBuilder.build(UmsMessageStatus.class,mineIds));
+			LogsUtil.add("成功删除我的:"+len);
+			total.addAndGet(len);
+		}
+
+		// 根据消息id删除
+		Set<Long> msgIds=list.stream().filter(r->r.getMineId()==null).map(UmsMessageMine::getId).collect(Collectors.toSet());
+		if(ObjectUtil.isNotEmpty(msgIds)){
+			List<UmsMessageStatus> stsList = msgIds.stream().map(id->{
+ 				UmsMessageStatus sts=new UmsMessageStatus();
+                sts.setMessageId(id);
+                sts.setUserId(sessionService.getUserId());
+                sts.setDelFlag(1);
+                sts.setViewSts(0);
+                return sts;
+            }).collect(Collectors.toList());
+			 if(!stsList.isEmpty()){
+                int t[] = dataBaseDao.insertBatch(stsList);
+                Arrays.asList(t).stream().filter(l->(Integer)l>0).forEach(i->total.addAndGet((Integer)i));
+            }
+		}
+		
+		results.setSuccess(total.get()>0);
+		results.setMessage(total.get()>0?"操作成功":"操作失败");
+		results.setBody(total.get());
 		return results;
 	}
 

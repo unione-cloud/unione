@@ -19,6 +19,9 @@ whereField
 -- @if(isNotEmpty(query.id)){
 AND msg.ID=#{query.id}
 -- @}  
+-- @if(isNotEmpty(query.ids)){
+AND msg.ID in (#{join(query.ids)})
+-- @} 
 -- @if(isNotEmpty(params.fromId)){
 AND msg.FROM_ID=#{params.fromId}
 -- @}    
