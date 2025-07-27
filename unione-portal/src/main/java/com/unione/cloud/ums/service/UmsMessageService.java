@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -230,6 +232,52 @@ public class UmsMessageService {
 
         log.debug("退出：加载我的消息");
         return result;
+    }
+
+    /**
+     * 标记所有消息已读
+     * @return
+     */
+    public Results<Integer> clear(){
+        log.debug("进入：标记所有消息已读");
+        AtomicInteger total=new AtomicInteger();
+
+        // 设置status为已读
+        UmsMessageStatus status = new UmsMessageStatus();
+        status.setViewSts(1);
+        status.setViewTime(DateUtil.date());
+        int len = dataBaseDao.update(SqlBuilder.build(status).field("viewSts","viewTime").where("userId = [principal.id] and viewSts = 0"));
+        total.addAndGet(len);
+
+        // 加载所有未初始化status消息，并设置已读
+        Params<UmsMessageMine> params=new Params<>();
+        params.setBody(new UmsMessageMine());
+        params.getBody().setViewSts(0);
+        params.setPage(1);
+        params.setPageSize(2000);
+        List<UmsMessageMine> list=dataBaseDao.findPageList("loadMine",params);
+        while(!list.isEmpty()){
+            // 批量更新
+            List<UmsMessageStatus> stsList = list.stream().filter(row->row.getMineId()==null).map(row->{
+                UmsMessageStatus sts=new UmsMessageStatus();
+                sts.setMessageId(row.getId());
+                sts.setUserId(sessionService.getUserId());
+                sts.setDelFlag(0);
+                sts.setViewSts(1);
+                sts.setViewTime(DateUtil.date());
+                return sts;
+            }).collect(Collectors.toList());
+           
+            if(!stsList.isEmpty()){
+                int t[] = dataBaseDao.insertBatch(stsList);
+                Arrays.asList(t).stream().filter(l->(Integer)l>0).forEach(i->total.addAndGet((Integer)i));
+            }
+
+            params.setPage(params.getPage()+1);
+            list=dataBaseDao.findPageList("loadMine",params);
+        }
+
+        return Results.success(total.get());
     }
 
 

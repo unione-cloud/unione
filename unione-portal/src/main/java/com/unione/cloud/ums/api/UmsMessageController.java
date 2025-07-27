@@ -33,6 +33,8 @@ import com.unione.cloud.ums.dto.UmsMessageSend;
 import com.unione.cloud.ums.model.UmsCategory;
 import com.unione.cloud.ums.model.UmsMessage;
 import com.unione.cloud.ums.model.UmsMessageStatus;
+import com.unione.cloud.ums.model.UmsMessageTarget;
+import com.unione.cloud.ums.model.UmsMessageWay;
 import com.unione.cloud.ums.service.UmsMessageService;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -164,6 +166,35 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		return Results.build(len>0);
 	}
 
+	@PostMapping("/remove")
+	@Operation(summary = "删除我的消息",description = "参数ids不能为空")
+	@Action(title="删除我的消息",type = ActionType.Delete)
+	public Results<Integer> remove(@RequestBody Set<Long> ids){
+		Results<Integer> results = new Results<>();
+		
+		// 参数处理
+		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
+		
+		// 执行删除
+		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(UmsMessageStatus.class,ids));
+		LogsUtil.add("成功删除记录数量:"+count);
+		
+		results.setSuccess(count>0);
+		results.setMessage(count>0?"操作成功":"操作失败");
+		results.setBody(count);
+
+		return results;
+	}
+
+
+	@PostMapping("/clear")
+	@Action(title="标记所有消息已读",type = ActionType.Other)
+	@Operation(summary = "标记所有消息已读",description = "将所有未读消息设置成已读")
+	public Results<Integer> clear(){
+		return umsMessageService.clear();
+	}
+
 	
 	@Override
 	@Action(title="查询统一消息",type = ActionType.Query)
@@ -176,6 +207,8 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 
 		if(results.getBody()!=null){
+
+			// 加载通知类别
 			Set<Long> cids = results.getBody().stream().map(r->r.getCategoryId()).filter(i->i!=null).collect(Collectors.toSet());
 			if(!cids.isEmpty()){
 				Map<String,UmsCategory> map = dataBaseDao.findMap(SqlBuilder.build(UmsCategory.class, cids), "id");
@@ -184,6 +217,21 @@ public class UmsMessageController implements FeignDelete<UmsMessage>,FeignFind<U
 					if(category!=null){
 						r.setCategoryName(category.getTitle());
 					}
+				});
+			}
+
+			// 加载通知目标，通知方式
+			Set<Long> mids=results.getBody().stream().map(r->r.getId()).filter(i->i!=null).collect(Collectors.toSet());
+			if(!mids.isEmpty()){
+				List<UmsMessageTarget> targetList = dataBaseDao.findList(SqlBuilder.build(UmsMessageTarget.class,mids).where("messageId in [ids]"));
+				Map<Long,List<UmsMessageTarget>> targetMap = targetList.stream().collect(Collectors.groupingBy(UmsMessageTarget::getMessageId));
+				
+				List<UmsMessageWay> wayList=dataBaseDao.findList(SqlBuilder.build(UmsMessageWay.class,mids).where("messageId in [ids]"));
+				Map<Long,List<UmsMessageWay>> wayMap = wayList.stream().collect(Collectors.groupingBy(UmsMessageWay::getMessageId));
+				
+				results.getBody().stream().forEach(r->{
+					r.setTargets(targetMap.get(r.getId()));
+					r.setWays(wayMap.get(r.getId()).stream().map(w->w.getWay()).collect(Collectors.toList()));
 				});
 			}
 		}
