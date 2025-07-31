@@ -1,4 +1,4 @@
-package com.unione.cloud.system.dto;
+package com.unione.cloud.base.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

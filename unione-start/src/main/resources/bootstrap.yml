@@ -87,9 +87,12 @@ springdoc:
   swagger-ui:
     tags-sorter: alpha
   group-configs:
+    - group: base
+      display-name: 基础接口
+      paths-to-match: /api/base/**
     - group: common
       display-name: 通用接口
-      paths-to-match: /api/common/**
+      paths-to-match: /api/common/**  
     - group: security
       display-name: 认证接口
       paths-to-match: /api/security/**

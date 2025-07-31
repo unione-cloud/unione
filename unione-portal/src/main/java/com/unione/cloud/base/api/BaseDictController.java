@@ -1,4 +1,4 @@
-package com.unione.cloud.system.api;
+package com.unione.cloud.base.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.base.dto.DictShowDto;
+import com.unione.cloud.base.model.BaseDict;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
@@ -31,8 +33,6 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
-import com.unione.cloud.system.dto.DictShowDto;
-import com.unione.cloud.system.model.BaseDict;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -48,8 +48,8 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @RestController
-@Tag(name = "系统管理：基础字典",description="BaseDict")
-@RequestMapping("/api/system/dict")	 //TreeFeignApi
+@Tag(name = "基础：字典管理",description="BaseDict")
+@RequestMapping("/api/base/dict")	 //TreeFeignApi
 public class BaseDictController implements TreeFeignApi<BaseDict>{
 	
 	@Autowired

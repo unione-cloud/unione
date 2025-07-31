@@ -1,4 +1,4 @@
-package com.unione.cloud.system.model;
+package com.unione.cloud.base.model;
 
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
