@@ -310,6 +310,8 @@
 		<!-- cache -->
 		<jedis.version>5.2.0</jedis.version>
 		<jetcache.version>2.7.7</jetcache.version>
+
+		<ip2region.version>2.7.0</ip2region.version>
 		
 	</properties>
 	

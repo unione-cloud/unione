@@ -65,8 +65,8 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("ums");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("ums");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("common");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("common");
 //		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
@@ -91,13 +91,9 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("ums_tmpl",mavenProject);
-		factory.gen("ums_todo",mavenProject);
-		factory.gen("ums_message",mavenProject);
-		factory.gen("ums_message_status",mavenProject);
-		factory.gen("ums_message_target",mavenProject);
-		factory.gen("ums_message_way",mavenProject);
-		factory.gen("ums_category",mavenProject);
+		factory.gen("comm_visit_item",mavenProject);
+		factory.gen("comm_visit_stat",mavenProject);
+		factory.gen("comm_visit_target",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 
