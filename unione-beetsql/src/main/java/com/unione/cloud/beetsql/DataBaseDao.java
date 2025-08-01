@@ -308,6 +308,31 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 
+		/**
+	 * 	更新数据
+	 * @param builder
+	 * @return
+	 */
+	public <T> int update(String sqlName,SqlBuilder<T> builder) {
+		builder.init(this.sqlManager);
+
+		SessionService sessionService=SessionHolder.build();
+		SqlEntity sqlEntity=builder.getEntity();
+		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
+		if(lastUpdated!=null) {
+			BeanUtils.setDefaultValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
+			sqlEntity.getFieldList().add(lastUpdated.getAlias());
+		}
+		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
+		if(lastUpdatedBy!=null) {
+			BeanUtils.setDefaultValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
+			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
+		}
+		
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+		return this.sqlManager.update(sqlId, builder.toParams());
+	}
+
 	/**
 	 * 	更新数据,使用sql更新{ResoruceName}.updateById
 	 * @param updater
@@ -980,6 +1005,19 @@ public class DataBaseDao {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findPageList(SqlBuilder<T> builder){
 		SqlId findsql=this.loadSql(builder, SqlType.SELECT);
+		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
+		return rows;
+	}
+
+	/**
+	 * 	查询列表(分页),不执行total统计
+	 * @param params
+	 * @param sort
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findPageList(String sqlName,SqlBuilder<T> builder){
+		SqlId findsql=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
 	}

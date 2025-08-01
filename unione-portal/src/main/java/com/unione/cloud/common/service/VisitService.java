@@ -2,13 +2,16 @@ package com.unione.cloud.common.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.alicp.jetcache.Cache;
@@ -17,12 +20,16 @@ import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.CommVisitStatDto;
 import com.unione.cloud.common.dto.VisitEntry;
 import com.unione.cloud.common.model.CommVisitItem;
+import com.unione.cloud.common.model.CommVisitStat;
 import com.unione.cloud.common.model.CommVisitTarget;
+import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.generator.IdGenHolder;
+import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.RequestUtils;
@@ -51,6 +58,9 @@ public class VisitService {
 
     @Autowired
     private SessionService sessionService;
+
+    @Autowired
+    private RedisService redisService;
 
     /**
 	 * 缓存时间：单位秒，默认7200秒
@@ -195,5 +205,59 @@ public class VisitService {
         }
         return Results.failure();
     }
+
+
+    @Scheduled(cron = "${visit.stat.cron:0 0/30 * * * ?}")
+    public void statJob(){
+        stat(DateUtil.date());
+    }
+
+
+    /**
+     * 按天统计指定日期访客统计信息
+     * @param date
+     */
+    public void stat(Date date){
+        log.debug("进入：按天统计指定日期访客统计信息,date:{}",date);
+        String rkey=String.format("COMM:VISIT:STATBYDAY:%s", DateUtil.format(date, "yyyyMMdd"));
+        boolean lock=redisService.putIfAbsent(rkey, 1, Duration.ofMinutes(5));
+        if(!lock){
+            return;
+        }
+
+        try{
+            Params<CommVisitStatDto> params=new Params<>();
+            CommVisitStatDto statDto=new CommVisitStatDto();
+            statDto.setTimeBegin(DateUtil.beginOfDay(date));
+            statDto.setTimeEnd(DateUtil.endOfDay(date));
+            params.setBody(statDto);
+            params.setPageSize(1000);
+            List<CommVisitStatDto> list = dataBaseDao.findPageList("statByDay",SqlBuilder.build(params));
+            while(!list.isEmpty()){
+                List<CommVisitStat> stats = list.stream().filter(dto->{
+                    dto.setTime(DateUtil.date());
+                    int len = dataBaseDao.update("updateStatByDay", SqlBuilder.build(dto));
+                    return len<=0;
+                }).map(dto->{
+                    CommVisitStat stat=new CommVisitStat();
+                    BeanUtils.copyProperties(dto, stat);
+                    return stat;
+                }).collect(Collectors.toList());
+                if(!stats.isEmpty()){
+                    dataBaseDao.insertBatch(stats);
+                }
+                if(list.size()<params.getPageSize()){
+                    break;
+                }
+                params.setPage(params.getPage()+1);
+                list = dataBaseDao.findPageList("statByDay",SqlBuilder.build(params));
+            }
+        }catch(Exception e){
+            log.error("按天统计访客信息失败,date:{}",date,e);
+        }
+        redisService.delete(rkey);
+        log.debug("退出：按天统计指定日期访客统计信息,date:{}",date);
+    }
+
 
 }

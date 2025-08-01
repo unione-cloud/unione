@@ -91,7 +91,7 @@ public class RequestUtils {
 	public static String getClientIp(HttpServletRequest request) {
 		log.debug("进入：获取client ip方法");
 		if(request==null){
-			return null;
+			return "Unknown";
 		}
 		String ip = null;
 		ip = StringUtils.trimToNull(request.getHeader("X-Forwarded-For"));
@@ -137,7 +137,7 @@ public class RequestUtils {
 	 */
 	public static String getClientOs(HttpServletRequest request) {
 	    if (request == null) {
-	        return null;
+	        return "Unknown";
 	    }
 	    String userAgent = request.getHeader("user-agent");
 	    if (StringUtils.isEmpty(userAgent)) {
@@ -172,7 +172,7 @@ public class RequestUtils {
 	 */
 	public static String getClientExplorer(HttpServletRequest request) {
 	    if (request == null) {
-	        return null;
+	        return "Unknown";
 	    }
 	    String userAgent = request.getHeader("user-agent");
 	    if (StringUtils.isEmpty(userAgent)) {
@@ -236,13 +236,13 @@ public class RequestUtils {
 	@Data
 	public static class ClientLocation{
 		@Schema(title="访问IP",description="长度为：50")
-		private String visitIp;
+		private String visitIp="Unknown";
 		@Schema(title="所在国家",description="长度为：200")
-		private String country;
+		private String country="Unknown";
 		@Schema(title="所在省份",description="长度为：100")
-		private String province;
+		private String province="Unknown";
 		@Schema(title="所在城市",description="长度为：100")
-		private String city;
+		private String city="Unknown";
 	}
 
 }
