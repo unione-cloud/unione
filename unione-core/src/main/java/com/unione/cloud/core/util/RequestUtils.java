@@ -1,5 +1,6 @@
 package com.unione.cloud.core.util;
 
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,11 +26,15 @@ public class RequestUtils {
 
 
 	private static Searcher ipsearcher;
-	{
+	static{
+		InputStream in = null;
 		try {
-			ipsearcher = Searcher.newWithFileOnly("/xdb/ip2region.xdb");
+			in = RequestUtils.class.getResourceAsStream("/xdb/ip2region.xdb");
+			ipsearcher = Searcher.newWithBuffer(IoUtil.readBytes(in));
 		} catch (Exception e) {
 			log.error("ip2region.xdb文件加载失败",e);
+		} finally{
+			IoUtil.close(in);
 		}
 	}
 	
@@ -210,9 +216,24 @@ public class RequestUtils {
 
 		// 根据ip获取位置信息
 		if(!ObjectUtil.isEmpty(location.getVisitIp()) && ipsearcher!=null){
+			location=getClientLocation(location.getVisitIp());
+		}
+
+		return location;
+	}
+
+
+	/**
+	 * 根据ip获取位置信息
+	 * @param ip
+	 * @return
+	 */
+	public static ClientLocation getClientLocation(String ip){
+		ClientLocation location=new ClientLocation();
+		if(!ObjectUtil.isEmpty(ip) && ipsearcher!=null){
 			try {
 				//searchIpInfo 的数据格式： 国家|区域|省份|城市|ISP
-				String info = ipsearcher.search(location.getVisitIp());
+				String info = ipsearcher.search(ip);
 				if(StringUtils.isNotEmpty(info)){
 					String[] infos = info.split("\\|");
 					if(infos.length>=5 && !"0".equals(infos[0])){
@@ -225,12 +246,8 @@ public class RequestUtils {
 				log.error("根据ip获取位置信息失败,ip:{}", location.getVisitIp(), e);
 			}
 		}
-
 		return location;
 	}
-
-
-
 
 
 	@Data

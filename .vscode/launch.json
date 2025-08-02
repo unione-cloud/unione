@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "IpSearchTest",
+            "request": "launch",
+            "mainClass": "com.unione.cloud.IpSearchTest",
+            "projectName": "unione-start"
+        },
+        {
+            "type": "java",
+            "name": "RequestUtils",
+            "request": "launch",
+            "mainClass": "com.unione.cloud.core.util.RequestUtils",
+            "projectName": "unione-core"
+        },
+        {
+            "type": "java",
             "name": "CodeBuilderFactoryTest",
             "request": "launch",
             "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
