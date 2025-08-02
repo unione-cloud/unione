@@ -1,6 +1,7 @@
 package com.unione.cloud.common.api;
 
-import org.simpleframework.xml.core.Validate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.common.dto.CommVisitStatDto;
 import com.unione.cloud.common.dto.VisitEntry;
 import com.unione.cloud.common.service.VisitService;
 import com.unione.cloud.core.dto.Results;
@@ -30,9 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 public class CommVisitController {
 	
 	@Autowired
-	private DataBaseDao dataBaseDao;
-
-	@Autowired
 	private VisitService visitService;
 
 	@PostMapping("/entry")
@@ -43,5 +41,11 @@ public class CommVisitController {
 	}
 
 	
+	@PostMapping("/stat")
+	@Operation(summary = "统计",description = "加载统计信息，参数：开始时间：timeBegin,截止时间：timeEnd,统计维度：dimensions")
+	public Results<List<CommVisitStatDto>> stat(@RequestBody CommVisitStatDto dto) {
+		return visitService.stat(dto);
+	}
+
 
 }

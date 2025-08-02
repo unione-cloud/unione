@@ -3,6 +3,7 @@ import java.util.Date;
 import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.unione.cloud.core.model.Pojo;
 
 /**
@@ -48,6 +50,13 @@ public class CommVisitStat extends Pojo {
 	*/
 	@Schema(title="操作系统",description="长度为：50")
 	private String osname;
+	/**
+	* 访问日期
+	*/
+	@Schema(title="访问日期",description="长度为：10")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date visitDate;
 	/**
 	* 访问年份
 	*/

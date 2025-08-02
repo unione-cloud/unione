@@ -1,6 +1,7 @@
 package com.unione.cloud.common.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
@@ -17,6 +18,9 @@ import lombok.Data;
 @Table(name="comm_visit_stat")
 @SqlResource("common.CommVisitStatDto")
 public class CommVisitStatDto extends CommVisitStat{
+
+	@Schema(title="统计维度",description = "可选：app,tenant,organ,user,target,explorer,osname,year,quar,month,week,day,country,province,city")
+	private List<String> dimensions;
 
     @Schema(title="开始时间",description = "时间格式:yyyy-MM-dd HH:mm:ss")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

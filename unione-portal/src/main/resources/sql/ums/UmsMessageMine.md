@@ -28,7 +28,7 @@ AND msg.FROM_ID=#{params.fromId}
 -- @if(isNotEmpty(params.categoryId)){
 AND msg.CATEGORY_ID=#{params.categoryId}
 -- @}   
--- @if(isNotEmpty(params.types) && varNotNull(params.types)){
+-- @if(isNotEmpty(params.types) && notNull(params.types)){
 AND msg.TYPES=#{params.types}
 -- @}   
 -- @if(isNotEmpty(params.timeBegine)){

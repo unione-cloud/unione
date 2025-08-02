@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.CacheManager;
@@ -241,6 +242,7 @@ public class VisitService {
                 }).map(dto->{
                     CommVisitStat stat=new CommVisitStat();
                     BeanUtils.copyProperties(dto, stat);
+                    stat.setVisitDate(date);
                     return stat;
                 }).collect(Collectors.toList());
                 if(!stats.isEmpty()){
@@ -258,6 +260,26 @@ public class VisitService {
         redisService.delete(rkey);
         log.debug("退出：按天统计指定日期访客统计信息,date:{}",date);
     }
+
+
+    /**
+     * 加载统计信息
+     * @param dto
+     * @return
+     */
+    public Results<List<CommVisitStatDto>> stat(@RequestBody CommVisitStatDto dto) {
+        log.debug("进入：加载统计信息,timeBegin:{},timeEnd:{},dimensions:{}",dto.getTimeBegin(),dto.getTimeEnd(),dto.getDimensions());
+        if(dto.getTimeBegin()==null&&dto.getTimeEnd()==null){
+            // 默认加载本月数据
+            dto.setTimeBegin(DateUtil.beginOfMonth(DateUtil.date()));
+            dto.setTimeEnd(DateUtil.endOfMonth(DateUtil.date()));
+        }
+
+        List<CommVisitStatDto> list = dataBaseDao.findList("loadStat", SqlBuilder.build(dto));
+
+        return Results.success(list);
+    } 
+
 
 
 }
