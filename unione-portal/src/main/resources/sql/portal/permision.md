@@ -12,6 +12,7 @@ SELECT app.* FROM SYS_APP_INFO APP WHERE STATUS in (2,3) AND TYPES = #{params.ty
     OR EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.ID  WHERE APP_ID = app.ID AND sgm.USER_ID = #{params.user.id})
 )
 -- @}
+ORDER BY app.ORDERED
 ```
 
 loadResorucePermisForUser
@@ -27,4 +28,5 @@ SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND APP_ID IN (#{join(pa
     OR EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm ON sgm.GROUP_ID=sgp.ID  WHERE RES_ID = res.ID and sgm.USER_ID = #{params.user.id})
 )
 -- @}
+ORDER BY res.ORDERED
 ```
