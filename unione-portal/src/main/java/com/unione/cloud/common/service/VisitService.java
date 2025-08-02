@@ -75,6 +75,9 @@ public class VisitService {
     @Value("${visit.cache.queue.batchsize:100}")
     private int    QUEUE_BATCHSIZE;
 
+     @Value("${visit.stat.currentmonth:false}")
+    private boolean STAT_CURENTMONTH;
+
     /**
      * 访问目标缓存队列
      */
@@ -269,7 +272,8 @@ public class VisitService {
      */
     public Results<List<CommVisitStatDto>> stat(@RequestBody CommVisitStatDto dto) {
         log.debug("进入：加载统计信息,timeBegin:{},timeEnd:{},dimensions:{}",dto.getTimeBegin(),dto.getTimeEnd(),dto.getDimensions());
-        if(dto.getTimeBegin()==null&&dto.getTimeEnd()==null){
+        
+        if(dto.getTimeBegin()==null && dto.getTimeEnd()==null && STAT_CURENTMONTH){
             // 默认加载本月数据
             dto.setTimeBegin(DateUtil.beginOfMonth(DateUtil.date()));
             dto.setTimeEnd(DateUtil.endOfMonth(DateUtil.date()));

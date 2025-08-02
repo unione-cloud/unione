@@ -68,7 +68,13 @@ SELECT sum(VISIT_COUNT) AS VISIT_COUNT
         ,CITY
     -- @}    
 -- @}
-FROM COMM_VISIT_STAT WHERE VISIT_DATE>=#{params.timeBegin} AND VISIT_DATE<=#{params.timeEnd}
+FROM COMM_VISIT_STAT WHERE 1=1  
+-- @if(notNull(params.timeBegin)){
+AND VISIT_DATE>=#{params.timeBegin}
+-- @}  
+-- @if(notNull(params.timeEnd)){
+AND VISIT_DATE<=#{params.timeEnd}
+-- @}  
 -- @if(notNull(params.dimensions)){
 GROUP BY 
 -- @sqlTrim(){
