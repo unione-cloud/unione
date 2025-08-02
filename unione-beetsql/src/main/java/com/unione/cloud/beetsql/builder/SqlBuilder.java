@@ -453,14 +453,14 @@ public class SqlBuilder<T> {
 			StringBuffer where=new StringBuffer();
 			where.append("\n-- @sqlWhere(){\n");
 			
-			where.append("-- @if(varNotNull(params.").append(idField.getAlias()).append(") || varNotNull(query.id) || varNotNull(query.ids)){\n");
-			where.append("-- @if(varNotNull(params.").append(idField.getAlias()).append(") && !varNotNull(query.id) && !varNotNull(query.ids)){\n")
+			where.append("-- @if(notNull(params.").append(idField.getAlias()).append(") || notNull(query.id) || notNull(query.ids)){\n");
+			where.append("-- @if(notNull(params.").append(idField.getAlias()).append(") && !notNull(query.id) && !notNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" = #{params.").append(idField.getAlias()).append("}\n")
 		      .append("-- @}\n");
-			where.append("-- @if(varNotNull(query.id) && !varNotNull(query.ids)){\n")
+			where.append("-- @if(notNull(query.id) && !notNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" = #{query.id}\n")
 		      .append("-- @}\n");
-			where.append("-- @if(!varNotNull(params.").append(idField.getAlias()).append(") && !varNotNull(query.id) && varNotNull(query.ids)){\n")
+			where.append("-- @if(!notNull(params.").append(idField.getAlias()).append(") && !notNull(query.id) && notNull(query.ids)){\n")
 		      .append(idField.getColumn()).append(" IN (#{join(query.ids)})\n")
 		      .append("-- @}\n");
 			
@@ -702,9 +702,9 @@ public class SqlBuilder<T> {
 		}
 		if(fieldName.startsWith("data.") || fieldName.startsWith("query.") || 
 					fieldName.startsWith("params.") || fieldName.startsWith("principal.")){
-			return String.format("\n-- @if(varNotNull(%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
+			return String.format("\n-- @if(notNull(%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
 		}
-		return String.format("\n-- @if(varNotNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
+		return String.format("\n-- @if(notNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
 	}
 	
 	private PermisRule loadDataPermis() {

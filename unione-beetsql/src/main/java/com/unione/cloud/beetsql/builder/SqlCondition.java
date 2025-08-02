@@ -35,7 +35,7 @@ public class SqlCondition {
 		
 		// ID,IDS搜索特殊处理
 		if(SqlAction.ID.equals(this.action) || SqlAction.IDS.equals(this.action)) {
-			buffer.append("-- @if(varNotNull(query.").append(this.name).append(")){\n")
+			buffer.append("-- @if(notNull(query.").append(this.name).append(")){\n")
 			  .append(this.fun.name()).append(" ")
 			  .append(this.column).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
 			  .append("-- @}\n");
@@ -44,7 +44,7 @@ public class SqlCondition {
 		
 		// KEYWORDS搜索特殊处理
 		if(SqlAction.KEYWORD.equals(this.action)) {
-			buffer.append("-- @if(varNotNull(query.keywords)){\n")
+			buffer.append("-- @if(notNull(query.keywords)){\n")
 				  .append(this.fun.name());
 			if(this.childrens.size()>1) {
 				buffer.append(" (");
@@ -63,7 +63,7 @@ public class SqlCondition {
 				
 		// 常规处理
 		if(this.childrens==null || this.childrens.isEmpty()) {
-			buffer.append("-- @if(varNotNull(params.").append(this.name).append(")){\n")
+			buffer.append("-- @if(notNull(params.").append(this.name).append(")){\n")
 				  .append(this.fun.name()).append(" ")
 				  .append(this.column).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
 				  .append("-- @}\n");

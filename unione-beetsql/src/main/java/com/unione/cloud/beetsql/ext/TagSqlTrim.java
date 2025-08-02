@@ -38,7 +38,9 @@ public class TagSqlTrim extends TrimTag {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(4, sql.length()),suffix));
 				}else if (sql.toUpperCase().startsWith("OR ")) {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(3, sql.length()),suffix));
-				} else if (sql.endsWith(",")) {
+				} else if (sql.startsWith(",")) {
+					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(1, sql.length()),suffix));
+				}else if (sql.endsWith(",")) {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(0, sql.length() - 1),suffix));
 				} else {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql,suffix));
