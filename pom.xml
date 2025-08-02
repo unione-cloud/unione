@@ -323,7 +323,7 @@
 		<module>unione-job</module>
 		<module>unione-portal</module>
 		<module>unione-util</module>
-		<module>unione-start</module>
+		<module>unione-starter</module>
 		<module>unione-codegen</module>
 	</modules>
 	

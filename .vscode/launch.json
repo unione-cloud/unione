@@ -4,27 +4,7 @@
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "type": "java",
-            "name": "IpSearchTest",
-            "request": "launch",
-            "mainClass": "com.unione.cloud.IpSearchTest",
-            "projectName": "unione-start"
-        },
-        {
-            "type": "java",
-            "name": "RequestUtils",
-            "request": "launch",
-            "mainClass": "com.unione.cloud.core.util.RequestUtils",
-            "projectName": "unione-core"
-        },
-        {
-            "type": "java",
-            "name": "CodeBuilderFactoryTest",
-            "request": "launch",
-            "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
-            "projectName": "unione-start"
-        },
+    
         {
             "type": "java",
             "name": "Current File",
@@ -34,10 +14,10 @@
         },
         {
             "type": "java",
-            "name": "UnioneStart",
+            "name": "UnioneStarter",
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
-            "projectName": "unione-start",
+            "projectName": "unione-starter",
             "vmArgs": "-Dfile.encoding=UTF-8"
         }
     ]
