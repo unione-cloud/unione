@@ -65,8 +65,8 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("common");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("common");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("cms");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("cms");
 //		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
@@ -91,9 +91,18 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("comm_visit_item",mavenProject);
-		factory.gen("comm_visit_stat",mavenProject);
-		factory.gen("comm_visit_target",mavenProject);
+		factory.gen("cms_channel",mavenProject);
+		factory.gen("cms_content",mavenProject);
+		factory.gen("cms_content_topic",mavenProject);
+		factory.gen("cms_log_static",mavenProject);
+		factory.gen("cms_resource",mavenProject);
+		factory.gen("cms_resource_his",mavenProject);
+		factory.gen("cms_resource_release",mavenProject);
+		factory.gen("cms_site",mavenProject);
+		factory.gen("cms_space",mavenProject);
+		factory.gen("cms_space_his",mavenProject);
+		factory.gen("cms_topic",mavenProject);
+
 //		factory.genAll(mavenProject);
 	}
 
