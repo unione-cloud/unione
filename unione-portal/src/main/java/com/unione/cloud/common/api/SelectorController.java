@@ -1,5 +1,6 @@
 package com.unione.cloud.common.api;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.common.dto.SelectorGroupDto;
 import com.unione.cloud.common.dto.SelectorGroupParam;
 import com.unione.cloud.common.dto.SelectorOrganDto;
@@ -26,7 +29,11 @@ import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
+import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.util.DesensitizeUtil;
+import com.unione.cloud.core.util.DesensitizeUtil.DesensitizeType;
 
+import cn.hutool.core.collection.ListUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +55,9 @@ public class SelectorController {
    
     @Autowired
     private SelectorService selectorService;
+
+    @Autowired
+    private DataBaseDao dataBaseDao;
 
 
     /**
@@ -154,5 +164,40 @@ public class SelectorController {
         log.debug("退出:岗位树查询接口,参数:{},result:{}", params,results.isSuccess());
         return results;
     }
+
+
+     /**
+     * 选择器:加载节点
+     * @param params
+     * @return
+     */
+    @PostMapping("/load/{type}")
+    @Action(title="选择器:加载节点",type = ActionType.Query,nolog = true)
+    @Operation(summary = "选择器:加载节点", description = "参数：type:user,role,organ,group,post")
+    public Results<List<? extends TreeNodeDto>> load(@PathVariable("type") String type,@RequestBody Params<List<Long>> params) {
+        log.debug("进入:加载节点查询接口,参数:type:{},ids:{}",type, params.getBody());
+        List<? extends TreeNodeDto> list=ListUtil.empty();
+        AssertUtil.service().notIn(type, Arrays.asList("user","role","organ","group","post"), "参数type不正确")
+            .notEmpty(params.getBody(), "参数body不能为空");
+        if("user".equals(type)){
+            list=dataBaseDao.findList("loadUserList",SqlBuilder.build(SelectorUserDto.class,params.getBody()));
+            list.stream().forEach(row->{
+                DesensitizeUtil.process(row,"tel",DesensitizeType.TEL);
+                DesensitizeUtil.process(row,"email",DesensitizeType.EMAIL);
+            });
+        }else  if("role".equals(type)){
+            list=dataBaseDao.findList("loadRoleList",SqlBuilder.build(SelectorRoleDto.class,params.getBody()));
+        }else  if("organ".equals(type)){
+            list=dataBaseDao.findList("loadOrganList",SqlBuilder.build(SelectorOrganDto.class,params.getBody()));
+        }else  if("group".equals(type)){
+            list=dataBaseDao.findList("loadGroupList",SqlBuilder.build(SelectorGroupDto.class,params.getBody()));
+        }else  if("post".equals(type)){
+            list=dataBaseDao.findList("loadPostList",SqlBuilder.build(SelectorPostDto.class,params.getBody()));
+        }
+
+        log.debug("退出:加载节点查询接口,参数:type:{},ids:{},len:{}",type, params.getBody(),list.size());
+        return Results.success(list);
+    }
+
 
 }

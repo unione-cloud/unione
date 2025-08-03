@@ -76,3 +76,11 @@ FROM SYS_ROLE R
 LEFT JOIN SYS_ROLE_PERMIS RP ON RP.ROLE_ID=R.ID 
 WHERE R.STATUS=1 AND R.ID IN (#{join(params.ids)}) AND RP.RES_ID=#{params.targetId}
 ```
+
+loadRoleList
+===
+```sql
+SELECT ID,NAME AS TITLE,TYPES AS RTYPE,SN,DESCS
+FROM SYS_ROLE
+WHERE STATUS=1 AND ID IN (#{join(query.ids)})
+```
