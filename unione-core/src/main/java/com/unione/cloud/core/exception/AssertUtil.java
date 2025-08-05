@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -148,6 +149,13 @@ public class AssertUtil {
 			}
 		}
 		if(!flag) {
+			buildExpception(message);
+		}
+		return this;
+	}
+
+	public AssertUtil isEq(Object object,Object target,String message) {
+		if(ObjectUtil.equal(object, target)) {
 			buildExpception(message);
 		}
 		return this;
