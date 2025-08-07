@@ -67,7 +67,7 @@ public class SqlBuilder<T> {
 	 * 	查询，更新，删除的过滤条件
 	 */
 	@Getter
-	private T params;
+	private Object params;
 	
 	private String tableName;	// 数据表名称
 	private DataPermis dataPermis;
@@ -113,12 +113,12 @@ public class SqlBuilder<T> {
 		this.tableName=tableName;
 	}
 	
-	private SqlBuilder(T data,T params) {
+	private SqlBuilder(T data,Object params) {
 		this.params=params;
 		this.data=data;
 	}
 	
-	private SqlBuilder(String tableName,T data,T params) {
+	private SqlBuilder(String tableName,T data,Object params) {
 		this.params=params;
 		this.data=data;
 		this.tableName=tableName;
@@ -140,7 +140,7 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(String tableName,T data,T params) {
+	public static <T> SqlBuilder<T> build(String tableName,T data,Object params) {
 		return new SqlBuilder(tableName,data,params);
 	}
 	
@@ -195,7 +195,7 @@ public class SqlBuilder<T> {
 				return buildr;
 			}
 			if(params instanceof Params){
-				Params<T> params2=(Params)params;
+				Params<Object> params2=(Params)params;
 				SqlBuilder<T> buildr=new SqlBuilder(obj,params2.getBody());
 				buildr.page(params2.getPage())
 					.pageSize(params2.getPageSize())

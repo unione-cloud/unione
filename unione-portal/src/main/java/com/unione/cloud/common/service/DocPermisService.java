@@ -207,23 +207,15 @@ public class DocPermisService {
 		LogsUtil.add("进入:批量加载用户文件权限信息方法");
 		
 		List<Long> ids = files.stream().map(f->f.getId()).collect(Collectors.toList());
-		DocPermis permis=new DocPermis();
-		Map<String, Object> params=new HashMap<String, Object>();
-		params.put("delFlag", 0);
-		params.put("inResults", Arrays.asList(2,4));
-		params.put("permisUser", sessionService.getUserId());
 		List<Long> permisOwners=new ArrayList<Long>();
-		params.put("permisOwners", permisOwners);
 		permisOwners.add(sessionService.getUserId());
 		if(sessionService.getOrgId()!=null) {
 			permisOwners.add(sessionService.getOrgId());
 		}
-		if(sessionService.getUserRoles()!=null) {
-			//permisOwners.addAll(sessionService.getUserRoles());
-		}
-		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, params)
-				.ids(ids)
-				.where("delFlag=? and auditResult in [] and permisUser=? and ownerId in []");
+		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, ids)
+				.where("delFlag=? and auditResult in (2,4) and permisUser=? and ownerId in [permisOwners]")
+				.params("permisOwners", permisOwners)
+				.params("permisUser", sessionService.getUserId());
 		List<DocPermis> permisList=dataBaseDao.findList(builder);
 		
 		LogsUtil.add("分发权限信息到文档对象中");
