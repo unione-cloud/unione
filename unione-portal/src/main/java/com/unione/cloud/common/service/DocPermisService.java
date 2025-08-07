@@ -221,7 +221,7 @@ public class DocPermisService {
 		if(sessionService.getUserRoles()!=null) {
 			//permisOwners.addAll(sessionService.getUserRoles());
 		}
-		SqlBuilder<DocPermis> builder=SqlBuilder.build(permis, params)
+		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, params)
 				.ids(ids)
 				.where("delFlag=? and auditResult in [] and permisUser=? and ownerId in []");
 		List<DocPermis> permisList=dataBaseDao.findList(builder);

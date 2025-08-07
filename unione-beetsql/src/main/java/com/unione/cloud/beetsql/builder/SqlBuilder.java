@@ -1,9 +1,7 @@
 package com.unione.cloud.beetsql.builder;
 
-import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,10 +16,8 @@ import org.beetl.sql.clazz.kit.BeanKit;
 import org.beetl.sql.core.SQLManager;
 
 import com.unione.cloud.beetsql.Sort;
-import com.unione.cloud.beetsql.annotation.DataDelFlag;
 import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
-import com.unione.cloud.beetsql.annotation.DataSensitive;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.beetsql.annotation.QueryAction;
 import com.unione.cloud.beetsql.annotation.QueryIgnore;
@@ -31,6 +27,7 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.BaseField;
+import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -143,11 +140,6 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(T data,Object params) {
-		return new SqlBuilder(data,params);
-	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(String tableName,T data,T params) {
 		return new SqlBuilder(tableName,data,params);
 	}
@@ -170,6 +162,7 @@ public class SqlBuilder<T> {
 		}
 		return buildr;
 	}
+
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> SqlBuilder<T> build(Class<T> cls) {
@@ -183,37 +176,43 @@ public class SqlBuilder<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(Class<T> cls,Set<Long> ids) {
-		try {
-			T obj=cls.newInstance();
-			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
-			buildr.ids=new ArrayList<>(ids);
-			return buildr;
-		} catch (Exception e) {
-			throw new DataBaseException("构建SqlBuilder实例失败",e);
-		}
-	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(Class<T> cls,Long id) {
+	public static <T> SqlBuilder<T> build(Class<T> cls,Object params) {
 		try {
 			T obj=BeanKit.newInstance(cls);
-			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
-			buildr.id(id);
-			return buildr;
-		} catch (Exception e) {
-			throw new DataBaseException("构建SqlBuilder实例失败",e);
-		}
-	}
-	
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> SqlBuilder<T> build(Class<T> cls,List<Long> ids) {
-		try {
-			T obj=BeanKit.newInstance(cls);
-			SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
-			buildr.ids(ids);
-			return buildr;
+			if(params instanceof Set){
+				SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
+				buildr.ids=new ArrayList<>((Set)params);
+				return buildr;
+			}
+			if(params instanceof List){
+				SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
+				buildr.ids((List)params);
+				return buildr;
+			}
+			if(params instanceof Long){
+				SqlBuilder<T> buildr=new SqlBuilder(obj,new HashMap<>());
+				buildr.id((Long)params);
+				return buildr;
+			}
+			if(params instanceof Params){
+				Params<T> params2=(Params)params;
+				SqlBuilder<T> buildr=new SqlBuilder(obj,params2.getBody());
+				buildr.page(params2.getPage())
+					.pageSize(params2.getPageSize())
+					.needCount(params2.isNeedCount())
+					.keywords(params2.getKeywords());
+				if(!ObjectUtil.isEmpty(params2.getSorts())) {
+					List<Sort> sorts = params2.getSorts().stream()
+						.filter(s->s!=null)
+						.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
+						.collect(Collectors.toList());
+					if(!sorts.isEmpty()) {
+						buildr.sort(sorts.toArray(new Sort[] {}));
+					}
+				}
+				return buildr;
+			}
+			return new SqlBuilder(obj,params);
 		} catch (Exception e) {
 			throw new DataBaseException("构建SqlBuilder实例失败",e);
 		}

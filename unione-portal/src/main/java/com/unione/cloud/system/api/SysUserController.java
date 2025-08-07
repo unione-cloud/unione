@@ -103,10 +103,7 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"orgId","userType","username","realName","aliasName","avatar","birthday","sex","email","qq","tel","status","lockTime","descs"};
-			SysUser where=new SysUser();
-			where.setId(entity.getId());
-			SqlBuilder<SysUser> sqlBuilder=SqlBuilder.build(entity,where).field(fields);
-			len = dataBaseDao.updateById(sqlBuilder);
+			len = dataBaseDao.updateById(SqlBuilder.build(entity).where("id=?").field(fields));
 		}
 		
 		return Results.build(len>0, entity.getId());
