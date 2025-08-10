@@ -491,7 +491,7 @@ public class SqlBuilder<T> {
 		}
 		
 		// sort 排序处理
-		if(SqlType.SELECT.equals(type)) {
+		if(SqlType.SELECT.equals(type) || SqlType.SELECT_ONE.equals(type) || SqlType.SELECT_BYID.equals(type)) {
 			buffer.append("-- @if(!isEmpty(sorts)){\n")
 			      .append("ORDER BY #{text(sorts)}\n")
 			      .append("-- @}");
