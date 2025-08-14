@@ -1231,5 +1231,9 @@ public class DataBaseDao {
 		String simpleName=cla.getSimpleName();
 		return (simpleName.charAt(0)+"").toLowerCase()+simpleName.substring(1, simpleName.length());
 	}
+
+	public SQLManager getSqlManager() {
+		return sqlManager;
+	}
 	
 }
