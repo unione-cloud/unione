@@ -412,9 +412,9 @@ public class SqlBuilder<T> {
 				.filter(field->!field.isPk()).forEach(field->{
 				if(field.getStsField()!=null && (
 						BaseField.ID.getName().equals(field.getStsField().getName()) || 
-						BaseField.TENANT_ID.getName().equals(field.getStsField().getName()) ||
-						BaseField.CREATED.getName().equals(field.getStsField().getName()) ||
-						BaseField.CREATED_BY.getName().equals(field.getStsField().getName()) ||
+						// BaseField.TENANT_ID.getName().equals(field.getStsField().getName()) ||
+						// BaseField.CREATED.getName().equals(field.getStsField().getName()) ||
+						// BaseField.CREATED_BY.getName().equals(field.getStsField().getName()) ||
 						BaseField.LAST_UPDATED.getName().equals(field.getStsField().getName()) ||
 						BaseField.LAST_UPDATED_BY.getName().equals(field.getStsField().getName()))) {
 					return;
