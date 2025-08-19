@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 public class SessionHolder implements SessionService {
 	
-	private static SessionHolder holder;
+	private static SessionHolder holder=new SessionHolder();
 	private static ThreadLocal<UserPrincipal> session=new NamedInheritableThreadLocal<>("Session context");
 	private static ThreadLocal<String> token=new NamedInheritableThreadLocal<>("Token context");
 	private static ThreadLocal<Map<String,Object>> var=new NamedInheritableThreadLocal<>("Var context");
@@ -28,9 +28,7 @@ public class SessionHolder implements SessionService {
 	private String administrator;
 	
 	
-	public SessionHolder() {
-		holder=this;
-	}
+	public SessionHolder() {}
 	public static SessionHolder build() {
 		return holder;
 	}
