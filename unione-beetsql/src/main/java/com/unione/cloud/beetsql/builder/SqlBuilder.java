@@ -363,6 +363,11 @@ public class SqlBuilder<T> {
 			.filter(field->{
 				// 如果字段设置了过滤
 				if(field.getQueryIgnore()!=null) {
+					if(!ObjectUtil.isEmpty(entity.getFieldList())){
+						if(entity.getFieldList().contains(field.getAlias())){
+							return true;
+						}
+					}
 					if(QueryType.SELECT.equals(field.getQueryIgnore().value())) {
 						return false;
 					}
