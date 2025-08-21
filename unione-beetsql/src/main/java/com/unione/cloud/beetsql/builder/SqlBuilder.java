@@ -84,6 +84,8 @@ public class SqlBuilder<T> {
 	
 	@Getter
 	private boolean needCount=true;
+
+	private boolean queryIgnore=true;
 	
 	@Getter
 	private int pageSize = 10;
@@ -362,7 +364,7 @@ public class SqlBuilder<T> {
 			.filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))
 			.filter(field->{
 				// 如果字段设置了过滤
-				if(field.getQueryIgnore()!=null) {
+				if(field.getQueryIgnore()!=null && queryIgnore==true) {
 					if(!ObjectUtil.isEmpty(entity.getFieldList())){
 						if(entity.getFieldList().contains(field.getAlias())){
 							return true;
@@ -820,6 +822,11 @@ public class SqlBuilder<T> {
 		this.needCount=needCount;
 		return this;
 	} 
+
+	public SqlBuilder<T> offQueryIgnore(){
+		this.queryIgnore=false;
+		return this;
+	}
 	
 //	public SqlBuilder<T> setId(Object id) {
 //		SqlField pkField=this.entity.getPkField();
