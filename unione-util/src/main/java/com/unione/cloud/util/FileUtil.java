@@ -282,6 +282,10 @@ public class FileUtil {
 	
 	private static void zip(File file, ZipOutputStream out, String dir)throws IOException {
 		if (file.isDirectory()) {
+			// 先添加目录条目
+			String entryName = dir + file.getName() + "/";
+			out.putNextEntry(new ZipEntry(entryName));
+			out.closeEntry();
 			for (File f : file.listFiles()) {
 				FileUtil.zip(f, out, dir + file.getName() + File.separator);
 			}
