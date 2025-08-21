@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -487,20 +488,25 @@ public class RedisService {
 	 * @param pattern
 	 */
 	@SuppressWarnings({ "unchecked" })
-	public void deleteKeys(String pattern) {
+	public int deleteKeys(String pattern) {
 		log.debug("批量删除数据，Key pattern:{}", pattern);
 		// count 可以设置每次返回的键的数量
+		AtomicInteger count=new AtomicInteger(0);
 		ScanOptions options = ScanOptions.scanOptions().match(pattern).count(500).build(); 
 		redisTemplate.execute((RedisCallback<Void>) connection -> {
 			while(true){
 				Cursor<byte[]> cursorData = connection.keyCommands().scan(options);
-				cursorData.forEachRemaining(key -> connection.keyCommands().del(key));
+				cursorData.forEachRemaining(key -> {
+					connection.keyCommands().del(key);
+					count.incrementAndGet();
+				});
 				if (!cursorData.hasNext()) {
 					break;
 				}
 			}
 			return null;
 		});
+		return count.get();
 	}
 
 	/**
@@ -509,21 +515,26 @@ public class RedisService {
 	 * @param pattern
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void deleteKeys(int db,String pattern) {
+	public int deleteKeys(int db,String pattern) {
 		log.debug("批量删除数据，Key pattern:{}", pattern);
 		// count 可以设置每次返回的键的数量
+		AtomicInteger count=new AtomicInteger(0);
 		ScanOptions options = ScanOptions.scanOptions().match(pattern).count(500).build(); 
 		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
 		redisTemplate.execute((RedisCallback<Void>) connection -> {
 			while(true){
 				Cursor<byte[]> cursorData = connection.keyCommands().scan(options);
-				cursorData.forEachRemaining(key -> connection.keyCommands().del(key));
+				cursorData.forEachRemaining(key -> {
+					connection.keyCommands().del(key);
+					count.incrementAndGet();
+				});
 				if (!cursorData.hasNext()) {
 					break;
 				}
 			}
 			return null;
 		});
+		return count.get();
 	}
 
 	/**
