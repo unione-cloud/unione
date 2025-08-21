@@ -105,7 +105,7 @@ public class ${className}Controller implements PojoFeignApi<${className}>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.delete(SqlBuilder.build(${className}.class,ids));
+		int count = dataBaseDao.deleteById(SqlBuilder.build(${className}.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
