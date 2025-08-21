@@ -502,7 +502,7 @@ public class DataBaseDao {
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
-		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		BeanUtils.setFieldValue(builder.getData(), delFlag.getAlias(), 1);
 		builder.getEntity().getFieldList().add(delFlag.getAlias());
 
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -601,7 +601,7 @@ public class DataBaseDao {
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
-		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		BeanUtils.setFieldValue(builder.getData(), delFlag.getAlias(), 1);
 		builder.getEntity().getFieldList().add(delFlag.getAlias());
 
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -630,7 +630,7 @@ public class DataBaseDao {
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
-		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		BeanUtils.setFieldValue(builder.getData(), delFlag.getAlias(), 1);
 		builder.getEntity().getFieldList().add(delFlag.getAlias());
 
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
