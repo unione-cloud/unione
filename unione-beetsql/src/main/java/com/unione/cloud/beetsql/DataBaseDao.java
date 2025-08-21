@@ -499,7 +499,12 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_BYID);
 		
 		SessionService sessionService=SessionHolder.build();
-		SqlEntity sqlEntity=builder.getEntity();
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
+		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
+		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
+		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		builder.getEntity().getFieldList().add(delFlag.getAlias());
+
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdated!=null) {
 			BeanUtils.setDefaultValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
@@ -597,6 +602,7 @@ public class DataBaseDao {
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
 		BeanUtils.setDefaultValue(builder.getData(), delFlag.getAlias(), 1);
+		builder.getEntity().getFieldList().add(delFlag.getAlias());
 
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
 		if(lastUpdated!=null) {
