@@ -67,7 +67,7 @@ public class Params<T> implements Serializable {
 	private boolean needCount=true;
 	
 	@Schema(title = "排序方式")
-	private List<Sort> sorts=new ArrayList<>();
+	private List<Sort> sorts;
 
 	@Schema(title = "请求参数")
 	private T body;
@@ -131,6 +131,9 @@ public class Params<T> implements Serializable {
 		Sort sort=new Sort();
 		sort.setAsc(asc);
 		sort.setName(name);
+		if(sorts==null) {
+			sorts=new ArrayList<>();
+		}
 		sorts.add(sort);
 	}
 	
