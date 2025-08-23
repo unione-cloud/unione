@@ -683,6 +683,18 @@ public class DataBaseDao {
 		this.setDataPermis(params);
 		return this.sqlManager.selectUnique(sqlId, map, Long.class);
 	}
+
+	/**
+	 * 	统计数量,使用sql统计{ResoruceName}.{sqlName}
+	 * @param <T>
+	 * @param sqlName
+	 * @param builder
+	 * @return
+	 */
+	public <T> long count(String sqlName, SqlBuilder<T> builder) {
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+		return this.sqlManager.selectUnique(sqlId, builder.toParams(), Long.class);
+	}
 	
 	/**
 	 * 	查询唯一数据
