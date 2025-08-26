@@ -415,7 +415,7 @@ public class SqlBuilder<T> {
 			.append("-- @sqlTrim(){\n");
 			
 			this.entity.getFields().stream()
-				.filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))
+				// .filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))
 				.filter(field->!field.isPk()).forEach(field->{
 				if(field.getStsField()!=null && (
 						BaseField.ID.getName().equals(field.getStsField().getName()) || 
