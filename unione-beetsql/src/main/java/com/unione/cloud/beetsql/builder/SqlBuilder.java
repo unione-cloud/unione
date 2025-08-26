@@ -533,7 +533,9 @@ public class SqlBuilder<T> {
 		Map<String, Object> params=new HashMap<String, Object>();
 		
 		Map<String, String> fields=new HashMap<>();
-		this.entity.getFields().stream().forEach(field->{
+		this.entity.getFields().stream()
+			.filter(field->ObjectUtil.isEmpty(entity.getFieldList()) || entity.getFieldList().contains(field.getAlias()))	
+			.forEach(field->{
 			fields.put(field.getAlias(), field.getColumn());
 			
 			// 数据脱敏处理
