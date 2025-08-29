@@ -379,6 +379,9 @@ public class LoginService {
 		}
 		principal.setOrgIds(orgIds);
 		
+		LogsUtil.add("生成认证令牌");
+		String token=tokenService.build4auth(principal,user.getPwdText());
+
 		// 更新用户登录信息
 		user.setLastLoginIp(LogsUtil.getClientIp());
 		user.setLastLoginTime(DateUtil.date());
@@ -387,8 +390,7 @@ public class LoginService {
 		int len = dataBaseDao.update(updater);
 		LogsUtil.add("更新用户登录信息,user id:%s,len:%s",user.getId(),len);
 		
-		LogsUtil.add("生成认证令牌并返回结果");
-		String token=tokenService.build4auth(principal,user.getPwdText());
+		LogsUtil.add("登录成功");
 		return LoginResult.success(token, principal);
 	}
 	
