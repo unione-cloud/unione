@@ -111,6 +111,9 @@ springdoc:
     - group: formPage
       display-name: 表单页面
       paths-to-match: /api/page/**
+    - group: ai
+      display-name: AI接口
+      paths-to-match: /api/ai/**
   default-flat-param-object: true
 knife4j:
   enable: true

@@ -670,7 +670,7 @@ public class AttachUtil {
 	
 	@Data
 	public static class Attach{
-		private Long sid;
+		private Long id;
 		private Long appId;
 		private Long tenantId;
 		private Long ownerId;

@@ -282,7 +282,7 @@
 		<httpclient.version>5.4.1</httpclient.version>
 		
 		<!-- beetsql index -->
-		<ibeetl.version>3.30.14-RELEASE</ibeetl.version>
+		<ibeetl.version>3.35.1-RELEASE</ibeetl.version>
 		<hutool.version>5.8.34</hutool.version>
 		<mysql.version>8.0.21</mysql.version>
 		

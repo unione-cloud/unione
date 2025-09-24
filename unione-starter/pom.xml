@@ -19,6 +19,12 @@
 
 		<dependency>
 			<groupId>cloud.unione</groupId>
+			<artifactId>unione-ai</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>cloud.unione</groupId>
 			<artifactId>unione-form</artifactId>
 			<version>${project.version}</version>
 		</dependency>
