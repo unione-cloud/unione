@@ -17,6 +17,14 @@ spring:
     name: unione-portal
   profiles:
     active: pro
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
 
   #============================================
   #
@@ -53,12 +61,11 @@ spring:
 #
 #============================================
 beetlsql:
-  sqlManagers: sqlManager
-  sqlManager:
+  sqlManagers: sqlManager1
+  sqlManager1:
     ds: dataSource
     basePackage: com.unione.cloud.**.dao
     daoSuffix: Dao
-
 
 
 
