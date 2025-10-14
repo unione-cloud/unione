@@ -91,7 +91,7 @@ unione/
 1. **Access the management backend**
    - Browser access: `http://localhost:8080/portal`
    - Default username: admin
-   - Default password: admin123
+   - Default password: admin
 
 2. **Create an application**
    - Log in to the management backend
@@ -110,6 +110,21 @@ unione/
    - Access Swagger documentation: `http://localhost:8080/portal/doc.html`
    - Call the corresponding API according to the interface documentation
    - Note: All interfaces need to carry a valid JWT token
+
+5. **Clone the frontend code from GitHub**
+   ```bash
+   git clone https://github.com/unione-cloud/unione-admin-vue.git
+   cd unione-admin-vue
+   npm install
+   npm run dev
+   ```
+5.1. **Clone the frontend code from Gitee**
+   ```bash
+   git clone https://gitee.com/unione-cloud/unione-admin-vue.git
+   cd unione-admin-vue
+   npm install
+   npm run dev
+   ```
 
 ## Contribution Guidelines
 We welcome community contributions very much! If you want to participate in project development, please follow these steps:

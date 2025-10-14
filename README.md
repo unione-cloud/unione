@@ -91,7 +91,7 @@ unione/
 1. **访问管理后台**
    - 浏览器访问：`http://localhost:8080/portal`
    - 默认账号：admin
-   - 默认密码：admin123
+   - 默认密码：admin
 
 2. **创建应用**
    - 登录管理后台
@@ -110,6 +110,22 @@ unione/
    - 访问Swagger文档：`http://localhost:8080/portal/doc.html`
    - 根据接口文档调用相应API
    - 注意：所有接口需要携带有效的JWT令牌
+
+
+5. **克隆前端代码 github**
+   ```bash
+   git clone https://github.com/unione-cloud/unione-admin-vue.git
+   cd unione-admin-vue
+   npm install
+   npm run dev
+   ```
+5.1. **克隆前端代码 gitee**
+   ```bash
+   git clone https://gitee.com/unione-cloud/unione-admin-vue.git
+   cd unione-admin-vue
+   npm install
+   npm run dev
+   ```
 
 ## 贡献指南
 我们非常欢迎社区贡献！如果您想参与项目开发，请按照以下步骤进行：
