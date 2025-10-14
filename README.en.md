@@ -32,6 +32,7 @@ unione cloud is an enterprise-level unified low-code development platform design
 - **Tool Libraries**: Hutool, Lombok, Jackson
 
 ## Project Structure
+
 unione adopts a modular architecture design, with clear responsibilities for each module, facilitating maintenance and expansion:
 
 ```
@@ -39,13 +40,34 @@ unione/
 ├── unione-core/         # Core function module, providing basic services and common components
 ├── unione-beetsql/      # Database access module, based on BeetSQL framework
 ├── unione-web/          # Web service foundation module, business service extension components
-├── unione-gateway/      # API gateway module, unified entrance and routing management
+├── unione-gateway/      # API gateway module, routing management, authentication management
 ├── unione-job/          # Scheduled task module, managing background scheduled tasks
 ├── unione-portal/       # Portal module, providing user interface and interaction entrance
 ├── unione-util/         # Tool class module, providing common utility methods
 ├── unione-starter/      # Starter module, integrating components and providing startup entrance
 └── unione-codegen/      # Code generation module, automatically generating basic code
 ```
+
+## Functional Modules
+
+- **Unified Portal**:
+  - **User Login**: User account login, supporting multi-factor authentication.
+  - **Personal Center**: User personal information, password modification, etc.
+  - **Style Settings**: User personal settings, such as language, theme, etc.
+  - **Navigation Menu**: Application menu navigation.
+  - **System Integration**: System page integration
+- **System Management**:
+  - **Basic Management**: Application management, menu management, button management, configuration management, dictionary management
+  - **Common Services**: Attachment management, attachment storage
+  - **Organization Management**: Institution management, user management, role management, position management, group management
+  - **Permission Management**: User permissions, role permissions, resource permissions
+  - **Tenant Management**: Multi-tenant management
+  - **Operation and Maintenance Management**: Operation logs, access statistics
+- **Unified Messaging**:
+  - **Message Types**: Message type management
+  - **Message Templates**: Message template management
+  - **Message Sending**: Message sending functionality
+  - **My Messages**: User received messages functionality
 
 ## Installation Tutorial
 ### Prerequisites
@@ -56,12 +78,13 @@ unione/
 - Nacos 2023.0.3.2 service registration center
 
 ### Steps
-1. **Clone the repository from GitHub**
+1. **Clone the repository**
+   _github_:
    ```bash
    git clone https://github.com/unione-cloud/unione.git
    cd unione
    ```
-1.1. **Clone the repository from Gitee**
+   _gitee_:
    ```bash
    git clone https://gitee.com/unione-cloud/unione.git
    cd unione
@@ -155,7 +178,9 @@ We welcome community contributions very much! If you want to participate in proj
 This project is open-sourced under the Apache License 2.0. For details, please see the [LICENSE](LICENSE) file.
 
 ## Contact Information
-- **Project Lead**: Jeking Yang
-- **Email**: jeking217@163.com
+
+- **Email**: unione-cloud@163.com
 - **Project Address (GitHub)**: https://github.com/unione-cloud/unione
 - **Project Address (Gitee)**: https://gitee.com/unione-cloud/unione
+- **GitHub Issues**: [Submit Issues](https://github.com/unione-cloud/unione/issues)
+- **Gitee Issues**: [Submit Issues](https://gitee.com/unione-cloud/unione/issues)

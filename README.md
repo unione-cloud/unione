@@ -39,13 +39,34 @@ unione/
 ├── unione-core/         # 核心功能模块，提供基础服务和通用组件
 ├── unione-beetsql/      # 数据库访问模块，基于BeetSQL框架
 ├── unione-web/          # Web服务基础模块，业务服务扩展组件
-├── unione-gateway/      # API网关模块，统一入口和路由管理
+├── unione-gateway/      # API网关模块,路由管理，鉴权管理
 ├── unione-job/          # 定时任务模块，管理后台定时任务
 ├── unione-portal/       # 门户模块，提供用户界面和交互入口
 ├── unione-util/         # 工具类模块，提供通用工具方法
 ├── unione-starter/      # 启动模块，整合各组件并提供启动入口
 └── unione-codegen/      # 代码生成模块，自动生成基础代码
 ```
+
+## 功能模块
+
+- **统一门户**：
+  - **用户登录**：用户账号登录，支持多因素认证。
+  - **个人中心**：用户个人信息、密码修改等功能。
+  - **样式设置**：用户个人设置，如语言、主题等。
+  - **导航菜单**：应用菜单导航。
+  - **系统集成**：系统页面集成
+- **系统管理**：
+  - **基础管理**：应用管理，菜单管理，按钮管理，配置管理，字典管理
+  - **通用服务**：附件管理，附件存储
+  - **组织管理**：机构管理，用户管理，角色管理，岗位管理，分组管理
+  - **权限管理**：用户权限，角色权限，资源权限
+  - **租户管理**：多租户管理
+  - **运维管理**：操作日志、访问统计
+- **统一消息**：
+  - **消息类型**：消息类型管理
+  - **消息模板**：消息模板管理
+  - **消息发送**：消息发送功能
+  - **我的消息**：用户接收消息功能
 
 ## 安装教程
 ### 前提条件
@@ -56,12 +77,13 @@ unione/
 - Nacos 2023.0.3.2 服务注册中心
 
 ### 步骤说明
-1. **克隆代码仓库 github**
+1. **克隆代码仓库**
+   _github_：
    ```bash
    git clone https://github.com/unione-cloud/unione.git
    cd unione
    ```
-1.1. **克隆代码仓库 gitee**
+   _gitee_：
    ```bash
    git clone https://gitee.com/unione-cloud/unione.git
    cd unione
@@ -156,9 +178,9 @@ unione/
 本项目采用 Apache License 2.0 许可证开源，详情请查看 [LICENSE](LICENSE) 文件。
 
 ## 联系方式
-- **项目负责人**：Jeking Yang
-- **邮箱**：jeking217@163.com
+- **邮箱**：邮箱: unione-cloud@163.com
 - **项目地址github**：https://github.com/unione-cloud/unione
 - **项目地址gitee**：https://gitee.com/unione-cloud/unione
-
+- **GitHub Issues**: [提交问题](https://github.com/unione-cloud/unione/issues)
+- **Gitee Issues**: [提交问题](https://gitee.com/unione-cloud/unione/issues)
 
