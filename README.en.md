@@ -69,6 +69,22 @@ unione/
   - **Message Sending**: Message sending functionality
   - **My Messages**: User received messages functionality
 
+## Database Support
+
+- **MySQL+**: Supported
+- **Oracle+**: Supported
+- **SQL Server**: Supported
+- **PostgreSQL**: Supported
+- **DM (Dameng)**: Supported
+- **KingbaseES**: Supported
+- **TDSQL**: Supported
+- **GaussDb**: Supported
+The platform adopts standard SQL, theoretically supporting all relational databases.
+
+## Environment Support
+- **Operating Systems**: Windows, macOS, Linux, Debian, China Standard Software (NeoKylin), Galaxy Kylin, Unified Operating System (UOS), openEuler, Deepin, and other domestic operating systems supporting ARM architecture
+- **Development Tools**: IntelliJ IDEA, Visual Studio Code
+
 ## Installation Tutorial
 ### Prerequisites
 - JDK 21 or higher

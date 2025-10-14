@@ -15,9 +15,8 @@
 	<!-- unione cloud:基础团队 -->
 	<developers>
 		<developer>
-			<name>Jeking Yang</name>
-			<email>jeking217@163.com</email>
-			<url>https://wiki.cloud.unione/jeking217</url>
+			<name>unione cloud</name>
+			<email>unione-cloud@163.com</email>
 			<organization>unione cloud</organization>
 		</developer>
 	</developers>

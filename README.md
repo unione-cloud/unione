@@ -68,6 +68,22 @@ unione/
   - **消息发送**：消息发送功能
   - **我的消息**：用户接收消息功能
 
+## 数据库支持
+
+- **MySQL+**：支持
+- **Oracle+**：支持
+- **SQL Server**：支持
+- **PostgreSQL**：支持
+- **达梦**：支持
+- **人大金仓**：支持
+- **TDSQL**：支持
+- **GaussDb**：支持
+平台采用标准sql，理论上支持所有关系型数据库。
+
+## 环境支持
+- **操作系统**：Windows、macOS、Linux、debain、中标麒麟、银河麒麟、统信UOS、openEuler、Deepin等支持国产操作系统arm架构
+- **开发工具**：IntelliJ IDEA、Visual Studio Code
+
 ## 安装教程
 ### 前提条件
 - JDK 21 或更高版本
