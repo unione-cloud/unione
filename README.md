@@ -194,9 +194,13 @@ unione/
 本项目采用 Apache License 2.0 许可证开源，详情请查看 [LICENSE](LICENSE) 文件。
 
 ## 联系方式
-- **邮箱**：邮箱: unione-cloud@163.com
 - **项目地址github**：https://github.com/unione-cloud/unione
 - **项目地址gitee**：https://gitee.com/unione-cloud/unione
-- **GitHub Issues**: [提交问题](https://github.com/unione-cloud/unione/issues)
-- **Gitee Issues**: [提交问题](https://gitee.com/unione-cloud/unione/issues)
-
+- **GitHub Issues**: https://github.com/unione-cloud/unione/issues
+- **Gitee Issues**: https://gitee.com/unione-cloud/unione/issues
+- **邮箱**：邮箱: unione-cloud@163.com
+- **微信号**：wx192637274
+   加微信：wx192637274进群，与其他开发者交流、分享经验、解决问题。
+- **QQ群**：192637274
+    加入QQ群，与其他开发者交流、分享经验、解决问题。
+    ![QQ群](./doc/img/qq.png)

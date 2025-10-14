@@ -195,8 +195,13 @@ This project is open-sourced under the Apache License 2.0. For details, please s
 
 ## Contact Information
 
-- **Email**: unione-cloud@163.com
 - **Project Address (GitHub)**: https://github.com/unione-cloud/unione
 - **Project Address (Gitee)**: https://gitee.com/unione-cloud/unione
 - **GitHub Issues**: [Submit Issues](https://github.com/unione-cloud/unione/issues)
 - **Gitee Issues**: [Submit Issues](https://gitee.com/unione-cloud/unione/issues)
+- **Email**: unione-cloud@163.com
+- **WeChat ID**: wx192637274
+   Add WeChat ID: wx192637274 to join the group, communicate with other developers, share experiences, and solve problems.
+- **QQ Group**: 192637274
+    Join the QQ group to communicate with other developers, share experiences, and solve problems.
+    ![QQ Group](./doc/img/qq.png)
