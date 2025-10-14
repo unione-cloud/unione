@@ -112,6 +112,9 @@ public class Params<T> implements Serializable {
 	
 	@JsonIgnore
 	public String getSortText() {
+		if(sorts==null || sorts.isEmpty()) {
+			return null;
+		}
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < sorts.size(); ++i) {
 			buf.append(sorts.get(i));
