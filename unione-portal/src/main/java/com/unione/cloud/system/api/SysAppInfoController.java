@@ -3,7 +3,9 @@ package com.unione.cloud.system.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -26,6 +29,7 @@ import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysAppInfo;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,9 +50,40 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	@Autowired
 	private DataBaseDao dataBaseDao;
 	
+	@PostMapping("/query")
+	@Action(title = "查询应用:公开",type = ActionType.Query)
+	@Operation(summary = "查询应用:公开",description = "查询应用")
+	public Results<List<SysAppInfo>> query(@RequestBody Params<SysAppInfo> params) {
+		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
+		
+		Map<String,Object> entity = BeanUtils.beanToMap(params.getBody());
+		if(!ObjectUtil.isEmpty(params.getBody().getCategory())){
+			entity.put("category", params.getBody().getCategory().trim().split(","));
+		}
+		SqlBuilder<SysAppInfo> builder=SqlBuilder.build(SysAppInfo.class,entity)
+			.where("category in [category] and status in (1,2,3) and trades=? and (name like [%keywords%] or sn like [%keywords%])")
+			.page(params.getPage())
+			.pageSize(params.getPageSize())
+			.params("keywords",params.getKeywords());
+		if(!ObjectUtil.isEmpty(params.getSorts())) {
+			List<Sort> sorts = params.getSorts().stream()
+				.filter(s->s!=null)
+				.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
+				.collect(Collectors.toList());
+			if(!sorts.isEmpty()) {
+				builder.sort(sorts.toArray(new Sort[0]));
+			}
+		}	
+		Results<List<SysAppInfo>> results = dataBaseDao.findPages(builder);
+				
+		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
+		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+		
+		return results;
+	}
 	
 	@Override
-	@Action(title = "查询应用",type = ActionType.Query)
+	@Action(title = "查询应用:管理",type = ActionType.Query)
 	public Results<List<SysAppInfo>> find(Params<SysAppInfo> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
