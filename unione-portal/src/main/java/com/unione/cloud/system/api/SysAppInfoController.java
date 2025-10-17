@@ -78,7 +78,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 			SysAppInfo tmp = dataBaseDao.findById(SqlBuilder.build(SysAppInfo.class,entity.getId()));
 			AssertUtil.service().notNull(tmp, "记录未找到");
 
-			String[] fields = {"name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","trades","types","isPlatform","status","descs"};
+			String[] fields = {"category","name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","trades","types","isPlatform","status","descs"};
 			SqlBuilder<SysAppInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}

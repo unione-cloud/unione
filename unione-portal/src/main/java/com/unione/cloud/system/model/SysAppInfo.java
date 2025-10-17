@@ -35,7 +35,7 @@ public class SysAppInfo extends Pojo {
 	*/
 	@NotNull(message = "应用类别不能为空",groups = {Validator.save.class})
 	@NotBlank(message = "应用类别不能为空",groups = {Validator.save.class})
-	@Schema(title="应用类别，字典APPCATEGORY app：应用，component：组件，platform：平台",description="长度为：20")
+	@Schema(title="应用类别，字典APPCATEGORY app：应用，component：组件，service：服务，platform：平台",description="长度为：20")
 	private String category;
 	/**
 	* 应用名称
