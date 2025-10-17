@@ -35,9 +35,9 @@ public class CodeBuilderFactoryTest {
 	private static   DataSource datasource() {
 		HikariDataSource ds = new HikariDataSource();
     //内存数据库
-		ds.setJdbcUrl("jdbc:mysql://8.134.11.253:2206/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8");
+		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8");
 		ds.setUsername("unione");
-		ds.setPassword("unione123@Admin");
+		ds.setPassword("unione@db");
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		return ds;
 	}
@@ -65,8 +65,8 @@ public class CodeBuilderFactoryTest {
 		SQLManager sqlManager=getSQLManager();
 
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("cms");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("cms");
+		SourceBuilder entityBuilder = new PojoSourceBuilder("system");
+		SourceBuilder apiBuilder = new ApiSourceBuilder("system");
 //		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
 
 		sourceBuilder.add(entityBuilder);
@@ -91,17 +91,8 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("cms_channel",mavenProject);
-		factory.gen("cms_content",mavenProject);
-		factory.gen("cms_content_topic",mavenProject);
-		factory.gen("cms_log_static",mavenProject);
-		factory.gen("cms_resource",mavenProject);
-		factory.gen("cms_resource_his",mavenProject);
-		factory.gen("cms_resource_release",mavenProject);
-		factory.gen("cms_site",mavenProject);
-		factory.gen("cms_space",mavenProject);
-		factory.gen("cms_space_his",mavenProject);
-		factory.gen("cms_topic",mavenProject);
+		factory.gen("sys_change_log",mavenProject);
+		factory.gen("sys_trend_rss",mavenProject);
 
 //		factory.genAll(mavenProject);
 	}

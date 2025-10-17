@@ -4,8 +4,11 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +30,13 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Table(name="sys_app_info")
 public class SysAppInfo extends Pojo {
+	/**
+	* 应用类别，字典APPCATEGORY app：应用，component：组件，platform：平台
+	*/
+	@NotNull(message = "应用类别不能为空",groups = {Validator.save.class})
+	@NotBlank(message = "应用类别不能为空",groups = {Validator.save.class})
+	@Schema(title="应用类别，字典APPCATEGORY app：应用，component：组件，platform：平台",description="长度为：20")
+	private String category;
 	/**
 	* 应用名称
 	*/
@@ -110,9 +120,9 @@ public class SysAppInfo extends Pojo {
 	@Schema(title="是否模版，字典 TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isTmpl;
 	/**
-	* 状态，字典，使用状态 APPSTATUS 1新建，2内测，3发布，4撤销
+	* 状态，字典，使用状态 APPSTATUS 1开发，2内测，3发布，4撤销
 	*/
-	@Schema(title="状态，字典",description="使用状态 APPSTATUS 1新建，2内测，3发布，4撤销")
+	@Schema(title="状态，字典",description="使用状态 APPSTATUS 1开发，2内测，3发布，4撤销")
 	private Integer status;
 	/**
 	* 描述

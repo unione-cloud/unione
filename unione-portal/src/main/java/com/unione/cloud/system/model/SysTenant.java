@@ -65,6 +65,11 @@ public class SysTenant extends Pojo {
 	@Schema(title="租户注册方式,字典TENANTREGTYPE 1自主注册，2客服创建",description="长度为：10")
 	private Integer registeWay;
 	/**
+	* 租户管理员id
+	*/
+	@Schema(title="租户管理员id",description="长度为：10")
+	private Long adminId;
+	/**
 	* 联系人
 	*/
 	@Schema(title="联系人",description="长度为：30")
