@@ -74,7 +74,7 @@ public class SysChangeLog extends Pojo {
 	* 更新说明
 	*/
 	@KeyWords
-	@QueryIgnore(QueryType.SELECT_LIST)
+	// @QueryIgnore(QueryType.SELECT_LIST)
 	@NotNull(message = "更新说明不能为空",groups = {Validator.save.class})
 	@NotBlank(message = "更新说明不能为空",groups = {Validator.save.class})
 	@Schema(title="更新说明",description="长度为：2147483647")

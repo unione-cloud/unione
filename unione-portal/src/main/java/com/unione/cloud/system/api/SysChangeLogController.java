@@ -1,8 +1,11 @@
 package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -16,10 +19,15 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
+import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.dto.ChangeLogDto;
 import com.unione.cloud.system.model.SysAppInfo;
 import com.unione.cloud.system.model.SysChangeLog;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -39,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "系统管理：更新日志",description="SysChangeLog")
 @RequestMapping("/api/system/changeLog")	 //TreeFeignApi
-public class SysChangeLogController implements PojoFeignApi<SysChangeLog>{
+public class SysChangeLogController implements FeignSave<SysChangeLog>,FeignDelete<SysChangeLog>,FeignFind<ChangeLogDto>,FeignFindById<SysChangeLog>,FeignDetail<SysChangeLog>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -47,12 +55,25 @@ public class SysChangeLogController implements PojoFeignApi<SysChangeLog>{
 	
 	@Override
 	@Action(title="查询更新日志",type = ActionType.Query)
-	public Results<List<SysChangeLog>> find(Params<SysChangeLog> params) {
+	public Results<List<ChangeLogDto>> find(Params<ChangeLogDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysChangeLog>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<ChangeLogDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+
+		Set<Long> appIds = results.getBody().stream().map(ChangeLogDto::getAppId).collect(Collectors.toSet());
+		Map<String,SysAppInfo> appMap=new HashMap<>();
+		if(!appIds.isEmpty()) {
+			Map<String,SysAppInfo> tmp=dataBaseDao.findMap(SqlBuilder.build(SysAppInfo.class,appIds), "id");
+			appMap.putAll(tmp);
+		}
+		results.getBody().stream().forEach(row->{
+			SysAppInfo appInfo=appMap.get(row.getAppId().toString());
+			if(appInfo!=null) {
+				row.setAppName(appInfo.getName());
+			}
+		});
 		
 		return results;
 	}
