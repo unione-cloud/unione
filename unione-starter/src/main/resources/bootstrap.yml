@@ -78,7 +78,7 @@ security:
   enabled: true
   filter:
     includes: /**
-    executions: /portal/,/portal/error,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**
+    executions: /portal/,/portal/error,/portal/api/security/login,/portal/api/security/captcha,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**,/api/system/contactUs/save,/api/system/trendRss/save,/api/system/changeLog/find
   tcm:
     autoEnable: true
   jwt:
