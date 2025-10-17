@@ -118,7 +118,7 @@ public class SysTrendRssController implements PojoFeignApi<SysTrendRss>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.deleteById(SqlBuilder.build(SysTrendRss.class,ids));
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(SysTrendRss.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
