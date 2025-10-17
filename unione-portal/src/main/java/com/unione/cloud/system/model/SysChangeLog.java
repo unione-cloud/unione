@@ -38,7 +38,6 @@ public class SysChangeLog extends Pojo {
 	* 应用ID
 	*/
 	@NotNull(message = "应用ID不能为空",groups = {Validator.save.class})
-	@NotBlank(message = "应用ID不能为空",groups = {Validator.save.class})
 	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 	/**

@@ -93,6 +93,7 @@ public class CodeBuilderFactoryTest {
 		
 		factory.gen("sys_change_log",mavenProject);
 		factory.gen("sys_trend_rss",mavenProject);
+		factory.gen("sys_contact_us",mavenProject);
 
 //		factory.genAll(mavenProject);
 	}
