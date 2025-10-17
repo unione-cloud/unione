@@ -18,6 +18,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysTrendRss;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -61,6 +62,16 @@ public class SysTrendRssController implements PojoFeignApi<SysTrendRss>{
 		AssertUtil.service().isTrue(!ObjectUtil.isEmpty(entity.getTel()) || !ObjectUtil.isEmpty(entity.getEmail()), "电话和邮箱不不能都为空");
 		// 参数处理
 		int len = 0;
+
+		SysTrendRss tmp = dataBaseDao.findOne(SqlBuilder.build(entity).where("tel=? and email=?"));
+		if(tmp!=null){
+			entity.setId(tmp.getId());
+			BeanUtils.setDefaultValue(entity, "name", tmp.getName());
+			BeanUtils.setDefaultValue(entity, "email", tmp.getEmail());
+			BeanUtils.setDefaultValue(entity, "tel", tmp.getTel());
+			BeanUtils.setDefaultValue(entity, "descs", tmp.getDescs());
+		}
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
