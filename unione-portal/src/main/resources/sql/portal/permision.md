@@ -2,7 +2,7 @@
 loadAppPermisForUser
 ===
 ```
-SELECT app.* FROM SYS_APP_INFO APP WHERE STATUS in (2,3) AND TYPES = #{params.type}
+SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3) AND TYPES = #{params.type}
 -- @if(params.isAdmin==false){
  AND (
     EXISTS (select 1 from sys_user_permis where APP_ID = app.ID AND RES_TYPE='app' and USER_ID=#{params.user.id})

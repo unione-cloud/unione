@@ -1,5 +1,6 @@
 package com.unione.cloud.system.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.common.dto.TreeNodeDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +21,7 @@ public class ResTreeNodeDto extends TreeNodeDto{
 	private String alias;
 
     @Schema(title="图标（字体图标）",description="长度为：100")
-	private String icon;
+	private String iconName;
 
     @Schema(title="资源设置,JSON存储{}",description="长度为：1000")
 	private String configs;

@@ -195,11 +195,14 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			.notIn(type, Arrays.asList("permisOrgan","permisRole","permisUser","permisGroup","permisPost","view"), "参数type取值范围[permisOrgan,permisRole,permisUser,permisGroup,permisPost,view]");
 
 		// 加载应用列表
-		SqlBuilder<SysAppInfo> appBuilder = SqlBuilder.build(SysAppInfo.class)
-			.where("status in (2,3) and isTmpl=0 and (isPlatform=1 or tenantId=?)")
-			.params("status",1)
-			.params("tenantId",sessionService.getTenantId());
-		List<SysAppInfo> appList = dataBaseDao.findList(appBuilder);
+		Map<String, Object> paramsApp=new HashMap<>();
+		paramsApp.put("user", sessionService.getPrincipal());
+		paramsApp.put("type", type);	
+		paramsApp.put("isAdmin", false);
+		if(sessionService.isAdmin() || sessionService.hasRole(UserRoles.SUPPER_ADMIN)){
+			paramsApp.put("isAdmin", true);
+		}
+		List<SysAppInfo> appList = dataBaseDao.findList("system.SysResource.loadSysAppList",paramsApp, SysAppInfo.class);
 			
 		// 获得应用id集合
 		Set<Long> appIds = appList.stream().map(SysAppInfo::getId).collect(Collectors.toSet());
@@ -208,14 +211,17 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		}
 		
 		// 加载资源列表
+		Map<Long,Boolean> hadAppMap=new HashMap<>();
 		List<SysResource> resList = new ArrayList<>();
 		if(!ObjectUtil.isEmpty(appIds)) {
 			Map<String,Object> paramsMap = new HashMap<>();
-			paramsMap.put("tenantId", sessionService.getTenantId());
 			paramsMap.put("appIds", appIds);
 			paramsMap.put("type", type);
-			paramsMap.put("userId", sessionService.getUserId());
-			paramsMap.put("isAdmin", sessionService.isAdmin());
+			paramsMap.put("user", sessionService.getPrincipal());
+			paramsMap.put("isAdmin", false);
+			if(sessionService.isAdmin() || sessionService.hasRole(UserRoles.SUPPER_ADMIN)){
+				paramsMap.put("isAdmin", true);
+			}
 			resList = dataBaseDao.findList("loadSysResourceTree", paramsMap, SysResource.class);
 		}
 
@@ -226,6 +232,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				.params("orgId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));
+				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 			});
 		}
 		// 加载角色资源权限
@@ -234,6 +241,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				.params("roleId", params.getBody());	
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 			});
 		}
 		// 加载用户资源权限
@@ -241,7 +249,8 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			SqlBuilder<SysUserPermis> permisBuilder = SqlBuilder.build(SysUserPermis.class)
 				.params("userId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
-				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));
+				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 			});
 		}
 		// 加载分组资源权限
@@ -250,6 +259,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				.params("groupId", params.getBody());	
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 			});
 		}
 		// 加载岗位资源权限
@@ -258,6 +268,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				.params("groupId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
+				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 			});
 		}
 
@@ -268,19 +279,15 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setNtype("app");
 			node.setPid(-1L);
 			node.setTitle(row.getName());
-			node.setIcon(row.getIcon());
+			node.setIconName(row.getIcon());
 			node.setAppId(row.getId());
-			if("view".equalsIgnoreCase(type)){
-				nodes.add(node);
-			}else{
-				if(hadResMap.get(row.getId())!=null){
-					node.setChecked(true);
-					if(hadResMap.get(row.getId())){
-						node.setEnDilivery(1);
-					}else{
-						node.setEnDilivery(0);
-					}
-					nodes.add(node);
+			nodes.add(node);
+			if(hadAppMap.get(row.getId())!=null){
+				node.setChecked(true);
+				if(hadAppMap.get(row.getId())){
+					node.setEnDilivery(1);
+				}else{
+					node.setEnDilivery(0);
 				}
 			}
 		});
