@@ -83,7 +83,7 @@ public class SysOnlineDocItem extends Pojo {
 	* 文档内容
 	*/
 	@KeyWords
-	@QueryIgnore(QueryType.SELECT_LIST)
+	// @QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="文档内容",description="长度为：2147483647")
 	private String contents;
 	/**

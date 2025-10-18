@@ -78,7 +78,7 @@ public class SysOnlineDoc extends Pojo {
 	/**
 	* 文档介绍
 	*/
-	@QueryIgnore(QueryType.SELECT_LIST)
+	// @QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="文档介绍",description="长度为：2147483647")
 	private String profile;
 	/**
@@ -95,7 +95,7 @@ public class SysOnlineDoc extends Pojo {
 	* 发布日期
 	*/
 	@Schema(title="发布日期",description="长度为：19")
-	private Date releseTime;
+	private Date releaseTime;
 	/**
 	* 归档日期
 	*/

@@ -22,6 +22,7 @@ import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.model.SysOnlineDoc;
 import com.unione.cloud.system.model.SysOnlineDocItem;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -93,6 +94,10 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 	@Override
 	@Action(title="保存在线文档内容",type = ActionType.Save,roles = {UserRoles.TENANTADMIN,UserRoles.SUPPERADMIN,UserRoles.ONLINEDEV,UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysOnlineDocItem entity) {
+		SysOnlineDoc doc = dataBaseDao.findById(SqlBuilder.build(SysOnlineDoc.class,entity.getDocId()));
+			AssertUtil.service().notNull(doc, "文档记录未找到")
+				.isTrue(doc.getStatus()!=4, "已归档文档不能修改");
+				
 		// 参数处理
 		int len = 0;
 		BeanUtils.setDefaultValue(entity, "ordered",0);

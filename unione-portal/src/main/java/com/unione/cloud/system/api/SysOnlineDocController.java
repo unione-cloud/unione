@@ -1,6 +1,7 @@
 package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysOnlineDoc;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -91,11 +93,36 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 			entity.setStatus(1);
 			len = dataBaseDao.insert(entity);
 		}else {
+			SysOnlineDoc doc = dataBaseDao.findById(SqlBuilder.build(SysOnlineDoc.class,entity.getId()));
+			AssertUtil.service().notNull(doc, "记录未找到")
+				.isTrue(doc.getStatus()!=4, "已归档文档不能修改");
+
 			String[] fields = {"title","versNo","icon","picMax","picMid","picMix","profile","ordered","descs"};
 			SqlBuilder<SysOnlineDoc> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
 		return Results.build(len>0, entity.getId());
+	}
+
+	@PostMapping("/status")
+	@Action(title="设置应用状态",type = ActionType.Save,roles = {UserRoles.TENANTADMIN,UserRoles.SUPPERADMIN,UserRoles.ONLINEDEV,UserRoles.FORMDEV})
+	@Operation(summary = "设置应用状态", description="1：编制中，2：内审中，3：已发布，4：已归档")
+	public Results<Void> setStatus(@RequestBody SysOnlineDoc entity){
+		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
+			.notIn(entity.getStatus(), Arrays.asList(1,2,3,4), "参数status取值范围[1,2,3,4]");
+		
+		List<String> fields=new ArrayList<>();
+		fields.add("status");
+		if(entity.getStatus()==3){
+			fields.add("releaseTime");
+			entity.setReleaseTime(DateUtil.date());
+		}else if(entity.getStatus()==4){
+			fields.add("archiveTime");
+			entity.setArchiveTime(DateUtil.date());
+		}
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields.toArray(new String[0])));
+		
+		return Results.build(len>0);
 	}
 
 	@Override
