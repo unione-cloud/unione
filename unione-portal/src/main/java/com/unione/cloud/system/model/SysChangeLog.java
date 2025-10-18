@@ -64,11 +64,11 @@ public class SysChangeLog extends Pojo {
 	@Schema(title="版本说明",description="长度为：500")
 	private String versDesc;
 	/**
-	* 更新类型，字典CHANGETYPE master：主要更新，minor：次要更新，pack：补丁更新
+	* 更新类型，字典CHANGETYPE master：主要更新，minor：次要更新，patch：补丁更新
 	*/
 	@NotNull(message = "更新类型不能为空",groups = {Validator.save.class})
 	@NotBlank(message = "更新类型不能为空",groups = {Validator.save.class})
-	@Schema(title="更新类型，字典CHANGETYPE master：主要更新，minor：次要更新，pack：补丁更新",description="长度为：20")
+	@Schema(title="更新类型，字典CHANGETYPE master：主要更新，minor：次要更新，patch：补丁更新",description="长度为：20")
 	private String changeType;
 	/**
 	* 更新说明

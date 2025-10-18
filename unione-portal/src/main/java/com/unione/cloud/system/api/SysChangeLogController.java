@@ -74,6 +74,7 @@ public class SysChangeLogController implements FeignSave<SysChangeLog>,FeignDele
 			SysAppInfo appInfo=appMap.get(row.getAppId().toString());
 			if(appInfo!=null) {
 				row.setAppName(appInfo.getName());
+				row.setAppStatus(appInfo.getStatus());
 			}
 		});
 		

@@ -142,9 +142,11 @@ minio:
 unione:
    cors:
       - url: /api/common/visit/entry
-        allowed-origins: http://localhost:8000
+        allowed-origins: http://localhost:8000,http://localhost:5173
       - url: /api/system/appInfo/query 
-        allowed-origins: http://localhost:8000
+        allowed-origins: http://localhost:8000,http://localhost:5173
+      - url: /api/system/changeLog/find
+        allowed-origins: http://localhost:8000,http://localhost:5173
 
 #============================================
 #

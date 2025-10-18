@@ -21,6 +21,8 @@ public class ChangeLogDto extends SysChangeLog {
 
     private String appName;
 
+    private Integer appStatus;
+
     private List<String> appCategorys;
 
 }
