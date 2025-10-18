@@ -61,7 +61,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 			entity.put("category", params.getBody().getCategory().trim().split(","));
 		}
 		SqlBuilder<SysAppInfo> builder=SqlBuilder.build(SysAppInfo.class,entity)
-			.where("category in [category] and status in (1,2,3) and trades=? and (name like [%keywords%] or sn like [%keywords%])")
+			.where("category in [category] and status in (1,2,3) and status=? and trades=? and (name like [%keywords%] or sn like [%keywords%])")
 			.page(params.getPage())
 			.pageSize(params.getPageSize())
 			.params("keywords",params.getKeywords());
