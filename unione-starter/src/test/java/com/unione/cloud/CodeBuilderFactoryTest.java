@@ -91,9 +91,8 @@ public class CodeBuilderFactoryTest {
 //			}
 //		});
 		
-		factory.gen("sys_change_log",mavenProject);
-		factory.gen("sys_trend_rss",mavenProject);
-		factory.gen("sys_contact_us",mavenProject);
+		factory.gen("sys_online_doc",mavenProject);
+		factory.gen("sys_online_doc_item",mavenProject);
 
 //		factory.genAll(mavenProject);
 	}

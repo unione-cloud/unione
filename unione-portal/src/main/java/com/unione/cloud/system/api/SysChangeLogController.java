@@ -58,6 +58,7 @@ public class SysChangeLogController implements FeignSave<SysChangeLog>,FeignDele
 	@Action(title="查询更新日志",type = ActionType.Query)
 	public Results<List<ChangeLogDto>> find(Params<ChangeLogDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
+		params.getBody().setDelFlag(0);
 				
 		Results<List<ChangeLogDto>> results = dataBaseDao.findPages(SqlBuilder.build(params)
 			.link(LinkEntity.build("appId",SysAppInfo.class).in("category", params.getBody().getAppCategorys())));

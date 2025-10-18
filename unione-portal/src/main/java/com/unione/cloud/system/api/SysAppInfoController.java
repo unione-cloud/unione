@@ -56,25 +56,8 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	public Results<List<SysAppInfo>> query(@RequestBody Params<SysAppInfo> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 		
-		Map<String,Object> entity = BeanUtils.beanToMap(params.getBody());
-		if(!ObjectUtil.isEmpty(params.getBody().getCategory())){
-			entity.put("category", params.getBody().getCategory().trim().split(","));
-		}
-		SqlBuilder<SysAppInfo> builder=SqlBuilder.build(SysAppInfo.class,entity)
-			.where("category in [category] and status in (1,2,3) and status=? and trades=? and (name like [%keywords%] or sn like [%keywords%])")
-			.page(params.getPage())
-			.pageSize(params.getPageSize())
-			.params("keywords",params.getKeywords());
-		if(!ObjectUtil.isEmpty(params.getSorts())) {
-			List<Sort> sorts = params.getSorts().stream()
-				.filter(s->s!=null)
-				.map(s->Sort.build(s.getName(), s.isAsc()?"ASC":"DESC"))
-				.collect(Collectors.toList());
-			if(!sorts.isEmpty()) {
-				builder.sort(sorts.toArray(new Sort[0]));
-			}
-		}	
-		Results<List<SysAppInfo>> results = dataBaseDao.findPages(builder);
+		Results<List<SysAppInfo>> results = dataBaseDao.findPages(SqlBuilder.build(SysAppInfo.class,params)
+			.where("category in ('component','service','platform') and category=? and status in (1,2,3) and status=? and trades=?"));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
