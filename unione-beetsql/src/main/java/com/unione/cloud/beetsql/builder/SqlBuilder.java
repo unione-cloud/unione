@@ -49,6 +49,8 @@ public class SqlBuilder<T> {
 	
 	@Getter
 	private SqlEntity entity=new SqlEntity();
+
+	private List<LinkEntity> linkEntitys=new ArrayList<>();
 	/**
 	 * 自定义主键字段，例如：id
 	 */
@@ -489,13 +491,20 @@ public class SqlBuilder<T> {
 		// where 条件处理
 		if(!StringUtils.isEmpty(this.entity.getWhere())) {
 			buffer.append(this.entity.getWhere());
+			this.linkEntitys.stream().forEach(link->{
+				buffer.append(link.toSql(sqlManager));
+			});
 		}else if(!this.entity.getConditions().isEmpty()){
 			buffer.append("\n-- @sqlWhere(){\n");
 			this.entity.getConditions().stream().forEach(con->{
 				con.toSql(buffer);
 			});
+			this.linkEntitys.stream().forEach(link->{
+				buffer.append(link.toSql(sqlManager));
+			});
 			buffer.append("-- @}\n");
 		}
+
 		
 		// sort 排序处理
 		if(SqlType.SELECT.equals(type) || SqlType.SELECT_ONE.equals(type) || SqlType.SELECT_BYID.equals(type)) {
@@ -572,6 +581,11 @@ public class SqlBuilder<T> {
 		query.put("ids", this.ids);
 		params.put("principal", SessionHolder.build().getPrincipal());
 		params.put("query", query);
+
+		// 关联查询条件
+		this.linkEntitys.stream().forEach(link->{
+			params.put(String.format("%sLinkParams", link.getField()), link.getParams());
+		});
 		
 		// 数据权限处理
 		PermisRule dataPermis=this.loadDataPermis();
@@ -807,6 +821,13 @@ public class SqlBuilder<T> {
 	
 	public SqlBuilder<T> params(String name,Object value){
 		BeanUtils.setFieldValue(this.params, name, value);
+		return this;
+	}
+
+	public SqlBuilder<T> link(LinkEntity ...links){
+		for(LinkEntity link:links){
+			this.linkEntitys.add(link);
+		}
 		return this;
 	}
 	

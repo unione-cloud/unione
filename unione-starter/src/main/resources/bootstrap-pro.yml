@@ -139,10 +139,12 @@ minio:
 # Unione Config
 #
 #============================================ 
-# unione:
-#    cors:
-#       - url: /api/common/visit/entry
-#         allowed-origins: http://10.168.1.192:8000,http://172.22.192.1:8000
+unione:
+   cors:
+      - url: /api/common/visit/entry
+        allowed-origins: http://localhost:8000
+      - url: /api/system/appInfo/query 
+        allowed-origins: http://localhost:8000
 
 #============================================
 #
