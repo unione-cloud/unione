@@ -1,5 +1,7 @@
 package com.unione.cloud.system.dto;
 
+import java.util.List;
+
 import org.beetl.sql.annotation.entity.Table;
 
 import com.unione.cloud.system.model.SysChangeLog;
@@ -18,5 +20,7 @@ import lombok.experimental.Accessors;
 public class ChangeLogDto extends SysChangeLog {
 
     private String appName;
+
+    private List<String> appCategorys;
 
 }

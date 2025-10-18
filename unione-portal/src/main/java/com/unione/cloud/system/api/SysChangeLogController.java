@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.builder.LinkEntity;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -58,7 +59,8 @@ public class SysChangeLogController implements FeignSave<SysChangeLog>,FeignDele
 	public Results<List<ChangeLogDto>> find(Params<ChangeLogDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<ChangeLogDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<ChangeLogDto>> results = dataBaseDao.findPages(SqlBuilder.build(params)
+			.link(LinkEntity.build("appId",SysAppInfo.class).in("category", params.getBody().getAppCategorys())));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 
