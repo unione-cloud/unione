@@ -162,7 +162,7 @@ public class LinkEntity {
 
         StringBuffer sb = new StringBuffer();
         sb.append("-- @if(notNull(").append(field).append("LinkParams)){\n");
-        sb.append(" ").append(field).append(" IN (\n")
+        sb.append(" AND ").append(field).append(" IN (\n")
           .append("SELECT ").append(linkField).append(" FROM ").append(linkTableName).append("\n")
           .append("\n-- @sqlWhere(){\n");
         if (!linkConditions.isEmpty()) {
