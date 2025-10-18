@@ -274,7 +274,7 @@ public class SqlBuilder<T> {
 		
 		// 自定义sql条件处理
 		if(!StringUtils.isEmpty(this.where)) {
-			this.processCondition();
+			this.processWhereCondition();
 		}else if(classDesc!=null){
 			// Model 数据库操作，解析通用过滤条件，包括：关键字查询，id查询，常规查询
 			// 关键字查询
@@ -617,7 +617,7 @@ public class SqlBuilder<T> {
 	/**
 	 * Sql Where 处理
 	 */
-	private void processCondition() {
+	private void processWhereCondition() {
 		if(!StringUtils.isEmpty(this.entity.getSql()) || StringUtils.isEmpty(this.where)) {
 			return;
 		}
@@ -639,6 +639,30 @@ public class SqlBuilder<T> {
 			whereSql=whereSql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
 		}
 		
+		// 关键字查询处理
+		if(!ObjectUtil.isEmpty(this.entity.getFields())){
+			// 关键字查询
+			SqlCondition keyWordCondition=new SqlCondition();
+			keyWordCondition.setAction(SqlAction.KEYWORD);
+			this.entity.getFields().stream().forEach(field->{
+				// 关键字搜索解析
+				KeyWords keywordQuery=BeanKit.getAnnotation(this.data.getClass(), field.getAlias(),KeyWords.class);
+				if(keywordQuery!=null) {
+					SqlCondition keyword=new SqlCondition();
+					keyword.setFun(SqlFun.OR);
+					keyword.setColumn(field.getColumn());
+					keyword.setName(field.getAlias());
+					keyWordCondition.getChildrens().add(keyword);
+				}
+			});
+			if(!ObjectUtil.isEmpty(keyWordCondition.getChildrens())){
+				StringBuffer buffer=new StringBuffer(whereSql);
+				keyWordCondition.toSql(buffer);
+				whereSql=buffer.toString();
+			}
+		}
+
+		// 数据权限处理
 		PermisRule dataPermis=this.loadDataPermis();
 		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
 			switch (dataPermis) {
