@@ -117,7 +117,7 @@ public class OnlineDocService {
             List<DocVersion> versList = dataBaseDao.findList(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id,versNo")
                     .where("appId=? and delFlag=0 and status in (3,4)")
-                    .params("appId",id)).stream().map(row->{
+                    .params("appId",tmp.getAppId())).stream().map(row->{
                         DocVersion vers = new DocVersion();
                         vers.setVersId(row.getId());
                         vers.setVersNo(row.getVersNo());
