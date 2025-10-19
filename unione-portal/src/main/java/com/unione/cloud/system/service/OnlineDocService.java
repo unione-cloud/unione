@@ -90,7 +90,8 @@ public class OnlineDocService {
             // 加载文档大纲
             List<SysOnlineDocItem> items = dataBaseDao.findList(SqlBuilder.build(SysOnlineDocItem.class)
                     .field("id,parentId,title,iconName")
-                    .where("docId=? and delFlag=0"));
+                    .where("docId=? and delFlag=0")
+                    .params("docId", id));
             Map<Long, TreeNodeDto> nodeMap = new HashMap<>();
             List<TreeNodeDto> nodeList = items.stream().map(item -> {
                 TreeNodeDto node = new TreeNodeDto();
@@ -116,7 +117,7 @@ public class OnlineDocService {
             List<DocVersion> versList = dataBaseDao.findList(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id,versNo")
                     .where("appId=? and delFlag=0 and status in (3,4)")
-                    .params("appId",tmp.getAppId())).stream().map(row->{
+                    .params("appId",id)).stream().map(row->{
                         DocVersion vers = new DocVersion();
                         vers.setVersId(row.getId());
                         vers.setVersNo(row.getVersNo());
