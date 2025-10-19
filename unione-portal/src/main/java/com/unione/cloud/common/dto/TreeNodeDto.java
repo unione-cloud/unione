@@ -1,6 +1,8 @@
 package com.unione.cloud.common.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -28,7 +30,12 @@ public class TreeNodeDto implements Serializable{
     @Schema(title="节点标题",description="长度为：100")
     private String title;
 
+    @Schema(title="图标名称",description="长度为：100")
+    private String iconName;
+
     @Schema(title="是否选中",description="true：选中，false：未选中")
     private Boolean checked;
-   
+
+    @Schema(title="子节点列表")
+    private List<TreeNodeDto> children=new ArrayList<>();
 }
