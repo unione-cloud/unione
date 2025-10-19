@@ -1,4 +1,4 @@
-# unione
+# unione cloud
 
 <div align="center">
   <img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License" />
@@ -90,7 +90,7 @@ unione/
 - Maven 3.6+ 构建工具
 - MySQL 8.0+ 数据库
 - Redis 5.0+ 缓存服务
-- Nacos 2023.0.3.2 服务注册中心
+- Nacos 2023.0.3.2 服务注册中心 【可选】
 
 ### 步骤说明
 1. **克隆代码仓库**
