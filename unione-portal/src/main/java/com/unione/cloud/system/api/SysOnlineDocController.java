@@ -2,8 +2,11 @@ package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.TreeNodeDto;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
@@ -23,7 +27,10 @@ import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.dto.OnlineDocDto;
 import com.unione.cloud.system.model.SysOnlineDoc;
+import com.unione.cloud.system.model.SysOnlineDocItem;
+import com.unione.cloud.system.service.OnlineDocService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
@@ -46,6 +53,9 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private OnlineDocService onlineDocService;
 	
 
 	@PostMapping("/load")
@@ -67,6 +77,21 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 		return results;
 	}
 
+	@PostMapping("/view")
+	@Operation(summary="查看在线文档",description="appId不能为空")
+	@Action(title="查看在线文档",type = ActionType.Query)
+	public Results<OnlineDocDto> view(@RequestBody SysOnlineDoc params) {
+		AssertUtil.service().isTrue(params.getAppId()!=null || params.getId()!=null,"appId和docId不能都为空");
+		OnlineDocDto doc=null;
+		if(params.getId()!=null){
+			doc=onlineDocService.viewByDocId(params.getId());
+		}else{
+			doc=onlineDocService.viewByAppId(params.getAppId());
+		}
+		AssertUtil.service().notNull(doc, "记录未找到");
+		return Results.success(doc);
+	}
+		
 	
 	@Override
 	@Action(title="查询在线文档",type = ActionType.Query)
@@ -111,6 +136,9 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(1,2,3,4), "参数status取值范围[1,2,3,4]");
 		
+		SysOnlineDoc tmp = dataBaseDao.findById(SqlBuilder.build(SysOnlineDoc.class,entity.getId()).field("id,appId,status"));
+		AssertUtil.service().notNull(tmp, "记录未找到");
+
 		List<String> fields=new ArrayList<>();
 		fields.add("status");
 		if(entity.getStatus()==3){
@@ -121,6 +149,9 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 			entity.setArchiveTime(DateUtil.date());
 		}
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields.toArray(new String[0])));
+		if(len>0 && (entity.getStatus()==3 || entity.getStatus()==4)){
+			onlineDocService.refresh(tmp);
+		}
 		
 		return Results.build(len>0);
 	}

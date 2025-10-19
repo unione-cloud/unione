@@ -149,6 +149,8 @@ unione:
         allowed-origins: http://localhost:8000,http://localhost:5173
       - url: /api/system/onlineDoc/load
         allowed-origins: http://localhost:8000,http://localhost:5173
+      - url: /api/system/onlineDoc/view
+        allowed-origins: http://localhost:8000,http://localhost:5173
       - url: /api/system/onlineDoc/item/load
         allowed-origins: http://localhost:8000,http://localhost:5173
       - url: /api/system/onlineDoc/item/view
