@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.builder.LinkEntity;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -55,7 +57,8 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 		params.getBody().setDelFlag(0);
 				
 		Results<List<SysOnlineDocItem>> results = dataBaseDao.findPages(SqlBuilder.build(params)
-			.field("id,parentId,title,icon,picMax,picMid,picMix,ordered,isLeaf"));
+			.field("id,parentId,title,icon,picMax,picMid,picMix,ordered,isLeaf")
+			.link(LinkEntity.build("docId", SysOnlineDoc.class).in("status", Arrays.asList(new Integer[]{3,4}))));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
@@ -71,6 +74,7 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 		
 		SysOnlineDocItem tmp = dataBaseDao.findById(SqlBuilder.build(SysOnlineDocItem.class,id)
 				.field("id,contents")
+				.link(LinkEntity.build("docId", SysOnlineDoc.class).in("status", Arrays.asList(new Integer[]{3,4})))
 				.params("delFlag", 0));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
@@ -116,7 +120,7 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 			entity.setDelFlag(0);
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"title","icon","picMax","picMid","picMix","contents","ordered","descs"};
+			String[] fields = {"title","iconName","picMax","picMid","picMix","contents","ordered","descs"};
 			SqlBuilder<SysOnlineDocItem> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}

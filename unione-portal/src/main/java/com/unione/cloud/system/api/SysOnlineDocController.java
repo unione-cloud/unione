@@ -97,7 +97,7 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 			AssertUtil.service().notNull(doc, "记录未找到")
 				.isTrue(doc.getStatus()!=4, "已归档文档不能修改");
 
-			String[] fields = {"title","versNo","icon","picMax","picMid","picMix","profile","ordered","descs"};
+			String[] fields = {"title","versNo","iconName","picMax","picMid","picMix","profile","ordered","descs"};
 			SqlBuilder<SysOnlineDoc> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
