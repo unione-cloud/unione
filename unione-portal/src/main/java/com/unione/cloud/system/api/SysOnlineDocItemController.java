@@ -26,6 +26,7 @@ import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysOnlineDoc;
 import com.unione.cloud.system.model.SysOnlineDocItem;
+import com.unione.cloud.system.service.OnlineDocService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -47,6 +48,9 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private OnlineDocService onlineDocService;
 	
 	@PostMapping("/load")
 	@Operation(summary="加载在线文档内容",description="根据文档ID加载文档内容")
@@ -68,17 +72,11 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 	@PostMapping("/view")
 	@Operation(summary="加载在线文档内容",description="根据文档ID加载文档内容")
 	@Action(title="加载在线文档内容",type = ActionType.Query)
-	public Results<SysOnlineDocItem> view(@RequestBody Long id) {
+	public Results<String> view(@RequestBody Long id) {
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
-		
-		SysOnlineDocItem tmp = dataBaseDao.findById(SqlBuilder.build(SysOnlineDocItem.class,id)
-				.field("id,contents")
-				.link(LinkEntity.build("docId", SysOnlineDoc.class).in("status", Arrays.asList(new Integer[]{3,4})))
-				.params("delFlag", 0));
-		AssertUtil.service().notNull(tmp, "记录未找到");
-		
-		return Results.success(tmp);
+		String content = onlineDocService.loadDocContent(id);
+		return Results.success(content);
 	}
 	
 	@Override

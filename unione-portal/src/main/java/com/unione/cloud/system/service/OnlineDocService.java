@@ -36,13 +36,24 @@ public class OnlineDocService {
     private CacheManager cacheManager;
 
     @Value("${unione.cache.onlinedoc.expire:6000}")
-    private int CACHE_EXPIRE = 6000;
+    private int DOC_CACHE_EXPIRE = 6000;
 
-    private Cache<Long, OnlineDocDto> getCache() {
+    @Value("${unione.cache.onlinedoci.expire:60000}")
+    private int DOCI_CACHE_EXPIRE = 60000;
+
+    private Cache<Long, OnlineDocDto> getDocCache() {
         return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:ONLINEDOC:")
                 .cacheType(CacheType.BOTH)
                 .cacheNullValue(true)
-                .expire(Duration.ofSeconds(CACHE_EXPIRE))
+                .expire(Duration.ofSeconds(DOC_CACHE_EXPIRE))
+                .build());
+    }
+
+    private Cache<Long, String> getContentCache() {
+        return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:ONLINEDOCI:")
+                .cacheType(CacheType.BOTH)
+                .cacheNullValue(true)
+                .expire(Duration.ofSeconds(DOCI_CACHE_EXPIRE))
                 .build());
     }
 
@@ -51,8 +62,8 @@ public class OnlineDocService {
      * @param appId
      * @return
      */
-    public OnlineDocDto viewByAppId(Long appId) {
-        Cache<Long, OnlineDocDto> cache = getCache();
+    public OnlineDocDto loadDocByAppId(Long appId) {
+        Cache<Long, OnlineDocDto> cache = getDocCache();
         OnlineDocDto doc = cache.get(appId);
         if (doc == null) {
             SysOnlineDoc tmp = dataBaseDao.findOne(SqlBuilder.build(SysOnlineDoc.class)
@@ -61,7 +72,7 @@ public class OnlineDocService {
                     .params("appId", appId)
                     .sort(Sort.build("versNo", "desc")));
             if (tmp != null) {
-                doc = this.viewByDocId(tmp.getId());
+                doc = this.loadDocByDocId(tmp.getId());
                 cache.put(appId, doc);
             }
         }
@@ -74,8 +85,8 @@ public class OnlineDocService {
      * @param id
      * @return
      */
-    public OnlineDocDto viewByDocId(Long id) {
-        Cache<Long, OnlineDocDto> cache = getCache();
+    public OnlineDocDto loadDocByDocId(Long id) {
+        Cache<Long, OnlineDocDto> cache = getDocCache();
         OnlineDocDto doc = cache.get(id);
         if (doc == null) {
             // 加载文档信息
@@ -136,12 +147,46 @@ public class OnlineDocService {
      * 刷新在线文档缓存
      * @param doc
      */
-    public void refresh(SysOnlineDoc doc){
-        Cache<Long, OnlineDocDto> cache = getCache();
+    public void refreshDoc(SysOnlineDoc doc){
+        Cache<Long, OnlineDocDto> cache = getDocCache();
         cache.remove(doc.getAppId());
         cache.remove(doc.getId());
-        this.viewByAppId(doc.getAppId());
-        this.viewByDocId(doc.getId());
+        this.loadDocByAppId(doc.getAppId());
+        this.loadDocByDocId(doc.getId());
+    }
+
+    /**
+     * 根据文档项id加载文档内容
+     * @param id
+     * @return
+     */
+    public String loadDocContent(Long id){
+        Cache<Long, String> cache = getContentCache();
+        String content = cache.get(id);
+        if (content == null) {
+            SysOnlineDocItem item = dataBaseDao.findOne(SqlBuilder.build(SysOnlineDocItem.class)
+                    .field("id,contents")
+                    .where("id=? and delFlag=0")
+                    .params("id", id));
+            if (item == null || item.getContents() == null) {
+                content="{\"header\":[],\"main\":[{\"value\":\"文档内容为空\"}],\"footer\":[]}";
+                cache.put(id, content);
+            }else{
+                content=item.getContents();
+                cache.put(id, content);
+            }
+        }
+        return content;
+    }
+
+
+    /**
+     * 刷新文档内容缓存
+     * @param id
+     */
+    public void refreshContent(SysOnlineDocItem item){
+        Cache<Long, String> cache = getContentCache();
+        cache.put(item.getId(), item.getContents());
     }
 
 

@@ -84,9 +84,9 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 		AssertUtil.service().isTrue(params.getAppId()!=null || params.getId()!=null,"appId和docId不能都为空");
 		OnlineDocDto doc=null;
 		if(params.getId()!=null){
-			doc=onlineDocService.viewByDocId(params.getId());
+			doc=onlineDocService.loadDocByDocId(params.getId());
 		}else{
-			doc=onlineDocService.viewByAppId(params.getAppId());
+			doc=onlineDocService.loadDocByAppId(params.getAppId());
 		}
 		AssertUtil.service().notNull(doc, "记录未找到");
 		return Results.success(doc);
@@ -150,7 +150,7 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 		}
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields.toArray(new String[0])));
 		if(len>0 && (entity.getStatus()==3 || entity.getStatus()==4)){
-			onlineDocService.refresh(tmp);
+			onlineDocService.refreshDoc(tmp);
 		}
 		
 		return Results.build(len>0);
