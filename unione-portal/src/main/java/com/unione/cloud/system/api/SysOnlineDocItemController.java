@@ -121,6 +121,9 @@ public class SysOnlineDocItemController implements TreeFeignApi<SysOnlineDocItem
 			String[] fields = {"title","iconName","picMax","picMid","picMix","contents","ordered","descs"};
 			SqlBuilder<SysOnlineDocItem> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
+			if(len>0){
+				onlineDocService.refreshContent(entity);
+			}
 		}
 		return Results.build(len>0, entity.getId());
 	}
