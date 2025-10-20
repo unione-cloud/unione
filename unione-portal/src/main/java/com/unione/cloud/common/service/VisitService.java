@@ -126,7 +126,7 @@ public class VisitService {
 	 * @return
 	 */
 	private Cache<Long,CommVisitTarget> getTargetCache() {
-		QuickConfig config = QuickConfig.newBuilder("COMM:VISIT:TARGET:LIFTE")
+		QuickConfig config = QuickConfig.newBuilder("COMM:VISIT:TARGET:LIFTE:")
 		    .expire(Duration.ofSeconds(CACHE_LIFETIME))
 		    .cacheType(CacheType.BOTH)
 		    .build();
