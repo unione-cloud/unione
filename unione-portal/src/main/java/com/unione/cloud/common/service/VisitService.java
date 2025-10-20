@@ -142,7 +142,7 @@ public class VisitService {
     public CommVisitTarget loadTarget(VisitEntry entry){
         CommVisitTarget target = getTargetCache().get(entry.getTargetId());
         if(target == null){
-            target = dataBaseDao.findOne(SqlBuilder.build(CommVisitTarget.class, entry.getTargetId()));
+            target = dataBaseDao.findOne(SqlBuilder.build(CommVisitTarget.class).params("targetId", entry.getTargetId()));
             if(target != null){
                 getTargetCache().put(entry.getTargetId(), target);
             }else{
@@ -156,7 +156,8 @@ public class VisitService {
                 target.setOrdered(0);
                 target.setStatus(1);
                 target.setDelFlag(0);
-                dataBaseDao.insert(target);
+                int len = dataBaseDao.insert(target);
+                log.debug("插入访问目标,id:{},target:{},len:{}",target.getId(),target.getTargetId(),len);
                 getTargetCache().put(entry.getTargetId(), target);
             }
         }
