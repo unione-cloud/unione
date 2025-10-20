@@ -1,5 +1,6 @@
 package com.unione.cloud.system.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.beetl.sql.annotation.entity.Table;
@@ -25,7 +26,7 @@ public class OnlineDocDto extends SysOnlineDoc{
 
     @Data
     @Schema(title="文档版本")
-    public static class DocVersion{
+    public static class DocVersion implements Serializable{
         @Schema(title="文档版本ID")
         private Long versId;
 
