@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * @版本	1.0.0
  **/
 @Slf4j
+@RefreshScope
 @RestController
 @Tag(name = "通用：访问登记服务")
 @RequestMapping("/api/common/visit")
