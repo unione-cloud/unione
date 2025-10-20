@@ -3,6 +3,7 @@ package com.unione.cloud.common.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,10 +35,20 @@ public class CommVisitController {
 	@Autowired
 	private VisitService visitService;
 
+	@Value("${unione.visit.enabled:true}")
+	private Boolean VISIT_ENABLED = true;
+
+	@Autowired
+	private HttpServletResponse response;
+
 	@PostMapping("/entry")
 	@Operation(summary = "访问",description = "记录页面访问信息")
 	public Results<Void> entry(@RequestBody @Validated(Validator.save.class) VisitEntry entry) {
 		log.debug("进入：页面访问登记接口");
+		if(!VISIT_ENABLED) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
 		return visitService.entry(entry);
 	}
 
