@@ -35,6 +35,12 @@ public class Swagger2Config {
 	
 	@Value("${knife4j.author.email:dev@unione.cloud}")
 	private String authorEmail;
+
+    @Value("${knife4j.info.version:v1.0.0}")
+    private String version;
+
+    @Value("${knife4j.info.url:https://www.unione.cloud}")
+    private String url;
 	
 	@Bean
     public OpenAPI springDocOpenAPI() {
@@ -46,11 +52,11 @@ public class Swagger2Config {
             .info(new Info()
             	.title("Unione Cloud "+name+" 接口文档")
             	.description("Unione Cloud "+name+" 微应用开发平台接口说明文档")
-                .version("v1.0.0")
+                .version(version)
                 .contact(contact)
                 .license(new License().name("Apache 2.0")))
                 .externalDocs(new ExternalDocumentation()
-                .url("https://www.unione.cloud"));
+                .url(url));
     }
 
 }
