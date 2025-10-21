@@ -125,6 +125,9 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 			String[] fields = {"title","versNo","iconName","picMax","picMid","picMix","profile","ordered","descs"};
 			SqlBuilder<SysOnlineDoc> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
+			if(len>0){
+				onlineDocService.refreshDoc(doc);
+			}
 		}
 		return Results.build(len>0, entity.getId());
 	}
