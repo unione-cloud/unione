@@ -59,11 +59,11 @@ public class CodeBuilderFactoryTest {
 	}
 
 
-	private static BuilderFactory build(String modelName){
+	private static BuilderFactory build(String moduleName){
 		SQLManager sqlManager=getSQLManager();
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder(modelName);
-		SourceBuilder apiBuilder = new ApiSourceBuilder(modelName);
+		SourceBuilder entityBuilder = new PojoSourceBuilder(moduleName);
+		SourceBuilder apiBuilder = new ApiSourceBuilder(moduleName);
 
 		sourceBuilder.add(entityBuilder);
 		sourceBuilder.add(apiBuilder);
@@ -80,10 +80,10 @@ public class CodeBuilderFactoryTest {
 	
 	public static void main(String[] args) {
 
-		String modelName="system";
+		String moduleName="system";
 		String packageName="com.unione.cloud";
 		
-		BuilderFactory factory = build(modelName);
+		BuilderFactory factory = build(moduleName);
 		SimpleUnioneProject mavenProject = new SimpleUnioneProject(packageName);
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 
