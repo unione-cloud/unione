@@ -51,7 +51,7 @@ public class Swagger2Config {
     		.components(new Components().addSecuritySchemes("token",new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("token")))
             .info(new Info()
             	.title("Unione Cloud "+name+" 接口文档")
-            	.description("Unione Cloud "+name+" 微应用开发平台接口说明文档")
+            	.description("Unione Cloud "+name+" 微服务开发平台接口说明文档")
                 .version(version)
                 .contact(contact)
                 .license(new License().name("Apache 2.0")))
