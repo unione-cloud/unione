@@ -34,7 +34,6 @@ public class CodeBuilderFactoryTest {
 	
 	private static   DataSource datasource() {
 		HikariDataSource ds = new HikariDataSource();
-    //内存数据库
 		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8");
 		ds.setUsername("unione");
 		ds.setPassword("unione@db");
@@ -59,18 +58,14 @@ public class CodeBuilderFactoryTest {
 		return sqlManager;
 	}
 
-	
-	public static void main(String[] args) {
-		
-		SQLManager sqlManager=getSQLManager();
 
+	private static BuilderFactory build(String modelName){
+		SQLManager sqlManager=getSQLManager();
 		List<SourceBuilder> sourceBuilder = new ArrayList<>();
-		SourceBuilder entityBuilder = new PojoSourceBuilder("system");
-		SourceBuilder apiBuilder = new ApiSourceBuilder("system");
-//		SourceBuilder mdBuilder = new SqlMdSourceBuilder("system");
+		SourceBuilder entityBuilder = new PojoSourceBuilder(modelName);
+		SourceBuilder apiBuilder = new ApiSourceBuilder(modelName);
 
 		sourceBuilder.add(entityBuilder);
-//		sourceBuilder.add(mdBuilder);
 		sourceBuilder.add(apiBuilder);
 
 		BuilderFactory factory = new BuilderFactory(sqlManager,sourceBuilder);
@@ -79,21 +74,20 @@ public class CodeBuilderFactoryTest {
 		//如果有错误，抛出异常而不是继续运行1
 		EntitySourceBuilder.getGroupTemplate().setErrorHandler(new ReThrowConsoleErrorHandler());
 		EntitySourceBuilder.getGroupTemplate().registerFunction("isBaseField",new FunIsBaseField());
-		
-		SimpleUnioneProject mavenProject = new SimpleUnioneProject("com.unione.cloud");
-		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
-		
-		//可以在控制台看到生成的所有代码
-//		factory.genAll(mavenProject, new SourceFilter() {
-//			@Override
-//			public boolean accept(MetadataManager metadataManager, String tableName) {
-//				return tableName.startsWith("sys_data");
-//			}
-//		});
-		
-		factory.gen("sys_online_doc",mavenProject);
-		factory.gen("sys_online_doc_item",mavenProject);
+		return factory;
+	}
 
+	
+	public static void main(String[] args) {
+
+		String modelName="system";
+		String packageName="com.unione.cloud";
+		
+		BuilderFactory factory = build(modelName);
+		SimpleUnioneProject mavenProject = new SimpleUnioneProject(packageName);
+		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
+
+		factory.gen("demo_test",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 
