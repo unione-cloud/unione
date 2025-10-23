@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
@@ -26,6 +27,7 @@ import com.unione.cloud.core.model.Validator;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("ums.UmsTmpl")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -68,7 +70,7 @@ public class UmsTmpl extends Pojo {
 	/**
 	* 模版变量,json数组存储[{name,title,dataType,defaultValue}]
 	*/
-	@Schema(title="模版变量,json数组存储[{name,title,dataType,defaultValue}]",description="长度为：65535")
+	@Schema(title="模版变量,json数组存储[{name,title,dataType,required,defaultValue}]",description="长度为：65535")
 	private String vars;
 	/**
 	* 使用级别，字典UMSTMPLUSEL 1：全局，2：租户，3：机构
