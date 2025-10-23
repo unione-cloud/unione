@@ -1,5 +1,7 @@
 package com.unione.cloud.security.api;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,8 @@ import com.unione.cloud.system.dto.LoginParam;
 import com.unione.cloud.system.dto.LoginResult;
 import com.unione.cloud.system.dto.UserRegister;
 import com.unione.cloud.system.service.RegisterService;
+import com.unione.cloud.ums.dto.SmsCaptcha;
+import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.captcha.AbstractCaptcha;
@@ -40,6 +44,9 @@ public class SecurityController {
 	
 	@Autowired
 	private CaptchaService captchaService;
+
+	@Autowired
+	private UmsSmsService umsSmsService;
 	
 	@Autowired
 	private LoginService loginService;
@@ -56,13 +63,34 @@ public class SecurityController {
 	
 	@Autowired
 	private SecretService secretService;
+
+	/**
+	 * 生成验证码图片
+	 */
+	@PostMapping("/captcha/sms")
+	@Operation(summary="生成验证码图片",description="生成验证码并返回验证码图片")
+	public Results<Void> captchaSms(@RequestBody SmsCaptcha captcha){
+		log.debug("进入->发送短信验证码方法");
+		AssertUtil.service()
+			.notNull(captcha, new String[] {"tel","scene"},"请求参数%s不能为空")
+			.notIn(captcha.getScene(), Arrays.asList("login","register"), "场景编码只能是login或register");
+		
+		if(umsSmsService.enableCaptcha(captcha.getScene(), captcha.getTel())){
+			return Results.success();
+		}
+
+		umsSmsService.sendCaptcha(captcha);
+		
+		log.debug("退出->发送短信验证码方法");
+		return Results.success();
+	}
 	
 	/**
 	 * 生成验证码图片
 	 */
-	@GetMapping("/captcha")
+	@GetMapping("/captcha/image")
 	@Operation(summary="生成验证码图片",description="生成验证码并返回验证码图片")
-	public void captcha(){
+	public void captchaImage(){
 		log.debug("进入->生成验证码图片控制器");
 		response.setContentType("image/jpeg");
 		// 不缓存此内容
@@ -82,9 +110,9 @@ public class SecurityController {
 	
 	
 	
-	@PostMapping("/login")
-	@Action(title="用户登录",type = ActionType.Login)
-	@Operation(summary="用户登录",description="")
+	@PostMapping("/login/uname")
+	@Action(title="用户登录:帐号密码",type = ActionType.Login)
+	@Operation(summary="用户登录:帐号密码",description="")
 	public LoginResult login(@RequestBody LoginParam param) {
 		log.info("用户登录，usrename:{}",param.getUsername());
 		LogsUtil.setUsername(param.getUsername());
@@ -94,7 +122,22 @@ public class SecurityController {
 		param.setPassword(secretService.decrypt(param.getPassword()));
 		
 		// 执行登录
-		LoginResult result = loginService.doLogin(param);
+		LoginResult result = loginService.doLoginByUname(param);
+		
+		return result;
+	}
+
+	@PostMapping("/login/sms")
+	@Action(title="用户登录:短信验证码",type = ActionType.Login)
+	@Operation(summary="用户登录:短信验证码",description="")
+	public LoginResult loginBySms(@RequestBody LoginParam param) {
+		log.info("用户登录，usrename:{}",param.getUsername());
+		LogsUtil.setUsername(param.getUserphone());
+		AssertUtil.service()
+			.notNull(param, new String[] {"userphone","captcha"},"请求参数%s不能为空");
+
+		// 执行登录
+		LoginResult result = loginService.doLoginBySms(param);
 		
 		return result;
 	}

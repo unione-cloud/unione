@@ -7,6 +7,9 @@ import lombok.Data;
 @Schema(title="用户注册")
 public class UserRegister {
 
+	@Schema(title="单位名称",description="字符长度为：200")
+	private String company;
+
 	@Schema(title="用户类型，字典USERTYPE 1管理员，2普通用户，9其他",description="字符长度为：10")
 	private Integer userType;
 	

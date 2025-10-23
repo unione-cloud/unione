@@ -4,10 +4,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import org.beetl.core.Configuration;
+import org.beetl.core.GroupTemplate;
+import org.beetl.core.Template;
+import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 
 import com.alicp.jetcache.Cache;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.redis.HpdlProcess;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionService;
@@ -27,6 +30,7 @@ import com.unione.cloud.ums.dto.UmsTmplVar;
 import com.unione.cloud.ums.model.UmsTmpl;
 
 import cn.hutool.core.util.ObjectUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -45,6 +49,8 @@ public class UmsTmplService {
     @Autowired
     private CacheManager cacheManager;
 
+    private GroupTemplate groupTemplate;
+
     @Value("${unione.ums.sms.default:sms-default}")
     private String TMPL_SMS_DEFAULT;
 
@@ -56,6 +62,21 @@ public class UmsTmplService {
 
     @Value("${unione.cache.ums.tmpl.expire:600}")
     private int TMPL_CACHE_EXPIRE;
+
+
+    @PostConstruct
+    public void postConstruct(){
+        try {
+            StringTemplateResourceLoader resourceLoader = new StringTemplateResourceLoader();
+            Configuration configuration = Configuration.defaultConfiguration();
+            configuration.setCharset("UTF-8");
+            groupTemplate = new GroupTemplate(resourceLoader, configuration);
+        } catch (Exception e) {
+            log.error("初始化模板引擎失败", e);
+            throw new ServiceException("模板引擎初始化失败");
+        }
+    }
+
 
     private Cache<String, UmsTmpl> getTmplCache() {
         return cacheManager.getOrCreateCache(QuickConfig.newBuilder("UMS:TMPL:")
@@ -169,11 +190,10 @@ public class UmsTmplService {
                 }
             }
         }
-
-        SpelExpressionParser parser = new SpelExpressionParser();
-        Expression expression = parser.parseExpression(content);
-        content = expression.getValue(sms.getVars(), String.class);
-
+        // 模版处理
+        Template template = groupTemplate.getTemplate(content);
+        template.binding(sms.getVars());
+        content = template.render();
         return content;
     }
 

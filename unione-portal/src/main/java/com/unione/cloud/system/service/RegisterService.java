@@ -7,7 +7,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
@@ -17,8 +20,10 @@ import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.security.service.CaptchaService;
 import com.unione.cloud.system.dto.UserRegister;
+import com.unione.cloud.system.model.SysTenant;
 import com.unione.cloud.system.model.SysUser;
 import com.unione.cloud.system.model.SysUserRole;
+import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.codec.Base64;
@@ -36,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
+@RefreshScope
 public class RegisterService {
 	
 	@Autowired
@@ -43,6 +49,9 @@ public class RegisterService {
 	
 	@Autowired
 	private CaptchaService captchaService;	
+
+	@Autowired
+	private UmsSmsService umsSmsService;
 	
 	
 	/**
@@ -91,63 +100,93 @@ public class RegisterService {
 	 * @param param
 	 * @return
 	 */
+	@Transactional
 	public Results<Void> doRegister(UserRegister param){
 		log.info("进入：用户注册方法,username:{},realName:{}",param.getUsername(),param.getRealName());
 		LogsUtil.add("进入：用户注册方法,username:%s,realName:%s",param.getUsername(),param.getRealName());
 		AssertUtil.service()
 			.isTrue(REGISGER_ENABLE, "用户注册功能未开启")
-			.notNull(param, new String[] {"username","pwdText"},"属性%s不能为空")
-			.isTrue(captchaService.validate(param.getCaptcha()),"验证码不正确");
+			.notNull(param, new String[] {"username","pwdText","company"},"属性%s不能为空");
 		
 		if(REGISTER_TEL_CAPTCHA) {
-			//TODO 手机短信验证码接入逻辑
+			AssertUtil.service().isTrue(umsSmsService.valiCaptcha("register",param.getTel(),param.getCaptcha()),"短信验证码不正确");
+		}else{
+			AssertUtil.service().isTrue(captchaService.validate(param.getCaptcha()),"验证码不正确");
 		}
-		
-		Long userId = IdGenHolder.generate();
-		SysUser user=new SysUser();
-		BeanUtils.copyProperties(param, user);
-		user.setId(userId);
-		
-		LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());
-		SqlBuilder<SysUser> untelBuilder=SqlBuilder.build(user).field("id,username,tel").where("username=? or tel=?");
-		List<SysUser> untelList = dataBaseDao.findList(untelBuilder);
-		untelList.stream().forEach(row->{
-			AssertUtil.service()
-				.isTrue(ObjectUtil.notEqual(row.getUsername(), param.getUsername()),"账号已存在")
-				.isTrue(ObjectUtil.notEqual(row.getTel(),param.getTel()),"手机号已存在");			
-		});
-		
-		LogsUtil.add("设置默认属性");
-		user.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
-		user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
-		user.setCreatedBy(userId);
-		user.setLastUpdatedBy(userId);	
-		BeanUtils.setDefaultValue(user, "userType", 2);	//用户类型，字典USERTYPE 1管理员，2普通用户，9其他	
-		BeanUtils.setDefaultValue(user, REGISGER_DEFAULT_INFO);	
-		
-		LogsUtil.add("生成用户密码盐并对密码进行加密处理");
-		user.setPwdSalt(Base64.encode(KeyUtil.generateKey("SM4").getEncoded()));
-		String pwd = SmUtil.sm4(Base64.decode(user.getPwdSalt())).encryptHex(user.getPwdText());
-		user.setPwdText(pwd);
-		LogsUtil.add("保存用户信息");
-		dataBaseDao.insertWithId(user);
-		
-		List<Long> roles=REGISGER_DEFAULT_ROLES.get(user.getUserType());
-		LogsUtil.add("分配用户角色,roles:%s",roles);
-		if(roles!=null) {
-			List<SysUserRole> userRoles = roles.stream().map(roleId->{
-				SysUserRole ur=new SysUserRole();
-				ur.setRoleId(roleId);			
-				ur.setUserId(user.getId());
-				ur.setCreatedBy(user.getId());
-				ur.setLastUpdatedBy(user.getId());
-				return ur;
-			}).collect(Collectors.toList());
-			dataBaseDao.insertBatch(userRoles);
-			LogsUtil.add("成功分配用户角色,roles:%s",roles);
+
+		try{
+			Long userId = IdGenHolder.generate();
+			SysUser user=new SysUser();
+			BeanUtils.copyProperties(param, user);
+			user.setId(userId);
+			user.setUserType(2);
+
+			//加载租户
+			SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
+				.where("name=?")
+				.params("name", param.getCompany()));
+			if(tenant==null) {
+				tenant=new SysTenant();
+				tenant.setId(IdGenHolder.generate());
+				tenant.setName(param.getCompany());
+				tenant.setAdminId(userId);
+				tenant.setSn(String.valueOf(tenant.getId()));
+				tenant.setCreatedBy(userId);
+				tenant.setLastUpdatedBy(userId);
+				int len = dataBaseDao.insertWithId(tenant);
+				if(len<=0){
+					return Results.failure("租户信息保存失败");
+				}
+				user.setUserType(1);
+			}
+			user.setTenantId(tenant.getId());
+			
+			LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());
+			SqlBuilder<SysUser> untelBuilder=SqlBuilder.build(user).field("id,username,tel").where("username=? or tel=?");
+			List<SysUser> untelList = dataBaseDao.findList(untelBuilder);
+			untelList.stream().forEach(row->{
+				AssertUtil.service()
+					.isTrue(ObjectUtil.notEqual(row.getUsername(), param.getUsername()),"账号已存在")
+					.isTrue(ObjectUtil.notEqual(row.getTel(),param.getTel()),"手机号已存在");			
+			});
+			
+			LogsUtil.add("设置默认属性");
+			user.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
+			user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
+			user.setCreatedBy(userId);
+			user.setLastUpdatedBy(userId);	
+			BeanUtils.setDefaultValue(user, "userType", 2);	//用户类型，字典USERTYPE 1管理员，2普通用户，9其他	
+			BeanUtils.setDefaultValue(user, REGISGER_DEFAULT_INFO);	
+			
+			LogsUtil.add("生成用户密码盐并对密码进行加密处理");
+			user.setPwdSalt(Base64.encode(KeyUtil.generateKey("SM4").getEncoded()));
+			String pwd = SmUtil.sm4(Base64.decode(user.getPwdSalt())).encryptHex(user.getPwdText());
+			user.setPwdText(pwd);
+			LogsUtil.add("保存用户信息");
+			dataBaseDao.insertWithId(user);
+			
+			List<Long> roles=REGISGER_DEFAULT_ROLES.get(user.getUserType());
+			LogsUtil.add("分配用户角色,roles:%s",roles);
+			if(roles!=null) {
+				List<SysUserRole> userRoles = roles.stream().map(roleId->{
+					SysUserRole ur=new SysUserRole();
+					ur.setRoleId(roleId);			
+					ur.setUserId(user.getId());
+					ur.setCreatedBy(user.getId());
+					ur.setLastUpdatedBy(user.getId());
+					return ur;
+				}).collect(Collectors.toList());
+				dataBaseDao.insertBatch(userRoles);
+				LogsUtil.add("成功分配用户角色,roles:%s",roles);
+			}
+			return Results.success();
+		}catch(Exception e) {
+			log.error("用户注册失败,username:{},realName:{}",param.getUsername(),param.getRealName(),e);
+			LogsUtil.add("用户注册失败,username:%s,realName:%s",param.getUsername(),param.getRealName());
+			LogsUtil.error(e);
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 		}
-		
-		return Results.success();
+		return Results.failure("用户注册失败");
 	}	
 	
 

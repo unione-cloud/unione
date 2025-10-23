@@ -33,6 +33,7 @@ import com.unione.cloud.system.dto.LoginResult;
 import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.system.model.SysUser;
 import com.unione.cloud.system.model.SysUserOrgan;
+import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -68,6 +69,9 @@ public class LoginService {
 	
 	@Autowired
 	private CaptchaService captchaService;	
+
+	@Autowired
+	private UmsSmsService umsSmsService;
 	
 	
 	/**
@@ -260,11 +264,11 @@ public class LoginService {
 	}
 	
 	/**
-	 * 执行用户登录方
+	 * 执行用户帐号密码登录
 	 * @param param
 	 * @return
 	 */
-	public LoginResult doLogin(LoginParam param) {
+	public LoginResult doLoginByUname(LoginParam param) {
 		log.info("进入：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s",param.getUsername(),param.getCaptcha());
 		AssertUtil.service()
@@ -339,6 +343,76 @@ public class LoginService {
 		}
 			
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
+		// 构建认证信息
+		return this.loginSuccess(user);
+	}
+
+	/**
+	 * 	执行短信验证码登录
+	 * @param param
+	 * @return
+	 */
+	public LoginResult doLoginBySms(LoginParam param) {
+		log.info("进入：用户登录方法,userphone:{},captcha:{}",param.getUserphone(),param.getCaptcha());
+		LogsUtil.add("用户请求登录，userphone:%s,captcha:%s",param.getUserphone(),param.getCaptcha());
+		AssertUtil.service()
+			.notNull(param, new String[] {"userphone","captcha"},"请求参数%s不能为空");
+
+		LogsUtil.add("验证手机号是否已被锁,userphone:%s",param.getUserphone());
+		int failureCount=this.getFailure(param.getUserphone());
+		if(failureCount>=LOGIN_FAILCOUNT && LOGIN_FAILLIMITE) {
+			LogsUtil.add("手机号已被锁定，拒绝本次登录请求");
+			Date expire=this.getLimitTime(param.getUserphone());
+			if(expire!=null) {
+				return LoginResult.fail(LOGIN_FAILURE_LLIMITEED
+						.replace("{failureCount}", failureCount+"")
+						.replace("{LimitTime}", DateUtil.format(expire, "yyyy-MM-dd HH:mm")));
+			}
+		}
+
+		// 验证短信验证码
+		if(!umsSmsService.valiCaptcha("login", param.getUserphone(), param.getCaptcha())){
+			return this.loginFailure(param.getUserphone());
+		}
+
+		// 加载用户信息
+		SysUser user=new SysUser();
+		user.setTel(StringUtils.trim(param.getUserphone()));
+		SqlBuilder<SysUser> builder=SqlBuilder
+				.build(user)
+				.query("SELECT u.*,org.ID as orgId,org.NAME as orgName,org.AREA_CODE as areaCode "
+						+ "FROM SYS_USER u LEFT JOIN SYS_ORGAN org on u.ORG_ID=org.ID "
+						+ "WHERE u.TEL=#{params.tel}");
+		user=dataBaseDao.findOne(builder);
+		if(user==null) {
+			LogsUtil.add("认证失败：手机号未注册");
+			return this.loginFailure(param.getUserphone());
+		}
+
+		// 用户状态验证
+		if(!LOGIN_STATUS_ALLOW.contains(user.getStatus())) {
+			String text=LOGIN_STATUS_MAP.get(user.getStatus());
+			if(StringUtils.isEmpty(text)) {
+				text="禁用";
+			}
+			LogsUtil.add("认证失败：帐号已%s",text);
+			return LoginResult.fail(LOGIN_FAILURE_FORBID.replace("{forbid}", text));
+		}
+
+		// 单设备登录
+		if(LOGIN_SINGLELIMIT) {
+			// 如果开启了单设备登录
+			String username=user.getUsername();
+			boolean flag = redisService.execute(tcmDb,(RedisCallback<Boolean>) action->{
+				ScanOptions options = ScanOptions.scanOptions()
+						.match(String.format("%s:%s:*",tcmKey,username)).build();
+				Cursor<byte[]> cursor = action.scan(options);
+				return cursor.hasNext();
+			});
+			AssertUtil.service().isTrue(!flag, LOGIN_SINGLETIP.replace("{username}", username));
+		}
+			
+		log.info("退出：用户登录方法,userphone:{},captcha:{}",param.getUserphone(),param.getCaptcha());
 		// 构建认证信息
 		return this.loginSuccess(user);
 	}

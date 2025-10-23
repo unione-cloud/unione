@@ -1,11 +1,15 @@
 package com.unione.cloud.ums.service;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.SimpleScriptContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +31,13 @@ import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.util.JsonUtil;
 import com.unione.cloud.ums.dto.SmsCaptcha;
 import com.unione.cloud.ums.dto.SmsEntity;
-import com.unione.cloud.ums.dto.SmsGtwAuth;
-import com.unione.cloud.ums.dto.ValiCaptcha;
 import com.unione.cloud.ums.model.UmsSmsBox;
 import com.unione.cloud.ums.model.UmsSmsGtw;
 import com.unione.cloud.ums.model.UmsTmpl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.script.ScriptUtil;
@@ -61,8 +64,17 @@ public class UmsSmsService {
     private String GTW_DEFAULT;
 
 
-    @Value("${unione.cache.ums.gtw.expire:600}")
+    @Value("${unione.cache.ums.gtw.expire:3600}")
     private int GTW_CACHE_EXPIRE;
+
+    @Value("${unione.sms.captcha.expire:10}")
+    private int CAPTCHA_EXPIRE;
+
+    @Value("${unione.sms.captcha.len.length:6}")
+    private int CAPTCHA_LENGTH;
+
+    @Value("${unione.sms.captcha.enable:true}")
+    private boolean CAPTCHA_ENABLE;
 
     /**
      * 获取短信网关缓存
@@ -77,6 +89,13 @@ public class UmsSmsService {
                 .build());
     }
 
+    private Cache<String, String> getCaptchaCache() {
+        return cacheManager.getOrCreateCache(QuickConfig.newBuilder("UMS:SMSCAPTCHA:")
+                .cacheType(CacheType.REMOTE)
+                .expire(Duration.ofMinutes(CAPTCHA_EXPIRE))
+                .build());
+    }
+
     /**
      * 加载短信网关
      * 
@@ -87,7 +106,7 @@ public class UmsSmsService {
         Cache<String, UmsSmsGtw> cache = this.getGtwCache();
         UmsSmsGtw gtw = cache.get(sn);
         if (gtw == null) {
-            redisService.doHpdl(new HpdlProcess<UmsSmsGtw>("UMS:GTW:LOCK:" + sn) {
+            gtw=redisService.doHpdl(new HpdlProcess<UmsSmsGtw>("UMS:GTW:LOCK:" + sn) {
                 @Override
                 public UmsSmsGtw process() {
                     return dataBaseDao.findOne(SqlBuilder.build(UmsSmsGtw.class).params("sn", sn));
@@ -100,7 +119,7 @@ public class UmsSmsService {
             gtw = new UmsSmsGtw();
         }
         AssertUtil.service().notNull(gtw, "短信网关不存在")
-                .isTrue(gtw.getId() != null, "短信网关ID不存在")
+                .isTrue(gtw.getId() != null, "短信网关不存在")
                 .isTrue(ObjectUtil.equal(gtw.getStatus(), 1), "短信网关不可用");
         return gtw;
     }
@@ -121,17 +140,19 @@ public class UmsSmsService {
      * @param gtw
      * @return
      */
+    @SuppressWarnings("unchecked")
     private Object auth(UmsSmsGtw gtw) {
         if (ObjectUtil.isEmpty(gtw.getAuthInfo()) || ObjectUtil.isEmpty(gtw.getAuthScript())) {
             return null;
         }
         try {
             ScriptContext context = new SimpleScriptContext();
-            SmsGtwAuth auth = null;
+            Map<String, Object> auth = new HashMap<>();
             if (!ObjectUtil.isEmpty(gtw.getAuthInfo())) {
-                auth = JsonUtil.toBean(SmsGtwAuth.class, gtw.getAuthInfo());
+                auth = JsonUtil.toBean(Map.class, gtw.getAuthInfo());
             }
             context.setAttribute("authConfig", auth, ScriptContext.ENGINE_SCOPE);
+            context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getAuthApi(), ScriptContext.ENGINE_SCOPE);
             initJavaScriptContent(context);
 
@@ -160,6 +181,7 @@ public class UmsSmsService {
         try {
             ScriptContext context = new SimpleScriptContext();
             context.setAttribute("authInfo", authInfo, ScriptContext.ENGINE_SCOPE);
+             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getReceiveApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("timesmtap", timesmtap, ScriptContext.ENGINE_SCOPE);
             initJavaScriptContent(context);
@@ -191,6 +213,7 @@ public class UmsSmsService {
         try {
             ScriptContext context = new SimpleScriptContext();
             context.setAttribute("authInfo", authInfo, ScriptContext.ENGINE_SCOPE);
+             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getReceiptApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("timesmtap", timesmtap, ScriptContext.ENGINE_SCOPE);
             initJavaScriptContent(context);
@@ -224,6 +247,7 @@ public class UmsSmsService {
             sendLogs.append(DateUtil.now()).append("\t初始化远程调用对象\n");
             ScriptContext context = new SimpleScriptContext();
             context.setAttribute("authInfo", authInfo, ScriptContext.ENGINE_SCOPE);
+             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getSendApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("sms", sms, ScriptContext.ENGINE_SCOPE);
             context.setAttribute("tmpl", tmpl, ScriptContext.ENGINE_SCOPE);
@@ -340,17 +364,56 @@ public class UmsSmsService {
         }
     }
 
-    public void sendCaptcha(SmsCaptcha sms) {
+    /**
+     * 发送验证码短信
+     * @param sms
+     */
+    public void sendCaptcha(SmsCaptcha captcha) {
+        AssertUtil.service().notNull(captcha, new String[]{"scene","tel"},"参数%s不能为空");
+        if(!CAPTCHA_ENABLE){
+            return;
+        }
+        String text=RandomUtil.randomNumbers(CAPTCHA_LENGTH);
+        String key=captcha.getScene()+":"+captcha.getTel();
 
+        SmsEntity sms=new SmsEntity();
+        sms.setScene(captcha.getScene());
+        sms.setTels(Arrays.asList(captcha.getTel()));
+        sms.setTmpl(captcha.getTmpl());
+        sms.getVars().put("code", text);
+        sms.getVars().put("expMinute", String.valueOf(CAPTCHA_EXPIRE));
+        sms.setContents("验证码：${code}，${expMinute}分钟内有效，请勿泄露并尽快验证。");
+        this.send(sms);
+
+        getCaptchaCache().put(key, text);
     }
 
-    public boolean valiCaptcha(ValiCaptcha captcha) {
-
-        return false;
+    /**
+     * 校验验证码短信
+     * @param captcha
+     * @return
+     */
+    public boolean valiCaptcha(String scene, String tel,String captcha) {
+        if(!CAPTCHA_ENABLE){
+            return true;
+        }
+        String key=scene+":"+tel;
+        Cache<String,String> cache=getCaptchaCache();
+        String captchaCache=cache.get(key);
+        cache.remove(key);
+        return ObjectUtil.isNotEmpty(captchaCache)&&captchaCache.equals(captcha);
     }
 
+    /**
+     * 监测验证码是否有效
+     * @param scene
+     * @param tel
+     * @return
+     */
     public boolean enableCaptcha(String scene, String tel) {
-        return false;
+        String key=scene+":"+tel;
+        String captcha=getCaptchaCache().get(key);
+        return ObjectUtil.isNotEmpty(captcha);
     }
 
 }
