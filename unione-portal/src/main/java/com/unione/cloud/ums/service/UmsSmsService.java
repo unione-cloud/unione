@@ -1,15 +1,16 @@
 package com.unione.cloud.ums.service;
 
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.SimpleScriptContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.script.ScriptUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -151,13 +153,16 @@ public class UmsSmsService {
             if (!ObjectUtil.isEmpty(gtw.getAuthInfo())) {
                 auth = JsonUtil.toBean(Map.class, gtw.getAuthInfo());
             }
+
             context.setAttribute("authConfig", auth, ScriptContext.ENGINE_SCOPE);
             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getAuthApi(), ScriptContext.ENGINE_SCOPE);
-            initJavaScriptContent(context);
+            context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
 
             ScriptEngine scriptEngine = ScriptUtil.createJsEngine();
-            Object ret = scriptEngine.eval(String.format("(function(){return %s})()", gtw.getAuthScript()), context);
+            scriptEngine.put("polyglot.js.allowAllAccess", true);
+
+            Object ret = scriptEngine.eval(String.format("(function(){\n %s \n})()", gtw.getAuthScript()), context);
             return ret;
         } catch (Exception e) {
             log.error("短信网关认证失败,网关ID:{},auth api:{},script:{}", gtw.getId(), gtw.getAuthApi(), gtw.getAuthScript(), e);
@@ -184,10 +189,11 @@ public class UmsSmsService {
              context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getReceiveApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("timesmtap", timesmtap, ScriptContext.ENGINE_SCOPE);
-            initJavaScriptContent(context);
-
+            context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
             ScriptEngine scriptEngine = ScriptUtil.createJsEngine();
-            Object list = scriptEngine.eval(String.format("(function(){return %s})()", gtw.getReceiveScript()),
+            scriptEngine.put("polyglot.js.allowAllAccess", true);
+
+            Object list = scriptEngine.eval(String.format("(function(){\n %s \n})()", gtw.getReceiveScript()),
                     context);
             log.info("短信网关接收返回:{}", list);
 
@@ -216,10 +222,11 @@ public class UmsSmsService {
              context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getReceiptApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("timesmtap", timesmtap, ScriptContext.ENGINE_SCOPE);
-            initJavaScriptContent(context);
-
+            context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
             ScriptEngine scriptEngine = ScriptUtil.createJsEngine();
-            Object list = scriptEngine.eval(String.format("(function(){return %s})()", gtw.getReceiptScript()),
+            scriptEngine.put("polyglot.js.allowAllAccess", true);
+
+            Object list = scriptEngine.eval(String.format("(function(){\n %s \n})()", gtw.getReceiptScript()),
                     context);
             log.info("短信网关回执返回:{}", list);
 
@@ -247,16 +254,17 @@ public class UmsSmsService {
             sendLogs.append(DateUtil.now()).append("\t初始化远程调用对象\n");
             ScriptContext context = new SimpleScriptContext();
             context.setAttribute("authInfo", authInfo, ScriptContext.ENGINE_SCOPE);
-             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
+            context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getSendApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("sms", sms, ScriptContext.ENGINE_SCOPE);
             context.setAttribute("tmpl", tmpl, ScriptContext.ENGINE_SCOPE);
-            initJavaScriptContent(context);
-
+            context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
             ScriptEngine scriptEngine = ScriptUtil.createJsEngine();
+            scriptEngine.put("polyglot.js.allowAllAccess", true);
+
 
             sendLogs.append(DateUtil.now()).append("\t远程调用：开始\n");
-            Object res = scriptEngine.eval(String.format("(function(){return %s})()", gtw.getSendScript()), context);
+            Object res = scriptEngine.eval(String.format("(function(){\n %s \n})()", gtw.getSendScript()), context);
             sendLogs.append(DateUtil.now()).append("\t远程调用：结束,返回值：").append(res!=null?res.toString():"null").append("\n");
             log.info("短信网关发送返回:{}", res);
             // 更新发送结果：
@@ -344,25 +352,7 @@ public class UmsSmsService {
         return Results.success(batchid);
     }
 
-    private void initJavaScriptContent(ScriptContext context) {
-        try {
-            // 获取当前类加载器可访问的工具类
-            context.setAttribute("StringUtils", org.apache.commons.lang3.StringUtils.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("DateUtil", cn.hutool.core.date.DateUtil.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("HttpUtil", cn.hutool.http.HttpUtil.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("HttpRequest", cn.hutool.http.HttpRequest.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("HttpResponse", cn.hutool.http.HttpResponse.class, ScriptContext.ENGINE_SCOPE);
-
-            // 创建工具类实例并绑定到上下文
-            context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("jsonUtil", JsonUtil.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("objectUtil", ObjectUtil.class, ScriptContext.ENGINE_SCOPE);
-            context.setAttribute("MD5", MD5.class, ScriptContext.ENGINE_SCOPE);
-
-        } catch (Exception e) {
-            log.error("导入全局类时出错: {}", e);
-        }
-    }
+    
 
     /**
      * 发送验证码短信
