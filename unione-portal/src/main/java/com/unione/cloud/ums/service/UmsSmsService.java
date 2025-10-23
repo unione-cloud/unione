@@ -219,7 +219,7 @@ public class UmsSmsService {
         try {
             ScriptContext context = new SimpleScriptContext();
             context.setAttribute("authInfo", authInfo, ScriptContext.ENGINE_SCOPE);
-             context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
+            context.setAttribute("host", gtw.getUrl(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("url", gtw.getReceiptApi(), ScriptContext.ENGINE_SCOPE);
             context.setAttribute("timesmtap", timesmtap, ScriptContext.ENGINE_SCOPE);
             context.setAttribute("log", log, ScriptContext.ENGINE_SCOPE);
@@ -238,7 +238,7 @@ public class UmsSmsService {
     }
 
 
-    private void send(UmsSmsGtw gtw,UmsTmpl tmpl, SmsEntity sms,Long batchId,StringBuffer sendLogs) {
+    private boolean send(UmsSmsGtw gtw,UmsTmpl tmpl, SmsEntity sms,Long batchId,StringBuffer sendLogs) {
         UmsSmsBox box=new UmsSmsBox();
         box.setBatchId(batchId);
         box.setSendSts(3);
@@ -246,7 +246,7 @@ public class UmsSmsService {
             sendLogs.append(DateUtil.now()).append("\t短信网关配置异常，send api或send script为空！忽略，不发送该短信！\n");
             box.setSendLog(sendLogs.toString());
             dataBaseDao.update(SqlBuilder.build(box).where("batchId=?").field("sendSts","sendLog"));
-            return;
+            return false;
         }
         Object authInfo = this.auth(gtw);
         try {
@@ -274,6 +274,7 @@ public class UmsSmsService {
             }
             box.setSendLog(sendLogs.toString());
             dataBaseDao.update(SqlBuilder.build(box).where("batchId=?").field("sendSts","sendLog"));
+            return ObjectUtil.equal(2, box.getSendSts());
         } catch (Exception e) {
             log.error("短信网关发送失败,网关ID:{},send api:{},script:{}", gtw.getId(), gtw.getSendApi(),
                     gtw.getSendScript(), e);
@@ -347,7 +348,8 @@ public class UmsSmsService {
 
         if(sms.getTimeSend()==null){
             // 立刻发送
-            this.send(gtw,tmpl, sms, batchid, sendLogs);
+            boolean flag = this.send(gtw,tmpl, sms, batchid, sendLogs);
+            return Results.build(flag);
         }
         return Results.success(batchid);
     }
@@ -358,10 +360,10 @@ public class UmsSmsService {
      * 发送验证码短信
      * @param sms
      */
-    public void sendCaptcha(SmsCaptcha captcha) {
+    public Results<Long> sendCaptcha(SmsCaptcha captcha) {
         AssertUtil.service().notNull(captcha, new String[]{"scene","tel"},"参数%s不能为空");
         if(!CAPTCHA_ENABLE){
-            return;
+            return Results.success();
         }
         String text=RandomUtil.randomNumbers(CAPTCHA_LENGTH);
         String key=captcha.getScene()+":"+captcha.getTel();
@@ -373,9 +375,13 @@ public class UmsSmsService {
         sms.getVars().put("code", text);
         sms.getVars().put("expMinute", String.valueOf(CAPTCHA_EXPIRE));
         sms.setContents("验证码：${code}，${expMinute}分钟内有效，请勿泄露并尽快验证。");
-        this.send(sms);
+        Results<Long> results = this.send(sms);
 
-        getCaptchaCache().put(key, text);
+        if(results.isSuccess()){
+            getCaptchaCache().put(key, text);
+        }
+
+        return results;
     }
 
     /**

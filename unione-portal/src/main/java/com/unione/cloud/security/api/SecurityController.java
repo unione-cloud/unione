@@ -69,7 +69,7 @@ public class SecurityController {
 	 */
 	@PostMapping("/captcha/sms")
 	@Operation(summary="生成验证码图片",description="生成验证码并返回验证码图片")
-	public Results<Void> captchaSms(@RequestBody SmsCaptcha captcha){
+	public Results<Long> captchaSms(@RequestBody SmsCaptcha captcha){
 		log.debug("进入->发送短信验证码方法");
 		AssertUtil.service()
 			.notNull(captcha, new String[] {"tel","scene"},"请求参数%s不能为空")
@@ -79,10 +79,10 @@ public class SecurityController {
 			return Results.success();
 		}
 
-		umsSmsService.sendCaptcha(captcha);
+		Results<Long> results = umsSmsService.sendCaptcha(captcha);
 		
 		log.debug("退出->发送短信验证码方法");
-		return Results.success();
+		return results;
 	}
 	
 	/**
