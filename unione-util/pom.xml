@@ -36,6 +36,24 @@
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
 		</dependency>
+
+		<!-- GraalVM JavaScript引擎依赖 - 适用于JDK 21 -->
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<version>22.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
+			<version>22.3.5</version>
+		</dependency>
+		<!-- GraalVM SDK依赖 -->
+		<dependency>
+			<groupId>org.graalvm.sdk</groupId>
+			<artifactId>graal-sdk</artifactId>
+			<version>22.3.5</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
