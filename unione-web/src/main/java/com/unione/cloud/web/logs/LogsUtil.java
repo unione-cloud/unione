@@ -521,6 +521,9 @@ public class LogsUtil {
 	 */
 	private static void doSave(SysLogs logs) {
 		log.debug("进入：保存日志信息	【异步】方法,logs:{}",logs);
+		if(ObjectUtil.isEmpty(logs.getTitle())){
+			return;
+		}
 		// 设置日志操作内容
 		StringBuffer buf=getContents();
 		if(buf!=null) {
