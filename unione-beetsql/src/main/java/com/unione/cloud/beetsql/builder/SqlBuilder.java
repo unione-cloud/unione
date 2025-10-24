@@ -27,7 +27,6 @@ import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.BaseField;
-import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.util.BeanUtils;
@@ -222,7 +221,10 @@ public class SqlBuilder<T> {
 		}
 	}
 	
-	
+	/**
+	 * 初始化
+	 * @param sqlManager
+	 */
 	public void init(SQLManager sqlManager) {
 		this.sqlManager=sqlManager;
 		if(StringUtils.isEmpty(this.tableName)) {
@@ -237,6 +239,10 @@ public class SqlBuilder<T> {
 		}
 	}
 	
+
+	/**
+	 * 解析查询信息
+	 */
 	private void resolve() {
 		TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 		ClassDesc classDesc=null;
@@ -350,6 +356,11 @@ public class SqlBuilder<T> {
 		
 	}
 	
+	/**
+	 * 生成SQL语句
+	 * @param type
+	 * @return
+	 */
 	public String toSql(SqlType type) {
 		
 		if(!StringUtils.isEmpty(this.entity.getSql())) {
@@ -515,11 +526,19 @@ public class SqlBuilder<T> {
 		
 		return buffer.toString();
 	}
-	
+		
+	/**
+	 * 获取目标实体类
+	 * @return
+	 */
 	public Class<?> targetClass(){
 		return this.data.getClass();
 	}
-	
+		
+	/**
+	 * 生成命名空间
+	 * @return
+	 */
 	public String nameSpace() {
 		if(!StringUtils.isEmpty(this.nameSpace)) {
 			return this.nameSpace;
@@ -532,12 +551,21 @@ public class SqlBuilder<T> {
 		return this.nameSpace;
 	}
 	
+	/**
+	 * 生成SQL ID
+	 * @param type
+	 * @return
+	 */
 	public String sqlId(SqlType type) {
 		StackTraceElement stes[]=ThreadUtil.getStackTrace();
 		StackTraceElement ste=stes[5];
 		return String.format("%s.%s.%s",ste.getMethodName(),type,ste.getLineNumber());
 	}
 	
+	/**
+	 * 参数转换
+	 * @return
+	 */
 	public Map<String, Object> toParams(){
 		Map<String, Object> params=new HashMap<String, Object>();
 		
@@ -686,6 +714,11 @@ public class SqlBuilder<T> {
 		this.entity.setWhere(String.format("\r\n-- @sqlWhere(){\r\n%s\r\n-- @}\r\n", whereSql));
 	}
 	
+	/**
+	 * 处理Where条件
+	 * @param condition
+	 * @return
+	 */
 	private String whereCondition(String condition) {
 		Matcher funMatcher=funRegix.matcher(condition);
 		String funName="";
@@ -753,6 +786,10 @@ public class SqlBuilder<T> {
 		return String.format("\n-- @if(notNull(params.%s)){\n%s%s\n-- @}\n",fieldName,funName,condition);
 	}
 	
+	/**
+	 * 加载数据权限级别
+	 * @return
+	 */
 	private PermisRule loadDataPermis() {
 		if(this.dataPermis==null && !(this.data instanceof Map)) {
 			DataPermis dataPermis = this.data.getClass().getAnnotation(DataPermis.class);
@@ -775,7 +812,12 @@ public class SqlBuilder<T> {
 		this.dataPermis=dataPermis;
 		return this;
 	}
-	
+		
+	/**
+	 * 设置查询/更新字段列表
+	 * @param fieldList
+	 * @return
+	 */
 	public SqlBuilder<T> field(String... fieldList){
 		for(String field:fieldList){
 			String[] list=field.split(",");
@@ -794,32 +836,62 @@ public class SqlBuilder<T> {
 		}
 		return this;
 	} 
-	
+		
+	/**
+	 * 设置查询关键词
+	 * @param keywords
+	 * @return
+	 */
 	public SqlBuilder<T> keywords(String keywords){
 		this.keywords=keywords;
 		return this;
 	}
-	
+		
+	/**
+	 * 设置主键
+	 * @param id
+	 * @return
+	 */
 	public SqlBuilder<T> id(Long id){
 		this.id=id;
 		return this;
 	}
 	
+	/**
+	 * 设置主键列表
+	 * @param ids
+	 * @return
+	 */
 	public SqlBuilder<T> ids(List<Long> ids){
 		this.ids=ids;
 		return this;
 	}
 	
+	/**
+	 * 设置主键列表
+	 * @param ids
+	 * @return
+	 */
 	public SqlBuilder<T> ids(Set<Long> ids){
 		this.ids=new ArrayList<>(ids);
 		return this;
 	}
-	
+		
+	/**
+	 * 设置查询SQL，不做任何处理
+	 * @param sql
+	 * @return
+	 */
 	public SqlBuilder<T> query(String sql){
 		this.entity.setSql(sql);
 		return this;
 	}
 	
+	/**
+	 * 设置自定义SQL，支持动态条件处理
+	 * @param sql
+	 * @return
+	 */
 	public SqlBuilder<T> sql(String sql){
 		// 动态条件处理
 		Matcher matcher=conditionRegix.matcher(sql);
@@ -838,16 +910,32 @@ public class SqlBuilder<T> {
 		return this;
 	}
 	
+	/**
+	 * 设置查询条件
+	 * @param where
+	 * @return
+	 */
 	public SqlBuilder<T> where(String where){
 		this.where=where;
 		return this;
 	}
-	
-	public SqlBuilder<T> params(String name,Object value){
+		
+	/**
+	 * 设置查询参数
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	public SqlBuilder<T> where(String name,Object value){
 		BeanUtils.setFieldValue(this.params, name, value);
 		return this;
 	}
 
+	/**
+	 * 添加关联查询
+	 * @param links
+	 * @return
+	 */
 	public SqlBuilder<T> link(LinkEntity ...links){
 		for(LinkEntity link:links){
 			this.linkEntitys.add(link);
@@ -855,43 +943,69 @@ public class SqlBuilder<T> {
 		return this;
 	}
 	
+	/**
+	 * 设置排序字段
+	 * @param sort
+	 * @return
+	 */
 	public SqlBuilder<T> sort(Sort ...sort){
 		this.sort=sort;
 		return this;
 	}
-	
+		
+	/**
+	 * 设置主键字段
+	 * @param keyField
+	 * @return
+	 */
 	public SqlBuilder<T> key(String keyField){
 		this.keyField=keyField;
 		return this;
 	}
-	
+		
+	/**
+	 * 设置是否需要查询总数
+	 * @param needCount
+	 * @return
+	 */
 	public SqlBuilder<T> needCount(boolean needCount){
 		this.needCount=needCount;
 		return this;
 	} 
 
+	/**
+	 * 关闭查询忽略
+	 * @return
+	 */
 	public SqlBuilder<T> offQueryIgnore(){
 		this.queryIgnore=false;
 		return this;
 	}
-	
-//	public SqlBuilder<T> setId(Object id) {
-//		SqlField pkField=this.entity.getPkField();
-//		AssertUtil.database().notNull(pkField, "主键字段不能为空");
-//		BeanUtil.setFieldValue(this.params, pkField.getAlias(),id);
-//		return this;
-//	}
-	
+		
+	/**
+	 * 设置分页页码
+	 * @param page
+	 * @return
+	 */
 	public SqlBuilder<T> page(int page){
 		this.page=page;
 		return this;
 	} 
-	
+		
+	/**
+	 * 设置分页每页数量
+	 * @param pageSize
+	 * @return
+	 */
 	public SqlBuilder<T> pageSize(int pageSize){
 		this.pageSize=pageSize;
 		return this;
 	} 
-	
+		
+	/**
+	 * 获取分页开始位置
+	 * @return
+	 */
 	public long getStart() {
 		return (page - 1) * pageSize;
 	}
