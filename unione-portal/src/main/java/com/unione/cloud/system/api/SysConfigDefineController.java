@@ -193,7 +193,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 
 		long unckChildCount = dataBaseDao.findList(SqlBuilder.build(SysConfigDefine.class)
 			.where("delFlag=0 and parentId in [pids]")
-			.params("pids", ids))
+			.where("pids", ids))
 			.stream()
 			.filter(r->!ids.contains(r.getId()))
 			.count();

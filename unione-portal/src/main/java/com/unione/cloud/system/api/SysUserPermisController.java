@@ -104,7 +104,7 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 					Map<Long,SysUserPermis> hdMap=new HashMap<>();
 					dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
 						.where("userId=?")
-						.params("userId", entity.getUserId()))
+						.where("userId", entity.getUserId()))
 						.stream().forEach(row->{
 							if(hdMap.containsKey(row.getResId())){
 								// 删除多余授权记录
@@ -196,8 +196,8 @@ public class SysUserPermisController implements PojoFeignApi<UserPermisDto>{
 						if(uids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysUserPermis.class)
 								.where("resId=? and userId in [userIds]")
-								.params("resId", entity.getResId())
-								.params("userIds", uids))
+								.where("resId", entity.getResId())
+								.where("userIds", uids))
 								.stream().forEach(row->{
 									hdMap.add(row.getUserId());
 								});

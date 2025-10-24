@@ -188,7 +188,7 @@ public class UmsMessageService {
             // 加载通知状态
             Map<Long,UmsMessageStatus> smap=new HashMap<>();
             dataBaseDao.findList(SqlBuilder.build(UmsMessageStatus.class,tuids).field("userId,viewSts")
-                .where("messageId=? and userId in [ids]").params("messageId",mid))
+                .where("messageId=? and userId in [ids]").where("messageId",mid))
                 .stream().forEach(s->{
                     smap.put(s.getUserId(), s);
                 });

@@ -109,8 +109,8 @@ public class SysOrganPermisController implements PojoFeignApi<OrganPermisDto>{
 						if(rids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysOrganPermis.class)
 								.where("orgId=? and resId in [resIds]")
-								.params("orgId", entity.getOrgId())
-								.params("resIds", rids))
+								.where("orgId", entity.getOrgId())
+								.where("resIds", rids))
 								.stream().forEach(row->{
 									hdMap.add(row.getResId());
 								});
@@ -172,8 +172,8 @@ public class SysOrganPermisController implements PojoFeignApi<OrganPermisDto>{
 						if(uids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysOrganPermis.class)
 								.where("resId=? and orgId in [orgIds]")
-								.params("resId", entity.getResId())
-								.params("orgIds", uids))
+								.where("resId", entity.getResId())
+								.where("orgIds", uids))
 								.stream().forEach(row->{
 									hdMap.add(row.getOrgId());
 								});

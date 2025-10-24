@@ -111,7 +111,7 @@ public class UmsSmsService {
             gtw=redisService.doHpdl(new HpdlProcess<UmsSmsGtw>("UMS:GTW:LOCK:" + sn) {
                 @Override
                 public UmsSmsGtw process() {
-                    return dataBaseDao.findOne(SqlBuilder.build(UmsSmsGtw.class).params("sn", sn));
+                    return dataBaseDao.findOne(SqlBuilder.build(UmsSmsGtw.class).where("sn", sn));
                 }
             }, 100, 5);
         }

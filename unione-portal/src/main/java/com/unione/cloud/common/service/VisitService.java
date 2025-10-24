@@ -142,7 +142,7 @@ public class VisitService {
     public CommVisitTarget loadTarget(VisitEntry entry){
         CommVisitTarget target = getTargetCache().get(entry.getTargetId());
         if(target == null){
-            target = dataBaseDao.findOne(SqlBuilder.build(CommVisitTarget.class).params("targetId", entry.getTargetId()));
+            target = dataBaseDao.findOne(SqlBuilder.build(CommVisitTarget.class).where("targetId", entry.getTargetId()));
             if(target != null){
                 getTargetCache().put(entry.getTargetId(), target);
             }else{

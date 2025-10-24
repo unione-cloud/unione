@@ -142,7 +142,7 @@ public class RegisterService {
 			//加载租户
 			SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
 				.where("name=?")
-				.params("name", param.getCompany().trim()));
+				.where("name", param.getCompany().trim()));
 			if(tenant==null) {
 				tenant=new SysTenant();
 				tenant.setId(IdGenHolder.generate());

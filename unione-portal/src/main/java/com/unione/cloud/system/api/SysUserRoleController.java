@@ -90,7 +90,7 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 					AssertUtil.service().notNull(user, "用户不存在");
 
 					SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
-					query.params("userId", entity.getUserId());
+					query.where("userId", entity.getUserId());
 					Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
 						.collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
 
@@ -138,7 +138,7 @@ public class SysUserRoleController implements PojoFeignApi<UserRoleDto>{
 				AssertUtil.service().notNull(role, "角色不存在");
 
 				SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
-				query.params("roleId", entity.getRoleId());
+				query.where("roleId", entity.getRoleId());
 				Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
 					.collect(Collectors.toMap(SysUserRole::getUserId, row->row));
 

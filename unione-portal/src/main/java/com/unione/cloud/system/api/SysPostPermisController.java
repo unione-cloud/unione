@@ -108,8 +108,8 @@ public class SysPostPermisController implements PojoFeignApi<PostPermisDto>{
 						if(rids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysPostPermis.class)
 								.where("postId=? and resId in [resIds]")
-								.params("postId", entity.getPostId())
-								.params("resIds", rids))
+								.where("postId", entity.getPostId())
+								.where("resIds", rids))
 								.stream().forEach(row->{
 									hdMap.add(row.getResId());
 								});
@@ -179,8 +179,8 @@ public class SysPostPermisController implements PojoFeignApi<PostPermisDto>{
 						if(uids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysPostPermis.class)
 								.where("resId=? and postId in [postIds]")
-								.params("resId", entity.getResId())
-								.params("postIds", uids))
+								.where("resId", entity.getResId())
+								.where("postIds", uids))
 								.stream().forEach(row->{
 									hdMap.add(row.getPostId());
 								});

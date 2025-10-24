@@ -105,12 +105,12 @@ public class SelectorService {
         log.debug("进入：查询角色节点方法,type:{},keyword:{}",params.getBody().getRtype(),params.getKeywords());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
-        builder.params("tenantId", sessionService.getTenantId());
-        builder.params("orgId", sessionService.getOrgId());
-        builder.params("keywords", params.getKeywords());
+        builder.where("tenantId", sessionService.getTenantId());
+        builder.where("orgId", sessionService.getOrgId());
+        builder.where("keywords", params.getKeywords());
         builder.page(params.getPage()).pageSize(params.getPageSize());
         if(params.getBody().getRtype()!=null && params.getBody().getRtype()>0){
-            builder.params("types", params.getBody().getRtype());
+            builder.where("types", params.getBody().getRtype());
         }
         Results<List<SelectorRoleDto>> results=dataBaseDao.findPages("selectRolePage4Use","countRole4Use",builder);
        
@@ -147,16 +147,16 @@ public class SelectorService {
         log.debug("进入：查询角色列表方法,type:{},target id:{}",params.getBody().getTargetType(),params.getBody().getTargetId());
         
         SqlBuilder<SelectorRoleDto> builder=SqlBuilder.build(SelectorRoleDto.class);
-        builder.params("tenantId", sessionService.getTenantId());
-        builder.params("orgId", sessionService.getOrgId());
+        builder.where("tenantId", sessionService.getTenantId());
+        builder.where("orgId", sessionService.getOrgId());
 
         String sqlName="selectRole4Use";
         if(Objects.equals(params.getBody().getTargetType(), "permis") || Objects.equals(params.getBody().getTargetType(), "assign")){
             sqlName="selectRole4Auth";
             if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
-                builder.params("isTenantAdmin", true);
+                builder.where("isTenantAdmin", true);
             }else if(sessionService.hasRole(UserRoles.ORGAN_ADMIN)){
-                builder.params("isOrganAdmin", true);
+                builder.where("isOrganAdmin", true);
             }
         }
        
@@ -170,7 +170,7 @@ public class SelectorService {
         if(Objects.equals(params.getBody().getTargetType(), "assign") && !Objects.isNull(params.getBody().getTargetId())){
             // 加载当前用户有角色列表
             SqlBuilder<SysUserRole> query=SqlBuilder.build(SysUserRole.class);
-            query.params("userId", params.getBody().getTargetId());
+            query.where("userId", params.getBody().getTargetId());
             Map<Long,SysUserRole> uRoles=dataBaseDao.findList(query).stream()
                 .collect(Collectors.toMap(SysUserRole::getRoleId, role->role));
             rows.forEach(role->{
@@ -186,7 +186,7 @@ public class SelectorService {
         if(Objects.equals(params.getBody().getTargetType(), "permis") && !Objects.isNull(params.getBody().getTargetId())){
             // 加载当前资源有角色列表
             SqlBuilder<SysRolePermis> query=SqlBuilder.build(SysRolePermis.class);
-            query.params("resId", params.getBody().getTargetId());
+            query.where("resId", params.getBody().getTargetId());
             Map<Long,SysRolePermis> uRoles=dataBaseDao.findList(query).stream()
                 .collect(Collectors.toMap(SysRolePermis::getRoleId, role->role));
             rows.forEach(role->{

@@ -108,8 +108,8 @@ public class SysGroupPermisController implements PojoFeignApi<GroupPermisDto>{
 						if(rids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysGroupPermis.class)
 								.where("groupId=? and resId in [resIds]")
-								.params("groupId", entity.getGroupId())
-								.params("resIds", rids))
+								.where("groupId", entity.getGroupId())
+								.where("resIds", rids))
 								.stream().forEach(row->{
 									hdMap.add(row.getResId());
 								});
@@ -179,8 +179,8 @@ public class SysGroupPermisController implements PojoFeignApi<GroupPermisDto>{
 						if(uids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysGroupPermis.class)
 								.where("resId=? and groupId in [groupIds]")
-								.params("resId", entity.getResId())
-								.params("groupId", uids))
+								.where("resId", entity.getResId())
+								.where("groupId", uids))
 								.stream().forEach(row->{
 									hdMap.add(row.getUserId());
 								});

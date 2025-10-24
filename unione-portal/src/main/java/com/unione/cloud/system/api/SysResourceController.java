@@ -229,7 +229,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载机构资源权限
 		if(ObjectUtil.equal(type, "permisOrgan") && params.getBody()!=null) {
 			SqlBuilder<SysOrganPermis> permisBuilder = SqlBuilder.build(SysOrganPermis.class)
-				.params("orgId", params.getBody());
+				.where("orgId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));
 				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
@@ -238,7 +238,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载角色资源权限
 		if(ObjectUtil.equal(type, "permisRole") && params.getBody()!=null) {
 			SqlBuilder<SysRolePermis> permisBuilder = SqlBuilder.build(SysRolePermis.class)
-				.params("roleId", params.getBody());	
+				.where("roleId", params.getBody());	
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
@@ -247,7 +247,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载用户资源权限
 		if(ObjectUtil.equal(type, "permisUser") && params.getBody()!=null) {
 			SqlBuilder<SysUserPermis> permisBuilder = SqlBuilder.build(SysUserPermis.class)
-				.params("userId", params.getBody());
+				.where("userId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));
 				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
@@ -256,7 +256,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载分组资源权限
 		if(ObjectUtil.equal(type, "permisGroup") && params.getBody()!=null) {
 			SqlBuilder<SysGroupPermis> permisBuilder = SqlBuilder.build(SysGroupPermis.class)
-				.params("groupId", params.getBody());	
+				.where("groupId", params.getBody());	
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	
@@ -265,7 +265,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载岗位资源权限
 		if(ObjectUtil.equal(type, "permisPost") && params.getBody()!=null) {
 			SqlBuilder<SysPostPermis> permisBuilder = SqlBuilder.build(SysPostPermis.class)
-				.params("groupId", params.getBody());
+				.where("groupId", params.getBody());
 			dataBaseDao.findList(permisBuilder).stream().forEach(row->{
 				hadResMap.put(row.getResId(), ObjectUtil.equal(1, row.getEnDilivery()));	
 				hadAppMap.put(row.getAppId(), ObjectUtil.equal(1, row.getEnDilivery()));	

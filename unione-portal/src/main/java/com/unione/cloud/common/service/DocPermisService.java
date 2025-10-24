@@ -214,8 +214,8 @@ public class DocPermisService {
 		}
 		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, ids)
 				.where("delFlag=? and auditResult in (2,4) and permisUser=? and ownerId in [permisOwners]")
-				.params("permisOwners", permisOwners)
-				.params("permisUser", sessionService.getUserId());
+				.where("permisOwners", permisOwners)
+				.where("permisUser", sessionService.getUserId());
 		List<DocPermis> permisList=dataBaseDao.findList(builder);
 		
 		LogsUtil.add("分发权限信息到文档对象中");

@@ -74,8 +74,8 @@ public class SysConfigService {
             if(ObjectUtil.equal(k, 1) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
                     .where("delFlag=0 and status=1 and configId in [ids] and types=? and tenantId=?")
-                    .params("types", k)
-                    .params("tenantId", sessionservice.getTenantId()));
+                    .where("types", k)
+                    .where("tenantId", sessionservice.getTenantId()));
             	values.forEach(r->{
             		vmap.put(r.getConfigId(), r);
             	});
@@ -83,8 +83,8 @@ public class SysConfigService {
             if(ObjectUtil.equal(k, 2) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
                    .where("delFlag=0 and status=1 and configId in [ids] and types=? and orgId=?")
-                   .params("types", k)
-                   .params("orgId", sessionservice.getOrgId()));
+                   .where("types", k)
+                   .where("orgId", sessionservice.getOrgId()));
             	values.forEach(r->{
             		vmap.put(r.getConfigId(), r);
             	});	
@@ -92,8 +92,8 @@ public class SysConfigService {
             if(ObjectUtil.equal(k, 3) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
                   .where("delFlag=0 and status=1 and configId in [ids] and types=? and userId=?")
-                  .params("types", k)
-                  .params("userId", sessionservice.getUserId()));
+                  .where("types", k)
+                  .where("userId", sessionservice.getUserId()));
             	values.forEach(r->{
             		vmap.put(r.getConfigId(), r);
             	});

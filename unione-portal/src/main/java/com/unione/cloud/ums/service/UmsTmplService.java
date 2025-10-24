@@ -99,7 +99,7 @@ public class UmsTmplService {
             redisService.doHpdl(new HpdlProcess<UmsTmpl>("UMS:TMPL:LOCK:" + sn) {
                 @Override
                 public UmsTmpl process() {
-                    return dataBaseDao.findOne(SqlBuilder.build(UmsTmpl.class).params("sn", sn).params("tenantId",
+                    return dataBaseDao.findOne(SqlBuilder.build(UmsTmpl.class).where("sn", sn).where("tenantId",
                             sessionService.getTenantId()));
                 }
             }, 100, 5);

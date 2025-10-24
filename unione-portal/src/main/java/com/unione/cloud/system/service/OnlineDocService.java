@@ -69,7 +69,7 @@ public class OnlineDocService {
             SysOnlineDoc tmp = dataBaseDao.findOne(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id")
                     .where("appId=? and delFlag=0")
-                    .params("appId", appId)
+                    .where("appId", appId)
                     .sort(Sort.build("versNo", "desc")));
             if (tmp != null) {
                 doc = this.loadDocByDocId(tmp.getId());
@@ -102,7 +102,7 @@ public class OnlineDocService {
             List<SysOnlineDocItem> items = dataBaseDao.findList(SqlBuilder.build(SysOnlineDocItem.class)
                     .field("id,parentId,title,iconName")
                     .where("docId=? and delFlag=0")
-                    .params("docId", id)
+                    .where("docId", id)
                     .sort(Sort.build("ordered", "asc")));
             Map<Long, TreeNodeDto> nodeMap = new HashMap<>();
             List<TreeNodeDto> nodeList = items.stream().map(item -> {
@@ -129,7 +129,7 @@ public class OnlineDocService {
             List<DocVersion> versList = dataBaseDao.findList(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id,versNo")
                     .where("appId=? and delFlag=0 and status in (3,4)")
-                    .params("appId",tmp.getAppId())
+                    .where("appId",tmp.getAppId())
                     .sort(Sort.build("versNo", "desc")))
                     .stream().map(row->{
                         DocVersion vers = new DocVersion();
@@ -170,7 +170,7 @@ public class OnlineDocService {
             SysOnlineDocItem item = dataBaseDao.findOne(SqlBuilder.build(SysOnlineDocItem.class)
                     .field("id,contents")
                     .where("id=? and delFlag=0")
-                    .params("id", id));
+                    .where("id", id));
             if (item == null || item.getContents() == null) {
                 content="{\"header\":[],\"main\":[{\"value\":\"文档内容为空\"}],\"footer\":[]}";
                 cache.put(id, content);
