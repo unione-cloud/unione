@@ -29,6 +29,7 @@ import com.unione.cloud.core.exception.DataBaseException;
 import com.unione.cloud.core.model.BaseField;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -617,8 +618,9 @@ public class SqlBuilder<T> {
 		
 		// 数据权限处理
 		PermisRule dataPermis=this.loadDataPermis();
-		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
-			SessionService sessionService=SessionHolder.build();
+		SessionService sessionService=SessionHolder.build();
+		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL) && (!sessionService.isAdmin() && 
+			!sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN))) {
 			switch (dataPermis) {
 			case TENANTID:
 				BeanUtils.setDefaultValue(this.params, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
