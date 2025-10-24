@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.beetl.sql.core.engine.WhereTag;
 
+import cn.hutool.core.util.ObjectUtil;
+
 public class TagSqlWhere extends WhereTag {
 
 	@Override
@@ -23,6 +25,14 @@ public class TagSqlWhere extends WhereTag {
 
 			String tmp=sql.replaceAll("\\s", "");
 			if("WHERE".equalsIgnoreCase(tmp) ||"WHEREAND".equalsIgnoreCase(tmp) || "WHEREOR".equalsIgnoreCase(tmp)) {
+				return;
+			}
+			if(tmp.startsWith("WHERE()AND")) {
+				tmp=tmp.substring(10);
+				if(ObjectUtil.isEmpty(tmp)){
+					return;
+				}
+				this.ctx.byteWriter.writeString(String.format("WHERE %s ", sb.substring(sql.indexOf(" AND ")+5)));
 				return;
 			}
 
