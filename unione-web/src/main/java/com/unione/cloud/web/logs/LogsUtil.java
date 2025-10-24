@@ -178,14 +178,6 @@ public class LogsUtil {
 			ent.setAppSn(appCode);
 			ent.setCreated(DateUtil.date());
 			ent.setStartTime(DateUtil.date());
-			if(sessionService.getPrincipal()!=null) {
-				ent.setTenantId(sessionService.getTenantId());
-				ent.setOrgId(sessionService.getOrgId());
-				ent.setUserId(sessionService.getUserId());
-				ent.setUserName(sessionService.getRealname());
-				ent.setCreatedBy(sessionService.getUserId());
-				ent.setLastUpdatedBy(sessionService.getUserId());
-			}
 			entry.set(ent);
 			
 			Object actionid=sessionService.getVar("_unione_actionid");
@@ -541,9 +533,13 @@ public class LogsUtil {
 		if(StringUtils.isEmpty(logs.getIp())) {
 			log.warn("保存日志信息：操作IP为空");
 		}
-		if(logs.getUserId()==null) {
+		if(sessionService.getPrincipal()!=null) {
+			logs.setTenantId(sessionService.getTenantId());
+			logs.setOrgId(sessionService.getOrgId());
 			logs.setUserId(sessionService.getUserId());
-			logs.setUserName(sessionService.getUsername());
+			logs.setUserName(sessionService.getRealname());
+			logs.setCreatedBy(sessionService.getUserId());
+			logs.setLastUpdatedBy(sessionService.getUserId());
 		}
 		
 		// 异步保存日志
