@@ -67,15 +67,15 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
 		}
 		SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-		if(tenantId!=null) {
+		if(tenantId!=null && sessionService.getTenantId()!=null) {
 			BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
 		}
 		SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-		if(organId!=null) {
+		if(organId!=null && sessionService.getOrgId()!=null) {
 			BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
 		}
 		SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-		if(userId!=null) {
+		if(userId!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
 		}
 		SqlField created=sqlEntity.getStsField(BaseField.CREATED);
@@ -83,7 +83,7 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
 		}
 		SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-		if(createdBy!=null) {
+		if(createdBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
 		}
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -91,7 +91,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 		
@@ -115,15 +115,15 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
 		}
 		SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-		if(tenantId!=null) {
+		if(tenantId!=null && sessionService.getTenantId()!=null) {
 			BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
 		}
 		SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-		if(organId!=null) {
+		if(organId!=null && sessionService.getOrgId()!=null) {
 			BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
 		}
 		SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-		if(userId!=null) {
+		if(userId!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
 		}
 		SqlField created=sqlEntity.getStsField(BaseField.CREATED);
@@ -131,7 +131,7 @@ public class DataBaseDao {
 			BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
 		}
 		SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-		if(createdBy!=null) {
+		if(createdBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
 		}
 		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -139,7 +139,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 
@@ -166,15 +166,15 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
 			}
 			SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-			if(tenantId!=null) {
+			if(tenantId!=null && sessionService.getTenantId()!=null) {
 				BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
 			}
 			SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-			if(organId!=null) {
+			if(organId!=null && sessionService.getOrgId()!=null) {
 				BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
 			}
 			SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-			if(userId!=null) {
+			if(userId!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
 			}
 			SqlField created=sqlEntity.getStsField(BaseField.CREATED);
@@ -182,7 +182,7 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
 			}
 			SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-			if(createdBy!=null) {
+			if(createdBy!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
 			}
 			SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -190,7 +190,7 @@ public class DataBaseDao {
 				BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
 			}
 			SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-			if(lastUpdatedBy!=null) {
+			if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			}
 		});
@@ -216,15 +216,15 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
 			}
 			SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-			if(tenantId!=null) {
+			if(tenantId!=null && sessionService.getTenantId()!=null) {
 				BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
 			}
 			SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-			if(organId!=null) {
+			if(organId!=null && sessionService.getOrgId()!=null) {
 				BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
 			}
 			SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-			if(userId!=null) {
+			if(userId!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
 			}
 			SqlField created=sqlEntity.getStsField(BaseField.CREATED);
@@ -232,7 +232,7 @@ public class DataBaseDao {
 				BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
 			}
 			SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-			if(createdBy!=null) {
+			if(createdBy!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
 			}
 			SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
@@ -240,7 +240,7 @@ public class DataBaseDao {
 				BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
 			}
 			SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-			if(lastUpdatedBy!=null) {
+			if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 				BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			}
 		});
@@ -273,7 +273,7 @@ public class DataBaseDao {
 			updater.getFields().put(lastUpdated.getAlias(), true);
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(updater.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			updater.getFields().put(lastUpdatedBy.getAlias(), true);
 		}
@@ -299,7 +299,7 @@ public class DataBaseDao {
 			sqlEntity.getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -324,7 +324,7 @@ public class DataBaseDao {
 			sqlEntity.getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -358,7 +358,7 @@ public class DataBaseDao {
 			updater.getFields().put(lastUpdated.getAlias(), true);
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(updater.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			updater.getFields().put(lastUpdatedBy.getAlias(), true);
 		}
@@ -384,7 +384,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(params, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 		
@@ -408,7 +408,7 @@ public class DataBaseDao {
 			sqlEntity.getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -444,7 +444,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(params, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 		map.put("principal", sessionService.getPrincipal());
@@ -470,7 +470,7 @@ public class DataBaseDao {
 			sqlEntity.getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -513,7 +513,7 @@ public class DataBaseDao {
 			sqlEntity.getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -548,7 +548,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(params, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 		map.put("principal", sessionService.getPrincipal());
@@ -584,7 +584,7 @@ public class DataBaseDao {
 			BeanUtils.setFieldValue(params, lastUpdated.getAlias(), DateUtil.date());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(params, lastUpdatedBy.getAlias(), sessionService.getUserId());	
 		}
 		map.put("principal", sessionService.getPrincipal());
@@ -612,7 +612,7 @@ public class DataBaseDao {
 			builder.getEntity().getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			builder.getEntity().getFieldList().add(lastUpdatedBy.getAlias());
 		}
@@ -641,7 +641,7 @@ public class DataBaseDao {
 			builder.getEntity().getFieldList().add(lastUpdated.getAlias());
 		}
 		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null) {
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
 			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
 			builder.getEntity().getFieldList().add(lastUpdatedBy.getAlias());
 		}
