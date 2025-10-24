@@ -8,6 +8,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-codegen</artifactId>
+	<name>unione-codegen</name>
 	
 	<dependencies>
 		<dependency>

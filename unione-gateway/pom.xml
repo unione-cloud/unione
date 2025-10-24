@@ -9,6 +9,8 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-gateway</artifactId>
+	<name>unione-gateway</name>
+
 
 	<dependencies>
 

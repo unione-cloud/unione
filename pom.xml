@@ -7,6 +7,7 @@
 	<artifactId>unione</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<name>unione</name>
 	<url>https://gitee.com/unione-cloud/unione</url>
 	<description>
 		unione 统一建站云平台，提供一站式低代码建站服务
@@ -21,6 +22,17 @@
 			<organization>unione cloud</organization>
 		</developer>
 	</developers>
+	<licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git@gitee.com:unione-cloud/unione.git</connection>
+        <developerConnection>scm:git@gitee.com:unione-cloud/unione.git</developerConnection>
+        <url>git@gitee.com:unione-cloud/unione.git</url>
+    </scm>
 	
 	
 	<!-- ===u=n=i=o=n=e=c=l=o=u=d=== -->

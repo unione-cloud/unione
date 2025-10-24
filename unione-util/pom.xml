@@ -9,6 +9,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-util</artifactId>
+	<name>unione-util</name>
 	
 	<properties>
 		<minio.version>8.4.3</minio.version>

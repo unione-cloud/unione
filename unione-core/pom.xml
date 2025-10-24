@@ -9,6 +9,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-core</artifactId>
+	<name>unione-core</name>
 
 
 	<dependencies>

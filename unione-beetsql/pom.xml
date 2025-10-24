@@ -9,6 +9,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-beetsql</artifactId>
+	<name>unione-beetsql</name>
 	
 	<dependencies>
 
