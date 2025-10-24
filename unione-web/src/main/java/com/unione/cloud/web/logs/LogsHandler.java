@@ -22,6 +22,7 @@ import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.security.UserRoles.Roles;
 import com.unione.cloud.core.util.JsonUtil;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -148,7 +149,17 @@ public class LogsHandler {
 			return result;
 		} catch (Throwable e) {
 			log.error("处理异常",e);
+
+			Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getMethod().getReturnType();
+			Object resultObj=null;
+			try{
+				resultObj=returnType.getConstructor().newInstance();
+			}catch(Exception ex){}
+
 			Results<?> result = new Results<>();
+			if(resultObj!=null && resultObj instanceof Results){
+				result=(Results<?>)resultObj;
+			}
 			result.setCode(500);
 			result.setMessage("系统异常");
 			if (e instanceof BeetlSQLException) {

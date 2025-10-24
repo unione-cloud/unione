@@ -141,7 +141,7 @@ public class CaptchaService {
 				}
 			}
 		}
-		AssertUtil.service().notNull(captchaid, "请求参数不完整，请重新获取验证码");
+		AssertUtil.service().notNull(captchaid, "请重新获取验证码");
 		
 		Cache<String,String> cache=this.getCache();
 		String code=cache.get(captchaid);

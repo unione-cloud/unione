@@ -20,7 +20,7 @@ public class LoginResult extends Results<Void>{
 	@Schema(title="凭证对象")
 	private UserPrincipal principal;
 	
-	private LoginResult() {}
+	public LoginResult() {}
 	
 	
 	/**
