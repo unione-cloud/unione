@@ -59,7 +59,7 @@ public class CaptchaService {
 	/**
 	 * 验证码：字符数量
 	 */
-	@Value("${security.captcha.codecount:5}")
+	@Value("${security.captcha.codecount:6}")
 	private int CODECOUNT;
 	
 	/**
