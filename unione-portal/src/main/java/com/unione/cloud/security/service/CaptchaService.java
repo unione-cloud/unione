@@ -135,7 +135,7 @@ public class CaptchaService {
 		if(request.getCookies()!=null) {
 			for(int i=0;i<request.getCookies().length;i++) {
 				Cookie ck=request.getCookies()[i];
-				if(ck!=null && "captchaId".equals(ck.getName())){
+				if(ck!=null && "CAPTCHAID".equalsIgnoreCase(ck.getName())){
 					captchaid=ck.getValue();
 					break;
 				}
@@ -154,7 +154,7 @@ public class CaptchaService {
 		ck.setMaxAge(0);
 		response.addCookie(ck);
 		
-		return ObjectUtil.equal(code, captcha);
+		return captcha.equalsIgnoreCase(code);
 	}
 	
 	
