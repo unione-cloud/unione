@@ -218,7 +218,7 @@ public class RegisterService {
 
 			// 如果是手机号注册，发送随机密码到手机号
 			if(!ObjectUtil.isEmpty(randomPwd)){
-				LogsUtil.add("发送随机密码到手机号,randomPwd:%s,tel:%s",randomPwd,param.getTel());
+				// LogsUtil.add("发送随机密码到手机号,randomPwd:%s,tel:%s",randomPwd,param.getTel());
 				// TODO
 			}
 
