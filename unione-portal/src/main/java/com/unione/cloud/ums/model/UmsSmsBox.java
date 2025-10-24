@@ -4,6 +4,7 @@ import java.util.Date;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
@@ -26,6 +27,7 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("ums.UmsSmsBox")
 @NoArgsConstructor
 @AllArgsConstructor

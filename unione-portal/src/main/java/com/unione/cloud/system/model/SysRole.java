@@ -2,6 +2,7 @@ package com.unione.cloud.system.model;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
+import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
@@ -21,6 +22,7 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("system.SysRole")
 @NoArgsConstructor
 @AllArgsConstructor

@@ -3,6 +3,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.beetsql.annotation.QueryAction;
 import com.unione.cloud.beetsql.builder.SqlAction;
@@ -24,6 +25,7 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("system.SysPost")
 @NoArgsConstructor
 @AllArgsConstructor

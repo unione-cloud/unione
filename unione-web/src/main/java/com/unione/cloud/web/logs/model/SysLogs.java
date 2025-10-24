@@ -6,6 +6,7 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +25,7 @@ import lombok.experimental.Accessors;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("system.SysLogs")
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,9 +1,13 @@
 package com.unione.cloud.ums.model;
 import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
+
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -11,9 +15,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.unione.cloud.core.model.Pojo;
 
 /**
  * @标题 	UmsMessageStatus Entity
@@ -24,6 +25,7 @@ import com.unione.cloud.core.model.Pojo;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("ums.UmsMessageStatus")
 @NoArgsConstructor
 @AllArgsConstructor
