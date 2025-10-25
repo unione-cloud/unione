@@ -116,6 +116,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<skip>${maven.source.skip}</skip>
+				</configuration>
 			</plugin>
 			<!-- Javadoc -->
 			<plugin>
@@ -337,6 +340,7 @@
 		<encoding>UTF-8</encoding>
 		<jdk.version>21</jdk.version>
 		<spring.boot.skip>true</spring.boot.skip>
+		<maven.source.skip>false</maven.source.skip>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	
