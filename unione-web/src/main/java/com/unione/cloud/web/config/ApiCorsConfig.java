@@ -1,4 +1,4 @@
-package com.unione.cloud.config;
+package com.unione.cloud.web.config;
 
 import java.util.ArrayList;
 import java.util.List;
