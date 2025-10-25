@@ -72,7 +72,7 @@ public class SqlBuilder<T> {
 	private Object params;
 	
 	private String tableName;	// 数据表名称
-	private DataPermis dataPermis;
+	private PermisRule dataPermis;
 	
 	/**
 	 * 	查询关键字
@@ -796,11 +796,11 @@ public class SqlBuilder<T> {
 		if(this.dataPermis==null && !(this.data instanceof Map)) {
 			DataPermis dataPermis = this.data.getClass().getAnnotation(DataPermis.class);
 			if(dataPermis!=null) {
-				this.dataPermis=dataPermis;
+				this.dataPermis=dataPermis.value();
 			}
 		}
 		if(this.dataPermis!=null) {
-			return this.dataPermis.value();	
+			return this.dataPermis;	
 		}
 		return null;
 	}
@@ -810,7 +810,7 @@ public class SqlBuilder<T> {
 	 * @param dataPermis
 	 * @return
 	 */
-	public SqlBuilder<T> dataPermis(DataPermis dataPermis){
+	public SqlBuilder<T> dataPermis(PermisRule dataPermis){
 		this.dataPermis=dataPermis;
 		return this;
 	}
