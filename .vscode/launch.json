@@ -6,10 +6,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeBuilderFactoryTest",
+            "name": "UnioneJobApplication",
             "request": "launch",
-            "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
-            "projectName": "unione-starter"
+            "mainClass": "com.unione.cloud.job.UnioneJobApplication",
+            "projectName": "unione-job",
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8081"
         },
         {
             "type": "java",
