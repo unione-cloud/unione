@@ -40,7 +40,7 @@ unione/
 ├── unione-beetsql/      # 数据库访问模块，基于BeetSQL框架
 ├── unione-web/          # Web服务基础模块，业务服务扩展组件
 ├── unione-gateway/      # API网关模块,路由管理，鉴权管理
-├── unione-job/          # 定时任务模块，管理后台定时任务
+├── unione-job/          # 定时任务模块，管理后台定时任务，基于xxl-job 3.2.0版本
 ├── unione-portal/       # 门户模块，提供用户界面和交互入口
 ├── unione-util/         # 工具类模块，提供通用工具方法
 ├── unione-starter/      # 启动模块，整合各组件并提供启动入口
