@@ -54,7 +54,7 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	/**
 	 * 	静态资源url
 	 */
-	@Value("${security.filter.resource:/*.html,/**/*.js,/**/*.css,/**/*.png,/**/*.jpg,/img/**,/images/**,/assets/**,/plugins/**}")
+	@Value("${security.filter.resource:/*.html,/**/*.js,/**/*.css,/**/*.png,/**/*.jpg,/img/**,/images/**,/assets/**,/plugins/**,/static/**}")
 	private List<String> RESOURCE_URL=new ArrayList<>();
 
 	/**

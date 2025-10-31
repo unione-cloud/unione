@@ -336,7 +336,7 @@ var ComAlertTec = {
 			'	<div class="modal-dialog modal-lg-">' +
 			'		<div class="modal-content-tec">' +
 			'			<div class="modal-body">' +
-			'				<div class="alert" style="color:#fff;word-wrap: break-word;">' +
+			'				<div class="alert" style="word-wrap: break-word;">' +
 			'				</div>' +
 			'			</div>' +
 			'				<div class="modal-footer">' +

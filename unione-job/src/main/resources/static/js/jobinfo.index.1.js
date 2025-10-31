@@ -125,12 +125,20 @@ $(function() {
 								}
 
                                 // log url
-                                var logHref = base_url +'/joblog?jobId='+ row.id;
+								var regex = new RegExp('[?&]isIframe=([^&#]*)');
+    							var isIframe = regex.exec(window.location.search);
+								if(isIframe){
+									isIframe='&'+isIframe[0].substring(1);
+								}else{
+									isIframe=""
+								}
+
+                                var logHref = base_url +'/joblog?jobId='+ row.id+isIframe;
 
                                 // code url
                                 var codeBtn = "";
                                 if ('BEAN' != row.glueType) {
-                                    var codeUrl = base_url +'/jobcode?jobId='+ row.id;
+                                    var codeUrl = base_url +'/jobcode?jobId='+ row.id+isIframe;
                                     codeBtn = '<li><a href="'+ codeUrl +'" target="_blank" >GLUE IDE</a></li>\n';
                                     codeBtn += '<li class="divider"></li>\n';
                                 }
@@ -202,7 +210,14 @@ $(function() {
 	$('#jobGroup').on('change', function(){
         //reload
         var jobGroup = $('#jobGroup').val();
-        window.location.href = base_url + "/jobinfo?jobGroup=" + jobGroup;
+		var regex = new RegExp('[?&]isIframe=([^&#]*)');
+    	var isIframe = regex.exec(window.location.search);
+		if(isIframe){
+			isIframe='&'+isIframe[0].substring(1);
+		}else{
+			isIframe=""
+		}
+        window.location.href = base_url + "/jobinfo?jobGroup=" + jobGroup+isIframe;
     });
 
 	// job operate

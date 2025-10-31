@@ -41,13 +41,7 @@ public class XxlSsoConfig implements HandlerInterceptor,WebMvcConfigurer {
     @Value("${xxl-sso.token.timeout}")
     private long tokenTimeout;
 
-    @Value("${security.filter.login:/portal/login}")
-    private String loginPath;
-
-    @Value("${security.filter.forbid:/portal/forbid}")
-    private String forbidPath;
-
-     @Value("${xxl.footer.hide:false}")
+    @Value("${xxl.footer.hide:true}")
     private boolean hideFooter;
 
 
@@ -85,16 +79,12 @@ public class XxlSsoConfig implements HandlerInterceptor,WebMvcConfigurer {
             if(sessionService.isAdmin()||sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)
                 ||sessionService.getUserRoles().contains(UserRoles.SYSOPSUSER) || sessionService.getUserRoles().contains(UserRoles.FORMDEV)){
                 loginInfo.setRoleList(Arrays.asList(Consts.ADMIN_ROLE));
-            }else{
-                response.sendRedirect(forbidPath);
-                return false;
             }
 		    XxlSsoHelper.loginWithCookie(loginInfo, response, false);
             request.setAttribute(Const.XXL_SSO_USER, loginInfo);
             return true;
         }
-        response.sendRedirect(loginPath);
-        return false;
+        return true;
     }
 
     /**

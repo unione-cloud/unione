@@ -44,6 +44,14 @@
 		.is-iframe .main-footer{
 			margin-left:0;
 		}
+		#ComAlertTec .modal-content-tec{
+			background-color:#FFFFFF;
+			color:#606060;
+		}
+		#ComAlertTec .modal-footer{
+			border-top-color: #b9b9b9;
+		}
+
 	</style>
 
 </#macro>

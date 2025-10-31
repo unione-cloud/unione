@@ -96,7 +96,7 @@ security:
   enabled: true
   filter:
     includes: /**
-    executions: /job/,/job/auth/login,/job/auth/doLogin
+    executions: /job/,/job/api/**,/job/auth/login,/job/auth/doLogin
   tcm:
     autoEnable: true
   jwt:
