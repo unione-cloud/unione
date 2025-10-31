@@ -75,7 +75,8 @@ public class XxlSsoConfig implements HandlerInterceptor,WebMvcConfigurer {
     @SuppressWarnings("null")
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-        request.setAttribute("isIframe", ObjectUtil.equal(request.getParameter("isIframe"), "true"));
+        request.setAttribute("isIframe", ObjectUtil.equal(request.getParameter("isIframe"), "true") ||
+            ObjectUtil.equal(request.getParameter("isIframe"), "1"));
         request.setAttribute("hideFooter", hideFooter);
         if(sessionService.getPrincipal()!=null){
             LoginInfo loginInfo = new LoginInfo(String.valueOf(sessionService.getUserId()), UUIDTool.getSimpleUUID());
