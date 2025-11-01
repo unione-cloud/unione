@@ -61,6 +61,18 @@ public class LinkEntity {
         return linkEntity;
     }
 
+    public static LinkEntity build(String field, String tableName) {
+        return build(field, tableName, "id");
+    }
+
+    public static LinkEntity build(String field, String tableName, String link) {
+        LinkEntity linkEntity = new LinkEntity();
+        linkEntity.setLinkTableName(tableName.replaceAll("[A-Z]", "_$0").toUpperCase());
+        linkEntity.setLinkField(link.replaceAll("[A-Z]", "_$0").toUpperCase());
+        linkEntity.setField(field.replaceAll("[A-Z]", "_$0").toUpperCase());
+        return linkEntity;
+    }
+
     public LinkEntity eq(String field, Object value,SqlFun...fun) {
         LinkCondition linkCondition = new LinkCondition();
         linkCondition.setColumn(field);
@@ -152,7 +164,9 @@ public class LinkEntity {
 
 
     public String toSql(SQLManager sqlManager){
-        this.linkTableName=sqlManager.getNc().getTableName(this.linkEntityClass);
+        if(ObjectUtil.isEmpty(this.linkTableName)){
+            this.linkTableName=sqlManager.getNc().getTableName(this.linkEntityClass);
+        }
         if(ObjectUtil.isEmpty(linkField)){
             List<SqlField> fields = SqlKit.loadFields(sqlManager, this.linkEntityClass, this.linkTableName);
             Optional<SqlField> pkField = fields.stream().filter(f -> f.isPk()).findFirst();

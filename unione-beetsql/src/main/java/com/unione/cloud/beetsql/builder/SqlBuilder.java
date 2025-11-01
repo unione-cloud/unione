@@ -114,7 +114,8 @@ public class SqlBuilder<T> {
 	private SqlBuilder(String tableName, T params) {
 		this.params=params;
 		this.data=params;
-		this.tableName=tableName;
+		tableName=(""+tableName.charAt(0)).toLowerCase()+tableName.substring(1);
+		this.tableName=tableName.replaceAll("[A-Z]", "_$0").toUpperCase();
 	}
 	
 	private SqlBuilder(T data,Object params) {
@@ -125,7 +126,8 @@ public class SqlBuilder<T> {
 	private SqlBuilder(String tableName,T data,Object params) {
 		this.params=params;
 		this.data=data;
-		this.tableName=tableName;
+		tableName=(""+tableName.charAt(0)).toLowerCase()+tableName.substring(1);
+		this.tableName=tableName.replaceAll("[A-Z]", "_$0").toUpperCase();
 	}
 	
 	/**
@@ -133,22 +135,27 @@ public class SqlBuilder<T> {
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked"})
 	public static <T> SqlBuilder<T> build(T params) {
 		return new SqlBuilder(params);
 	}
+
+	@SuppressWarnings({ "unchecked"})
+	public static SqlBuilder<Map<String,Object>> build(String tableName) {
+		return new SqlBuilder(tableName,new HashMap<>());
+	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked"})
 	public static <T> SqlBuilder<T> build(String tableName,T params) {
 		return new SqlBuilder(tableName,params);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked"})
 	public static <T> SqlBuilder<T> build(String tableName,T data,Object params) {
 		return new SqlBuilder(tableName,data,params);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked"})
 	public static <T> SqlBuilder<T> build(Params<T> params) {
 		SqlBuilder<T> buildr=new SqlBuilder(params.getBody());
 		buildr.page(params.getPage())
