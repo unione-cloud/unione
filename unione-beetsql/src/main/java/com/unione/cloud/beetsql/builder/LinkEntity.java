@@ -67,6 +67,7 @@ public class LinkEntity {
 
     public static LinkEntity build(String field, String tableName, String link) {
         LinkEntity linkEntity = new LinkEntity();
+        tableName=(""+tableName.charAt(0)).toLowerCase()+tableName.substring(1);
         linkEntity.setLinkTableName(tableName.replaceAll("[A-Z]", "_$0").toUpperCase());
         linkEntity.setLinkField(link.replaceAll("[A-Z]", "_$0").toUpperCase());
         linkEntity.setField(field.replaceAll("[A-Z]", "_$0").toUpperCase());
