@@ -9,22 +9,22 @@ MODIFY COLUMN `TYPES` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT 
 
 -- 数据定义：增加数据定义类型字段
 ALTER TABLE `unione`.`sys_data_define` 
-ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 UPDATE sys_data_define SET TYPES='setting' WHERE TYPES IS NULL;
 ALTER TABLE `unione`.`sys_data_define` 
-MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 
 ALTER TABLE `unione`.`sys_data_define_release` 
-ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 UPDATE sys_data_define_release SET TYPES='setting' WHERE TYPES IS NULL;
 ALTER TABLE `unione`.`sys_data_define_release` 
-MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 
 ALTER TABLE `unione`.`sys_data_define_his` 
-ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+ADD COLUMN `TYPES` varchar(10) NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 UPDATE sys_data_define_his SET TYPES='setting' WHERE TYPES IS NULL;
 ALTER TABLE `unione`.`sys_data_define_his` 
-MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计' AFTER `VERS`;
+MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 
 
 
