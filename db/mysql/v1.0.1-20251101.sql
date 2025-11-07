@@ -26,6 +26,12 @@ UPDATE sys_data_define_his SET TYPES='setting' WHERE TYPES IS NULL;
 ALTER TABLE `unione`.`sys_data_define_his` 
 MODIFY COLUMN `TYPES` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '数据定义类型 setting：数据配置，form：表单设计,inner:内嵌数据（内嵌在某个表单中的数据）' AFTER `VERS`;
 
-
-
-
+-- 组件定义：增加自定义组件字段，租户信息字段
+ALTER TABLE `unione`.`sys_page_widget` 
+CHANGE COLUMN `IS_BASE` `IS_CUSTOM` int(0) NOT NULL COMMENT '自定义组件，字典TUREORFALSE 1是，0否' AFTER `ORDERED`,
+ADD COLUMN `TENANT_ID` bigint NULL COMMENT '租户ID' AFTER `ID`,
+ADD COLUMN `ORG_ID` bigint NULL COMMENT '机构ID' AFTER `TENANT_ID`,
+ADD COLUMN `USER_ID` bigint NULL COMMENT '用户ID' AFTER `ORG_ID`,
+ADD COLUMN `APP` varchar(50) NULL COMMENT '应用，字典WIDGETAPP form：表单，visual：可视化' AFTER `USER_ID`;
+ALTER TABLE `unione`.`sys_page_widget` 
+ADD COLUMN `IS_PLATFORM` int(0) NOT NULL COMMENT '是否平台组件，字典 TUREORFALSE 1是，0否' AFTER `ORDERED`;
