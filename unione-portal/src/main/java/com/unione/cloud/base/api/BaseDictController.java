@@ -76,6 +76,21 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		return Results.success(list);
 	}
 	
+	@PostMapping("/list")
+	@Operation(summary="加载字典列表",description="根据关键字搜索字典列表")
+	@Action(title="加载字典列表",type = ActionType.Query)
+	public Results<List<BaseDict>> list(@RequestBody Params<BaseDict> params) {
+		if(params.getBody()==null){
+			params.setBody(BaseDict.builder().build());
+		}
+		params.getBody().setParentId(-1L);
+		params.getBody().setStatus(1);
+		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+				
+		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
+		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+		return results;
+	}
 	
 	@Override
 	@Action(title="查询字典",type = ActionType.Query)
