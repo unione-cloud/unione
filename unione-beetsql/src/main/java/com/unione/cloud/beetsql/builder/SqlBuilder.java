@@ -161,7 +161,8 @@ public class SqlBuilder<T> {
 		buildr.page(params.getPage())
 			  .pageSize(params.getPageSize())
 			  .needCount(params.isNeedCount())
-			  .keywords(params.getKeywords());
+			  .keywords(params.getKeywords())
+			  .ids(params.getIds());
 		if(!ObjectUtil.isEmpty(params.getSorts())) {
 			List<Sort> sorts = params.getSorts().stream()
 				.filter(s->s!=null)
