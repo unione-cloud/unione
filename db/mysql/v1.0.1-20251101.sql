@@ -35,3 +35,11 @@ ADD COLUMN `USER_ID` bigint NULL COMMENT '用户ID' AFTER `ORG_ID`,
 ADD COLUMN `APP` varchar(50) NULL COMMENT '应用，字典WIDGETAPP form：表单，visual：可视化' AFTER `USER_ID`;
 ALTER TABLE `unione`.`sys_page_widget` 
 ADD COLUMN `IS_PLATFORM` int(0) NOT NULL COMMENT '是否平台组件，字典 TUREORFALSE 1是，0否' AFTER `ORDERED`;
+
+-- 数据定义：增加无列表字段
+ALTER TABLE `unione`.`sys_data_define` 
+ADD COLUMN `IS_NO_LIST` int(2) NULL COMMENT '无列表，开启后无列表页面，字典TUREORFALSE 1是，0否' AFTER `IS_CUSTOM`;
+ALTER TABLE `unione`.`sys_data_define_his` 
+ADD COLUMN `IS_NO_LIST` int(2) NULL COMMENT '无列表，开启后无列表页面，字典TUREORFALSE 1是，0否' AFTER `IS_CUSTOM`;
+ALTER TABLE `unione`.`sys_data_define_release` 
+ADD COLUMN `IS_NO_LIST` int(2) NULL COMMENT '无列表，开启后无列表页面，字典TUREORFALSE 1是，0否' AFTER `IS_CUSTOM`;
