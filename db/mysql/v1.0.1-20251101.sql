@@ -43,3 +43,6 @@ ALTER TABLE `unione`.`sys_data_define_his`
 ADD COLUMN `IS_NO_LIST` int(2) NULL COMMENT '无列表，开启后无列表页面，字典TUREORFALSE 1是，0否' AFTER `IS_CUSTOM`;
 ALTER TABLE `unione`.`sys_data_define_release` 
 ADD COLUMN `IS_NO_LIST` int(2) NULL COMMENT '无列表，开启后无列表页面，字典TUREORFALSE 1是，0否' AFTER `IS_CUSTOM`;
+UPDATE  `unione`.`sys_data_define` SET IS_NO_LIST=0 WHERE IS_NO_LIST IS NULL;
+UPDATE  `unione`.`sys_data_define_his` SET IS_NO_LIST=0 WHERE IS_NO_LIST IS NULL;
+UPDATE  `unione`.`sys_data_define_release` SET IS_NO_LIST=0 WHERE IS_NO_LIST IS NULL;
