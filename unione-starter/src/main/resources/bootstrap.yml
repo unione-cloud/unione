@@ -67,7 +67,11 @@ beetlsql:
     basePackage: com.unione.cloud.**.dao
     daoSuffix: Dao
 
-
+unione:
+  form:
+    data:
+      table:
+        exclude: (sys.*)|(base.*)|(ai.*)|(cms.*)|(comm.*)|(doc.*)|(flow.*)|(ums.*)|(xxl.*)
 
 #============================================
 #
