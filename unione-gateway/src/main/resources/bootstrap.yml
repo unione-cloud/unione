@@ -27,10 +27,12 @@ spring:
       config:
         enabled: false
         file-extension: yaml
+        namespace: unione-space
         shared-dataids: unione-global-config.yaml
         refreshable-dataids: unione-global-config.yaml
       discovery:
         enabled: ${spring.cloud.nacos.config.enabled}
+        namespace: ${spring.cloud.nacos.config.namespace}
         server-addr: ${spring.cloud.nacos.config.server-addr}
 
   #============================================

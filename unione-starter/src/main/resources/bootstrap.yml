@@ -35,12 +35,13 @@ spring:
     nacos:
       config:
         enabled: false
-        server-addr: 8.134.11.253:8850
         file-extension: yaml
+        namespace: unione-space
         shared-dataids: unione-global-config.yaml
         refreshable-dataids: unione-global-config.yaml
       discovery:
         enabled: ${spring.cloud.nacos.config.enabled}
+        namespace: ${spring.cloud.nacos.config.namespace}
         server-addr: ${spring.cloud.nacos.config.server-addr}
 
   #============================================

@@ -18,7 +18,7 @@
             "request": "launch",
             "mainClass": "com.unione.cloud.job.UnioneJobApplication",
             "projectName": "unione-job",
-            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8081"
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8081 -Dspring.cloud.nacos.config.enabled=true -Dspring.cloud.nacos.config.server-addr=127.0.0.1:8848"
         },
         {
             "type": "java",

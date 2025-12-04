@@ -4,58 +4,58 @@
 #
 #============================================
 spring:
-   data:
-   #============================================
-   #
-   # Redis Config
-   #
-   #============================================
-      redis:
-         database: 0
-         host: 127.0.0.1
-         port: 6379
-         password: admin
-         timeout: 100s
-         pool:
-            max-active: 10
-            max-wait: -1
-            max-idle: 8
+  data:
+  #============================================
+  #
+  # Redis Config
+  #
+  #============================================
+    redis:
+      database: 0
+      host: 127.0.0.1
+      port: 6379
+      password: admin
+      timeout: 100s
+      pool:
+        max-active: 10
+        max-wait: -1
+        max-idle: 8
    #============================================
    #
    # Spring Multipart Config
    #
    #============================================
-   servlet:
-      multipart:
-         max-file-size: 100MB
-         max-request-size: 1024MB
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1024MB
 
    #============================================
    #
    # Gateway config
    #
    #============================================
-   cloud:
-      gateway:
-         default-filters:
-            - name: SecurityFilter
-              args:
-                 loginUrl: /portal/login
-                 noLoginTip: 当前离线，请先登录
-                 noPermisTip: 无操作权限
-                 exclusion: /**/*.js,/**/*.css,/**/*.png,/**/*.jpg,/**/img/,/**/images/*,/**/assets/*,/plugins/*,/*/swagger-ui.html/**,/*/webjars/**,/*/swagger-resources/**,/*/v3/api-docs/**,/*/doc.html/**,/portal/api/security/**
+  cloud:
+    gateway:
+      default-filters:
+        - name: SecurityFilter
+          args:
+            loginUrl: /portal/login
+            noLoginTip: 当前离线，请先登录
+            noPermisTip: 无操作权限
+            exclusion: /**/*.js,/**/*.css,/**/*.png,/**/*.jpg,/**/img/,/**/images/*,/**/assets/*,/plugins/*,/*/swagger-ui.html/**,/*/webjars/**,/*/swagger-resources/**,/*/v3/api-docs/**,/*/doc.html/**,/portal/api/security/**
 
-         routes:
-            #门户路由
-            - id: unione-portal
-              uri: lb://unione-portal
-              predicates:
-                 - Path=/portal/**    
-            #工作流
-            - id: unione-flow-lite
-              uri: lb://unione-flow-lite
-              predicates:
-                 - Path=/flow/**   
+      routes:
+        #门户路由
+        - id: unione-portal
+          uri: lb://unione-portal
+          predicates:
+            - Path=/portal/**    
+        #工作流
+        - id: unione-flow-lite
+          uri: lb://unione-flow-lite
+          predicates:
+            - Path=/flow/**   
 
 #============================================
 #
@@ -63,29 +63,29 @@ spring:
 #
 #============================================
 jetcache:
-   statIntervalMinutes: 15
-   areaInCacheName: false
-   local:
-      default:
-         type: linkedhashmap
-         keyConvertor: fastjson2
-         limit: 1000
-         expireAfterWriteInMillis: 600000
-         expireAfterAccessInMillis: 300000
-   remote:
-      default:
-         type: redis
-         keyConvertor: fastjson2
-         valueEncoder: java
-         valueDecoder: java
-         poolConfig:
-            minIdle: 5
-            maxIdle: 20
-            maxTotal: 50
-         host: ${spring.data.redis.host}
-         port: ${spring.data.redis.port}
-         password: ${spring.data.redis.password}
-
+  statIntervalMinutes: 15
+  areaInCacheName: false
+  local:
+    default:
+      type: linkedhashmap
+      keyConvertor: fastjson2
+      limit: 1000
+      expireAfterWriteInMillis: 600000
+      expireAfterAccessInMillis: 300000
+  remote:
+    default:
+      type: redis
+      keyConvertor: fastjson2
+      valueEncoder: java
+      valueDecoder: java
+      poolConfig:
+        minIdle: 5
+        maxIdle: 20
+        maxTotal: 50
+      host: ${spring.data.redis.host}
+      port: ${spring.data.redis.port}
+      password: ${spring.data.redis.password}
+      
       
 #============================================
 #
@@ -93,6 +93,6 @@ jetcache:
 #
 #============================================      
 logging:
-   level:
-      ROOT: ERROR
+  level:
+    ROOT: ERROR
 

@@ -4,67 +4,66 @@
 #
 #============================================
 spring:
-   #============================================
-   #
-   # Data Source config
-   #
-   #============================================
-   datasource:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8
-      username: unione
-      password: unione@db
+  #============================================
+  #
+  # Data Source config
+  #
+  #============================================
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8
+    username: unione
+    password: unione@db
 
 
-   #============================================
-   #
-   # Data Pool Druid Config
-   #
-   #============================================
-      druid:
-         initial-size: 2
-         max-active: 20
-         min-idle: 2
-         max-wait: 60000
-         pool-prepared-statements: true
-         validation-query: select 'x'
-         test-on-borrow: false
-         test-on-return: false
-         test-while-idle: true
+    #============================================
+    #
+    # Data Pool Druid Config
+    #
+    #============================================
+    druid:
+      initial-size: 2
+      max-active: 20
+      min-idle: 2
+      max-wait: 60000
+      pool-prepared-statements: true
+      validation-query: select 'x'
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
          
-         web-stat-filter:
-            enabled: true
-            url-pattern: /druid
-         stat-view-servlet:
-            login-username: unione
-            login-password: unione@druid
+      web-stat-filter:
+        enabled: true
+        url-pattern: /druid
+      stat-view-servlet:
+        login-username: unione
+        login-password: unione@druid
 
-
-   data:
-   #============================================
-   #
-   # Redis Config
-   #
-   #============================================
-      redis:
-         database: 0
-         host: 127.0.0.1
-         port: 6379
-         password: admin
-         timeout: 100s
-         pool:
-            max-active: 10
-            max-wait: -1
-            max-idle: 8
-   #============================================
-   #
-   # Spring Multipart Config
-   #
-   #============================================
-   servlet:
-      multipart:
-         max-file-size: 100MB
-         max-request-size: 1024MB
+  data:
+  #============================================
+  #
+  # Redis Config
+  #
+  #============================================
+    redis:
+      database: 0
+      host: 127.0.0.1
+      port: 6379
+      password: admin
+      timeout: 100s
+      pool:
+        max-active: 10
+        max-wait: -1
+        max-idle: 8
+  #============================================
+  #
+  # Spring Multipart Config
+  #
+  #============================================
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1024MB
 
 
 
@@ -74,38 +73,37 @@ spring:
 #
 #============================================
 jetcache:
-   statIntervalMinutes: 15
-   areaInCacheName: false
-   local:
-      default:
-         type: linkedhashmap
-         keyConvertor: fastjson2
-         limit: 1000
-         expireAfterWriteInMillis: 600000
-         expireAfterAccessInMillis: 300000
-   remote:
-      default:
-         type: redis
-         keyConvertor: fastjson2
-         valueEncoder: java
-         valueDecoder: java
-         poolConfig:
-            minIdle: 5
-            maxIdle: 20
-            maxTotal: 50
-         host: ${spring.data.redis.host}
-         port: ${spring.data.redis.port}
-         password: ${spring.data.redis.password}
-
+  statIntervalMinutes: 15
+  areaInCacheName: false
+  local:
+    default:
+      type: linkedhashmap
+      keyConvertor: fastjson2
+      limit: 1000
+      expireAfterWriteInMillis: 600000
+      expireAfterAccessInMillis: 300000
+  remote:
+    default:
+      type: redis
+      keyConvertor: fastjson2
+      valueEncoder: java
+      valueDecoder: java
+      poolConfig:
+        minIdle: 5
+        maxIdle: 20
+        maxTotal: 50
+      host: ${spring.data.redis.host}
+      port: ${spring.data.redis.port}
+      password: ${spring.data.redis.password}
       
 #============================================
 #
 # Logging Config
-#
+# ERROR INFO DEBUG
 #============================================      
 logging:
-   level:
-      ROOT: ERROR
+  level:
+    ROOT: INFO
 
 
 #============================================
@@ -114,8 +112,8 @@ logging:
 #
 #============================================ 
 security:
-   captcha:
-      enable: true
+  captcha:
+    enable: true
 
 
 #============================================
@@ -124,14 +122,14 @@ security:
 #
 #============================================ 
 attach:
-   file:
-      server:
-         type: minio
+  file:
+    server:
+      type: minio
 minio:
-   server:
-      url: http://127.0.0.1:9000
-      key: admin
-      secret: admin@123
+  server:
+    url: http://127.0.0.1:9000
+    key: admin
+    secret: admin@123
 
 #============================================
 #
@@ -139,21 +137,21 @@ minio:
 #
 #============================================ 
 unione:
-   cors:
-      - url: /api/common/visit/entry
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/appInfo/query 
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/changeLog/find
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/onlineDoc/load
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/onlineDoc/view
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/onlineDoc/item/load
-        allowed-origins: http://localhost:8000,http://localhost:5173
-      - url: /api/system/onlineDoc/item/view
-        allowed-origins: http://localhost:8000,http://localhost:5173
+  cors:
+    - url: /api/common/visit/entry
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/appInfo/query 
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/changeLog/find
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/onlineDoc/load
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/onlineDoc/view
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/onlineDoc/item/load
+      allowed-origins: http://localhost:8000,http://localhost:5173
+    - url: /api/system/onlineDoc/item/view
+      allowed-origins: http://localhost:8000,http://localhost:5173
 
 #============================================
 #
@@ -161,5 +159,5 @@ unione:
 #
 #============================================ 
 visit:
-   stat:
-      cron: 0 */30 * * * ?
+  stat:
+    cron: 0 */30 * * * ?

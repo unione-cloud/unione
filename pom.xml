@@ -381,7 +381,7 @@
 		<logback.version>1.5.12</logback.version>
 		
 		<!-- nacos index -->
-		<nacos.version>2023.0.3.2</nacos.version>
+		<nacos.version>2023.0.3.4</nacos.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		
 		<!-- cache -->
