@@ -31,14 +31,16 @@ spring:
   # nacos config
   #
   #============================================
+  config:
+    import:
+      - nacos:unione-portal.yaml
+      - nacos:unione-global-config.yaml
   cloud:
     nacos:
       config:
         enabled: false
         file-extension: yaml
         namespace: unione-space
-        shared-dataids: unione-global-config.yaml
-        refreshable-dataids: unione-global-config.yaml
       discovery:
         enabled: ${spring.cloud.nacos.config.enabled}
         namespace: ${spring.cloud.nacos.config.namespace}
