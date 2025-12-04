@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "java",
+            "name": "UnioneGateway",
+            "request": "launch",
+            "mainClass": "com.unione.cloud.gateway.Application",
+            "projectName": "unione-gateway",
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8090 -Dspring.cloud.nacos.config.enabled=true -Dspring.cloud.nacos.config.server-addr=127.0.0.1:8848"
+        },
+        {
+            "type": "java",
             "name": "UnioneJobApplication",
             "request": "launch",
             "mainClass": "com.unione.cloud.job.UnioneJobApplication",
@@ -25,7 +33,7 @@
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
             "projectName": "unione-starter",
-            "vmArgs": "-Dfile.encoding=UTF-8"
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dspring.cloud.nacos.config.enabled=true -Dspring.cloud.nacos.config.server-addr=127.0.0.1:8848"
         }
     ]
 }

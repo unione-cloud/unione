@@ -31,6 +31,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
+import com.unione.cloud.core.token.TokenService.TcmEntry;
 import com.unione.cloud.core.util.ApiPermisUtil;
 import com.unione.cloud.core.util.RequestUtils;
 import com.unione.cloud.core.util.SpringCtxUtil;
@@ -38,6 +39,7 @@ import com.unione.cloud.gateway.sso.AbstractAuthRealm;
 import com.unione.cloud.gateway.util.LogsUtil;
 import com.unione.cloud.gateway.util.LogsUtil.LogType;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
@@ -532,8 +534,13 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 			String remoteAddress) {
 		// 添加当前用户信息到header
 		Builder reqBuilder = exchange.getRequest().mutate()
-				.header(config.getTokenName(), tokenService.getTcm(token).getToken())
 				.header("RemoteAddress", remoteAddress);
+		if(!ObjectUtil.isEmpty(token)){
+			TcmEntry entry = tokenService.getTcm(token);
+			if(entry!=null){
+				reqBuilder.header(config.getTokenName(), tokenService.getTcm(token).getToken());
+			}
+		}
 		return exchange.mutate().request(reqBuilder.build()).build();
 	}
 

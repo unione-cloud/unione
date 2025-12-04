@@ -105,8 +105,7 @@ jetcache:
 #============================================      
 logging:
    level:
-      ROOT: info
-      org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+      ROOT: ERROR
 
 
 #============================================

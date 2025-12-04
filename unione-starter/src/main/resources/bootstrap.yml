@@ -40,7 +40,7 @@ spring:
         shared-dataids: unione-global-config.yaml
         refreshable-dataids: unione-global-config.yaml
       discovery:
-        enabled: false
+        enabled: ${spring.cloud.nacos.config.enabled}
         server-addr: ${spring.cloud.nacos.config.server-addr}
 
   #============================================
