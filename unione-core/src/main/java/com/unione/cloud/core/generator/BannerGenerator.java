@@ -6,18 +6,20 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class BannerGenerator{
 
+    @Autowired
+    private Environment env;
     private String serverName;
-
     private String serverPort;
-    
     private String serverCtx;
 
-    @Autowired
-    public void setEnv(Environment env) {
+    @PostConstruct
+    public void post(){
         this.serverName = env.getProperty("spring.application.name");
         this.serverPort = env.getProperty("server.port");
         this.serverCtx = env.getProperty("server.servlet.context-path","/");
