@@ -24,8 +24,8 @@ spring:
   #============================================
   config:
     import:
-      - nacos:unione-gateway.yaml
-      - nacos:unione-global-config.yaml
+      - optional:nacos:unione-gateway.yaml
+      - optional:nacos:unione-global-config.yaml
   cloud:
     nacos:
       config:
