@@ -11,12 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,6 +24,7 @@ import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 
+import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -114,6 +113,17 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 		// 首先清空当前线程中token信息
 		SessionHolder.setToken(null);
 		SessionHolder.setUserPrincipal(null);
+
+		String serviceToken=request.getHeader("ServiceToken");
+		if(!StrUtil.isEmpty(serviceToken)){
+			// 验证serviceToken
+			UserPrincipal principal=tokenService.resolveToken(serviceToken);
+			if(principal!=null) {
+				SessionHolder.build().setVar("ServiceToken", serviceToken);
+				SessionHolder.setUserPrincipal(principal);
+				return true;
+			}
+		}
 		
 		// 从header中获取
 		String token=request.getHeader(REQUEST_TOKEN);

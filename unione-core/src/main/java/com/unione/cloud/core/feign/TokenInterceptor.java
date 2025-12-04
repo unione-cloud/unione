@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionService;
 
 import cn.hutool.crypto.digest.DigestUtil;
@@ -52,6 +51,10 @@ public class TokenInterceptor implements RequestInterceptor {
 				if(!StringUtils.isEmpty(token)) {
 					template.header(TOKEN_NAME, TOKEN_PREFIX+token+TOKEN_SUFIX);
 					template.header(DigestUtil.md5Hex(token), "true");
+				}
+				String serviceToken=sessionService.getVar("ServiceToken");
+				if(!StringUtils.isEmpty(serviceToken)) {
+					template.header("ServiceToken", serviceToken);
 				}
 				
 				// 设置请求信息
