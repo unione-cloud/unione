@@ -631,19 +631,19 @@ public class SqlBuilder<T> {
 			!sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN))) {
 			switch (dataPermis) {
 			case TENANTID:
-				BeanUtils.setDefaultValue(this.params, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
+				BeanUtils.setFieldValue(this.params, BaseField.TENANT_ID.getName(), sessionService.getTenantId());
 				break;
 			case ORGANID:
-				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
+				BeanUtils.setFieldValue(this.params, BaseField.ORGAN_ID.getName(), sessionService.getOrgId());
 				break;	
 			case ORGANCODE:
-				BeanUtils.setDefaultValue(this.params, BaseField.ORGAN_CODE.getName(), sessionService.getOrgLvsn());
+				BeanUtils.setFieldValue(this.params, BaseField.ORGAN_CODE.getName(), sessionService.getOrgLvsn());
 				break;		
 			case AREACODE:
-				BeanUtils.setDefaultValue(this.params, BaseField.AREA_CODE.getName(), sessionService.getAreaCode());
+				BeanUtils.setFieldValue(this.params, BaseField.AREA_CODE.getName(), sessionService.getAreaCode());
 				break;		
 			default:
-				BeanUtils.setDefaultValue(this.params, BaseField.USER_ID.getName(), sessionService.getUserId());
+				BeanUtils.setFieldValue(this.params, BaseField.USER_ID.getName(), sessionService.getUserId());
 				break;
 			}
 		}
@@ -705,19 +705,24 @@ public class SqlBuilder<T> {
 		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
 			switch (dataPermis) {
 			case TENANTID:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
+				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
+					BaseField.TENANT_ID.getName(),BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
 				break;
 			case ORGANID:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
+				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
+					BaseField.ORGAN_ID.getName(),BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
 				break;	
 			case ORGANCODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%%'}", whereSql,BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
+				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
+					whereSql,BaseField.ORGAN_CODE.getName(),BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
 				break;	
 			case AREACODE:
-				whereSql=String.format("(%s) AND %s LIKE #{params.%s+'%%'}", whereSql,BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
+				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
+					whereSql,BaseField.AREA_CODE.getName(),BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
 				break;	
 			default:
-				whereSql=String.format("(%s) AND %s = #{params.%s}", whereSql,BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());
+				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",
+					whereSql,BaseField.USER_ID.getName(),BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());
 				break;
 			}
 		}
