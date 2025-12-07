@@ -5,6 +5,7 @@ import java.util.Map;
 import com.unione.cloud.core.exception.ServiceException;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -17,7 +18,7 @@ public class BeanUtils extends BeanUtil{
 	 */
 	public static void copy(Object from,Object to,String ...fields) {
 		if(fields==null || fields.length==0) {
-			BeanUtils.copyProperties(from, to);
+			BeanUtils.copyProperties(from, to,CopyOptions.create().setIgnoreNullValue(true));
 		}else {
 			for(String field:fields) {
 				Object value=BeanUtil.getProperty(from, field);
