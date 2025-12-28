@@ -306,7 +306,7 @@ public class DocStoreController implements DocStoreService{
 		}
 		
 		LogsUtil.add("查询文档记录");
-		DocFile tmp=dataBaseDao.findById(entity);
+		DocFile tmp=dataBaseDao.findById(SqlBuilder.build(entity));
 		AssertUtil.service().notNull(tmp, "文件记录未找到");
 		LogsUtil.setTarget(tmp.getId(), tmp.getTitle());
 		
