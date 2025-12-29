@@ -29,3 +29,8 @@ create unique index uni_uid_tid on SYS_MINE_LIKE
    USER_ID,
    TARGET_ID
 );
+
+-- 升级：系统资源，增加引用ID字段
+ALTER TABLE `unione`.`sys_resource` 
+MODIFY COLUMN `TYPES` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '资源类型，字典SYSRESTYPE menu：菜单，form：动态表单，flow：流程，btn：按钮，tool：工具' AFTER `ALIAS`,
+ADD COLUMN `REF_ID` bigint NULL COMMENT '引用ID，保存：表单ID、流程ID' AFTER `TYPES`;

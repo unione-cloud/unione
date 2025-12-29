@@ -68,12 +68,17 @@ public class SysResource extends Pojo {
 	@Schema(title="资源别名（授权树区别重复菜单名称）",description="长度为：100")
 	private String alias;
 	/**
-	* 资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具
+	* 资源类型，字典SYSRESTYPE menu：菜单，form：动态表单，flow：流程，btn：按钮，tool：工具
 	*/
-	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
+	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，form：动态表单，flow：流程，btn：按钮，tool：工具",description="长度为：20")
 	@NotBlank(message="资源类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	@NotNull(message="资源类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	private String types;
+	/**
+	* 引用ID，保存：表单ID、流程ID
+	*/
+	@Schema(title="引用ID，保存：表单ID、流程ID",description="长度为：19")
+	private Long refId;
 	/**
 	* 资源PATH
 	*/
