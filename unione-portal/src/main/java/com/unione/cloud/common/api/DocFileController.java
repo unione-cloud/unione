@@ -130,7 +130,7 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		params.getBody().setUserId(sessionService.getUserId());
 		params.getBody().setDelFlag(0);
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(params);
+		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		return result;
 	}
 	
@@ -145,7 +145,7 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		params.getBody().setDelFlag(0);
 		params.getBody().setAuditStatus(2);//1待审，2通过，3拒绝
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(params);
+		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		
 		return result;
 	}
@@ -175,7 +175,7 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 			//params.getBody().getPermisOwners().addAll(sessionService.getUserRoles());
 		}
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(params);
+		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		
 		// 加载文档权限集合
 		if(!ObjectUtils.isEmpty(result.getBody())) {
@@ -198,7 +198,7 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		params.getBody().setIsPublic(1);
 		params.getBody().setDelFlag(0);
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(params);
+		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		
 		return result;
 	}
@@ -244,9 +244,9 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 	@Operation(summary="更新文件信息",description= "")
 	public Results<Long> update(@RequestBody @Validated(Validator.update.class) DocFile entity) {
 		Results<Long> results = new Results<>();
-		
+
 		// 参数处理
-		//AssertUtil.service().notNull(entity, new String[] {"sid","appId","name","title"},"参数%s不能为空");
+		AssertUtil.service().notNull(entity, new String[] {"id","name","title"},"参数%s不能为空");
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			entity.setTenantId(sessionService.getTenantId());
 			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
@@ -254,11 +254,10 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 			}
 		}
 		
-		String fields[] = {"dirId","ownerId","appCode","title","name","type","size","ordered","extData","descs","fileMeta","fileData"};
-		
+		String fields[] = {"dirId","title","name","type","size","ordered","extData","descs","fileMeta","fileData"};
 		entity.setLastUpdated(DateUtil.date());
 		entity.setLastUpdatedBy(sessionService.getUserId());
-		int len = dataBaseDao.update(Updater.build(entity).fields(fields));
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		LogsUtil.add("保存数据,len:"+len);
 		
 		results.setBody(entity.getId());
@@ -318,7 +317,7 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		}
 		
 		LogsUtil.add("查找记录");
-		DocFile tmp = dataBaseDao.findById(entity);
+		DocFile tmp = dataBaseDao.findById(SqlBuilder.build(entity));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 					
 		results.setBody(tmp);

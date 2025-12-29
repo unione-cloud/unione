@@ -5,13 +5,18 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 /**
  * @标题 	SysMineLike Entity
@@ -22,6 +27,7 @@ import com.unione.cloud.core.model.Pojo;
  **/
 @Data
 @Builder
+@DataPermis(PermisRule.USERID)
 @SqlResource("system.SysMineLike")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,11 +37,14 @@ public class SysMineLike extends Pojo {
 	/**
 	* 目标类型
 	*/
+	@NotNull(message = "目标类型不能为空",groups = {Validator.save.class,Validator.update.class})
+	@NotBlank(message = "目标类型不能为空",groups = {Validator.save.class,Validator.update.class})
 	@Schema(title="目标类型",description="长度为：20")
 	private String targetType;
 	/**
 	* 目标ID
 	*/
+	@NotNull(message = "目标ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	@Schema(title="目标ID",description="长度为：19")
 	private Long targetId;
 	/**

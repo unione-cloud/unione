@@ -353,7 +353,7 @@ public class DocStoreController implements DocStoreService{
 		}
 		
 		LogsUtil.add("查询文档记录");
-		List<DocFile> list=dataBaseDao.findList(entity);
+		List<DocFile> list=dataBaseDao.findList(SqlBuilder.build(entity));
 		AssertUtil.service().notNull(list, "文件记录未找到").isTrue(!list.isEmpty(), "文件记录未找到");
 		LogsUtil.add("查询文档记录,count:"+list.size());
 		
