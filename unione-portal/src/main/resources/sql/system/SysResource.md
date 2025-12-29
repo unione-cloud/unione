@@ -1,6 +1,6 @@
 loadSysAppList
 ===
-```
+```sql
 SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3) AND (IS_PLATFORM=1 OR TENANT_ID=#{params.user.tenantId})
 -- @if(!isEqules("view",params.type) && params.isAdmin==false){
  AND (
