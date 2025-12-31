@@ -23,6 +23,9 @@ public class ResTreeNodeDto extends TreeNodeDto{
     @Schema(title="图标（字体图标）",description="长度为：100")
 	private String iconName;
 
+    @Schema(title="平台类型",description="pc:PC端，app:移动端")
+    private String platform;
+
     @Schema(title="资源设置,JSON存储{}",description="长度为：1000")
 	private String configs;
 

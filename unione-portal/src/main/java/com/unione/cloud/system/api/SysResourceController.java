@@ -192,7 +192,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	public Results<List<ResTreeNodeDto>> tree(@PathVariable("type") String type,@RequestBody Params<Long> params){
 		List<ResTreeNodeDto> nodes=new ArrayList<>();
 		AssertUtil.service().notNull(type, "参数type不能为空")
-			.notIn(type, Arrays.asList("permisOrgan","permisRole","permisUser","permisGroup","permisPost","view"), "参数type取值范围[permisOrgan,permisRole,permisUser,permisGroup,permisPost,view]");
+			.notIn(type, Arrays.asList("permisOrgan","permisRole","permisUser","permisGroup","permisPost","view","mine"), "参数type取值范围[permisOrgan,permisRole,permisUser,permisGroup,permisPost,view,mine]");
 
 		// 加载应用列表
 		Map<String, Object> paramsApp=new HashMap<>();
@@ -273,6 +273,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		}
 
 		// 数据转换
+		Map<Long,SysAppInfo> appMap=new HashMap<>();
 		appList.stream().forEach(row->{
 			ResTreeNodeDto node = new ResTreeNodeDto();
 			node.setId(row.getId());
@@ -290,6 +291,8 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 					node.setEnDilivery(0);
 				}
 			}
+			node.setPlatform(row.getTypes());
+			appMap.put(row.getId(), row);
 		});
 		resList.stream().forEach(row->{
 			ResTreeNodeDto node = new ResTreeNodeDto();
@@ -308,6 +311,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 					node.setEnDilivery(0);
 				}
 			}
+			node.setPlatform(appMap.get(row.getAppId()).getTypes());
 			nodes.add(node);
 		});
 

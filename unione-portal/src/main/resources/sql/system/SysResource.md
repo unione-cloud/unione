@@ -1,7 +1,17 @@
 loadSysAppList
 ===
 ```sql
-SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3) AND (IS_PLATFORM=1 OR TENANT_ID=#{params.user.tenantId})
+SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3)
+-- @if(!isEqules("mine",params.type)){
+ AND (IS_PLATFORM=1 OR TENANT_ID=#{params.user.tenantId})
+-- @}
+-- @if(isEqules("mine",params.type)){
+ AND (TENANT_ID=#{params.user.tenantId}
+ -- @if(params.isAdmin==true){
+  OR IS_PLATFORM=1 
+ -- @}
+ )
+-- @}
 -- @if(!isEqules("view",params.type) && params.isAdmin==false){
  AND (
     EXISTS (select 1 from SYS_USER_PERMIS where APP_ID = app.ID AND RES_TYPE='app' and USER_ID=#{params.user.id}) OR
@@ -18,7 +28,17 @@ loadSysResourceTree
 ===
 ```sql
 SELECT * FROM SYS_RESOURCE res
-WHERE STATUS = 1 AND (IS_PLATFORM=1 OR TENANT_ID=#{params.user.tenantId}) AND APP_ID IN (#{join(params.appIds)})
+WHERE STATUS = 1 AND APP_ID IN (#{join(params.appIds)})
+-- @if(!isEqules("mine",params.type)){
+AND (IS_PLATFORM=1 OR TENANT_ID=#{params.user.tenantId})
+-- @}
+-- @if(isEqules("mine",params.type)){
+ AND (TENANT_ID=#{params.user.tenantId}
+ -- @if(params.isAdmin==true){
+  OR IS_PLATFORM=1 
+ -- @}
+ )
+-- @}
 -- @if(!isEqules("view",params.type) && params.isAdmin==false){
    AND (
        EXISTS (SELECT 1 FROM SYS_USER_PERMIS sup WHERE sup.USER_ID=#{params.user.id} AND sup.RES_ID=res.ID AND EN_DILIVERY=1) OR
