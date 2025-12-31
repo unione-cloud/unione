@@ -116,6 +116,98 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	}
 
 
+	@PostMapping("/release")
+	@Action(title="发布资源",type = ActionType.Save)
+	@Operation(summary = "发布资源", description="发布资源：表单发布，流程发布")
+	public Results<Long> release(@RequestBody Params<SysResource> params) {
+		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空")
+			.notNull(params.getBody(),new String[]{"title","refId","types"},"属性%s不能为空")
+			.notIn(params.getBody().getTypes(), Arrays.asList("form","flow"), "属性types取值范围[form,flow]");
+
+		if(params.getBody().getId()!=null){
+			params.setIds(Arrays.asList(params.getBody().getId()));
+		}
+		if(!ObjectUtil.isEmpty(params.getIds())){
+			// 更新发布
+			int len = dataBaseDao.updateById(SqlBuilder.build(params).field("title","iconName","ordered","isNeedPermis","isHide"));
+			return Results.build(len>0);
+		}else{
+			// 验证资源名称是否已存在
+			LogsUtil.add("验证资源名称是否已存在,name:%s",params.getBody().getName());
+			SysResource tmp = dataBaseDao.findOne(SqlBuilder.build(params.getBody()).where("name=? and parentId=? and id!=?"));
+			AssertUtil.service().isTrue(tmp==null, String.format("资源名称[%s]已存在", params.getBody().getName()));
+
+			// 新增发布
+			BeanUtils.setDefaultValue(params.getBody(), "parentId",-1L);
+			BeanUtils.setDefaultValue(params.getBody(), "isNeedPermis",1);
+			BeanUtils.setDefaultValue(params.getBody(), "isLeaf",1);
+			BeanUtils.setDefaultValue(params.getBody(), "isHide",0);
+			BeanUtils.setDefaultValue(params.getBody(), "isPlatform",0);
+			BeanUtils.setDefaultValue(params.getBody(), "status",1);
+			BeanUtils.setDefaultValue(params.getBody(), "ordered",0);
+			BeanUtils.setDefaultValue(params.getBody(), "configs","{}");
+
+			if(!Objects.equals(-1L, params.getBody().getParentId())) {
+				SysResource parent = dataBaseDao.findById(SqlBuilder.build(SysResource.class,params.getBody().getParentId()));
+				AssertUtil.service().notNull(parent, "上级节点未找到");
+				if(!Objects.equals(parent.getIsLeaf(), 0)) {
+					parent.setIsLeaf(0);
+					dataBaseDao.updateById(SqlBuilder.build(parent).field("isLeaf"));
+				}
+				params.getBody().setAppId(parent.getAppId());
+			}
+
+			if(ObjectUtil.equal("form", params.getBody().getTypes())){
+				params.getBody().setIsLeaf(0);
+				BeanUtils.setDefaultValue(params.getBody(), "url","@UnionePageList");
+			}else if(ObjectUtil.equal("flow", params.getBody().getTypes())){
+				BeanUtils.setDefaultValue(params.getBody(), "url","@UnioneFlowDone");
+			}
+
+			int len = dataBaseDao.insert(params.getBody());
+
+			if(len>0 && ObjectUtil.equal("form", params.getBody().getTypes())){
+				// 新增表单资源
+				List<SysResource> forms = Arrays.asList("view","add","edit").stream().map(page->{
+					SysResource form = new SysResource();
+					BeanUtils.copyProperties(params.getBody(), form);
+					switch (page) {
+						case "view":
+							form.setTitle("查看");		
+							break;
+						case "add":
+							form.setTitle("新增");		
+							break;
+						case "edit":
+							form.setTitle("编辑");		
+							break;
+						default:
+							break;
+					}
+					form.setIconName(null);
+					form.setName(String.format("%s:%s", params.getBody().getName(),page));
+					form.setPath(String.format("%s/%s", params.getBody().getPath(),page));
+					form.setUrl("@UnionePageForm");
+					form.setConfigs(form.getConfigs().replace(":list", ":"+page));
+					form.setParentId(params.getBody().getId());
+					form.setTypes("form");
+					form.setIsPlatform(0);
+					form.setIsNeedPermis(1);
+					form.setIsHide(1);
+					form.setIsLeaf(1);
+					form.setStatus(1);
+					form.setOrdered(0);
+					return form;
+				}).collect(Collectors.toList());
+				dataBaseDao.insertBatch(forms);
+			}
+
+
+			return Results.build(len>0, params.getBody().getId());
+		}
+	}
+
+
 	@PostMapping("/status")
 	@Action(title="设置资源状态",type = ActionType.Save,roles = {UserRoles.SYS3PCONFIG})
 	@Operation(summary = "设置资源状态", description="USEORNOT 1使用，0停用")
@@ -282,6 +374,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setTitle(row.getName());
 			node.setIconName(row.getIcon());
 			node.setAppId(row.getId());
+			node.setName(row.getSn());
 			nodes.add(node);
 			if(hadAppMap.get(row.getId())!=null){
 				node.setChecked(true);
@@ -300,6 +393,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setNtype(row.getTypes());
 			node.setPid(row.getParentId());
 			node.setAppId(row.getAppId());
+			node.setRefId(row.getRefId());
 			if(ObjectUtil.equal(-1L, row.getParentId())){
 				node.setPid(row.getAppId());
 			}
@@ -312,6 +406,8 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				}
 			}
 			node.setPlatform(appMap.get(row.getAppId()).getTypes());
+			node.setPath(row.getPath());
+			node.setName(row.getName());
 			nodes.add(node);
 		});
 

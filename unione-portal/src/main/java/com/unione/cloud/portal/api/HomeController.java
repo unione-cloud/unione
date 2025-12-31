@@ -64,7 +64,7 @@ public class HomeController {
 			List<ResourceDto> resList = dataBaseDao.findList("portal.permision.loadResorucePermisForUser",params, ResourceDto.class);
 			List<ResourceDto> menuList=resList.stream()
 					.filter(res->appIdsList.contains(res.getAppId()))
-					.filter(res->ObjectUtil.equal(res.getTypes(),"btn") || ObjectUtil.equal(res.getTypes(),"menu"))
+					.filter(res->ObjectUtil.equal(res.getTypes(),"btn") || ObjectUtil.equal(res.getTypes(),"menu") || ObjectUtil.equal(res.getTypes(),"form") || ObjectUtil.equal(res.getTypes(),"flow"))
 					.collect(Collectors.toList());
 			List<ResourceDto> toolList=resList.stream()
 					.filter(res->appIdsList.contains(res.getAppId()))
