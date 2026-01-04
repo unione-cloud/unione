@@ -6,26 +6,29 @@ validPermis
 SELECT COUNT(*)
 FROM DOC_FILE f
 LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
-WHERE f.TENANT_ID=#{principal.tenantId} AND f.DEL_FLAG=0 AND (f.IS_SHARE=0 AND f.IS_PUBLIC=0 OR f.AUDIT_STATUS=2) 
+WHERE f.TENANT_ID=#{principal.tenantId} AND f.DEL_FLAG=0
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
 -- @} 
 -- @if(notNull(params.ids)){
-AND f.ID IN #{join(params.ids)}
+AND f.ID IN (#{join(params.ids)})
 -- @} 
 -- @if(notNull(params.ownerId)){
 AND f.OWNER_ID=#{params.ownerId}
 -- @} 
 AND (
-    f.USER_ID=#{query.permisUser}
+-- @if(!contains(params.permisTypes,'edit') && !contains(params.permisTypes,'download')){
+    f.IS_PUBLIC=0 AND f.AUDIT_STATUS=2
+-- @}        
+    OR f.USER_ID=#{query.permisUser}
 -- @if(notNull(params.permisOrg)){
     OR f.ORG_ID=#{params.permisOrg}
 -- @}      
     OR 
-    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN #{join(#{params.permisTypes})} AND (
-        p.OWNER_ID IN #{join(params.permisOwners)}
+    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
+        p.OWNER_ID IN (#{join(params.permisOwners)})
     -- @if(notNull(params.permisRoles)){
-        OR f.OWNER_NAME IN #{join(params.permisRoles)}
+        OR p.OWNER_NAME IN (#{join(params.permisRoles)})
     -- @}  
     )
 )
@@ -66,12 +69,12 @@ permisFilter
 ===
 ```sql
 LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
-WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0 AND (f.IS_SHARE=0 AND f.IS_PUBLIC=0 OR f.AUDIT_STATUS=2) 
+WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
 -- @} 
 -- @if(notNull(params.ids)){
-AND f.ID IN #{join(params.ids)}
+AND f.ID IN (#{join(params.ids)})
 -- @} 
 -- @if(notNull(params.ownerId)){
 AND f.OWNER_ID=#{params.ownerId}
@@ -95,24 +98,25 @@ AND f.DIR_ID=#{params.dirId}
 AND f.LV_SN LIKE #{params.lvSn+'%'}
 -- @} 
 -- @if(notNull(params.incTypes)){
-AND f.TYPE IN #{join(params.incTypes)}
+AND f.TYPE IN (#{join(params.incTypes)})
 -- @} 
 -- @if(notNull(params.ninTypes)){
-AND f.TYPE NOT IN #{join(params.ninTypes)}
+AND f.TYPE NOT IN (#{join(params.ninTypes)})
 -- @} 
 -- @if(notNull(query.keywords)){
 AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
 -- @} 
 AND (
-    f.USER_ID=#{query.permisUser}
+    f.IS_PUBLIC=0 AND f.AUDIT_STATUS=2
+    OR f.USER_ID=#{query.permisUser}
 -- @if(notNull(params.permisOrg)){
     OR f.ORG_ID=#{params.permisOrg}
 -- @}      
     OR 
-    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN #{join(#{params.permisTypes})} AND (
-        p.OWNER_ID IN #{join(params.permisOwners)}
+    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
+        p.OWNER_ID IN (#{join(params.permisOwners)})
     -- @if(notNull(params.permisRoles)){
-        OR f.OWNER_NAME IN #{join(params.permisRoles)}
+        OR p.OWNER_NAME IN (#{join(params.permisRoles)})
     -- @}  
     )
 )
@@ -124,27 +128,27 @@ findDocList
 ```sql
 SELECT #{page(use("fileFields"))}
 FROM DOC_FILE f
-#use("permisFilter")
+#{use("permisFilter")}
 ```
 countDocList
 ===
 ```sql
 SELECT COUNT(*)
 FROM DOC_FILE f
-#use("permisFilter")
+#{use("permisFilter")}
 ```
 
 
-shareFilter
+shareMineFilter
 ===
 ```sql
 LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
-WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0 AND (f.IS_SHARE=0 AND f.IS_PUBLIC=0 OR f.AUDIT_STATUS=2) 
+WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0 
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
 -- @} 
 -- @if(notNull(params.ids)){
-AND f.ID IN #{join(params.ids)}
+AND f.ID IN (#{join(params.ids)})
 -- @} 
 -- @if(notNull(params.ownerId)){
 AND f.OWNER_ID=#{params.ownerId}
@@ -168,24 +172,18 @@ AND f.DIR_ID=#{params.dirId}
 AND f.LV_SN LIKE #{params.lvSn+'%'}
 -- @} 
 -- @if(notNull(params.incTypes)){
-AND f.TYPE IN #{join(params.incTypes)}
+AND f.TYPE IN (#{join(params.incTypes)})
 -- @} 
 -- @if(notNull(params.ninTypes)){
-AND f.TYPE NOT IN #{join(params.ninTypes)}
+AND f.TYPE NOT IN (#{join(params.ninTypes)})
 -- @} 
 -- @if(notNull(query.keywords)){
 AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
 -- @} 
-AND (
-    f.USER_ID != #{principal.id}
--- @if(notNull(params.permisOrg)){
-    AND f.ORG_ID != #{params.permisOrg}
--- @}      
-    OR 
-    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN #{join(#{params.permisTypes})} AND (
-        p.OWNER_ID IN #{join(params.permisOwners)}
+AND (p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
+        p.OWNER_ID IN (#{join(params.permisOwners)})
     -- @if(notNull(params.permisRoles)){
-        OR f.OWNER_NAME IN #{join(params.permisRoles)}
+        OR p.OWNER_NAME IN (#{join(params.permisRoles)})
     -- @}  
     )
 )
@@ -197,12 +195,12 @@ findShareMine
 ```sql
 SELECT #{page(use("fileFields"))}
 FROM DOC_FILE f
-#use("shareFilter")
+#{use("shareMineFilter")}
 ```
 countShareMine
 ===
 ```sql
 SELECT COUNT(*)
 FROM DOC_FILE f
-#use("shareFilter")
+#{use("shareMineFilter")}
 ```

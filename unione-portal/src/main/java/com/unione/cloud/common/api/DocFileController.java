@@ -149,16 +149,14 @@ public class DocFileController implements DocFileService{
 		params.getBody().setIsShare(1);
 		params.getBody().setDelFlag(0);
 		params.getBody().setAuditStatus(2);//1待审，2通过，3拒绝
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			params.getBody().setTenantId(sessionService.getTenantId());
-			if ("organ".equals(PERMIS_LEVEL)) {
-				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-					params.getBody().setOrgId(sessionService.getOrgId());
-				}
-			} else if ("user".equals(PERMIS_LEVEL)) {
-				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-					params.getBody().setUserId(sessionService.getUserId());
-				}
+		params.getBody().setTenantId(sessionService.getTenantId());
+		if ("organ".equals(PERMIS_LEVEL)) {
+			if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+				params.getBody().setOrgId(sessionService.getOrgId());
+			}
+		} else if ("user".equals(PERMIS_LEVEL)) {
+			if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+				params.getBody().setUserId(sessionService.getUserId());
 			}
 		}
 		
@@ -174,10 +172,7 @@ public class DocFileController implements DocFileService{
 	public Results<List<DocFileDto>> findShareMine(@RequestBody Params<DocFileDto> params) {
 		// 参数处理
 		params.getBody().setDelFlag(0);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			params.getBody().setTenantId(sessionService.getTenantId());
-		}
-		params.getBody().setPermisEnable(true);
+		params.getBody().setTenantId(sessionService.getTenantId());
 		params.getBody().setPermisTypes(Arrays.asList("view","download","edit"));
 		params.getBody().setPermisUser(sessionService.getUserId());
 		params.getBody().getPermisOwners().add(sessionService.getUserId());
@@ -205,13 +200,14 @@ public class DocFileController implements DocFileService{
 	@Operation(summary="查询公开文件列表",description= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
 	public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params) {
 		// 参数处理
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			params.getBody().setTenantId(sessionService.getTenantId());
-		}
+		params.getBody().setTenantId(sessionService.getTenantId());
 		params.getBody().setUserId(sessionService.getUserId());
+		if ("organ".equals(PERMIS_LEVEL)) {
+			params.getBody().setOrgId(sessionService.getOrgId());
+		}
 		
 		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params)
-			.where("delFlag=0 and isPublic=1 and AUDIT_STATUS=2 and tenantId=? and userId!=? and lvsn like [lvsn%] and (title like [%query.keywords%] or name descs [%query.keywords%])"));
+			.where("delFlag=0 and isPublic=1 and AUDIT_STATUS=2 and tenantId=? and userId!=? and orgId!=? and lvSn like [lvSn%] and title like [%title%]"));
 		
 		return result;
 	}
