@@ -80,7 +80,7 @@ public class DocFileController implements DocFileService{
 	@Value("${doc.permis.level:tenant}")
 	private String PERMIS_LEVEL;
 	
-	private String DOCTREECODE="UNIONE:DOCTREE";
+	private String DOCTREECODE="DOCTREE";
 	
 	
 	@Override
@@ -118,7 +118,7 @@ public class DocFileController implements DocFileService{
 	@PostMapping({"/find/mine"})
 	@Action(title="查询我的文件",type = ActionType.Query)
 	@Operation(summary="查询我的文件",description= "只查询自己上传的文件")
-	public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params) {
+	public Results<List<DocFile>> findMine(@RequestBody Params<DocFileDto> params) {
 		// 参数处理
 		params.getBody().setDelFlag(0);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
@@ -134,8 +134,10 @@ public class DocFileController implements DocFileService{
 			}
 		}
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
-		return result;
+		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
+		.where("delFlag=0 and isPublic=? and isShare=? and auditStatus=? and dirId=? and (userId=? or orgId=?) and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
+		
+		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()));
 	}
 	
 	
@@ -220,7 +222,7 @@ public class DocFileController implements DocFileService{
 	public Results<Long> save(@Validated(Validator.save.class) DocFileDto entity) {
 		
 		// 参数处理
-		AssertUtil.service().notNull(entity, new String[] {"appId","name","title"},"参数%s不能为空");
+		AssertUtil.service().notNull(entity, new String[] {"title"},"参数%s不能为空");
 		int len = 0;
 		if(entity.getPermis()!=null && !entity.getPermis().isEmpty() || 
 				entity.getIsPublic()!=null&&entity.getIsPublic()==1) {
@@ -251,6 +253,7 @@ public class DocFileController implements DocFileService{
 		}else {
 			entity.setDelFlag(0);
 			entity.setStatus(1);
+			entity.setIsShare(0);
 			entity.setLvNo(-1);
 			BeanUtils.setDefaultValue(entity, "dirId", -1L);
 			if(entity.getDirId()!=null&&entity.getDirId()>0) {
@@ -422,7 +425,6 @@ public class DocFileController implements DocFileService{
 		entity.setDelFlag(0);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			entity.setTenantId(sessionService.getTenantId());
-			entity.setDelFlag(0);
 			if ("organ".equals(PERMIS_LEVEL)) {
 				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
 					entity.setOrgId(sessionService.getOrgId());

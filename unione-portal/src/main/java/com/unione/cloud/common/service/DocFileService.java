@@ -30,7 +30,7 @@ public interface DocFileService extends FeignSave<DocFileDto>,FeignDelete<DocFil
 	   
 	   @PostMapping({"/find/mine"})
 	   @Operation(summary = "我的文件",description = "只查询自己上传的文件")
-	   public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params);
+	   public Results<List<DocFile>> findMine(@RequestBody Params<DocFileDto> params);
 	   
 	   
 	   @PostMapping({"/find/other"})

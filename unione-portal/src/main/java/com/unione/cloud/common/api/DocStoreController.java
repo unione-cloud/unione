@@ -122,7 +122,7 @@ public class DocStoreController implements DocStoreService{
 	private String PERMIS_LEVEL;
 	
 
-	private String DOCTREECODE="UNIONE:DOCTREE";
+	private String DOCTREECODE="DOCTREE";
 	
 
 	@Action(title="上传文件",type=ActionType.Upload)
@@ -613,7 +613,7 @@ public class DocStoreController implements DocStoreService{
 		
 		// 加载文件记录
 		SqlBuilder<DocFileDto>	builder=SqlBuilder.build(entity).ids(ids);
-		List<DocFileDto> docs = dataBaseDao.findList(builder);
+		List<DocFileDto> docs = dataBaseDao.findByIds(builder);
 		AssertUtil.service().notEmpty(docs, "文件记录未找到或当前用户无操作权限");
 		LogsUtil.setTarget(docs.get(0).getId(), docs.get(0).getTitle());
 		

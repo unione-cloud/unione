@@ -91,8 +91,8 @@ AND f.NAME=#{params.name}
 -- @if(notNull(params.dirId)){
 AND f.DIR_ID=#{params.dirId}
 -- @} 
--- @if(notNull(params.lvsn)){
-AND f.LV_SN LIKE #{params.lvsn+'%'}
+-- @if(notNull(params.lvSn)){
+AND f.LV_SN LIKE #{params.lvSn+'%'}
 -- @} 
 -- @if(notNull(params.incTypes)){
 AND f.TYPE IN #{join(params.incTypes)}
@@ -164,8 +164,8 @@ AND f.NAME=#{params.name}
 -- @if(notNull(params.dirId)){
 AND f.DIR_ID=#{params.dirId}
 -- @} 
--- @if(notNull(params.lvsn)){
-AND f.LV_SN LIKE #{params.lvsn+'%'}
+-- @if(notNull(params.lvSn)){
+AND f.LV_SN LIKE #{params.lvSn+'%'}
 -- @} 
 -- @if(notNull(params.incTypes)){
 AND f.TYPE IN #{join(params.incTypes)}

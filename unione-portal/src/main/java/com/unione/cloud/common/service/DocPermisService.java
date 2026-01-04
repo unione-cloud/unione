@@ -1,6 +1,7 @@
 package com.unione.cloud.common.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
@@ -43,10 +43,10 @@ public class DocPermisService {
 	
 	
 	/**
-	 * 	数据权限：机构权限开关，默认开启
+	 * 文档权限级别：tenant(租户)、organ(机构)、user(用户)
 	 */
-	@Value("${data.permis.org.enable:true}")
-	private boolean ORG_PERMIS;
+	@Value("${doc.permis.level:tenant}")
+	private String PERMIS_LEVEL;
 	
 	
 	/**
@@ -109,10 +109,15 @@ public class DocPermisService {
 		Params<DocPermis> params=new Params<>();
 		params.setBody(temp);
 		Map<Long, DocPermis> map = new HashMap<>();
-		List<DocPermis> list = dataBaseDao.findList(temp);
+		List<DocPermis> list = dataBaseDao.findList(SqlBuilder.build(temp));
 		list.stream().forEach(perm->{
 			map.put(perm.getOwnerId(), perm);
 		});
+		Map<String,Integer> porder=new HashMap<>();
+		porder.put("view", 1);
+		porder.put("download", 2);
+		porder.put("edit", 3);
+		
 		
 		if(permis!=null && !permis.isEmpty()) {
 			List<DocPermis> adds=new ArrayList<>();
@@ -120,18 +125,12 @@ public class DocPermisService {
 				DocPermis p=map.remove(perm.getOwnerId());
 				if(p!=null) {
 					if(!StringUtils.equals(p.getList(), perm.getList())) {
-						// 更新
-						if(p.getList().indexOf("download")<0 && perm.getList().indexOf("download")>=0) {
-							// 如果是新添加下载权限，则需要重新审核，设置审核状态：4变更
-							p.setDelFlag(1);
-							perm.setAuditResult(4);
-							adds.add(perm);
-						}else {
-							p.setList(perm.getList());
+						p.setList(perm.getList());
+						if(porder.get(p.getList())!=null && porder.get(perm.getList())!=null && porder.get(p.getList())>porder.get(perm.getList())) {
+							// 如果加大权限，则需要重新审核，设置审核状态：4变更
+							p.setAuditResult(4);
 						}
-						p.setLastUpdated(DateUtil.date());
-						p.setLastUpdatedBy(sessionService.getUserId());
-						int len=dataBaseDao.updateById(Updater.build(p).fields("list","delFlag"));
+						int len=dataBaseDao.updateById(SqlBuilder.build(p).field("list","auditResult"));
 						log.debug("权限记录更新结果,sid:{},len:{}",p.getId(),len);
 					}
 				}else {
@@ -142,13 +141,21 @@ public class DocPermisService {
 				adds.stream().forEach(perm->{
 					perm.setId(IdGenHolder.generate());
 					perm.setDelFlag(0);
-					if(perm.getAuditResult()==null || perm.getAuditResult()!=4) {
-						perm.setAuditResult(1);
-					}
+					perm.setAuditResult(1);
 					perm.setFileId(file.getId());
-					perm.setFileTitle(file.getTitle());
 					perm.setFileName(file.getName());
+					perm.setFileTitle(file.getTitle());
 					perm.setFileType(file.getType());
+					if("dir".equals(file.getType())){
+						perm.setFileLvSn(file.getLvSn()+"%");
+					}else{
+						perm.setFileLvSn(file.getLvSn());
+					}
+					if("public".equals(perm.getOwnerType())) {
+						perm.setAuditType(1);
+					}else{
+						perm.setAuditType(2);
+					}
 					perm.setTenantId(sessionService.getTenantId());
 					perm.setOrgId(sessionService.getOrgId());
 					perm.setUserId(sessionService.getUserId());
@@ -168,11 +175,9 @@ public class DocPermisService {
 		if(map!=null && !map.isEmpty()) {
 			List<Long> ids=map.values().stream().map(p->p.getId()).collect(Collectors.toList());
 			DocPermis tmp=new DocPermis();
-			tmp.setLastUpdated(DateUtil.date());
-			tmp.setLastUpdatedBy(sessionService.getUserId());
 			SqlBuilder<DocPermis> builder=SqlBuilder.build(tmp).ids(ids);
 			int len=dataBaseDao.deleteLogicById(builder);
-			LogsUtil.add("删除数据，len:"+len);
+			LogsUtil.add("删除数据，len:%s",len);
 		}
 		
 		LogsUtil.add("退出:修改文件权限方法");
@@ -192,15 +197,20 @@ public class DocPermisService {
 		SqlBuilder<DocPermis> builder=SqlBuilder.build(permis).ids(fileIds);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			permis.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				permis.setOrgId(sessionService.getOrgId());
-			}
+			if ("organ".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					permis.setOrgId(sessionService.getOrgId());
+				}
+			} else if ("user".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					permis.setUserId(sessionService.getUserId());
+				}
+			}			
 		}
 		
-		int len=dataBaseDao.update(builder);
-		LogsUtil.add("成功更新数据,len:"+len);
+		int len=dataBaseDao.deleteLogicById(builder);
+		LogsUtil.add("成功更新数据,len:%s",len);
 		
-		LogsUtil.add("退出:删除文件权限方法");
 	}
 	
 	/**
@@ -217,11 +227,14 @@ public class DocPermisService {
 		if(sessionService.getOrgId()!=null) {
 			permisOwners.add(sessionService.getOrgId());
 		}
-		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, ids)
-				.where("delFlag=0 and auditResult in (2,4) and ownerId in [permisOwners]")
-				.where("permisOwners", permisOwners);
+		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class)
+				.where("delFlag=0 and auditResult in [auditResults] and (ownerId in [permisOwners] or ownerName in [ownerNames]) and fileId in [ids]")
+				.where("auditResults", Arrays.asList(2,4))
+				.where("permisOwners", permisOwners)
+				.where("ownerNames", sessionService.getUserRoles())
+				.where("ids", ids);
 		List<DocPermis> permisList=dataBaseDao.findList(builder);
-		
+
 		LogsUtil.add("分发权限信息到文档对象中");
 		Map<Long, DocFileDto> fMap=new HashMap<>();
 		
