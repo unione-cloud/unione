@@ -492,7 +492,7 @@ public class SqlBuilder<T> {
 		      .append(idField.getColumn()).append(" IN (#{join(query.ids)})\n")
 		      .append("-- @}\n");
 			
-			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID,BaseField.USER_ID).stream().forEach(field->{
+			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID,BaseField.USER_ID,BaseField.DEL_FLAG).stream().forEach(field->{
 				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
 			      .append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n")
 			      .append("-- @}\n");
