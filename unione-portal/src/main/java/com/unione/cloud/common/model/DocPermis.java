@@ -46,6 +46,11 @@ public class DocPermis extends Pojo {
 	@Schema(title="文件名称",description="长度为：50")
 	private String fileName;
 	/**
+	* 文件层级编码
+	*/
+	@Schema(title="文件层级编码",description="长度为：50")
+	private String fileLvSn;
+	/**
 	* 文件类型
 	*/
 	@Schema(title="文件类型",description="长度为：10")
@@ -65,6 +70,11 @@ public class DocPermis extends Pojo {
 	*/
 	@Schema(title="权限拥有者ID",description="长度为：19")
 	private Long ownerId;
+	/**
+	* 权限拥有者名称
+	*/
+	@Schema(title="权限拥有者名称",description="长度为：50")
+	private String ownerName;
 	/**
 	* 权限拥有者标题
 	*/

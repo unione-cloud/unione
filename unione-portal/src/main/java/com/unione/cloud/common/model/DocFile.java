@@ -1,19 +1,16 @@
 package com.unione.cloud.common.model;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.QueryAction;
+import com.unione.cloud.beetsql.builder.SqlAction;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -60,14 +57,25 @@ public class DocFile extends Pojo {
 	@Schema(title="附件名称（表单中的名称）",description="长度为：50")
 	private String name;
 	/**
+	* 层级编码：自动生成
+	*/
+	@QueryAction(SqlAction.LIKER)
+	@Schema(title="层级编码",description="层级编码：自动生成，长度为：100")
+	private String lvSn;
+	/**
+	* 所在层级
+	*/
+	@Schema(title="所在层级",description="长度为：10")
+	private Integer lvNo;
+	/**
 	* 附件大小(字节)
 	*/
 	@Schema(title="附件大小(字节)",description="长度为：12")
 	private Long size;
 	/**
-	* 附件类型:jpg,doc,png
+	* 附件类型:jpg,doc,png,dir:文件夹
 	*/
-	@Schema(title="附件类型:jpg,doc,png",description="长度为：10")
+	@Schema(title="附件类型:jpg,doc,png,dir:文件夹",description="长度为：10")
 	private String type;
 	/**
 	* 附件路径
@@ -89,6 +97,11 @@ public class DocFile extends Pojo {
 	*/
 	@Schema(title="公开状态：0:不公开,1:公开",description="长度为：10")
 	private Integer isPublic;
+	/**
+	* 共享状态，字典TRUEORFALSE 1是，0否
+	*/
+	@Schema(title="共享状态，字典TRUEORFALSE 1是，0否",description="长度为：10")
+	private Integer isShare;
 	/**
 	* 审核状态，公开或共享时的审核状态，字典DOCFILEAUDITSTS 1待审，2通过，3拒绝
 	*/
@@ -116,38 +129,4 @@ public class DocFile extends Pojo {
 		return this.path;
 	}
 	
-	@Default
-	@Schema(title="文档权限集合")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private List<DocPermis> permis=new ArrayList<>();
-	@Schema(title="文档拥有者",description="如果是文档拥有则，则为true否则为false")
-	private boolean isOwner;
-	@JsonIgnore
-	@Schema(title="共享文档",description="如果设置成true，则查询有分配权限或公开的文档")
-	private boolean shared;
-	@Schema(title="附件所有者ID集合")
-	private List<Long> ownerIds;
-	@JsonIgnore
-	private boolean incPublic;		// 包含公开文件
-	@JsonIgnore
-	private boolean incDel;			// 包含删除文件
-	@JsonIgnore
-	private Long unUserId;			// 非当前用户,过滤掉当前用户
-	@JsonIgnore
-	private boolean permisEnable;						// 文档查询权限开关
-	@JsonIgnore
-	private Long permisUser;							// 文档权限查询，当前查询用户ID
-	@JsonIgnore
-	private Long permisOrg;								// 文档权限查询，当前查询用户所属机构ID
-	@JsonIgnore
-	@Default
-	private List<Long> permisOwners=new ArrayList<>();	// 文档权限查询，权限归属ID集合
-	@Default
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@Schema(title="包含types集合",description="通过types进行文件类型过滤")
-	private List<String> incTypes=new ArrayList<>();
-	@Default
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@Schema(title="不包含types集合",description="通过types进行文件类型过滤")
-	private List<String> ninTypes=new ArrayList<>();
 }

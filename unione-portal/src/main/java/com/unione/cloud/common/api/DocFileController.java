@@ -1,13 +1,14 @@
 package com.unione.cloud.common.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
-import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.common.service.DocFileService;
 import com.unione.cloud.common.service.DocPermisService;
@@ -26,14 +27,16 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
-import com.unione.cloud.system.model.SysApiInfo;
+import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.service.CodeTreeService;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "doc管理：文件信息 管理服务")
 @RequestMapping("/api/common/file")
-public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
+public class DocFileController implements DocFileService{
 
 	/**
 	 * 数据访问对象
@@ -68,19 +71,16 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 	@Autowired
 	private DocPermisService docPermisService;
 
+	@Autowired
+	private CodeTreeService codeTreeService;
+
 	/**
-	 * 	数据权限：机构权限开关，默认开启
+	 * 文档权限级别：tenant(租户)、organ(机构)、user(用户)
 	 */
-	@Value("${doc.permis.org.enable:true}")
-	private boolean ORG_PERMIS;
+	@Value("${doc.permis.level:tenant}")
+	private String PERMIS_LEVEL;
 	
-	
-	/**
-	 * 	数据权限：文档权限开关，默认开启
-	 */
-	@Value("${doc.permis.file.enable:false}")
-	private boolean FILE_PERMIS_ENABLE;
-	
+	private String DOCTREECODE="UNIONE:DOCTREE";
 	
 	
 	@Override
@@ -88,47 +88,51 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 	@Operation(summary="查询文件列表",description="文档综合查询接口")
 	public Results<List<DocFile>> find(Params<DocFile> params) {
 		// 参数处理
-		params.getBody().setPermisEnable(FILE_PERMIS_ENABLE);
-		if(FILE_PERMIS_ENABLE) {
-			params.getBody().setPermisUser(sessionService.getUserId());
-			if(ORG_PERMIS) {
-				params.getBody().setPermisOrg(sessionService.getOrgId());
-			}
-			params.getBody().getPermisOwners().add(sessionService.getUserId());
-			if(sessionService.getOrgId()!=null) {
-				params.getBody().getPermisOwners().add(sessionService.getOrgId());
-			}
-//			if(sessionService.getUserRoles()!=null) {
-//				params.getBody().getPermisOwners().addAll(sessionService.getUserRoles());
-//			}
-		}
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			params.getBody().setTenantId(sessionService.getTenantId());
-			params.getBody().setDelFlag(0);
-			if(ORG_PERMIS && FILE_PERMIS_ENABLE==false && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				params.getBody().setOrgId(sessionService.getOrgId());
-			}
-		}
-		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
-		
-		// 加载文档权限集合
-		if(FILE_PERMIS_ENABLE && !ObjectUtils.isEmpty(result.getBody()) && 
-				params.getBody().getUserId()==null) {
-			docPermisService.loadFilePermis(result.getBody());
-		}
+		Params<DocFileDto> query=new Params<>();
+		BeanUtil.copyProperties(params, query, "body");
+		BeanUtil.copyProperties(params.getBody(), query.getBody());
 
-		return result;
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			query.getBody().setPermisEnable(true);
+			query.getBody().setPermisTypes(Arrays.asList("view","download","edit"));
+			query.getBody().setPermisUser(sessionService.getUserId());
+			if("organ".equals(PERMIS_LEVEL)) {
+				query.getBody().setPermisOrg(sessionService.getOrgId());
+			}
+			query.getBody().getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				query.getBody().getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				query.getBody().getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+		}
+		query.getBody().setDelFlag(0);
+		
+		Results<List<DocFileDto>> result = dataBaseDao.findPages("findDocList","countDocList",SqlBuilder.build(query));
+		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()));
 	}
 	
+
 	
 	@PostMapping({"/find/mine"})
 	@Action(title="查询我的文件",type = ActionType.Query)
 	@Operation(summary="查询我的文件",description= "只查询自己上传的文件")
 	public Results<List<DocFile>> findMine(@RequestBody Params<DocFile> params) {
 		// 参数处理
-		params.getBody().setUserId(sessionService.getUserId());
 		params.getBody().setDelFlag(0);
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			params.getBody().setTenantId(sessionService.getTenantId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					params.getBody().setOrgId(sessionService.getOrgId());
+				}
+			} else if ("user".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					params.getBody().setUserId(sessionService.getUserId());
+				}
+			}
+		}
 		
 		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		return result;
@@ -136,14 +140,25 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 	
 	
 	@PostMapping("/find/mineShare")
-	@Operation(summary="查询我共享的文件",description="")
+	@Operation(summary="查询我共享的文件",description="包括：我共享")
 	@Action(title="查询我共享的文件",type = ActionType.Query)
 	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params) {
 		// 参数处理
-		params.getBody().setUserId(sessionService.getUserId());
-		params.getBody().setShared(true);
+		params.getBody().setIsShare(1);
 		params.getBody().setDelFlag(0);
 		params.getBody().setAuditStatus(2);//1待审，2通过，3拒绝
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			params.getBody().setTenantId(sessionService.getTenantId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					params.getBody().setOrgId(sessionService.getOrgId());
+				}
+			} else if ("user".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					params.getBody().setUserId(sessionService.getUserId());
+				}
+			}
+		}
 		
 		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
 		
@@ -154,31 +169,28 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 	@PostMapping("/find/shareMine")
 	@Operation(summary="查询共享给我的文件",description="")
 	@Action(title="查询共享给我的文件",type = ActionType.Query)
-	public Results<List<DocFile>> findShareMine(@RequestBody Params<DocFile> params) {
+	public Results<List<DocFileDto>> findShareMine(@RequestBody Params<DocFileDto> params) {
 		// 参数处理
-		params.getBody().setUserId(null);
-		params.getBody().setUnUserId(sessionService.getUserId());
 		params.getBody().setDelFlag(0);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
 		}
 		params.getBody().setPermisEnable(true);
+		params.getBody().setPermisTypes(Arrays.asList("view","download","edit"));
 		params.getBody().setPermisUser(sessionService.getUserId());
-		if(ORG_PERMIS) {
+		params.getBody().getPermisOwners().add(sessionService.getUserId());
+		if ("organ".equals(PERMIS_LEVEL)) {
 			params.getBody().setPermisOrg(sessionService.getOrgId());
 		}
-		params.getBody().getPermisOwners().add(sessionService.getUserId());
-		if(sessionService.getOrgId()!=null) {
-			params.getBody().getPermisOwners().add(sessionService.getOrgId());
-		}
+		params.getBody().getPermisOwners().add(sessionService.getOrgId());
 		if(sessionService.getUserRoles()!=null) {
-			//params.getBody().getPermisOwners().addAll(sessionService.getUserRoles());
+			params.getBody().getPermisRoles().addAll(sessionService.getUserRoles());
 		}
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<DocFileDto>> result = dataBaseDao.findPages("findShareMine","countShareMine",SqlBuilder.build(params));
 		
 		// 加载文档权限集合
-		if(!ObjectUtils.isEmpty(result.getBody())) {
+		if(!ObjectUtil.isEmpty(result.getBody())) {
 			docPermisService.loadFilePermis(result.getBody());
 		}
 		
@@ -194,23 +206,21 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			params.getBody().setTenantId(sessionService.getTenantId());
 		}
-		params.getBody().setUnUserId(sessionService.getUserId());
-		params.getBody().setIsPublic(1);
-		params.getBody().setDelFlag(0);
+		params.getBody().setUserId(sessionService.getUserId());
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params)
+			.where("delFlag=0 and isPublic=1 and AUDIT_STATUS=2 and tenantId=? and userId!=? and lvsn like [lvsn%] and (title like [%query.keywords%] or name descs [%query.keywords%])"));
 		
 		return result;
 	}
 
-
+	
 	@Override
 	@Action(title="保存文件信息",type=ActionType.Save)
-	public Results<Long> save(@Validated(Validator.save.class) DocFile entity) {
-		Results<Long> results = new Results<>();
+	public Results<Long> save(@Validated(Validator.save.class) DocFileDto entity) {
 		
 		// 参数处理
-		//AssertUtil.service().notNull(entity, new String[] {"appId","name","title"},"参数%s不能为空");
+		AssertUtil.service().notNull(entity, new String[] {"appId","name","title"},"参数%s不能为空");
 		int len = 0;
 		if(entity.getPermis()!=null && !entity.getPermis().isEmpty() || 
 				entity.getIsPublic()!=null&&entity.getIsPublic()==1) {
@@ -218,141 +228,185 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		}
 		
 		if(entity.getId()!=null&&entity.getId()>0){
-			len = dataBaseDao.insertWithId(entity);
+			// 权限验证
+			if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+				entity.setPermisTypes(Arrays.asList("edit"));
+				entity.setPermisUser(sessionService.getUserId());
+				if ("organ".equals(PERMIS_LEVEL)) {
+					entity.setPermisOrg(sessionService.getOrgId());
+				}
+				entity.getPermisOwners().add(sessionService.getUserId());
+				if(sessionService.getOrgId()!=null) {
+					entity.getPermisOwners().add(sessionService.getOrgId());
+				}
+				if(sessionService.getUserRoles()!=null) {
+					entity.getPermisRoles().addAll(sessionService.getUserRoles());
+				}
+				long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+				AssertUtil.service().isTrue(valid>0, "文件记录未找到或当前用户无操作权限");
+			}
+			
+			String fields[] = {"title","name","ordered","extData","descs","fileMeta","fileData"};
+			len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
 		}else {
-			LogsUtil.add("设置默认属性");
 			entity.setDelFlag(0);
 			entity.setStatus(1);
+			entity.setLvNo(-1);
+			BeanUtils.setDefaultValue(entity, "dirId", -1L);
+			if(entity.getDirId()!=null&&entity.getDirId()>0) {
+				DocFile dir=dataBaseDao.findById(SqlBuilder.build(DocFile.class).id(entity.getDirId()));
+				AssertUtil.service().notNull(dir, "目录不存在")
+					.isTrue("dir".equals(dir.getType()), "文件夹类型不对")
+					.notNull(dir, new String[] {"lvNo","lvSn"}, "目录属性%s异常");
+
+				//目录权限验证
+				if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+					DocFileDto permis=new DocFileDto();
+					permis.setPermisTypes(Arrays.asList("edit"));
+					permis.setId(dir.getId());
+					permis.setPermisUser(sessionService.getUserId());
+					if ("organ".equals(PERMIS_LEVEL)) {
+						permis.setPermisOrg(sessionService.getOrgId());
+					}
+					if(sessionService.getOrgId()!=null) {
+						permis.getPermisOwners().add(sessionService.getOrgId());
+					}
+					permis.getPermisOwners().add(sessionService.getUserId());
+					if(sessionService.getUserRoles()!=null) {
+						permis.getPermisRoles().addAll(sessionService.getUserRoles());
+					}
+					Long valid = dataBaseDao.count("validPermis",SqlBuilder.build(permis));
+					AssertUtil.service().isTrue(valid>0, "当前用户无权限访问该目录");
+				}
+
+				entity.setLvNo(dir.getLvNo()+1);
+				entity.setLvSn(codeTreeService.generate(DOCTREECODE, dir.getLvSn(), dir.getLvNo()+1));
+			}else if("dir".equals(entity.getType()) && ObjectUtil.equals(entity.getDirId(), -1L)) {
+				entity.setLvNo(0);
+				entity.setLvSn(codeTreeService.generate(DOCTREECODE));
+			}
+
 			len = dataBaseDao.insert(entity);
+
 		}
-		LogsUtil.add("保存数据,len:"+len);
 		
 		// 保存文档权限
-		if(FILE_PERMIS_ENABLE && entity.getPermis()!=null && !entity.getPermis().isEmpty()) {
+		if(!"tenant".equals(PERMIS_LEVEL) && entity.getPermis()!=null && !entity.getPermis().isEmpty()) {
 			docPermisService.save(entity, entity.getPermis());
 		}
 		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-		return results;
+		return Results.build(len>0, entity.getId());
 	}
-
-
-	@PostMapping("/update")
-	@Action(title="更新文件信息",type=ActionType.Save)
-	@Operation(summary="更新文件信息",description= "")
-	public Results<Long> update(@RequestBody @Validated(Validator.update.class) DocFile entity) {
-		Results<Long> results = new Results<>();
-
-		// 参数处理
-		AssertUtil.service().notNull(entity, new String[] {"id","name","title"},"参数%s不能为空");
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
-		
-		String fields[] = {"dirId","title","name","type","size","ordered","extData","descs","fileMeta","fileData"};
-		entity.setLastUpdated(DateUtil.date());
-		entity.setLastUpdatedBy(sessionService.getUserId());
-		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
-		LogsUtil.add("保存数据,len:"+len);
-		
-		results.setBody(entity.getId());
-		results.setSuccess(len>0);
-		results.setMessage(len>0?"操作成功":"操作失败");
-
-		log.debug("退出控制:修改文档文件信息方法，entity:{},result:{}",entity,results.isSuccess());
-		return results;
-	}
-
 
 
 	@Override
 	public Results<List<DocFile>> findByIds(Set<Long> ids) {
 		log.debug("进入控制:批量查询文档文件信息方法，ids:{}",ids);
-		Results<List<DocFile>> results = new Results<>();
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");
 		
 		// 参数处理
-		DocFile entity=new DocFile();
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			entity.setDelFlag(0);
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+		DocFileDto entity=new DocFileDto();
+		entity.setDelFlag(0);
+		entity.setIds(new ArrayList<>(ids));
+
+		// 权限验证
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisEnable(true);
+			entity.setPermisTypes(Arrays.asList("view","download","edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
 			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			AssertUtil.service().isTrue(valid>0, "文件记录未找到或当前用户无操作权限");
 		}
 		
-		SqlBuilder<DocFile> builder=SqlBuilder.build(entity).ids(new ArrayList<>(ids));
-		List<DocFile> rows= dataBaseDao.findList(builder);
+		SqlBuilder<DocFileDto> builder=SqlBuilder.build(entity).ids(new ArrayList<>(ids));
+		List<DocFileDto> rows= dataBaseDao.findList(builder);
 		LogsUtil.add("批量查询数据:"+rows.size());
 		
-		results.setBody(rows);
-		results.setSuccess(true);
-		results.setMessage("操作成功");
-		
-		return results;
+		return Results.success(rows.stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()));
 	}
 
 
 	@Override
-	public Results<DocFile> detail(Long sid) {
-		Results<DocFile> results = new Results<>();
+	public Results<DocFile> detail(Long id) {
 		// 参数处理
-		AssertUtil.service().notNull(sid,"参数sid不能为空");
+		AssertUtil.service().notNull(id,"参数id不能为空");
 		
 		// 参数处理
-		DocFile entity=new DocFile();
-		entity.setId(sid);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			entity.setDelFlag(0);
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+		DocFileDto entity=new DocFileDto();
+		entity.setId(id);
+		entity.setDelFlag(0);
+
+		// 权限验证
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisEnable(true);
+			entity.setPermisTypes(Arrays.asList("view","download","edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
 			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			Long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			AssertUtil.service().isTrue(valid>0, "文件记录未找到或当前用户无操作权限");
 		}
 		
 		LogsUtil.add("查找记录");
-		DocFile tmp = dataBaseDao.findById(SqlBuilder.build(entity));
+		DocFileDto tmp = dataBaseDao.findById(SqlBuilder.build(entity));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 					
-		results.setBody(tmp);
-		results.setSuccess(true);
-		results.setMessage("操作成功");
-		return results;
+		return Results.success(tmp);
 	}
 	
 
 	@Override
 	@Action(title="删除文件",type = ActionType.Delete)
 	public Results<Integer> delete(Set<Long> ids){
-		Results<Integer> results = new Results<>();
 		// 参数处理
 		AssertUtil.service().notEmpty(ids, "参数不能为空");	
 		
 		// 参数处理
-		DocFile entity=new DocFile();
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+		DocFileDto entity=new DocFileDto();
+		entity.setIds(new ArrayList<>(ids));
+		// 权限验证
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
 			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			Long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			AssertUtil.service().isTrue(valid>0, "当前用户无权限访问该目录");
 		}
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:%s",JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.deleteById(SqlBuilder.build(SysApiInfo.class,ids));
-		LogsUtil.add("成功删除记录数量:"+count);
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(entity).ids(ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
-		results.setSuccess(count>0);
-		results.setMessage(count>0?"操作成功":"操作失败");
-		results.setBody(count);
-		return results;
+		return Results.build(count>0, count);
 	}
 
 
@@ -365,11 +419,18 @@ public class DocFileController implements PojoFeignApi<DocFile>,DocFileService{
 		
 		// 参数处理
 		DocFile entity=new DocFile();
+		entity.setDelFlag(0);
 		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
 			entity.setTenantId(sessionService.getTenantId());
 			entity.setDelFlag(0);
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					entity.setOrgId(sessionService.getOrgId());
+				}
+			} else if ("user".equals(PERMIS_LEVEL)) {
+				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+					entity.setUserId(sessionService.getUserId());
+				}
 			}
 		}
 		

@@ -1,7 +1,6 @@
 package com.unione.cloud.common.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Updater;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.common.model.DocPermis;
 import com.unione.cloud.core.dto.Params;
@@ -68,6 +68,11 @@ public class DocPermisService {
 					perm.setFileTitle(file.getTitle());
 					perm.setFileName(file.getName());
 					perm.setFileType(file.getType());
+					if("dir".equals(file.getType())){
+						perm.setFileLvSn(file.getLvSn()+"%");
+					}else{
+						perm.setFileLvSn(file.getLvSn());
+					}
 				}
 				if(perm.getAuditResult()==null || perm.getAuditResult()!=4) {
 					perm.setAuditResult(1);
@@ -203,7 +208,7 @@ public class DocPermisService {
 	 * @param files
 	 * @return
 	 */
-	public List<DocPermis> loadFilePermis(List<DocFile> files){
+	public List<DocPermis> loadFilePermis(List<DocFileDto> files){
 		LogsUtil.add("进入:批量加载用户文件权限信息方法");
 		
 		List<Long> ids = files.stream().map(f->f.getId()).collect(Collectors.toList());
@@ -213,13 +218,12 @@ public class DocPermisService {
 			permisOwners.add(sessionService.getOrgId());
 		}
 		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class, ids)
-				.where("delFlag=? and auditResult in (2,4) and permisUser=? and ownerId in [permisOwners]")
-				.where("permisOwners", permisOwners)
-				.where("permisUser", sessionService.getUserId());
+				.where("delFlag=0 and auditResult in (2,4) and ownerId in [permisOwners]")
+				.where("permisOwners", permisOwners);
 		List<DocPermis> permisList=dataBaseDao.findList(builder);
 		
 		LogsUtil.add("分发权限信息到文档对象中");
-		Map<Long, DocFile> fMap=new HashMap<>();
+		Map<Long, DocFileDto> fMap=new HashMap<>();
 		
 		DocPermis view=new DocPermis();
 		view.setList("view");
@@ -232,7 +236,7 @@ public class DocPermisService {
 			}
 		});
 		permisList.stream().forEach(p->{
-			DocFile file=fMap.get(p.getFileId());
+			DocFileDto file=fMap.get(p.getFileId());
 			if(file!=null) {
 				file.getPermis().add(p);
 			}

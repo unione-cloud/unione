@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.common.model.DocPermis;
 import com.unione.cloud.common.service.DocCacheService;
@@ -41,6 +43,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.service.CodeTreeService;
 import com.unione.cloud.util.AttachUtil;
 import com.unione.cloud.util.AttachUtil.Attach;
 import com.unione.cloud.util.FileUtil;
@@ -48,6 +51,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -94,6 +98,9 @@ public class DocStoreController implements DocStoreService{
 	
 	@Autowired
 	private HttpServletRequest request;
+
+	@Autowired
+	private CodeTreeService codeTreeService;
 	
 //	@Autowired
 //	private PdfService pdfConvertor;
@@ -102,24 +109,20 @@ public class DocStoreController implements DocStoreService{
 	private String PDF_CONVERT_REGIX;
 	
 	/**
-	 * 	文件物流删除开关，默认：物理删除
+	 * 	文件物理删除开关，默认：物理删除
 	 */
 	@Value("${doc.delete.physically:true}")
 	private boolean FILE_PHYSICALLY_DELETED;
 	
 	
 	/**
-	 * 	数据权限：机构权限开关，默认开启
+	 * 文档权限级别：tenant(租户)、organ(机构)、user(用户)
 	 */
-	@Value("${doc.permis.org.enable:true}")
-	private boolean ORG_PERMIS;
+	@Value("${doc.permis.level:tenant}")
+	private String PERMIS_LEVEL;
 	
-	
-	/**
-	 * 	数据权限：文档权限开关，默认开启
-	 */
-	@Value("${doc.permis.file.enable:false}")
-	private boolean FILE_PERMIS_ENABLE;
+
+	private String DOCTREECODE="UNIONE:DOCTREE";
 	
 
 	@Action(title="上传文件",type=ActionType.Upload)
@@ -138,7 +141,7 @@ public class DocStoreController implements DocStoreService{
 		DocFile doc=new DocFile();
 		doc.setAppCode(appCode);
 		doc.setOwnerId(ownerId);
-		doc.setDirId(dirId!=null&&!"null".equals(dirId)?Long.parseLong(dirId):null);
+		doc.setDirId(dirId!=null&&!"null".equals(dirId)?Long.parseLong(dirId):-1L);
 		doc.setName(name!=null&&!"null".equals(name)?name:null);
 		doc.setIsPublic(isPublic!=null?isPublic:0);
 		doc.setExtData(extData!=null&&!"null".equals(extData)?extData:null);
@@ -148,6 +151,38 @@ public class DocStoreController implements DocStoreService{
 		AssertUtil.service().notNull(file, "文件不能为空")
 			.isTrue(!file.isEmpty(), "文件不能为空")
 			.notNull(doc,new String[] {"appCode"}, "属性%s不能为空");
+
+		// 文件层级编码
+		if(doc.getDirId()!=null && doc.getDirId()!=-1L) {
+			LogsUtil.add("设置文件层级编码");
+			DocFile dir=dataBaseDao.findById(SqlBuilder.build(DocFile.class).id(doc.getDirId()));
+			AssertUtil.service().notNull(dir, "目录不存在")
+				.isTrue("dir".equals(dir.getType()), "文件夹类型不对")
+				.notNull(dir, new String[] {"lvNo","lvSn"}, "目录属性%s异常");
+
+			//目录权限验证
+			if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+				DocFileDto permis=new DocFileDto();
+				permis.setPermisTypes(Arrays.asList("edit"));
+				permis.setId(dir.getId());
+				permis.setPermisUser(sessionService.getUserId());
+				if ("organ".equals(PERMIS_LEVEL)) {
+					permis.setPermisOrg(sessionService.getOrgId());
+				}
+				if(sessionService.getOrgId()!=null) {
+					permis.getPermisOwners().add(sessionService.getOrgId());
+				}
+				permis.getPermisOwners().add(sessionService.getUserId());
+				if(sessionService.getUserRoles()!=null) {
+					permis.getPermisRoles().addAll(sessionService.getUserRoles());
+				}
+				Long valid = dataBaseDao.count("validPermis",SqlBuilder.build(permis));
+				AssertUtil.service().isTrue(valid>0, "当前用户无权限访问该目录");
+			}
+
+			doc.setLvNo(dir.getLvNo()+1);
+			doc.setLvSn(codeTreeService.generate(DOCTREECODE, dir.getLvSn(), dir.getLvNo()+1));
+		}	
 		
 		LogsUtil.add("设置默认信息");
 		doc.setStatus(1);
@@ -164,12 +199,13 @@ public class DocStoreController implements DocStoreService{
 		doc.setTitle(attach.getTitle());
 		doc.setSize(attach.getSize());
 		doc.setType(attach.getTypes());
+		doc.setLvNo(-1);
 		
 		LogsUtil.add("保存文件记录");
 		int len = dataBaseDao.insert(doc);
 		
 		//如果是公开文件，则创建公开文件权限记录
-		if(FILE_PERMIS_ENABLE && doc.getIsPublic()==1) {
+		if(!"tenant".equals(PERMIS_LEVEL) && doc.getIsPublic()==1) {
 			DocPermis permis=new DocPermis();
 			permis.setOwnerType("public");
 			permis.setOwnerTitle("文件公开");
@@ -212,7 +248,7 @@ public class DocStoreController implements DocStoreService{
 		DocFile doc=new DocFile();
 		doc.setAppCode(appCode);
 		doc.setOwnerId(ownerId);
-		doc.setDirId(dirId!=null&&!"null".equals(dirId)?Long.parseLong(dirId):null);
+		doc.setDirId(dirId!=null&&!"null".equals(dirId)?Long.parseLong(dirId):-1L);
 		doc.setName(name!=null&&!"null".equals(name)?name:null);
 		doc.setIsPublic(isPublic!=null?isPublic:0);
 		doc.setExtData(extData!=null&&!"null".equals(extData)?extData:null);
@@ -233,6 +269,34 @@ public class DocStoreController implements DocStoreService{
 		doc.setCreatedBy(sessionService.getUserId());
 		doc.setLastUpdated(DateUtil.date());
 		doc.setLastUpdatedBy(sessionService.getUserId());
+
+		DocFile dir=null;
+		if(doc.getDirId()!=null && doc.getDirId()!=-1L) {
+			LogsUtil.add("设置文件层级编码");
+			dir=dataBaseDao.findById(SqlBuilder.build(DocFile.class).id(doc.getDirId()));
+			AssertUtil.service().notNull(dir, "目录不存在")
+				.isTrue("dir".equals(dir.getType()), "文件夹类型不对")
+				.notNull(dir, new String[] {"lvNo","lvSn"}, "目录属性%s异常");
+			// 目录权限验证
+			if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+				DocFileDto permis=new DocFileDto();
+				permis.setPermisTypes(Arrays.asList("edit"));
+				permis.setId(dir.getId());
+				permis.setPermisUser(sessionService.getUserId());
+				if ("organ".equals(PERMIS_LEVEL)) {
+					permis.setPermisOrg(sessionService.getOrgId());
+				}
+				if(sessionService.getOrgId()!=null) {
+					permis.getPermisOwners().add(sessionService.getOrgId());
+				}
+				permis.getPermisOwners().add(sessionService.getUserId());
+				if(sessionService.getUserRoles()!=null) {
+					permis.getPermisRoles().addAll(sessionService.getUserRoles());
+				}
+				Long valid = dataBaseDao.count("validPermis",SqlBuilder.build(permis));
+				AssertUtil.service().isTrue(valid>0, "当前用户无权限访问该目录");
+			}
+		}	
 		
 		LogsUtil.add("保存附件,count:"+files.size());
 		for(MultipartFile file:files) {
@@ -248,6 +312,13 @@ public class DocStoreController implements DocStoreService{
 			dfile.setTitle(attach.getTitle());
 			dfile.setSize(attach.getSize());
 			dfile.setType(attach.getTypes());
+			dfile.setLvNo(-1);
+
+			if(dir!=null){
+				LogsUtil.add("设置文件层级编码");
+				doc.setLvNo(dir.getLvNo()+1);
+				doc.setLvSn(codeTreeService.generate(DOCTREECODE, dir.getLvSn(), dir.getLvNo()+1));
+			}
 			
 			LogsUtil.add("保存文件记录");
 			int len = dataBaseDao.insert(dfile);
@@ -257,7 +328,7 @@ public class DocStoreController implements DocStoreService{
 				dfile.setPath("error");
 			}else {
 				//如果是公开文件，则创建公开文件权限记录
-				if(FILE_PERMIS_ENABLE && dfile.getIsPublic()==1) {
+				if(!"tenant".equals(PERMIS_LEVEL) && dfile.getIsPublic()==1) {
 					DocPermis permis=new DocPermis();
 					permis.setOwnerType("public");
 					permis.setOwnerTitle("文件公开");
@@ -296,26 +367,38 @@ public class DocStoreController implements DocStoreService{
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 		
 		LogsUtil.add("参数处理");
-		DocFile entity=new DocFile();
+		DocFileDto entity=new DocFileDto();
 		entity.setId(fileId);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+		entity.setDelFlag(0);
+
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
 			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			AssertUtil.service().isTrue(valid>0, "文件记录未找到或当前用户无操作权限");
 		}
 		
 		LogsUtil.add("查询文档记录");
 		DocFile tmp=dataBaseDao.findById(SqlBuilder.build(entity));
-		AssertUtil.service().notNull(tmp, "文件记录未找到");
+		AssertUtil.service().notNull(tmp, "文件记录未找到或当前用户无操作权限");
 		LogsUtil.setTarget(tmp.getId(), tmp.getTitle());
+
 		
 		int len = 0;
 		if(FILE_PHYSICALLY_DELETED) {
 			LogsUtil.add("删除文档存储,path:"+tmp.getRealPath());
 			boolean flag = AttachUtil.delete(tmp.getRealPath());
 			LogsUtil.add("删除文档存储结果:%s",flag);
-//			AssertUtil.service().isTrue(flag, "文档删除失败");
 			
 			// 删除pdf文件
 			String pdfPath=tmp.getRealPath().substring(0,tmp.getRealPath().lastIndexOf("."))+".pdf";
@@ -328,7 +411,8 @@ public class DocStoreController implements DocStoreService{
 		}
 		
 		// 删除缓存
-		docCacheService.delDocData(tmp.getId());
+		docCacheService.delDocData(tmp.getId(),false);
+		docCacheService.delDocData(tmp.getId(),true);
 
 		return results.setSuccess(len>0);
 	}
@@ -343,19 +427,31 @@ public class DocStoreController implements DocStoreService{
 		AssertUtil.service().notNull(ownerId, "参数ownerId不能为空");
 		
 		LogsUtil.add("参数处理");
-		DocFile entity=new DocFile();
+		DocFileDto entity=new DocFileDto();
+		entity.setDelFlag(0);
 		entity.setOwnerId(ownerId);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
 			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			AssertUtil.service().isTrue(valid>0, "文件记录未找到或当前用户无操作权限");
 		}
 		
 		LogsUtil.add("查询文档记录");
 		List<DocFile> list=dataBaseDao.findList(SqlBuilder.build(entity));
-		AssertUtil.service().notNull(list, "文件记录未找到").isTrue(!list.isEmpty(), "文件记录未找到");
+		AssertUtil.service().notEmpty(list, "文件记录未找到或当前用户无操作权限");
 		LogsUtil.add("查询文档记录,count:"+list.size());
+
 		
 		Integer count=0;
 		for(DocFile tmp:list) {
@@ -364,7 +460,6 @@ public class DocStoreController implements DocStoreService{
 				boolean flag = AttachUtil.delete(tmp.getRealPath());
 				LogsUtil.add("删除文档存储结果:%s",flag);
 				try {
-//					AssertUtil.service().isTrue(flag, "文档删除失败");
 					
 					LogsUtil.add("删除文档记录");
 					int len = dataBaseDao.deleteById(SqlBuilder.build(DocFile.class, tmp.getId()));
@@ -388,7 +483,8 @@ public class DocStoreController implements DocStoreService{
 			}
 			
 			// 删除缓存
-			docCacheService.delDocData(tmp.getId());
+			docCacheService.delDocData(tmp.getId(),false);
+			docCacheService.delDocData(tmp.getId(),true);
 		}
 		
 		// 逻辑删除文件信息
@@ -404,33 +500,19 @@ public class DocStoreController implements DocStoreService{
 	@Action(title="下载文件",type=ActionType.Download)
 	@Operation(summary="下载文件",description = "根据文件id下载")
 	public void download(@PathVariable("fileId") Long fileId) {
-		log.debug("进入:文件下载方法，fileId:{}",fileId);
-		File file = this.downloadFile(fileId);
-		if(file!=null) {
-			DocData cache=docCacheService.getDocData(fileId);
-			// 下载文件
-			AttachUtil.download(file, cache!=null?cache.getTitle():file.getName(), request, response);
-		}
-	}
-	
-	
-	public File downloadFile(Long fileId) {
 		LogsUtil.add("参数验证");
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 		
 		LogsUtil.add("参数处理");
-		DocFile entity=new DocFile();
+		DocFileDto entity=new DocFileDto();
 		entity.setId(fileId);
-		entity.setIncPublic(true);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
-		if(FILE_PERMIS_ENABLE) {
+		entity.setDelFlag(0);
+
+		// 权限验证
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("download","edit"));
 			entity.setPermisUser(sessionService.getUserId());
-			if(ORG_PERMIS) {
+			if ("organ".equals(PERMIS_LEVEL)) {
 				entity.setPermisOrg(sessionService.getOrgId());
 			}
 			entity.getPermisOwners().add(sessionService.getUserId());
@@ -438,16 +520,29 @@ public class DocStoreController implements DocStoreService{
 				entity.getPermisOwners().add(sessionService.getOrgId());
 			}
 			if(sessionService.getUserRoles()!=null) {
-				//entity.getPermisOwners().addAll(sessionService.getUserRoles());
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			if(valid==0) {
+				AttachUtil.sendScriptMessage("文件记录未找到或当前用户无操作权限", response);
+				return;
 			}
 		}
+
+		// 加载文件记录
 		DocFile tmp=dataBaseDao.findOne(SqlBuilder.build(entity));
-		AssertUtil.service().notNull(tmp, "文件记录未找到").notNull(tmp.getPath(), "文件存储path为空");
+		if(tmp==null) {
+			AttachUtil.sendScriptMessage("文件记录未找到或当前用户无操作权限", response);
+			return;
+		}
 		LogsUtil.setTarget(tmp.getId(), tmp.getTitle());
-		
+		if(ObjectUtil.isEmpty(tmp.getPath())){
+			AttachUtil.sendScriptMessage("文件存储path为空", response);
+			return;
+		}
 		
 		LogsUtil.add("查询文档记录");
-		DocData cache=docCacheService.getDocData(fileId);
+		DocData cache=docCacheService.getDocData(fileId,false);
 		File file = null;
 		if(cache==null || (file=cache.getFile())==null) {
 			// 如果是公开文档，则添加public
@@ -459,7 +554,7 @@ public class DocStoreController implements DocStoreService{
 			file = AttachUtil.download(tmp.getPath());
 			if(file!=null) {
 				// 设置文件缓存
-				docCacheService.setDocData(fileId, DocData.build(tmp, file));
+				docCacheService.setDocData(fileId,false, DocData.build(tmp, file));
 			}else {
 				AttachUtil.sendScriptMessage("文件未找到", response);
 			}
@@ -470,32 +565,36 @@ public class DocStoreController implements DocStoreService{
 			AttachUtil.download(file, cache.getTitle(), request, response);
 			log.debug("退出:文件下载方法，fileId:{},path:{}",fileId,cache.getPath());
 		}
-		
-		return file;
+
+		if(file!=null && cache!=null) {
+			// 下载文件
+			AttachUtil.download(file, cache!=null?cache.getTitle():file.getName(), request, response);
+		}else{
+			AttachUtil.sendScriptMessage("文件下载失败", response);
+		}
 	}
+	
 
 	
 	@PostMapping("/download")
 	@Action(title="下载文件",type=ActionType.Download)
 	@Operation(summary="下载文件【批量】",description = "根据文件id下载")
-	public void download(@RequestBody List<Long> fileIds) {
+	public void download(@RequestBody Set<Long> ids) {
 		LogsUtil.add("参数验证");
-		AssertUtil.service().notNull(fileIds, "参数fileIds不能为空")
-			.notEmpty(fileIds, "参数fileIds不能为空");
-		LogsUtil.add("文件下载批量ID:"+fileIds);
+		AssertUtil.service().notNull(ids, "参数fileIds不能为空")
+			.notEmpty(ids, "参数fileIds不能为空");
+		LogsUtil.add("文件下载批量ID:"+ids);
 		
 		LogsUtil.add("参数处理");
-		DocFile entity=new DocFile();
-		entity.setIncPublic(true);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
-		if(FILE_PERMIS_ENABLE) {
+		DocFileDto entity=new DocFileDto();
+		entity.setDelFlag(0);
+		entity.setIds(new ArrayList<>(ids));
+
+		// 权限验证
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("download","edit"));
 			entity.setPermisUser(sessionService.getUserId());
-			if(ORG_PERMIS) {
+			if ("organ".equals(PERMIS_LEVEL)) {
 				entity.setPermisOrg(sessionService.getOrgId());
 			}
 			entity.getPermisOwners().add(sessionService.getUserId());
@@ -503,30 +602,36 @@ public class DocStoreController implements DocStoreService{
 				entity.getPermisOwners().add(sessionService.getOrgId());
 			}
 			if(sessionService.getUserRoles()!=null) {
-				//entity.getPermisOwners().addAll(sessionService.getUserRoles());
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			if(valid==0) {
+				AttachUtil.sendScriptMessage("文件记录未找到或当前用户无操作权限", response);
+				return;
 			}
 		}
 		
-		LogsUtil.add("查询文档记录");
-		SqlBuilder<DocFile>	builder=SqlBuilder.build(entity).ids(fileIds);
-		List<DocFile> docs = dataBaseDao.findList(builder);
-		AssertUtil.service().notEmpty(docs, "文件记录未找到");
+		// 加载文件记录
+		SqlBuilder<DocFileDto>	builder=SqlBuilder.build(entity).ids(ids);
+		List<DocFileDto> docs = dataBaseDao.findList(builder);
+		AssertUtil.service().notEmpty(docs, "文件记录未找到或当前用户无操作权限");
 		LogsUtil.setTarget(docs.get(0).getId(), docs.get(0).getTitle());
 		
+		// 文件处理
 		File dir=new File(System.getProperty("java.io.tmpdir"), "file.download.bt."+UUID.fastUUID().toString());
 		dir.mkdir();
 		Map<String, Integer> map=new HashMap<>();
 		
 		LogsUtil.add("下载文件：开始");
 		for(DocFile doc:docs) {
-			DocData cache=docCacheService.getDocData(doc.getId());
+			DocData cache=docCacheService.getDocData(doc.getId(),false);
 			File file = cache!=null?cache.getFile():null;
 			if(cache==null || file==null) {
 				LogsUtil.add("下载文档,path:"+doc.getPath());
 				file = AttachUtil.download(doc.getRealPath());
 				if(file!=null) {
 					// 设置文件缓存
-					docCacheService.setDocData(doc.getId(), DocData.build(doc, file));
+					docCacheService.setDocData(doc.getId(),false, DocData.build(doc, file));
 				}else {
 					LogsUtil.add("文件未找到，title:"+doc.getTitle());
 					LogsUtil.add("文件未找到，path:"+doc.getRealPath());
@@ -575,23 +680,18 @@ public class DocStoreController implements DocStoreService{
 	@GetMapping("/preview/{fileId}")
 	@Action(title="文件预览",type = ActionType.Query)
 	@Operation(summary="预览文件",description = "根据文件id下载")
-	public void preview(@PathVariable("fileId") Long fileId) {
+	public void preview(@PathVariable("fileId") Long id) {
 		LogsUtil.add("参数验证");
-		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
+		AssertUtil.service().notNull(id, "参数fileId不能为空");
 		
 		LogsUtil.add("参数处理");
-		DocFile entity=new DocFile();
-		entity.setId(fileId);
-		entity.setIncPublic(true);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			entity.setTenantId(sessionService.getTenantId());
-			if(ORG_PERMIS && !sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-				entity.setOrgId(sessionService.getOrgId());
-			}
-		}
-		if(FILE_PERMIS_ENABLE) {
+		DocFileDto entity=new DocFileDto();
+		entity.setDelFlag(0);
+		entity.setId(id);
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("view","download","edit"));
 			entity.setPermisUser(sessionService.getUserId());
-			if(ORG_PERMIS) {
+			if ("organ".equals(PERMIS_LEVEL)) {
 				entity.setPermisOrg(sessionService.getOrgId());
 			}
 			entity.getPermisOwners().add(sessionService.getUserId());
@@ -599,12 +699,17 @@ public class DocStoreController implements DocStoreService{
 				entity.getPermisOwners().add(sessionService.getOrgId());
 			}
 			if(sessionService.getUserRoles()!=null) {
-				//entity.getPermisOwners().addAll(sessionService.getUserRoles());
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			if(valid==0) {
+				AttachUtil.sendScriptMessage("文件记录未找到或当前用户无操作权限", response);
+				return;
 			}
 		}
 		
 		LogsUtil.add("查询文档记录");
-		DocData cache=docCacheService.getDocData(fileId);
+		DocData cache=docCacheService.getDocData(id,false);
 		File file = cache!=null?cache.getFile():null;
 		if(cache!=null && !StringUtils.isEmpty(cache.getError())) {
 			// 直接输出错误信息
@@ -648,15 +753,15 @@ public class DocStoreController implements DocStoreService{
 				file = AttachUtil.download(tmp.getPath());
 				if(file!=null) {
 					// 设置文件缓存
-					docCacheService.setDocData(fileId, DocData.build(tmp, file));
+					docCacheService.setDocData(id,false, DocData.build(tmp, file));
 					// 文件预览
 					AttachUtil.preview(file, response);
-					log.debug("退出:文件下载方法，fileId:{},path:{}",fileId,tmp.getPath());
+					log.debug("退出:文件下载方法，fileId:{},path:{}",id,tmp.getPath());
 				}else {
 					AttachUtil.sendScriptMessage("文件未找到", response);
 				}
 //			}
-			log.debug("退出:文件预览方法，fileId:{},path:{}",fileId,tmp.getPath());
+			log.debug("退出:文件预览方法，fileId:{},path:{}",id,tmp.getPath());
 		}
 	}
 	
@@ -669,7 +774,7 @@ public class DocStoreController implements DocStoreService{
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 		
 		log.debug("查询文档记录");
-		DocData cache=docCacheService.getDocData(fileId);
+		DocData cache=docCacheService.getDocData(fileId,true);
 		File file = cache!=null?cache.getFile():null;
 		if(cache!=null && !StringUtils.isEmpty(cache.getError())) {
 			// 直接输出错误信息
@@ -706,7 +811,7 @@ public class DocStoreController implements DocStoreService{
 				file = AttachUtil.download(tmp.getPath());
 				if(file!=null) {
 					// 设置文件缓存
-					docCacheService.setDocData(fileId, DocData.build(tmp, file));
+					docCacheService.setDocData(fileId,true, DocData.build(tmp, file));
 					
 					// 文件预览
 					AttachUtil.preview(file, response);

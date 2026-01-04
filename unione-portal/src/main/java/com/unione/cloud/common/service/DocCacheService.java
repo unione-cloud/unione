@@ -19,7 +19,7 @@ import lombok.Data;
 public class DocCacheService {
 	
 	
-	private Cache<Long, DocData> cache;
+	private Cache<String, DocData> cache;
 	/**
 	 * 文档缓存时间，单位秒，默认：60
 	 * @param time
@@ -75,29 +75,31 @@ public class DocCacheService {
 	/**
 	 * 	从缓存中获取doc file对象
 	 * @param fileId
+	 * @param isPublic 是否为公共文件
 	 * @return
 	 */
-	public DocData getDocData(Long fileId) {
-		return cache.get(fileId);
+	public DocData getDocData(Long fileId,boolean isPublic) {
+		return cache.get(String.format("%s:%s",fileId,isPublic));
 	}
 	
 	
 	/**
 	 * 	添加doc file 到缓存
 	 * @param fileId
+	 * @param isPublic 是否为公共文件
 	 * @param data
 	 */
-	public void setDocData(Long fileId,DocData data) {
-		cache.put(fileId, data);
+	public void setDocData(Long fileId,boolean isPublic,DocData data) {
+		cache.put(String.format("%s:%s",fileId,isPublic), data);
 	}
 	
 	/**
 	 * 	从缓存中删除doc file
 	 * @param fileId
-	 * @param file
+	 * @param isPublic 是否为公共文件
 	 */
-	public void delDocData(Long fileId) {
-		cache.remove(fileId);
+	public void delDocData(Long fileId,boolean isPublic) {
+		cache.remove(String.format("%s:%s",fileId,isPublic));
 	}
 
 }

@@ -2,6 +2,7 @@ package com.unione.cloud.common.service;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,9 +87,7 @@ public interface DocStoreService{
 	
 	@PostMapping("/download")
 	@Operation(summary = "下载文件【批量】",description = "根据文件id下载")
-	public void download(@RequestBody List<Long> fileIds);
-	
-	public File downloadFile(Long fileId);
+	public void download(@RequestBody Set<Long> fileIds);
 	
 	
 	@GetMapping("/preview/{fileId}")

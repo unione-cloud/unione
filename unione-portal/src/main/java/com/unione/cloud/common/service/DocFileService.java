@@ -7,16 +7,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.core.feign.PojoFeignApi;
+import com.unione.cloud.core.feign.api.FeignDelete;
+import com.unione.cloud.core.feign.api.FeignDetail;
+import com.unione.cloud.core.feign.api.FeignFind;
+import com.unione.cloud.core.feign.api.FeignFindById;
+import com.unione.cloud.core.feign.api.FeignSave;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 
 
-public interface DocFileService extends PojoFeignApi<DocFile>{
+public interface DocFileService extends FeignSave<DocFileDto>,FeignDelete<DocFile>,FeignFind<DocFile>,FeignFindById<DocFile>,FeignDetail<DocFile>{
 	
 	   @PostMapping({"/set/owner/{ownerId}"})
 	   @Operation(summary = "设置文件归属",description = "参数body中未文件id集合，返回body为成功数")
@@ -40,6 +45,6 @@ public interface DocFileService extends PojoFeignApi<DocFile>{
 		
 	   @PostMapping("/find/shareMine")
 	   @Operation(summary = "共享给我的文件",description="")
-	   public Results<List<DocFile>> findShareMine(@RequestBody Params<DocFile> params);
+	   public Results<List<DocFileDto>> findShareMine(@RequestBody Params<DocFileDto> params);
 	   
 }
