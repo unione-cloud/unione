@@ -200,6 +200,10 @@ public class DocStoreController implements DocStoreService{
 		doc.setSize(attach.getSize());
 		doc.setType(attach.getTypes());
 		BeanUtils.setDefaultValue(doc, "lvNo",-1);
+		if(ObjectUtil.equal(request.getAttribute("public"), true)){
+			// 上传公开文件，直接设置为已审核
+			doc.setAuditStatus(2);
+		}
 		
 		LogsUtil.add("保存文件记录");
 		int len = dataBaseDao.insert(doc);
@@ -214,6 +218,18 @@ public class DocStoreController implements DocStoreService{
 		}
 		
 		return Results.build(len>0, doc);
+	}
+
+	@PostMapping(value="/upload/public/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
+			@PathVariable("appCode") String appCode,
+			@PathVariable("ownerId") Long ownerId,
+			@RequestParam(value="dirId",required=false) String dirId,
+			@RequestParam(value="name",required=false) String name,
+			@RequestParam(value="extData",required=false) String extData,
+			@RequestParam(value="descs",required=false) String descs){
+		request.setAttribute("public", true);
+		return this.upload(file, appCode, ownerId, dirId, name, 1, extData, descs);
 	}
 
 

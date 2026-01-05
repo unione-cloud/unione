@@ -46,6 +46,16 @@ public interface DocStoreService{
 			@RequestParam(value="descs",required=false) String descs);
 	
 	
+	@Operation(summary ="上传文件[单个]")
+	@PostMapping(value="/upload/public/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public Results<DocFile> upload(@RequestPart("file") MultipartFile file,
+			@PathVariable("appCode") String appCode,
+			@PathVariable("ownerId") Long ownerId,
+			@RequestParam(value="dirId",required=false) String dirId,
+			@RequestParam(value="name",required=false) String name,
+			@RequestParam(value="extData",required=false) String extData,
+			@RequestParam(value="descs",required=false) String descs);
+	
 	
 	@Operation(summary =  "上传文件[批量]")
 	@PostMapping(value="/upload/batch/{appCode}/{ownerId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
