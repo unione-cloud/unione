@@ -51,7 +51,7 @@ public class DocPermis extends Pojo {
 	* 文件层级编码
 	*/
 	@Schema(title="文件层级编码",description="长度为：50")
-	private String fileLvSn;
+	private String fileLvsn;
 	/**
 	* 文件类型
 	*/

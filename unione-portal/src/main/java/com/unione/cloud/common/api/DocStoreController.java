@@ -199,7 +199,7 @@ public class DocStoreController implements DocStoreService{
 		doc.setTitle(attach.getTitle());
 		doc.setSize(attach.getSize());
 		doc.setType(attach.getTypes());
-		doc.setLvNo(-1);
+		BeanUtils.setDefaultValue(doc, "lvNo",-1);
 		
 		LogsUtil.add("保存文件记录");
 		int len = dataBaseDao.insert(doc);
@@ -316,8 +316,8 @@ public class DocStoreController implements DocStoreService{
 
 			if(dir!=null){
 				LogsUtil.add("设置文件层级编码");
-				doc.setLvNo(dir.getLvNo()+1);
-				doc.setLvSn(codeTreeService.generate(DOCTREECODE, dir.getLvSn(), dir.getLvNo()+1));
+				dfile.setLvNo(dir.getLvNo()+1);
+				dfile.setLvSn(codeTreeService.generate(DOCTREECODE, dir.getLvSn(), dir.getLvNo()+1));
 			}
 			
 			LogsUtil.add("保存文件记录");

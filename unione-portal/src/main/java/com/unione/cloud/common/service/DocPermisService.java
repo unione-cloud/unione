@@ -69,9 +69,9 @@ public class DocPermisService {
 					perm.setFileName(file.getName());
 					perm.setFileType(file.getType());
 					if("dir".equals(file.getType())){
-						perm.setFileLvSn(file.getLvSn()+"%");
+						perm.setFileLvsn(file.getLvSn()+"%");
 					}else{
-						perm.setFileLvSn(file.getLvSn());
+						perm.setFileLvsn(file.getLvSn());
 					}
 				}
 				if(perm.getAuditResult()==null || perm.getAuditResult()!=4) {
@@ -147,9 +147,9 @@ public class DocPermisService {
 					perm.setFileTitle(file.getTitle());
 					perm.setFileType(file.getType());
 					if("dir".equals(file.getType())){
-						perm.setFileLvSn(file.getLvSn()+"%");
+						perm.setFileLvsn(file.getLvSn()+"%");
 					}else{
-						perm.setFileLvSn(file.getLvSn());
+						perm.setFileLvsn(file.getLvSn());
 					}
 					if("public".equals(perm.getOwnerType())) {
 						perm.setAuditType(1);
@@ -178,6 +178,11 @@ public class DocPermisService {
 			SqlBuilder<DocPermis> builder=SqlBuilder.build(tmp).ids(ids);
 			int len=dataBaseDao.deleteLogicById(builder);
 			LogsUtil.add("删除数据，len:%s",len);
+		}
+
+		long hadPermisCount = dataBaseDao.count(SqlBuilder.build(temp).where("fileId=? and delFlag=0 and ownerType!='public'"));
+		if(hadPermisCount>0){
+			file.setIsShare(1);
 		}
 		
 		LogsUtil.add("退出:修改文件权限方法");

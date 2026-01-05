@@ -5,7 +5,7 @@ validPermis
 ```sql
 SELECT COUNT(*)
 FROM DOC_FILE f
-LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
+LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.LV_SN LIKE p.FILE_LVSN
 WHERE f.TENANT_ID=#{principal.tenantId} AND f.DEL_FLAG=0
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
@@ -17,19 +17,24 @@ AND f.ID IN (#{join(params.ids)})
 AND f.OWNER_ID=#{params.ownerId}
 -- @} 
 AND (
--- @if(!contains(params.permisTypes,'edit') && !contains(params.permisTypes,'download')){
-    f.IS_PUBLIC=0 AND f.AUDIT_STATUS=2
+    f.USER_ID=#{params.permisUser}
+-- @if(contains(params.permisTypes,'view')){
+    OR f.IS_PUBLIC=1 AND f.AUDIT_STATUS=2
 -- @}        
-    OR f.USER_ID=#{query.permisUser}
 -- @if(notNull(params.permisOrg)){
     OR f.ORG_ID=#{params.permisOrg}
 -- @}      
-    OR 
-    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
-        p.OWNER_ID IN (#{join(params.permisOwners)})
-    -- @if(notNull(params.permisRoles)){
-        OR p.OWNER_NAME IN (#{join(params.permisRoles)})
-    -- @}  
+    OR p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND 
+    (
+        p.LIST IN (#{join(params.permisTypes)}) AND (
+            p.OWNER_ID IN (#{join(params.permisOwners)})
+        -- @if(notNull(params.permisRoles)){
+            OR p.OWNER_NAME IN (#{join(params.permisRoles)})
+        -- @}  
+        )
+        -- @if(contains(params.permisTypes,'view')){
+            OR p.OWNER_TYPE='public'
+        -- @}   
     )
 )
 ```
@@ -37,6 +42,7 @@ AND (
 fileFields
 ===
 ```sql
+  DISTINCT
   f.ID,
   f.TENANT_ID,
   f.DIR_ID,
@@ -68,7 +74,7 @@ fileFields
 permisFilter
 ===
 ```sql
-LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
+LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.LV_SN LIKE p.FILE_LVSN
 WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
@@ -107,17 +113,18 @@ AND f.TYPE NOT IN (#{join(params.ninTypes)})
 AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
 -- @} 
 AND (
-    f.IS_PUBLIC=0 AND f.AUDIT_STATUS=2
+    f.IS_PUBLIC=1 AND f.AUDIT_STATUS=2
     OR f.USER_ID=#{query.permisUser}
 -- @if(notNull(params.permisOrg)){
     OR f.ORG_ID=#{params.permisOrg}
 -- @}      
-    OR 
-    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
+    OR p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND 
+    (   p.OWNER_TYPE='public' OR  p.LIST IN (#{join(params.permisTypes)}) AND (
         p.OWNER_ID IN (#{join(params.permisOwners)})
-    -- @if(notNull(params.permisRoles)){
-        OR p.OWNER_NAME IN (#{join(params.permisRoles)})
-    -- @}  
+        -- @if(notNull(params.permisRoles)){
+            OR p.OWNER_NAME IN (#{join(params.permisRoles)})
+        -- @}  
+        )
     )
 )
 ```
@@ -133,17 +140,70 @@ FROM DOC_FILE f
 countDocList
 ===
 ```sql
-SELECT COUNT(*)
+SELECT COUNT(DISTINCT(f.ID))
 FROM DOC_FILE f
 #{use("permisFilter")}
 ```
 
 
+
+mineShareFilter
+===
+```sql
+LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.LV_SN LIKE p.FILE_LVSN
+WHERE f.TENANT_ID=#{principal.tenantId} AND f.DEL_FLAG=0 AND ((f.IS_PUBLIC=1 OR f.IS_SHARE=1) AND f.AUDIT_STATUS=2 OR p.DEL_FLAG=0 AND p.AUDIT_RESULT=2)
+AND (
+f.USER_ID=#{principal.id}
+-- @if(notNull(params.orgId)){
+OR f.ORG_ID=#{params.orgId}
+-- @} 
+)
+-- @if(notNull(params.dirId)){
+AND f.DIR_ID=#{params.dirId}
+-- @} 
+-- @if(notNull(params.lvSn)){
+AND f.LV_SN LIKE #{params.lvSn+'%'}
+-- @} 
+-- @if(notNull(params.incTypes)){
+AND f.TYPE IN (#{join(params.incTypes)})
+-- @} 
+-- @if(notNull(params.ninTypes)){
+AND f.TYPE NOT IN (#{join(params.ninTypes)})
+-- @} 
+-- @if(notNull(query.keywords)){
+AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
+-- @} 
+```
+
+
+findMineShare
+===
+```sql
+SELECT #{page(use("fileFields"))}
+FROM DOC_FILE f
+#{use("mineShareFilter")}
+```
+countMineShare
+===
+```sql
+SELECT COUNT(DISTINCT(f.ID))
+FROM DOC_FILE f
+#{use("mineShareFilter")}
+```
+
+
+
 shareMineFilter
 ===
 ```sql
-LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.TYPE='dir' AND f.LV_SN LIKE p.FILE_LVSN
+LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.LV_SN LIKE p.FILE_LVSN
 WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0 
+AND (
+f.USER_ID!=#{principal.id}
+-- @if(notNull(params.orgId)){
+AND f.ORG_ID!=#{params.orgId}
+-- @} 
+)
 -- @if(notNull(params.id)){
 AND f.ID=#{params.id}
 -- @} 
@@ -180,7 +240,9 @@ AND f.TYPE NOT IN (#{join(params.ninTypes)})
 -- @if(notNull(query.keywords)){
 AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
 -- @} 
-AND (p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
+AND (
+    f.IS_PUBLIC=1 AND f.AUDIT_STATUS=2 OR 
+    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.LIST IN (#{join(params.permisTypes)}) AND (
         p.OWNER_ID IN (#{join(params.permisOwners)})
     -- @if(notNull(params.permisRoles)){
         OR p.OWNER_NAME IN (#{join(params.permisRoles)})
@@ -200,7 +262,69 @@ FROM DOC_FILE f
 countShareMine
 ===
 ```sql
-SELECT COUNT(*)
+SELECT COUNT(DISTINCT(f.ID))
 FROM DOC_FILE f
 #{use("shareMineFilter")}
+```
+
+
+
+publicFilter
+===
+```sql
+LEFT JOIN DOC_PERMIS p ON f.ID=p.FILE_ID OR f.LV_SN LIKE p.FILE_LVSN
+WHERE f.TENANT_ID=#{params.tenantId} AND f.DEL_FLAG=0 
+AND (
+f.USER_ID!=#{principal.id}
+-- @if(notNull(params.orgId)){
+AND f.ORG_ID!=#{params.orgId}
+-- @} 
+)
+-- @if(notNull(params.id)){
+AND f.ID=#{params.id}
+-- @} 
+-- @if(notNull(params.ids)){
+AND f.ID IN (#{join(params.ids)})
+-- @} 
+-- @if(notNull(params.ownerId)){
+AND f.OWNER_ID=#{params.ownerId}
+-- @} 
+-- @if(notNull(params.name)){
+AND f.NAME=#{params.name}
+-- @} 
+-- @if(notNull(params.dirId)){
+AND f.DIR_ID=#{params.dirId}
+-- @} 
+-- @if(notNull(params.lvSn)){
+AND f.LV_SN LIKE #{params.lvSn+'%'}
+-- @} 
+-- @if(notNull(params.incTypes)){
+AND f.TYPE IN (#{join(params.incTypes)})
+-- @} 
+-- @if(notNull(params.ninTypes)){
+AND f.TYPE NOT IN (#{join(params.ninTypes)})
+-- @} 
+-- @if(notNull(query.keywords)){
+AND (f.TITLE LIKE #{'%'+query.keywords+'%'} OR f.DESCS LIKE #{'%'+query.keywords+'%'})
+-- @} 
+AND (
+    f.IS_PUBLIC=1 AND f.AUDIT_STATUS=2 OR 
+    p.DEL_FLAG=0 AND p.AUDIT_RESULT=2 AND p.OWNER_TYPE='public'
+)
+```
+
+
+findPublic
+===
+```sql
+SELECT #{page(use("fileFields"))}
+FROM DOC_FILE f
+#{use("publicFilter")}
+```
+countPublic
+===
+```sql
+SELECT COUNT(DISTINCT(f.ID))
+FROM DOC_FILE f
+#{use("publicFilter")}
 ```

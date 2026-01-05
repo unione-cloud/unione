@@ -160,9 +160,7 @@ public class DocFileController implements DocFileService{
 			}
 		}
 		
-		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
-		.where("delFlag=0 and (isPublic=1 or isShare=1) and auditStatus=2 and tenantId=? and (userId=? or orgId=?)  "+
-			"and dirId=? and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
+		Results<List<DocFileDto>> result = dataBaseDao.findPages("findMineShare","countMineShare",SqlBuilder.build(params));
 		
 		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
 			.setPage(result.getPage())
@@ -211,8 +209,7 @@ public class DocFileController implements DocFileService{
 			params.getBody().setOrgId(sessionService.getOrgId());
 		}
 		
-		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
-			.where("delFlag=0 and isPublic=1 and auditStatus=2 and tenantId=? and userId!=? and orgId!=? and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
+		Results<List<DocFileDto>> result = dataBaseDao.findPages("findPublic","countPublic",SqlBuilder.build(params));
 		
 		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
 			.setPage(result.getPage())

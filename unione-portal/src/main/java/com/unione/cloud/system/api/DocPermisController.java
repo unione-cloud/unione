@@ -31,6 +31,7 @@ import com.unione.cloud.util.AttachUtil;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -148,7 +149,7 @@ public class DocPermisController {
 		AssertUtil.service().notNull(tmp, "文档记录未找到或当前用户无操作权限");
 		
 		//如果公开属性发送变化，则迁移文档路径
-		if(entity.getIsPublic()!=tmp.getIsPublic() && !"dir".equals(tmp.getType())) {
+		if(!ObjectUtil.equal(entity.getIsPublic(),tmp.getIsPublic()) && !"dir".equals(tmp.getType())) {
 			LogsUtil.add("文档公开属性发生变化，改成："+entity.getIsPublic());
 			String remote=tmp.getRealPath();
 			File tFile = AttachUtil.download(remote);
@@ -163,17 +164,19 @@ public class DocPermisController {
 		
 		LogsUtil.add("保存文档权限信息");
 		String fields[] = {"title","isPublic"};
-		int addPermis = docPermisSErvice.update(tmp, entity.getPermis());
-		if(addPermis>0) {
+		int addPermisCount = docPermisSErvice.update(tmp, entity.getPermis());
+		if(addPermisCount>0) {
 			//字典DOCFILEAUDITSTS 1待审，2通过，3拒绝
 			entity.setAuditStatus(1);
-			fields=new String[] {"title","isPublic","auditStatus"};
+			entity.setIsShare(tmp.getIsShare());
+			fields=new String[] {"title","isPublic","isShare","auditStatus"};
 		}
 		
-		if(entity.getIsPublic()==0 && (entity.getPermis()==null  || entity.getPermis().isEmpty())) {
+		if(addPermisCount<=0 && entity.getIsPublic()==0 && ObjectUtil.isEmpty(entity.getPermis())) {
 			//字典DOCFILEAUDITSTS 1待审，2通过，3拒绝
 			entity.setAuditStatus(null);
-			fields=new String[] {"title","isPublic","auditStatus"};
+			entity.setIsShare(tmp.getIsShare());
+			fields=new String[] {"title","isPublic","isShare","auditStatus"};
 		}
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
