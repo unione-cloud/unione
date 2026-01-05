@@ -43,10 +43,14 @@ public class DocFileDto extends DocFile{
 	@JsonIgnore
 	private List<String> permisRoles=new ArrayList<>();	// 文档权限查询，权限角色集合
 
+	@Schema(title="查询文档类型",description="字典DOCQUERYFILETYPE all:全部,img:图片,doc:文档,video:视频,audio:音频,txt:文本")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String fileType;
+
+	@JsonIgnore
 	@Schema(title="包含types集合",description="通过types进行文件类型过滤")
 	private List<String> incTypes=new ArrayList<>();
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonIgnore
 	@Schema(title="不包含types集合",description="通过types进行文件类型过滤")
 	private List<String> ninTypes=new ArrayList<>();
 

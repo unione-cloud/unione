@@ -22,6 +22,7 @@ import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
 import com.unione.cloud.common.service.DocFileService;
 import com.unione.cloud.common.service.DocPermisService;
+import com.unione.cloud.consts.DocTypeConst;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
@@ -133,6 +134,10 @@ public class DocFileController implements DocFileService{
 				}
 			}
 		}
+
+		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
+			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
 		.where("delFlag=0 and isPublic=? and isShare=? and auditStatus=? and dirId=? and (userId=? or orgId=?) and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
@@ -158,6 +163,10 @@ public class DocFileController implements DocFileService{
 			if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
 				params.getBody().setUserId(sessionService.getUserId());
 			}
+		}
+
+		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
+			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findMineShare","countMineShare",SqlBuilder.build(params));
@@ -186,6 +195,10 @@ public class DocFileController implements DocFileService{
 		if(sessionService.getUserRoles()!=null) {
 			params.getBody().getPermisRoles().addAll(sessionService.getUserRoles());
 		}
+
+		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
+			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findShareMine","countShareMine",SqlBuilder.build(params));
 		
@@ -207,6 +220,10 @@ public class DocFileController implements DocFileService{
 		params.getBody().setUserId(sessionService.getUserId());
 		if ("organ".equals(PERMIS_LEVEL)) {
 			params.getBody().setOrgId(sessionService.getOrgId());
+		}
+
+		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
+			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findPublic","countPublic",SqlBuilder.build(params));
