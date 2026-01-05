@@ -137,6 +137,9 @@ public class DocFileController implements DocFileService{
 
 		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
 			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+			if(!ObjectUtil.isEmpty(params.getBody().getIncTypes())){
+				params.getBody().getIncTypes().add("dir");
+			}
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
@@ -167,6 +170,9 @@ public class DocFileController implements DocFileService{
 
 		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
 			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+			if(!ObjectUtil.isEmpty(params.getBody().getIncTypes())){
+				params.getBody().getIncTypes().add("dir");
+			}
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findMineShare","countMineShare",SqlBuilder.build(params));
@@ -198,6 +204,9 @@ public class DocFileController implements DocFileService{
 
 		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
 			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+			if(!ObjectUtil.isEmpty(params.getBody().getIncTypes())){
+				params.getBody().getIncTypes().add("dir");
+			}
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findShareMine","countShareMine",SqlBuilder.build(params));
@@ -224,6 +233,9 @@ public class DocFileController implements DocFileService{
 
 		if(!ObjectUtil.isEmpty(params.getBody().getFileType())){
 			params.getBody().setIncTypes(DocTypeConst.getSuffix(params.getBody().getFileType()));
+			if(!ObjectUtil.isEmpty(params.getBody().getIncTypes())){
+				params.getBody().getIncTypes().add("dir");
+			}
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages("findPublic","countPublic",SqlBuilder.build(params));

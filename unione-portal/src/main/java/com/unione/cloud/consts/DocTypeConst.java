@@ -1,9 +1,12 @@
 package com.unione.cloud.consts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import cn.hutool.core.collection.ListUtil;
 
 public class DocTypeConst {
 
@@ -14,7 +17,7 @@ public class DocTypeConst {
         List<String> AUDIO_SUFFIX = Arrays.asList("mp3", "ogg", "wav", "ape", "cda", "au", "midi", "mac", "aac");
         List<String> VIDEO_SUFFIX = Arrays.asList("mp4", "mkv", "avi", "mov", "wmv", "flv", "webm");
         List<String> IMAGE_SUFFIX = Arrays.asList("jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif");
-        
+
         DOC_TYPE_MAP.put("img", IMAGE_SUFFIX);
         DOC_TYPE_MAP.put("audio", AUDIO_SUFFIX);
         DOC_TYPE_MAP.put("video", VIDEO_SUFFIX);
@@ -23,7 +26,11 @@ public class DocTypeConst {
     }
 
     public static List<String> getSuffix(String docType){
-        return DOC_TYPE_MAP.get(docType);
+        List<String> suffixList = DOC_TYPE_MAP.get(docType);
+        if(suffixList!=null){
+            return new ArrayList<>(suffixList);
+        }
+        return ListUtil.empty();
     }
 
 }
