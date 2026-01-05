@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.util.AttachUtil;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -99,29 +101,73 @@ public class DocPermisController {
 	@PostMapping({"/save"})
 	public Results<Void> save(@RequestBody DocFileDto entity) {
 
-		AssertUtil.service().notNull(entity.getId(), "参数id不能为空")
+		AssertUtil.service().isTrue(entity.getId()!=null||!ObjectUtil.isEmpty(entity.getIds()), "参数id或ids不能都为空")
 			.notEmpty(entity.getPermis(), "参数permis不能为空");
 
 		// 权限验证
-		DocFile tmp=new DocFile();
-		tmp.setId(entity.getId());
-		tmp.setDelFlag(0);
-		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
-			tmp.setTenantId(sessionService.getTenantId());
-			if ("organ".equals(PERMIS_LEVEL)) {
-				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-					tmp.setOrgId(sessionService.getOrgId());
-				}
-			} else if ("user".equals(PERMIS_LEVEL)) {
-				if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
-					tmp.setUserId(sessionService.getUserId());
+		if(entity.getId()!=null){
+			DocFile tmp=new DocFile();
+			tmp.setId(entity.getId());
+			tmp.setDelFlag(0);
+			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+				tmp.setTenantId(sessionService.getTenantId());
+				if ("organ".equals(PERMIS_LEVEL)) {
+					if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+						tmp.setOrgId(sessionService.getOrgId());
+					}
+				} else if ("user".equals(PERMIS_LEVEL)) {
+					if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+						tmp.setUserId(sessionService.getUserId());
+					}
 				}
 			}
+			tmp=dataBaseDao.findById(SqlBuilder.build(tmp));
+			AssertUtil.service().notNull(tmp, "文档记录未找到或当前用户无操作权限");
+
+			docPermisSErvice.save(entity, entity.getPermis());
+		}else if(!ObjectUtil.isEmpty(entity.getPermis())){
+			DocFile tmp=new DocFile();
+			tmp.setDelFlag(0);
+			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+				tmp.setTenantId(sessionService.getTenantId());
+				if ("organ".equals(PERMIS_LEVEL)) {
+					if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+						tmp.setOrgId(sessionService.getOrgId());
+					}
+				} else if ("user".equals(PERMIS_LEVEL)) {
+					if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
+						tmp.setUserId(sessionService.getUserId());
+					}
+				}
+			}
+			List<DocFile> rows = dataBaseDao.findByIds(SqlBuilder.build(tmp).ids(entity.getIds()));
+			List<DocPermis> permisList=new ArrayList<>();
+			rows.stream().forEach(doc->{
+				entity.getPermis().stream().forEach(p->{
+					DocPermis permis=BeanUtils.copyProperties(p, DocPermis.class);
+					permis.setFileId(doc.getId());
+					permis.setFileTitle(doc.getTitle());
+					permis.setFileName(doc.getName());
+					permis.setFileType(doc.getType());
+					if("dir".equals(doc.getType())){
+						permis.setFileLvsn(doc.getLvSn()+"%");
+					}else{
+						permis.setFileLvsn(doc.getLvSn());
+					}
+					permis.setAuditResult(1);
+					permisList.add(permis);
+				});
+			});
+			if(!permisList.isEmpty()){
+				dataBaseDao.insertBatch(permisList);
+				DocFile doc=new DocFile();
+				doc.setIsShare(1);
+				doc.setAuditStatus(1);
+				int len = dataBaseDao.updateById(SqlBuilder.build(doc).ids(rows.stream().map(DocFile::getId).collect(Collectors.toList()))
+					.field("isShare,auditStatus"));
+				LogsUtil.add("更新文档共享标识,更新记录数：%s",len);
+			}
 		}
-		tmp=dataBaseDao.findById(SqlBuilder.build(tmp));
-		AssertUtil.service().notNull(tmp, "文档记录未找到或当前用户无操作权限");
-		
-		docPermisSErvice.save(entity, entity.getPermis());
 		
 		return Results.success();
 	}

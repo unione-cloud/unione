@@ -24,7 +24,7 @@ public class DocFileDto extends DocFile{
 	@Schema(title="文档拥有者",description="如果是文档拥有则，则为true否则为false")
 	private boolean isOwner;
 
-	@JsonIgnore
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Schema(title="附件ID集合")
 	private List<Long> ids;
 

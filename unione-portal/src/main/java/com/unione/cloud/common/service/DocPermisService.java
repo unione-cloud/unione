@@ -74,16 +74,7 @@ public class DocPermisService {
 						perm.setFileLvsn(file.getLvSn());
 					}
 				}
-				if(perm.getAuditResult()==null || perm.getAuditResult()!=4) {
-					perm.setAuditResult(1);
-				}
-				perm.setTenantId(sessionService.getTenantId());
-				perm.setOrgId(sessionService.getOrgId());
-				perm.setUserId(sessionService.getUserId());
-				perm.setCreated(DateUtil.date());
-				perm.setCreatedBy(sessionService.getUserId());
-				perm.setLastUpdated(DateUtil.date());
-				perm.setLastUpdatedBy(sessionService.getUserId());
+				perm.setAuditResult(1);
 			});
 			
 			int len[]= dataBaseDao.insertBatch(permis);
