@@ -137,18 +137,18 @@ public class DocFileController implements DocFileService{
 		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
 		.where("delFlag=0 and isPublic=? and isShare=? and auditStatus=? and dirId=? and (userId=? or orgId=?) and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
 		
-		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()));
+		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
+			.setPage(result.getPage())
+			.setPageSize(result.getPageSize())
+			.setTotal(result.getTotal());
 	}
 	
 	
 	@PostMapping("/find/mineShare")
-	@Operation(summary="查询我共享的文件",description="包括：我共享")
+	@Operation(summary="查询我共享的文件",description="包括：我共享的文件、我共享的目录")
 	@Action(title="查询我共享的文件",type = ActionType.Query)
-	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params) {
+	public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFileDto> params) {
 		// 参数处理
-		params.getBody().setIsShare(1);
-		params.getBody().setDelFlag(0);
-		params.getBody().setAuditStatus(2);//1待审，2通过，3拒绝
 		params.getBody().setTenantId(sessionService.getTenantId());
 		if ("organ".equals(PERMIS_LEVEL)) {
 			if (!sessionService.getUserRoles().contains(UserRoles.TENANT_ADMIN.code())) {
@@ -160,9 +160,14 @@ public class DocFileController implements DocFileService{
 			}
 		}
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
+		.where("delFlag=0 and (isPublic=1 or isShare=1) and auditStatus=2 and tenantId=? and (userId=? or orgId=?)  "+
+			"and dirId=? and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
 		
-		return result;
+		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
+			.setPage(result.getPage())
+			.setPageSize(result.getPageSize())
+			.setTotal(result.getTotal());
 	}
 
 	 
@@ -198,7 +203,7 @@ public class DocFileController implements DocFileService{
 	@PostMapping("/find/other")
 	@Action(title="查询公开文件列表",type = ActionType.Query)
 	@Operation(summary="查询公开文件列表",description= "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
-	public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params) {
+	public Results<List<DocFile>> findOther(@RequestBody Params<DocFileDto> params) {
 		// 参数处理
 		params.getBody().setTenantId(sessionService.getTenantId());
 		params.getBody().setUserId(sessionService.getUserId());
@@ -206,10 +211,13 @@ public class DocFileController implements DocFileService{
 			params.getBody().setOrgId(sessionService.getOrgId());
 		}
 		
-		Results<List<DocFile>> result = dataBaseDao.findPages(SqlBuilder.build(params)
-			.where("delFlag=0 and isPublic=1 and AUDIT_STATUS=2 and tenantId=? and userId!=? and orgId!=? and lvSn like [lvSn%] and title like [%title%]"));
+		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
+			.where("delFlag=0 and isPublic=1 and auditStatus=2 and tenantId=? and userId!=? and orgId!=? and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
 		
-		return result;
+		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
+			.setPage(result.getPage())
+			.setPageSize(result.getPageSize())
+			.setTotal(result.getTotal());
 	}
 
 	

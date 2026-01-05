@@ -35,12 +35,12 @@ public interface DocFileService extends FeignSave<DocFileDto>,FeignDelete<DocFil
 	   
 	   @PostMapping({"/find/other"})
 	   @Operation(summary = "他人的公开文件",description = "查询他人的公开的文件，查询自己租户下其他人上传的公开文件")
-	   public Results<List<DocFile>> findOther(@RequestBody Params<DocFile> params);
+	   public Results<List<DocFile>> findOther(@RequestBody Params<DocFileDto> params);
 		
 		
 	   @PostMapping("/find/mineShare")
 	   @Operation(summary = "我共享的文件",description="")
-	   public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFile> params);
+	   public Results<List<DocFile>> findMineShare(@RequestBody Params<DocFileDto> params);
 		
 		
 	   @PostMapping("/find/shareMine")

@@ -5,6 +5,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.beetsql.annotation.KeyWords;
 import com.unione.cloud.core.model.Pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,7 @@ public class DocPermis extends Pojo {
 	/**
 	* 文件标题
 	*/
+	@KeyWords
 	@Schema(title="文件标题",description="长度为：400")
 	private String fileTitle;
 	/**
@@ -56,14 +58,14 @@ public class DocPermis extends Pojo {
 	@Schema(title="文件类型",description="长度为：10")
 	private String fileType;
 	/**
-	* 权限集合，[view,dowland]
+	* 权限集合,字典：DOCPERMISLIST:view-查看,dowland-下载，edit：编辑
 	*/
-	@Schema(title="权限集合，[view,dowland]",description="长度为：200")
+	@Schema(title="权限集合,字典：DOCPERMISLIST:view-查看,dowland-下载，edit：编辑",description="长度为：200")
 	private String list;
 	/**
-	* 权限拥有者类别,字典DOCPERMISTYPE user：用户，role：角色，org：机构，public：公开
+	* 权限拥有者类别,字典DOCPERMISTYPE user：用户，role：角色，organ：机构，public：公开
 	*/
-	@Schema(title="权限拥有者类别,字典DOCPERMISTYPE user：用户，role：角色，org：机构，public：公开",description="长度为：20")
+	@Schema(title="权限拥有者类别,字典DOCPERMISTYPE user：用户，role：角色，organ：机构，public：公开",description="长度为：20")
 	private String ownerType;
 	/**
 	* 权限拥有者ID
@@ -78,6 +80,7 @@ public class DocPermis extends Pojo {
 	/**
 	* 权限拥有者标题
 	*/
+	@KeyWords
 	@Schema(title="权限拥有者标题",description="长度为：200")
 	private String ownerTitle;
 	/**

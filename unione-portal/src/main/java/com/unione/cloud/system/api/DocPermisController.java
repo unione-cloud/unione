@@ -239,11 +239,11 @@ public class DocPermisController {
 		params.getBody().setAuditTime(DateUtil.date());
 		params.getBody().setAuditUserid(sessionService.getUserId());
 		params.getBody().setAuditUsername(sessionService.getRealname());
-		int len = dataBaseDao.updateById(SqlBuilder.build(params.getBody()).field("auditResult,auditOpinion,auditTime,auditUserid,auditUsername"));
+		int len = dataBaseDao.updateById(SqlBuilder.build(params).field("auditResult,auditOpinion,auditTime,auditUserid,auditUsername"));
 		LogsUtil.add("保存权限审核结果,len:"+len);
 		
 		if(len>0) {
-			List<DocPermis> permis=dataBaseDao.findList(SqlBuilder.build(params));
+			List<DocPermis> permis=dataBaseDao.findByIds(SqlBuilder.build(DocPermis.class).ids(ids));
 			Set<Long> fileIds=permis.stream().map(p->p.getFileId()).collect(Collectors.toSet());
 			if(!fileIds.isEmpty()){
 				permis=dataBaseDao.findList(SqlBuilder.build(DocPermis.class).where("delFlag=0 and fileId in [fileIds]").where("fileIds",fileIds));
