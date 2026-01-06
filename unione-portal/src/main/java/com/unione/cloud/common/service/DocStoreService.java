@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -112,6 +113,6 @@ public interface DocStoreService{
 
 	@GetMapping("/stream/{fileId}.{suffix}")
 	@Operation(summary = "媒体流下载",description = "根据文件id下载媒体流")
-	public ResponseEntity<byte[]> stream(@PathVariable("fileId") Long fileId,@PathVariable("suffix") String suffix);
+	public ResponseEntity<StreamingResponseBody> stream(@PathVariable("fileId") Long fileId,@PathVariable("suffix") String suffix);
 
 }

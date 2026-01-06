@@ -19,9 +19,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -855,7 +857,7 @@ public class DocStoreController implements DocStoreService{
 	 * @param suffix 文件后缀
 	 */
 	@Override
-	public ResponseEntity<byte[]> stream(Long fileId,String suffix){
+	public ResponseEntity<StreamingResponseBody> stream(Long fileId,String suffix){
 		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
 
 		DocFileDto entity=new DocFileDto();
@@ -876,18 +878,18 @@ public class DocStoreController implements DocStoreService{
 			}
 			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
 			if(valid==0) {
+				log.warn("用户{}没有权限查看文件{}",sessionService.getUsername(),fileId);
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 			}
 		}
 		DocFile doc=dataBaseDao.findById(SqlBuilder.build(entity));
-		AssertUtil.service().notNull(doc, "文件记录未找到");
+		if(doc==null){
+			log.warn("流媒体文件未找到,fileId:{}",fileId);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
 
 		// 原生HTTP Range流式播放
 		String range=request.getHeader("Range");
-		if(StringUtils.isEmpty(range)) {
-			range="";
-		}
-
 		try {
             // 获取文件信息
 			StatObjectResponse stat=MinioUtil.loadObjStat(doc.getRealPath());
@@ -896,37 +898,48 @@ public class DocStoreController implements DocStoreService{
             // 处理Range请求
             long start = 0;
             long end = fileSize - 1;
-            if (range != null && range.startsWith("bytes=")) {
+            boolean isRangeRequest = false;
+            if (StringUtils.isNotEmpty(range) && range.startsWith("bytes=")) {
+                isRangeRequest = true;
                 String[] parts = range.split("=")[1].split("-");
                 start = Long.parseLong(parts[0]);
-                if (parts.length > 1) {
+                if (parts.length > 1 && StringUtils.isNotEmpty(parts[1])) {
                     end = Long.parseLong(parts[1]);
                 }
+                // 确保end不超过文件大小
+                end = Math.min(end, fileSize - 1);
             }
 
-			// 分段读取文件
-			InputStream fin = MinioUtil.readObjRange(doc.getRealPath(), start, end);
-			byte[] bytes = IoUtil.readBytes(fin);
+            // 分段读取文件
+            InputStream fin = MinioUtil.readObjRange(doc.getRealPath(), start, end);
+            // 使用StreamingResponseBody来实现流式响应
+            StreamingResponseBody responseBody = outputStream -> {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = fin.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    outputStream.flush();
+                }
+                fin.close();
+            };
 
-			// 设置响应头
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Accept-Ranges", "bytes");
-			headers.set("Connection", "keep-alive");
-			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-			headers.set("Pragma", "no-cache");
-			headers.set("Expires", "0");
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept-Ranges", "bytes");
+            headers.setContentType(MediaType.parseMediaType(String.format("video/%s", suffix)));
 
-			headers.setContentType(MediaType.parseMediaType(String.format("video/%s", suffix)));
-			if (range != null) {
-				headers.set("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
-				return new ResponseEntity<>(bytes, headers, HttpStatus.PARTIAL_CONTENT);
-			} else {
-				headers.setContentLength(bytes.length);
-				return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
-			}
+            if (isRangeRequest) {
+                long contentLength = end - start + 1;
+                headers.set("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
+                headers.setContentLength(contentLength);
+                return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).headers(headers).body(responseBody);
+            } else {
+                headers.setContentLength(fileSize);
+                return ResponseEntity.ok().headers(headers).body(responseBody);
+            }
         } catch (Exception e) {
-            log.error("下载文件失败,fileId:{},path:{},range:{}",fileId,doc.getRealPath(),range,e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("加载媒体流失败,fileId:{},path:{},range:{}",fileId,doc.getRealPath(),range,e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
 	}
