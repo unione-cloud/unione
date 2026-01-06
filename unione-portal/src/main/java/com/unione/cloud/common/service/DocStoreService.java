@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -108,5 +109,9 @@ public interface DocStoreService{
 	@GetMapping("/preview/public/{fileId}")
 	@Operation(summary = "预览文件【公开】",description = "根据文件id下载，公开文件，不进行验证")
 	public void previewPublic(@PathVariable("fileId") Long fileId);
+
+	@GetMapping("/stream/{fileId}.{suffix}")
+	@Operation(summary = "媒体流下载",description = "根据文件id下载媒体流")
+	public ResponseEntity<byte[]> stream(@PathVariable("fileId") Long fileId,@PathVariable("suffix") String suffix);
 
 }

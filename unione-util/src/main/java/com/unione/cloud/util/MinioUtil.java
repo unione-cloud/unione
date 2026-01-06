@@ -19,10 +19,13 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.UUID;
 import io.minio.BucketExistsArgs;
 import io.minio.DownloadObjectArgs;
+import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import io.minio.UploadObjectArgs;
 import io.minio.messages.Bucket;
 import lombok.Data;
@@ -564,6 +567,52 @@ public class MinioUtil {
 		}
 		log.debug("退出:删除文件方法,remote:{}",remote);
 		return true;
+	}
+
+	/**
+	 * 加载文件元数据
+	 * @param remote
+	 * @return
+	 */
+	public static StatObjectResponse loadObjStat(String remote) {
+		try {
+			connect();
+			String bucket=remote.split("/")[1];
+			String path=remote.substring(bucket.length()+2,remote.length());
+			StatObjectArgs statArgs = StatObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(path)
+                    .build();
+           return client.statObject(statArgs);
+		}catch (Exception e){
+			log.error("加载文件元数据失败,remote:{}",remote,e);
+			throw new ServiceException("加载文件元数据失败");
+		}
+	}
+
+	/**
+	 * 读取文件范围数据
+	 * @param remote
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static InputStream readObjRange(String remote,long start,long end){
+		try {
+			connect();
+			String bucket=remote.split("/")[1];
+			String path=remote.substring(bucket.length()+2,remote.length());
+			GetObjectArgs getArgs = GetObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(path)
+                    .offset(start)
+                    .length(end - start + 1)
+                    .build();
+			return client.getObject(getArgs);
+		}catch (Exception e){
+			log.error("读取文件范围数据失败,remote:{},start:{},end:{}",remote,start,end,e);
+			throw new ServiceException("读取文件范围数据失败");
+		}
 	}
 
 	/**

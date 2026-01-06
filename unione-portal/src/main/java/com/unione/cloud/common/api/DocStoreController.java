@@ -2,6 +2,7 @@ package com.unione.cloud.common.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,7 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,11 +51,14 @@ import com.unione.cloud.system.service.CodeTreeService;
 import com.unione.cloud.util.AttachUtil;
 import com.unione.cloud.util.AttachUtil.Attach;
 import com.unione.cloud.util.FileUtil;
+import com.unione.cloud.util.MinioUtil;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ObjectUtil;
+import io.minio.StatObjectResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -571,6 +578,8 @@ public class DocStoreController implements DocStoreService{
 			if(file!=null) {
 				// 设置文件缓存
 				docCacheService.setDocData(fileId,false, DocData.build(tmp, file));
+				// 下载文件
+				AttachUtil.download(file, tmp.getTitle(), request, response);
 			}else {
 				AttachUtil.sendScriptMessage("文件未找到", response);
 			}
@@ -578,16 +587,10 @@ public class DocStoreController implements DocStoreService{
 			LogsUtil.add("成功从缓存加载文件");
 			LogsUtil.setTarget(cache.getFileId(), cache.getTitle());
 			// 下载文件
-			AttachUtil.download(file, cache.getTitle(), request, response);
+			AttachUtil.download(cache.getFile(), cache.getTitle(), request, response);
 			log.debug("退出:文件下载方法，fileId:{},path:{}",fileId,cache.getPath());
 		}
-
-		if(file!=null && cache!=null) {
-			// 下载文件
-			AttachUtil.download(file, cache!=null?cache.getTitle():file.getName(), request, response);
-		}else{
-			AttachUtil.sendScriptMessage("文件下载失败", response);
-		}
+		
 	}
 	
 
@@ -843,6 +846,89 @@ public class DocStoreController implements DocStoreService{
 		}
 		
 		log.debug("退出:文件预览【公开】方法，fileId:{}",fileId);
+	}
+
+
+	/**
+	 * 根据文件id下载媒体流,大文件支持分片
+	 * @param fileId 文件id
+	 * @param suffix 文件后缀
+	 */
+	@Override
+	public ResponseEntity<byte[]> stream(Long fileId,String suffix){
+		AssertUtil.service().notNull(fileId, "参数fileId不能为空");
+
+		DocFileDto entity=new DocFileDto();
+		entity.setDelFlag(0);
+		entity.setId(fileId);
+		if(!"tenant".equals(PERMIS_LEVEL) && !sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPER_ADMIN.code())) {
+			entity.setPermisTypes(Arrays.asList("view","download","edit"));
+			entity.setPermisUser(sessionService.getUserId());
+			if ("organ".equals(PERMIS_LEVEL)) {
+				entity.setPermisOrg(sessionService.getOrgId());
+			}
+			entity.getPermisOwners().add(sessionService.getUserId());
+			if(sessionService.getOrgId()!=null) {
+				entity.getPermisOwners().add(sessionService.getOrgId());
+			}
+			if(sessionService.getUserRoles()!=null) {
+				entity.getPermisRoles().addAll(sessionService.getUserRoles());
+			}
+			long valid = dataBaseDao.count("validPermis",SqlBuilder.build(entity));
+			if(valid==0) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+			}
+		}
+		DocFile doc=dataBaseDao.findById(SqlBuilder.build(entity));
+		AssertUtil.service().notNull(doc, "文件记录未找到");
+
+		// 原生HTTP Range流式播放
+		String range=request.getHeader("Range");
+		if(StringUtils.isEmpty(range)) {
+			range="";
+		}
+
+		try {
+            // 获取文件信息
+			StatObjectResponse stat=MinioUtil.loadObjStat(doc.getRealPath());
+            long fileSize = stat.size();
+
+            // 处理Range请求
+            long start = 0;
+            long end = fileSize - 1;
+            if (range != null && range.startsWith("bytes=")) {
+                String[] parts = range.split("=")[1].split("-");
+                start = Long.parseLong(parts[0]);
+                if (parts.length > 1) {
+                    end = Long.parseLong(parts[1]);
+                }
+            }
+
+			// 分段读取文件
+			InputStream fin = MinioUtil.readObjRange(doc.getRealPath(), start, end);
+			byte[] bytes = IoUtil.readBytes(fin);
+
+			// 设置响应头
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Accept-Ranges", "bytes");
+			headers.set("Connection", "keep-alive");
+			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+			headers.set("Pragma", "no-cache");
+			headers.set("Expires", "0");
+
+			headers.setContentType(MediaType.parseMediaType(String.format("video/%s", suffix)));
+			if (range != null) {
+				headers.set("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
+				return new ResponseEntity<>(bytes, headers, HttpStatus.PARTIAL_CONTENT);
+			} else {
+				headers.setContentLength(bytes.length);
+				return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+			}
+        } catch (Exception e) {
+            log.error("下载文件失败,fileId:{},path:{},range:{}",fileId,doc.getRealPath(),range,e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
 	}
 
 
