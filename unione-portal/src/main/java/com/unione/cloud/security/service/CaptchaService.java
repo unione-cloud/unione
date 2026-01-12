@@ -106,6 +106,7 @@ public class CaptchaService {
 		ck.setPath("/");
 		ck.setHttpOnly(true);
 		response.addCookie(ck);
+		response.setHeader("CAPTCHAID", captchaid);
 		
 		Cache<String,String> cache=this.getCache();
 		cache.put(captchaid, captcha.getCode());
