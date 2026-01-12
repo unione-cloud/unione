@@ -141,6 +141,9 @@ public class CaptchaService {
 				}
 			}
 		}
+		if(ObjectUtil.isEmpty(captchaid)){
+			captchaid=request.getHeader("CAPTCHAID");
+		}
 		AssertUtil.service().notNull(captchaid, "请重新获取验证码");
 		
 		Cache<String,String> cache=this.getCache();

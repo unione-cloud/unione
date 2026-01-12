@@ -65,10 +65,10 @@ public class SecurityController {
 	private SecretService secretService;
 
 	/**
-	 * 生成验证码图片
+	 * 发送短信验证码
 	 */
 	@PostMapping("/captcha/sms")
-	@Operation(summary="生成验证码图片",description="生成验证码并返回验证码图片")
+	@Operation(summary="发送短信验证码",description="")
 	public Results<Long> captchaSms(@RequestBody SmsCaptcha captcha){
 		log.debug("进入->发送短信验证码方法");
 		AssertUtil.service()
