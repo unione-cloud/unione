@@ -1,10 +1,11 @@
 package com.unione.cloud.codegen;
 
-import java.io.File;
 import java.io.Writer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.core.ResourceLoader;
 import org.beetl.core.Template;
+import org.beetl.core.resource.ClasspathResourceLoader;
 import org.beetl.sql.clazz.kit.StringKit;
 import org.beetl.sql.core.engine.template.Beetl;
 import org.beetl.sql.core.engine.template.BeetlTemplateEngine;
@@ -16,7 +17,8 @@ import org.beetl.sql.gen.simple.BaseTemplateSourceBuilder;
 import com.unione.cloud.core.model.BaseField;
 
 public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
-	public static  String mapperTemplate=String.format("codegen%sapi.btl", File.separator);
+	public static  String mapperTemplate="/codegen/api.btl";
+	private static ResourceLoader<String> resourceLoader=new ClasspathResourceLoader("templates");
 	
 	public ApiSourceBuilder() {
 		super("");
@@ -33,9 +35,11 @@ public class ApiSourceBuilder extends BaseTemplateSourceBuilder {
 	public void generate(BaseProject project, SourceConfig config, Entity entity) {
 		//BeetlSQl中的配置
 		Beetl beetl = ((BeetlTemplateEngine)config.getSqlManager().getSqlTemplateEngine()).getBeetl();
+		
 		//模板
-		Template template = groupTemplate.getTemplate(mapperTemplate);
+		Template template = groupTemplate.getTemplate(mapperTemplate,resourceLoader);
 		template.binding("entity", entity);
+	
 		template.binding("modelName", entity.getTableName());
 		template.binding("tableName", entity.getTableName());
 		template.binding("table", entity.getTableName());

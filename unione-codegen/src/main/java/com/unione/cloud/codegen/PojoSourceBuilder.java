@@ -1,10 +1,11 @@
 package com.unione.cloud.codegen;
 
-import java.io.File;
 import java.io.Writer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.core.ResourceLoader;
 import org.beetl.core.Template;
+import org.beetl.core.resource.ClasspathResourceLoader;
 import org.beetl.sql.gen.BaseProject;
 import org.beetl.sql.gen.Entity;
 import org.beetl.sql.gen.SourceConfig;
@@ -14,8 +15,10 @@ public class PojoSourceBuilder extends BaseTemplateSourceBuilder {
 	/**
 	 * 	指定模板的路径
 	 */
-	public static  String pojoPath = String.format("codegen%spojo.btl", File.separator);
-	public static  String pojoAliasPath = String.format("codegen%spojoAlias.btl", File.separator);
+	public static  String pojoPath = "/codegen/pojo.btl";
+	public static  String pojoAliasPath = "/codegen/pojoAlias.btl";
+	private static ResourceLoader<String> resourceLoader=new ClasspathResourceLoader("templates");
+	
 	private boolean alias = false;
 	public PojoSourceBuilder() {
 		super("");
@@ -40,7 +43,7 @@ public class PojoSourceBuilder extends BaseTemplateSourceBuilder {
 	@Override
 	public void generate(BaseProject project,SourceConfig config, Entity entity) {
 
-		Template template =alias?groupTemplate.getTemplate(pojoAliasPath): groupTemplate.getTemplate(pojoPath);
+		Template template =alias?groupTemplate.getTemplate(pojoAliasPath,resourceLoader): groupTemplate.getTemplate(pojoPath,resourceLoader);
 		template.binding("attrs", entity.getList());
 		template.binding("className", entity.getName());
 		template.binding("table", entity.getTableName());

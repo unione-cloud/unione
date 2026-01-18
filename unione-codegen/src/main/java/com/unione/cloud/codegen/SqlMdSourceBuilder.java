@@ -1,13 +1,14 @@
 package com.unione.cloud.codegen;
 
-import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.core.ResourceLoader;
 import org.beetl.core.Template;
+import org.beetl.core.resource.ClasspathResourceLoader;
 import org.beetl.sql.core.engine.template.Beetl;
 import org.beetl.sql.core.engine.template.BeetlTemplateEngine;
 import org.beetl.sql.gen.Attribute;
@@ -20,7 +21,8 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.model.BaseField;
 
 public class SqlMdSourceBuilder extends MDSourceBuilder {
-	public static  String mapperTemplate=String.format("codegen%smd.btl", File.separator);
+	public static  String mapperTemplate="/codegen/md.btl";
+	private static ResourceLoader<String> resourceLoader=new ClasspathResourceLoader("templates");
 	
 	public SqlMdSourceBuilder() {
 		super();
@@ -38,7 +40,7 @@ public class SqlMdSourceBuilder extends MDSourceBuilder {
 		//BeetlSQl中的配置
 		Beetl beetl = ((BeetlTemplateEngine)config.getSqlManager().getSqlTemplateEngine()).getBeetl();
 		//模板
-		Template template = groupTemplate.getTemplate(mapperTemplate);
+		Template template = groupTemplate.getTemplate(mapperTemplate,resourceLoader);
 		template.binding("tableName", entity.getTableName());
 		template.binding("cols", entity.getCols());
 		template.binding("props", entity.getList());
