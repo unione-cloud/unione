@@ -79,7 +79,7 @@ public class RedisConfig {
 	}
 
 	@SuppressWarnings("null")
-	@Bean(destroyMethod = "destroy")
+	@Bean(name= "redisUnioneMessageListenerContainer",destroyMethod = "destroy")
 	public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(redisConnectionFactory);
