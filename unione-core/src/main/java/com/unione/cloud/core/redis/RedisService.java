@@ -48,7 +48,7 @@ public class RedisService {
 	private RedisTemplate redisTemplate;
 
 	@Autowired
-	private RedisMessageListenerContainer redisUnioneMessageListenerContainer;
+	private RedisMessageListenerContainer redisMessageListenerContainer;
 
 	/**
 	 * @发布消息过期时间，默认30秒，单位秒
@@ -596,7 +596,7 @@ public class RedisService {
 	@SuppressWarnings("null")
 	public void subscribe(String key, MessageListener listener) {
 		log.debug("订阅消息，Key:{}", key);
-		redisUnioneMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
+		redisMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
 	}
 
 	@SuppressWarnings("null")
