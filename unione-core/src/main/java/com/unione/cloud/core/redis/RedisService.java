@@ -48,7 +48,7 @@ public class RedisService {
 	private RedisTemplate redisTemplate;
 
 	@Autowired
-	private RedisMessageListenerContainer redisMessageListenerContainer;
+	private RedisMessageListenerContainer redisUnioneMessageListenerContainer;
 
 	/**
 	 * @发布消息过期时间，默认30秒，单位秒
@@ -273,6 +273,17 @@ public class RedisService {
 	public Long getExpire(int db, String key) {
 		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
 		return redisTemplate.getExpire(key);
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public void setExpire(String key,Duration timeout) {
+		redisTemplate.expire(key, timeout);
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public void setExpire(int db, String key,Duration timeout) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		redisTemplate.expire(key, timeout);
 	}
 
 	/**
@@ -585,7 +596,7 @@ public class RedisService {
 	@SuppressWarnings("null")
 	public void subscribe(String key, MessageListener listener) {
 		log.debug("订阅消息，Key:{}", key);
-		redisMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
+		redisUnioneMessageListenerContainer.addMessageListener(listener, new ChannelTopic(key));
 	}
 
 	@SuppressWarnings("null")
