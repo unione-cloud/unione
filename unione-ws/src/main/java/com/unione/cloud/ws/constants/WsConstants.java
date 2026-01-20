@@ -80,7 +80,7 @@ public class WsConstants {
     /**
      * 成功
      */
-    public static final int ERROR_CODE_SUCCESS = 0;
+    public static final int ERROR_CODE_SUCCESS = 200;
     
     /**
      * 认证失败

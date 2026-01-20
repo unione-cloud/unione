@@ -32,7 +32,7 @@ public class WsResponse implements Serializable{
     /**
      * 响应数据
      */
-    private Object result;
+    private Object body;
     
     /**
      * 请求消息ID
@@ -41,6 +41,10 @@ public class WsResponse implements Serializable{
 
     public WsResponse(){
         this.timestamp=System.currentTimeMillis();
+    }
+
+    public boolean isSuccess(){
+        return code==WsConstants.ERROR_CODE_SUCCESS;
     }
 
     public static WsResponse error(String message){
@@ -58,19 +62,19 @@ public class WsResponse implements Serializable{
         return response;
      }
 
-    public static WsResponse success(Object result){
+    public static WsResponse success(Object body){
         WsResponse response=new WsResponse();
         response.setCode(WsConstants.ERROR_CODE_SUCCESS);
         response.setMessage("success");
-        response.setResult(result);
+        response.setBody(body);
         return response;
     }
 
-    public static WsResponse success(Long requestId,Object result){
+    public static WsResponse success(Long requestId,Object body){
         WsResponse response=new WsResponse();
         response.setCode(WsConstants.ERROR_CODE_SUCCESS);
         response.setMessage("success");
-        response.setResult(result);
+        response.setBody(body);
         response.setReqId(requestId);
         return response;
     }
