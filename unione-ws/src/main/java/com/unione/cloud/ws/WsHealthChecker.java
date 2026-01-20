@@ -2,6 +2,7 @@ package com.unione.cloud.ws;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,6 +44,7 @@ public class WsHealthChecker {
 
     private static final String NODE_LIST_KEY = "unione:ws:nodes:list";
     private static final String NODE_INFO_KEY = "unione:ws:nodes:%s";
+    private static final String NODE_SYNC_KEY = "unione:ws:node:sync";
     
     /**
      * 服务健康状态
@@ -119,12 +121,19 @@ public class WsHealthChecker {
     public List<WsNodeEntity> getNodes() {
         Set<String> nodeIds = redisService.getSet(NODE_LIST_KEY);
         List<WsNodeEntity> nodes = new ArrayList<>();
+        Set<String> deadNodes = new HashSet<>();
         for (String nodeId : nodeIds) {
             String nodeKey = String.format(NODE_INFO_KEY, nodeId);
             WsNodeEntity node = redisService.getObj(nodeKey);
             if (node != null) {
                 nodes.add(node);
+            }else{
+                deadNodes.add(nodeId);
             }
+        }
+        // 清理过期节点
+        for (String deadNodeId : deadNodes) {
+            delNode(deadNodeId);
         }
         return nodes;
     }
@@ -153,6 +162,14 @@ public class WsHealthChecker {
             wsClientManager.cleanExpired();
             
             isHealthy.set(true);
+            log.info("健康检查，当前节节点正常，连接数：{}，用户数：{}", clientCount, userCount);
+
+            boolean syncLock = redisService.putIfAbsent(NODE_SYNC_KEY, 1, Duration.ofSeconds(10));
+            if(syncLock){
+                List<WsNodeEntity> nodes = this.getNodes();
+                log.info("健康检查，正常节点数：{}", nodes.size());
+            }
+
         } catch (Exception e) {
         	log.warn("健康检查失败", e);
             isHealthy.set(false);
