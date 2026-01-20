@@ -715,7 +715,10 @@ public class RedisService {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public RedisTemplate template() {
+	public RedisTemplate template(int... db) {
+		if(db.length==1){
+			return redisConfig.getRedisTmpls(db[0]);
+		}
 		return redisTemplate;
 	}
 
