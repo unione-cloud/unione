@@ -406,6 +406,7 @@
 		<module>unione-util</module>
 		<module>unione-starter</module>
 		<module>unione-codegen</module>
+        <module>unione-ws</module>
 	</modules>
 	
 </project>

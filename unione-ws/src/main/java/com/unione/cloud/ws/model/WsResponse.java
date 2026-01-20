@@ -1,0 +1,78 @@
+package com.unione.cloud.ws.model;
+
+import java.io.Serializable;
+
+import com.unione.cloud.ws.constants.WsConstants;
+
+import lombok.Data;
+
+/**
+ * WebSocket响应消息
+ * 用于服务端向客户端发送响应
+ */
+@Data
+public class WsResponse implements Serializable{
+    private static final long serialVersionUID = 1L;
+    
+    /**
+     * 代码
+     */
+    private int code;
+    
+    /**
+     * 消息
+     */
+    private String message;
+
+    /**
+     * 时间戳
+     */
+    private Long timestamp;
+    
+    /**
+     * 响应数据
+     */
+    private Object result;
+    
+    /**
+     * 请求消息ID
+     */
+    private Long reqId;
+
+    public WsResponse(){
+        this.timestamp=System.currentTimeMillis();
+    }
+
+    public static WsResponse error(String message){
+        WsResponse response=new WsResponse();
+        response.setCode(WsConstants.ERROR_CODE_MESSAGE_HANDLE_ERROR);
+        response.setMessage(message);
+        return response;
+    }
+
+     public static WsResponse error(Long requestId,String message){
+        WsResponse response=new WsResponse();
+        response.setCode(WsConstants.ERROR_CODE_MESSAGE_HANDLE_ERROR);
+        response.setMessage(message);
+        response.setReqId(requestId);
+        return response;
+     }
+
+    public static WsResponse success(Object result){
+        WsResponse response=new WsResponse();
+        response.setCode(WsConstants.ERROR_CODE_SUCCESS);
+        response.setMessage("success");
+        response.setResult(result);
+        return response;
+    }
+
+    public static WsResponse success(Long requestId,Object result){
+        WsResponse response=new WsResponse();
+        response.setCode(WsConstants.ERROR_CODE_SUCCESS);
+        response.setMessage("success");
+        response.setResult(result);
+        response.setReqId(requestId);
+        return response;
+    }
+
+}
