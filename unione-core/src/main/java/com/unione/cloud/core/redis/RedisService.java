@@ -620,6 +620,56 @@ public class RedisService {
 	}
 
 	/**
+	 * @获取Set元素数量
+	 * @param key
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public long countSet(String key) {
+		SetOperations<String, Object> setOps = redisTemplate.opsForSet();
+		Long count = setOps.size(key);
+		return count==null?0:count;
+	}
+
+	@SuppressWarnings("unchecked")
+	public long countSet(int db, String key) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		SetOperations<String, Object> setOps = redisTemplate.opsForSet();
+		Long count = setOps.size(key);
+		return count==null?0:count;
+	}
+
+	@SuppressWarnings("unchecked")
+	public long countList(String key) {
+		ListOperations<String, Object> listOps = redisTemplate.opsForList();
+		Long count = listOps.size(key);
+		return count==null?0:count;
+	}
+
+	@SuppressWarnings("unchecked")
+	public long countList(int db, String key) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		ListOperations<String, Object> listOps = redisTemplate.opsForList();
+		Long count = listOps.size(key);
+		return count==null?0:count;
+	}
+
+	@SuppressWarnings("unchecked")
+	public long countMap(String key) {
+		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
+		Long count = hashOps.size(key);
+		return count==null?0:count;
+	}
+
+	@SuppressWarnings("unchecked")
+	public long countMap(int db, String key) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
+		Long count = hashOps.size(key);
+		return count==null?0:count;
+	}
+
+	/**
 	 * @订阅key消息
 	 * @param key
 	 * @param listener
