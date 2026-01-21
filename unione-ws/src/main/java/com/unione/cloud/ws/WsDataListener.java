@@ -206,6 +206,60 @@ public class WsDataListener {
             }
         });
 
+        // 订阅ws消息:房间加入事件
+        redisService.subscribe(WsConstants.WS_QUEUE_ROOM_JOIN, new MessageListener() {
+            @Override
+            @SuppressWarnings("null")
+            public void onMessage(Message message, @Nullable byte[] arg1) {
+
+                WsDistbuteEntity distbute = null;
+                try {
+                    byte[] data = message.getBody();
+                    if (ObjectUtil.isEmpty(data)) {
+                        return;
+                    }
+                    String json = new String(data, "UTF-8");
+                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
+                        String room=distbute.getData().toString();
+                        List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
+                        for (SocketIOClient client : clients) {
+                            client.joinRoom(room);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("广播房间加入事件异常,distbute:{}", distbute, e);
+                }
+            }
+        });
+
+        // 订阅ws消息:房间离开事件
+        redisService.subscribe(WsConstants.WS_QUEUE_ROOM_LEAVE, new MessageListener() {
+            @Override
+            @SuppressWarnings("null")
+            public void onMessage(Message message, @Nullable byte[] arg1) {
+
+                WsDistbuteEntity distbute = null;
+                try {
+                    byte[] data = message.getBody();
+                    if (ObjectUtil.isEmpty(data)) {
+                        return;
+                    }
+                    String json = new String(data, "UTF-8");
+                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
+                        String room=distbute.getData().toString();
+                        List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
+                        for (SocketIOClient client : clients) {
+                            client.leaveRoom(room);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("广播房间离开事件异常,distbute:{}", distbute, e);
+                }
+            }
+        });
+
     }
 
 }

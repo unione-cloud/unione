@@ -170,7 +170,11 @@ public class WsConstants {
 
     public static final String WS_QUEUE_ROOM_DATA = "unione:wsqueue:room:data";
     public static final String WS_QUEUE_ROOM_EVENT = "unione:wsqueue:room:event";
+    public static final String WS_QUEUE_ROOM_JOIN = "unione:wsqueue:room:join";
+    public static final String WS_QUEUE_ROOM_LEAVE = "unione:wsqueue:room:leave";
 
     public static final String WS_QUEUE_BROADCAST_EVENT = "unione:wsqueue:broadcast:event";
+
+    
     
 }
