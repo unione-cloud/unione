@@ -588,6 +588,22 @@ public class RedisService {
 		setOps.remove(key, values);
 	}
 
+	@SuppressWarnings("unchecked")
+	public boolean inSet(String key, Object value) {
+		SetOperations<String, Object> setOps = redisTemplate.opsForSet();
+		Boolean flag=setOps.isMember(key, value);
+		return (flag==null || flag==false)?false:true;
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean inSet(int db, String key, Object value) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		SetOperations<String, Object> setOps = redisTemplate.opsForSet();
+		Boolean flag=setOps.isMember(key, value);
+		return (flag==null || flag==false)?false:true;
+	}
+	
+
 	/**
 	 * @订阅key消息
 	 * @param key
