@@ -28,4 +28,11 @@ public class WsEvent implements Serializable{
         this.timestamp=System.currentTimeMillis();
     }
 
+    public static WsEvent build(String name, Object data){
+        WsEvent event=new WsEvent();
+        event.setName(name);
+        event.setData(data);
+        return event;
+    }
+
 }
