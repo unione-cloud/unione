@@ -604,6 +604,21 @@ public class RedisService {
 	}
 	
 
+	@SuppressWarnings("unchecked")
+	public boolean inMap(String key, Object hashKey) {
+		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
+		Boolean flag=hashOps.hasKey(key, hashKey);
+		return (flag==null || flag==false)?false:true;
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean inMap(int db, String key, Object hashKey) {
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
+		Boolean flag=hashOps.hasKey(key, hashKey);
+		return (flag==null || flag==false)?false:true;
+	}
+
 	/**
 	 * @订阅key消息
 	 * @param key
