@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,10 @@ public class WsDataListener {
     private RedisService redisService;
 
     @Autowired
+	@SuppressWarnings("rawtypes")
+	private RedisTemplate redisTemplate;
+
+    @Autowired
     private WsProperties wsProperties;
 
     @Autowired
@@ -48,12 +53,10 @@ public class WsDataListener {
             public void onMessage(Message message, @Nullable byte[] arg1) {
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && distbute.getUserId() != null) {
                         WsData entry = BeanUtils.toBean(distbute.getData(), WsData.class);
                         List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
@@ -74,12 +77,10 @@ public class WsDataListener {
             public void onMessage(Message message, @Nullable byte[] arg1) {
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && distbute.getUserId() != null) {
                         WsResponse entry = BeanUtils.toBean(distbute.getData(), WsResponse.class);
                         List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
@@ -100,12 +101,10 @@ public class WsDataListener {
             public void onMessage(Message message, @Nullable byte[] arg1) {
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && distbute.getUserId() != null) {
                         WsEvent entry = BeanUtils.toBean(distbute.getData(), WsEvent.class);
                         List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
@@ -126,12 +125,10 @@ public class WsDataListener {
             public void onMessage(Message message, @Nullable byte[] arg1) {
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getUserIds()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
                         WsData entry = BeanUtils.toBean(distbute.getData(), WsData.class);
                         for (Long userId : distbute.getUserIds()) {
@@ -156,12 +153,10 @@ public class WsDataListener {
             public void onMessage(Message message, @Nullable byte[] arg1) {
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getUserIds()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
                         WsEvent entry = BeanUtils.toBean(distbute.getData(), WsEvent.class);
                         for (Long userId : distbute.getUserIds()) {
@@ -187,12 +182,10 @@ public class WsDataListener {
 
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
                         WsEvent entry = BeanUtils.toBean(distbute.getData(), WsEvent.class);
                         List<SocketIOClient> clients = wsClientManager.getLocal();
@@ -214,12 +207,10 @@ public class WsDataListener {
 
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
                         String room=distbute.getData().toString();
                         List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
@@ -241,12 +232,10 @@ public class WsDataListener {
 
                 WsDistbuteEntity distbute = null;
                 try {
-                    byte[] data = message.getBody();
-                    if (ObjectUtil.isEmpty(data)) {
+                    if (ObjectUtil.isEmpty(message.getBody())) {
                         return;
                     }
-                    String json = new String(data, "UTF-8");
-                    distbute = JsonUtil.toBean(WsDistbuteEntity.class, json);
+                    distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
                     if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
                         String room=distbute.getData().toString();
                         List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
