@@ -38,7 +38,6 @@ public class WsConfig {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(wsProperties.getHostname());
         config.setPort(wsProperties.getPort());
-        config.setOrigin("*");
         config.setMaxFramePayloadLength(wsProperties.getMaxFramePayloadLength());
         config.setMaxHttpContentLength(wsProperties.getMaxHttpContentLength());
         config.setBossThreads(wsProperties.getBossThreads());
