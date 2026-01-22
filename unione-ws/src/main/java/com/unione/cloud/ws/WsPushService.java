@@ -162,7 +162,7 @@ public class WsPushService {
             return;
         }
         // 广播本地连接
-        socketIOServer.getBroadcastOperations().sendEvent(event.getName(), event);
+        socketIOServer.getBroadcastOperations().sendEvent(String.format("event:%s", event.getName()), event);
 
         // 如果启用了分布式，通过Redis广播到其他节点
         if (WS_DISTRIBUTE_ENABLE) {
