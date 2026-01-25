@@ -104,6 +104,7 @@ public class CaptchaService {
 		// 设置cookie
 		Cookie ck=new Cookie("CAPTCHAID",captchaid);
 		ck.setPath("/");
+		ck.setHttpOnly(true);
 		response.addCookie(ck);
 		
 		Cache<String,String> cache=this.getCache();

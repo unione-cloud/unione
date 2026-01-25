@@ -52,6 +52,11 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
                     properties.setOrigins(origins);
                 }
 
+                String patterns=env.getProperty(String.format("%s.%d.allowed-patterns", CORS_CONFIG_PREFIX,index));
+                if (!ObjectUtil.isEmpty(patterns)) {
+                    properties.setPatterns(patterns);
+                }
+
                 String methods=env.getProperty(String.format("%s.%d.allowed-methods", CORS_CONFIG_PREFIX,index));
                 if (!ObjectUtil.isEmpty(methods)) {
                     properties.setMethods(methods);
@@ -94,10 +99,14 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
         if(ObjectUtil.isEmpty(allowed)){
             return;
         }
-        allowed.stream().filter(a->ObjectUtil.isNotEmpty(a.getUrl())&&ObjectUtil.isNotEmpty(a.getOrigins()))
+        allowed.stream().filter(a->ObjectUtil.isNotEmpty(a.getUrl())&&(ObjectUtil.isNotEmpty(a.getOrigins())||ObjectUtil.isNotEmpty(a.getPatterns())))
         .forEach(allow->{
             CorsRegistration corsRegistration = registry.addMapping(allow.getUrl());
-            corsRegistration.allowedOrigins(StringUtils.commaDelimitedListToStringArray(allow.getOrigins()));
+            if(ObjectUtil.isNotEmpty(allow.getPatterns())){
+                corsRegistration.allowedOriginPatterns(StringUtils.commaDelimitedListToStringArray(allow.getPatterns()));
+            }else{
+                corsRegistration.allowedOrigins(StringUtils.commaDelimitedListToStringArray(allow.getOrigins()));
+            }
             if(!ObjectUtil.isEmpty(allow.getCredentials())){
                 corsRegistration.allowCredentials(allow.getCredentials());
             }
@@ -121,6 +130,7 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
         private String configKey;
         private String url;
         private String origins;
+        private String patterns;
         private String methods;
         private String headers;
         private String exposed;
@@ -175,6 +185,12 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
         }
         public void setExposed(String exposed) {
             this.exposed = exposed;
+        }
+        public String getPatterns() {
+            return patterns;
+        }
+        public void setPatterns(String patterns) {
+            this.patterns = patterns;
         }
     }
 
