@@ -14,6 +14,7 @@ import com.corundumstudio.socketio.listener.ExceptionListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,9 @@ public class WsConfig {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(wsProperties.getHostname());
         config.setPort(wsProperties.getPort());
+        if(!ObjectUtil.isEmpty(wsProperties.getContext())){
+            config.setContext(wsProperties.getContext());
+        }
         config.setMaxFramePayloadLength(wsProperties.getMaxFramePayloadLength());
         config.setMaxHttpContentLength(wsProperties.getMaxHttpContentLength());
         config.setBossThreads(wsProperties.getBossThreads());

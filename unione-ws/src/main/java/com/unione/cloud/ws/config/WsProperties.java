@@ -27,6 +27,11 @@ public class WsProperties {
      * WebSocket服务主机名
      */
     private String hostname = "0.0.0.0";
+
+    /**
+     * WebSocket服务上下文路径
+     */
+    private String context;
     
     /**
      * 最大帧长度
@@ -202,5 +207,13 @@ public class WsProperties {
 
     public void setConnectionCleanupInterval(long connectionCleanupInterval) {
         this.connectionCleanupInterval = connectionCleanupInterval;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 }
