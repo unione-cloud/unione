@@ -32,7 +32,7 @@ public class RequestUtils {
 			in = RequestUtils.class.getResourceAsStream("/xdb/ip2region.xdb");
 			ipsearcher = Searcher.newWithBuffer(IoUtil.readBytes(in));
 		} catch (Exception e) {
-			log.error("ip2region.xdb文件加载失败",e);
+			log.error("ip2region.xdb文件加载失败,message:{}",e.getMessage());
 		} finally{
 			IoUtil.close(in);
 		}
@@ -77,7 +77,7 @@ public class RequestUtils {
                     ip = inet.getHostAddress();
                     log.debug("get ip from local host,value:{}",ip);
                 } catch (Exception e) {
-                	log.warn("获取网卡本地ip地址失败",e);
+                	log.warn("获取网卡本地ip地址失败,message:{}",e.getMessage());
                 }
             }
 		}
@@ -124,7 +124,7 @@ public class RequestUtils {
                     ip = inet.getHostAddress();
                     log.debug("get ip from local host,value:{}",ip);
                 } catch (Exception e) {
-                	log.warn("获取网卡本地ip地址失败",e);
+                	log.warn("获取网卡本地ip地址失败,message:{}",e.getMessage());
                 }
             }
 		}
@@ -243,7 +243,7 @@ public class RequestUtils {
 					}
 				}
 			} catch (Exception e) {
-				log.error("根据ip获取位置信息失败,ip:{}", location.getVisitIp(), e);
+				log.error("根据ip获取位置信息失败,ip:{},message:{}", location.getVisitIp(), e.getMessage());
 			}
 		}
 		return location;
