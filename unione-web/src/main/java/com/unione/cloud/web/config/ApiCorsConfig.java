@@ -61,6 +61,11 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
                 if (!ObjectUtil.isEmpty(headers)) {
                     properties.setHeaders(headers);
                 }
+
+                String exposed=env.getProperty(String.format("%s.%d.exposed-headers", CORS_CONFIG_PREFIX,index));
+                if (!ObjectUtil.isEmpty(exposed)) {
+                    properties.setExposed(exposed);
+                }
                 
                 Boolean credentials=env.getProperty(String.format("%s.%d.allow-credentials", CORS_CONFIG_PREFIX,index),Boolean.class);
                 if (!ObjectUtil.isEmpty(credentials)) {
@@ -105,6 +110,9 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
             if(ObjectUtil.isNotEmpty(allow.getHeaders())){
                 corsRegistration.allowedHeaders(StringUtils.commaDelimitedListToStringArray(allow.getHeaders()));
             }
+            if(ObjectUtil.isNotEmpty(allow.getExposed())){
+                corsRegistration.exposedHeaders(StringUtils.commaDelimitedListToStringArray(allow.getExposed()));
+            }
         });
     }
 
@@ -115,6 +123,7 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
         private String origins;
         private String methods;
         private String headers;
+        private String exposed;
         private Boolean credentials;
         private Long maxAge;
 
@@ -161,7 +170,12 @@ public class ApiCorsConfig implements WebMvcConfigurer, InitializingBean {
         public Long getMaxAge() {
             return maxAge;
         }
-
+        public String getExposed() {
+            return exposed;
+        }
+        public void setExposed(String exposed) {
+            this.exposed = exposed;
+        }
     }
 
 
