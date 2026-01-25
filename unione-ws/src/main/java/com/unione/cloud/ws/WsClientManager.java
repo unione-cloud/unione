@@ -118,8 +118,18 @@ public class WsClientManager {
         clientEntity.setUserId(userId);
         clientEntity.setLastActiveTime(System.currentTimeMillis());
         String remoteAddress = client.getRemoteAddress().toString();
-        clientEntity.setIp(remoteAddress.substring(2, remoteAddress.indexOf("]")));
-
+        String ip = client.getHandshakeData().getHttpHeaders().get("X-Real-IP");
+        if(!ObjectUtil.isEmpty(ip)){
+            clientEntity.setIp(ip);
+        }else if(!ObjectUtil.isEmpty(remoteAddress)){
+            if(remoteAddress.startsWith("[")){
+                clientEntity.setIp(remoteAddress.substring(2, remoteAddress.indexOf("]")));
+            }else if(remoteAddress.contains(":")){
+                clientEntity.setIp(remoteAddress.substring(1, remoteAddress.indexOf(":")));
+            }else{
+                clientEntity.setIp(remoteAddress);
+            }
+        }
         redisService.put(connectionKey, clientEntity, Duration.ofMillis(wsProperties.getSessionTimeout()));
 
         // 存储用户-连接映射
