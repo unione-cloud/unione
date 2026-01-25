@@ -11,6 +11,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.ws.config.WsProperties;
 import com.unione.cloud.ws.constants.WsConstants;
+import com.unione.cloud.ws.model.WsClientEntity;
 import com.unione.cloud.ws.model.WsData;
 import com.unione.cloud.ws.model.WsDistbuteEntity;
 import com.unione.cloud.ws.model.WsEvent;
@@ -40,6 +41,11 @@ public class WsPushService {
 
     @Value("${unione.ws.redis:true}")
     private boolean WS_DISTRIBUTE_ENABLE;
+
+    /**
+     * 连接信息键前缀
+     */
+    private static final String CLIENT_KEY_PREFIX = "unione:ws:client:%s";
 
     /**
      * 向指定用户推送数据
@@ -214,7 +220,17 @@ public class WsPushService {
         List<SocketIOClient> clients = wsClientManager.getLocal(userId);
         for (SocketIOClient client : clients) {
             client.joinRoom(room);
+
+            // 更新客户端房间列表
+            String connectionKey = String.format(CLIENT_KEY_PREFIX, client.getSessionId());
+            // 存储连接信息
+            WsClientEntity clientEntity = redisService.getObj(connectionKey);
+            if(clientEntity!=null){
+                clientEntity.getRooms().add(room);
+                redisService.put(connectionKey, clientEntity);
+            }
         }
+
 
         if (WS_DISTRIBUTE_ENABLE) {
             WsDistbuteEntity distbute = new WsDistbuteEntity();
@@ -235,6 +251,14 @@ public class WsPushService {
         List<SocketIOClient> clients = wsClientManager.getLocal(userId);
         for (SocketIOClient client : clients) {
             client.leaveRoom(room);
+            // 更新客户端房间列表
+            String connectionKey = String.format(CLIENT_KEY_PREFIX, client.getSessionId());
+            // 存储连接信息
+            WsClientEntity clientEntity = redisService.getObj(connectionKey);
+            if(clientEntity!=null){
+                clientEntity.getRooms().remove(room);
+                redisService.put(connectionKey, clientEntity);
+            }
         }
 
         if (WS_DISTRIBUTE_ENABLE) {

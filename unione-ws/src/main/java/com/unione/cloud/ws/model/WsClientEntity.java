@@ -1,5 +1,8 @@
 package com.unione.cloud.ws.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -24,5 +27,8 @@ public class WsClientEntity {
 
     @Schema(title = "最后活跃时间")
     private long lastActiveTime;
+
+    @Schema(title = "加入房间列表")
+    private Set<String> rooms=new HashSet<>();
 
 }

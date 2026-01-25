@@ -110,6 +110,10 @@ public class WsClientManager {
             clientEntity.setNodeId(wsProperties.getNodeId());
             clientEntity.setClientId(sessionId);
             clientEntity.setConnectTime(System.currentTimeMillis());
+        }else{
+            if(!ObjectUtil.isEmpty(clientEntity.getRooms())){
+                client.joinRooms(clientEntity.getRooms());
+            }
         }
         clientEntity.setUserId(userId);
         clientEntity.setLastActiveTime(System.currentTimeMillis());
