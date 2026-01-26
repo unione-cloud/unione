@@ -119,6 +119,7 @@ public class WsServer implements ApplicationListener<ApplicationEvent> {
             System.out.println("  ::  WebSocket Server Started  ::  ");
             System.out.println("  ::  Host: " + wsProperties.getHostname());
             System.out.println("  ::  Port: " + wsProperties.getPort());
+            System.out.println("  ::  Ctx: " + wsProperties.getContext());
             System.out.println("  ::  NodeId: " + wsProperties.getNodeId());
             System.out.println("  ::  Normal Node Count: " + nodes.size());
             System.out.println("===========================================================");
