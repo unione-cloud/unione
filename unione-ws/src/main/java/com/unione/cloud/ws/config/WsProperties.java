@@ -37,6 +37,11 @@ public class WsProperties {
      * WebSocket服务允许的来源
      */
     private String origin;
+
+    /**
+     * WebSocket服务允许的传输协议,webSocket,polling
+     */
+    private String transports;
     
     /**
      * 最大帧长度
@@ -228,5 +233,13 @@ public class WsProperties {
 
     public void setOrigin(String origin) {
         this.origin = origin;
+    }
+
+    public String getTransports() {
+        return transports;
+    }
+
+    public void setTransports(String transports) {
+        this.transports = transports;
     }
 }

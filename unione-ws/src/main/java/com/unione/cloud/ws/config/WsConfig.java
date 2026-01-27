@@ -1,5 +1,6 @@
 package com.unione.cloud.ws.config;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.Transport;
 import com.corundumstudio.socketio.listener.ExceptionListener;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -41,6 +43,10 @@ public class WsConfig {
         }
         if(!ObjectUtil.isEmpty(wsProperties.getOrigin())){
             config.setOrigin(wsProperties.getOrigin());
+        }
+        if(!ObjectUtil.isEmpty(wsProperties.getTransports())){
+            List<Transport> transportList = Arrays.stream(wsProperties.getTransports().split(",")).map(Transport::valueOf).toList();
+            config.setTransports(transportList.toArray(new Transport[0]));
         }
         config.setMaxFramePayloadLength(wsProperties.getMaxFramePayloadLength());
         config.setMaxHttpContentLength(wsProperties.getMaxHttpContentLength());
