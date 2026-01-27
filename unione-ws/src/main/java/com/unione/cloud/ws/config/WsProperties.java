@@ -39,6 +39,11 @@ public class WsProperties {
     private String origin;
 
     /**
+     * WebSocket服务允许的头信息
+     */
+    private String allowHeaders;
+
+    /**
      * WebSocket服务允许的传输协议,webSocket,polling
      */
     private String transports;
@@ -241,5 +246,13 @@ public class WsProperties {
 
     public void setTransports(String transports) {
         this.transports = transports;
+    }
+
+    public String getAllowHeaders() {
+        return allowHeaders;
+    }
+
+    public void setAllowHeaders(String allowHeaders) {
+        this.allowHeaders = allowHeaders;
     }
 }

@@ -44,6 +44,9 @@ public class WsConfig {
         if(!ObjectUtil.isEmpty(wsProperties.getOrigin())){
             config.setOrigin(wsProperties.getOrigin());
         }
+        if(!ObjectUtil.isEmpty(wsProperties.getAllowHeaders())){
+            config.setAllowHeaders(wsProperties.getAllowHeaders());
+        }
         if(!ObjectUtil.isEmpty(wsProperties.getTransports())){
             List<Transport> transportList = Arrays.stream(wsProperties.getTransports().split(",")).map((val)->{
                 if("websocket".equals(val)){
