@@ -22,11 +22,13 @@ import com.unione.cloud.ws.model.WsClientEntity;
 import com.unione.cloud.ws.model.WsResponse;
 
 import cn.hutool.core.util.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 分布式WebSocket连接管理器
  * 使用Redis实现跨节点连接管理
  */
+@Slf4j
 @Service
 public class WsClientManager {
 
@@ -68,12 +70,17 @@ public class WsClientManager {
 
         String token = client.getHandshakeData().getHttpHeaders().get("token");
         if (ObjectUtil.isEmpty(token)) {
+            token=client.getHandshakeData().getSingleUrlParam("token");
+        }
+        if (ObjectUtil.isEmpty(token)) {
+            log.error("websocket 连接失败，token不能为空");
             client.sendEvent("error", WsResponse.error("token不能为空"));
             client.disconnect();
             return;
         }
         UserPrincipal principal = tokenService.toPrincipal(token);
         if (principal == null || principal.getId() == null) {
+            log.error("websocket 连接失败，token无效");
             client.sendEvent("error", WsResponse.error("token无效"));
             client.disconnect();
             return;
