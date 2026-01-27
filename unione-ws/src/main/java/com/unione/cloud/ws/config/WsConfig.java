@@ -45,8 +45,17 @@ public class WsConfig {
             config.setOrigin(wsProperties.getOrigin());
         }
         if(!ObjectUtil.isEmpty(wsProperties.getTransports())){
-            List<Transport> transportList = Arrays.stream(wsProperties.getTransports().split(",")).map(Transport::valueOf).toList();
-            config.setTransports(transportList.toArray(new Transport[0]));
+            List<Transport> transportList = Arrays.stream(wsProperties.getTransports().split(",")).map((val)->{
+                if("websocket".equals(val)){
+                    return Transport.WEBSOCKET;
+                }else if("polling".equals(val)){
+                    return Transport.POLLING;
+                }
+                return null;
+            }).filter(t->t!=null).toList();
+            if(!transportList.isEmpty()){
+                config.setTransports(transportList.toArray(new Transport[0]));
+            }
         }
         config.setMaxFramePayloadLength(wsProperties.getMaxFramePayloadLength());
         config.setMaxHttpContentLength(wsProperties.getMaxHttpContentLength());
