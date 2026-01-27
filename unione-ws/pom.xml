@@ -23,6 +23,12 @@
 			<artifactId>unione-beetsql</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>${spring.boot.version}</version> <!-- 或使用最新版本 -->
+        </dependency>
         
         <!-- WebSocket dependencies -->
         <dependency>

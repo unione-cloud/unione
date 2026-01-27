@@ -11,7 +11,7 @@ import lombok.Data;
  * 用于客户端向服务端发送请求
  */
 @Data
-public class WsRequest implements Serializable{
+public class WsRequest extends WsEvent{
     
     private static final long serialVersionUID = 1L;
 
@@ -24,11 +24,6 @@ public class WsRequest implements Serializable{
      * 时间戳
      */
     private Long timestamp;
-    
-    /**
-     * 请求内容
-     */
-    private Object data;
 
     public WsRequest(){
         this.timestamp = System.currentTimeMillis();

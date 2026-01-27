@@ -10,7 +10,6 @@ import com.unione.cloud.core.token.TokenService;
 import com.unione.cloud.ws.WsClientManager;
 import com.unione.cloud.ws.WsPushService;
 import com.unione.cloud.ws.constants.WsConstants;
-import com.unione.cloud.ws.model.WsResponse;
 
 import cn.hutool.core.util.ObjectUtil;
 
@@ -38,6 +37,9 @@ public abstract class WsAbstractHandler<T> implements DataListener<T> {
      */
     protected boolean isAuthed(SocketIOClient client) {
         String token = client.getHandshakeData().getHttpHeaders().get("token");
+        if (ObjectUtil.isEmpty(token)) {
+            token=client.getHandshakeData().getSingleUrlParam("token");
+        }
         if (ObjectUtil.isEmpty(token)) {
             return false;
         }

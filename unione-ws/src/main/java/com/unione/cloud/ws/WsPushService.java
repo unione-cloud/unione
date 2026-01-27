@@ -123,7 +123,7 @@ public class WsPushService {
         // 推送本地连接
         List<SocketIOClient> clients = wsClientManager.getLocal(userId);
         for (SocketIOClient client : clients) {
-            client.sendEvent(String.format("event:%s", event.getName()), event);
+            client.sendEvent(String.format("event:%s", event.getEvent()), event);
         }
 
         // 如果启用了分布式，通过Redis推送其他节点
@@ -142,7 +142,7 @@ public class WsPushService {
             List<SocketIOClient> clients = wsClientManager.getLocal(userId);
             for (SocketIOClient client : clients) {
                 if (client.getAllRooms().contains(roomId)) {
-                    client.sendEvent(String.format("event:%s", event.getName()), event);
+                    client.sendEvent(String.format("event:%s", event.getEvent()), event);
                 }
             }
         }
@@ -168,7 +168,7 @@ public class WsPushService {
             return;
         }
         // 广播本地连接
-        socketIOServer.getBroadcastOperations().sendEvent(String.format("event:%s", event.getName()), event);
+        socketIOServer.getBroadcastOperations().sendEvent(String.format("event:%s", event.getEvent()), event);
 
         // 如果启用了分布式，通过Redis广播到其他节点
         if (WS_DISTRIBUTE_ENABLE) {
@@ -206,7 +206,7 @@ public class WsPushService {
      * @param event  事件消息
      */
     public void sendEvent(SocketIOClient client, WsEvent event) {
-        client.sendEvent(String.format("event:%s", event.getName()), event);
+        client.sendEvent(String.format("event:%s", event.getEvent()), event);
     }
 
 

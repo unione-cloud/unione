@@ -1,7 +1,5 @@
 package com.unione.cloud.ws.model;
 
-import java.io.Serializable;
-
 import com.unione.cloud.ws.constants.WsConstants;
 
 import lombok.Data;
@@ -11,7 +9,7 @@ import lombok.Data;
  * 用于服务端向客户端发送响应
  */
 @Data
-public class WsResponse implements Serializable {
+public class WsResponse extends WsEvent {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -39,6 +37,11 @@ public class WsResponse implements Serializable {
      */
     private Long reqId;
 
+    public WsResponse event(String event) {
+        setEvent(event);
+        return this;
+    }
+
     public WsResponse() {
         this.timestamp = System.currentTimeMillis();
     }
@@ -51,6 +54,7 @@ public class WsResponse implements Serializable {
         WsResponse response = new WsResponse();
         response.setCode(code);
         response.setMessage(message);
+        response.setEvent("error");
         return response;
     }
 
@@ -58,6 +62,7 @@ public class WsResponse implements Serializable {
         WsResponse response = new WsResponse();
         response.setCode(WsConstants.ERROR_CODE_MESSAGE_HANDLE_ERROR);
         response.setMessage(message);
+        response.setEvent("error");
         return response;
     }
 
@@ -66,6 +71,7 @@ public class WsResponse implements Serializable {
         response.setCode(WsConstants.ERROR_CODE_MESSAGE_HANDLE_ERROR);
         response.setMessage(message);
         response.setReqId(requestId);
+        response.setEvent("error");
         return response;
     }
 

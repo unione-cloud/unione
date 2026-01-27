@@ -146,6 +146,16 @@ public class WsClientManager {
     }
 
     /**
+     * 根据会话ID获取连接
+     * 
+     * @param clientId 会话ID
+     * @return SocketIOClient
+     */
+    public SocketIOClient get(String clientId) {
+        return localConnectionMap.get(clientId);
+    }
+
+    /**
      * 移除连接
      * 
      * @param client SocketIOClient

@@ -12,7 +12,9 @@ public class WsEvent implements Serializable{
     /**
      * 事件名称
      */
-    private String name;
+    private String event;
+
+    private Long ackId;
 
     /**
      * 时间戳
@@ -30,7 +32,7 @@ public class WsEvent implements Serializable{
 
     public static WsEvent build(String name, Object data){
         WsEvent event=new WsEvent();
-        event.setName(name);
+        event.setEvent(name);
         event.setData(data);
         return event;
     }

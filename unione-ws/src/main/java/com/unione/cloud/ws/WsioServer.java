@@ -26,7 +26,7 @@ import com.unione.cloud.ws.model.WsNodeEntity;
  */
 @Component
 @ConditionalOnProperty(prefix = "unione.ws", name = "enabled", havingValue = "true", matchIfMissing = true)
-public class WsServer implements ApplicationListener<ApplicationEvent> {
+public class WsioServer implements ApplicationListener<ApplicationEvent> {
 
     @Autowired
     private WsClientManager wsClientManager;
