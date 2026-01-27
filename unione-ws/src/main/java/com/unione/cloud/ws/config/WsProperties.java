@@ -32,6 +32,11 @@ public class WsProperties {
      * WebSocket服务上下文路径
      */
     private String context;
+
+    /**
+     * WebSocket服务允许的来源
+     */
+    private String origin;
     
     /**
      * 最大帧长度
@@ -215,5 +220,13 @@ public class WsProperties {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 }
