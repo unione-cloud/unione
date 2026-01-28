@@ -18,11 +18,11 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- <dependency>
+		<dependency>
 			<groupId>cloud.unione</groupId>
-			<artifactId>unione-ai</artifactId>
+			<artifactId>unione-pay</artifactId>
 			<version>${project.version}</version>
-		</dependency> -->
+		</dependency>
 
 		<dependency>
 			<groupId>cloud.unione</groupId>

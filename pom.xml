@@ -407,6 +407,7 @@
 		<module>unione-starter</module>
 		<module>unione-codegen</module>
         <module>unione-ws</module>
+        <module>unione-pay</module>
 	</modules>
 	
 </project>
