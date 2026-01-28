@@ -161,8 +161,6 @@ public class RegisterService {
 				}
 				user.setUserType(1);
 			}
-			user.setTenantId(tenant.getId());
-			user.setOrgId(tenant.getId());
 			
 			LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());
 			SqlBuilder<SysUser> untelBuilder=SqlBuilder.build(user).field("id,username,tel").where("username=? or tel=?");
@@ -174,6 +172,8 @@ public class RegisterService {
 			});
 			
 			LogsUtil.add("设置默认属性");
+			user.setTenantId(tenant.getId());
+			user.setOrgId(tenant.getId());
 			user.setDelFlag(0);
 			user.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
 			user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
