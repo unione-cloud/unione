@@ -28,7 +28,7 @@ public class TagSqlWhere extends WhereTag {
 			}
 
 			String tmp=sql.replaceAll("\\s", "");
-			if("WHERE".equalsIgnoreCase(tmp) ||"WHEREAND".equalsIgnoreCase(tmp) || "WHEREOR".equalsIgnoreCase(tmp)) {
+			if("WHERE".equalsIgnoreCase(tmp) ||"WHEREAND".equalsIgnoreCase(tmp) || "WHEREOR".equalsIgnoreCase(tmp) || "WHERE()".equalsIgnoreCase(tmp)) {
 				return;
 			}
 			if(tmp.startsWith("WHERE()AND")) {

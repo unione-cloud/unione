@@ -21,7 +21,7 @@ public class TagSqlTrim extends TrimTag {
 					return;
 				}
 				String tmp=sql.replaceAll("\\s", "");
-				if("AND()".equalsIgnoreCase(tmp) || "OR()".equalsIgnoreCase(tmp)) {
+				if("AND()".equalsIgnoreCase(tmp) || "OR()".equalsIgnoreCase(tmp) || "()".equalsIgnoreCase(tmp)) {
 					return;
 				}
 				
