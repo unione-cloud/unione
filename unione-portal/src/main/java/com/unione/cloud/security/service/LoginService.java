@@ -327,9 +327,6 @@ public class LoginService {
 			return this.loginFailure(param.getUsername());
 		}
 		
-		// 密码正确
-		this.cleanFailure(param.getUsername());	//清空失败信息
-		
 		// 单设备登录
 		if(LOGIN_SINGLELIMIT) {
 			// 如果开启了单设备登录
@@ -341,6 +338,9 @@ public class LoginService {
 			});
 			AssertUtil.service().isTrue(!flag, LOGIN_SINGLETIP.replace("{username}", param.getUsername()));
 		}
+
+		//清空失败信息
+		this.cleanFailure(param.getUsername());
 			
 		log.info("退出：用户登录方法,username:{},captcha:{}",param.getUsername(),param.getCaptcha());
 		// 构建认证信息
@@ -411,6 +411,9 @@ public class LoginService {
 			});
 			AssertUtil.service().isTrue(!flag, LOGIN_SINGLETIP.replace("{username}", username));
 		}
+
+		//清空失败信息
+		this.cleanFailure(param.getUsername());	
 			
 		log.info("退出：用户登录方法,userphone:{},captcha:{}",param.getUserphone(),param.getCaptcha());
 		// 构建认证信息
