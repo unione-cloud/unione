@@ -130,6 +130,7 @@ public class RegisterService {
 		try{
 			Long userId = IdGenHolder.generate();
 			SysUser user=new SysUser();
+			BeanUtils.setDefaultValue(user, REGISGER_DEFAULT_INFO);	
 			BeanUtils.copyProperties(param, user);
 			user.setId(userId);
 			user.setUserType(2);		//用户类型，字典USERTYPE 1管理员，2普通用户，9其他	
@@ -178,7 +179,7 @@ public class RegisterService {
 			user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
 			user.setCreatedBy(userId);
 			user.setLastUpdatedBy(userId);	
-			BeanUtils.setDefaultValue(user, REGISGER_DEFAULT_INFO);	
+			
 			
 			LogsUtil.add("生成用户密码盐并对密码进行加密处理");
 			user.setPwdSalt(RandomUtil.randomString(16));
