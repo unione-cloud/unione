@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import com.google.protobuf.ServiceException;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
