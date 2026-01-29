@@ -43,6 +43,12 @@ public class CaptchaService {
 	
 	@Autowired
 	private HttpServletRequest request;
+
+	/**
+	 * 验证码类型：gif、line、shear、circle
+	 */
+	@Value("${security.captcha.type:gif}")
+	private String TYPE;
 	
 	/**
 	 * 验证码：宽度
@@ -99,6 +105,13 @@ public class CaptchaService {
 	public AbstractCaptcha create() {
 		log.debug("进入->创建验证码");
 		AbstractCaptcha captcha=CaptchaUtil.createGifCaptcha(WIDTH, HEIGHT,CODECOUNT);
+		if("line".equalsIgnoreCase(TYPE)) {
+			captcha=CaptchaUtil.createLineCaptcha(WIDTH, HEIGHT, CODECOUNT, CODECOUNT);
+		}else if("circle".equalsIgnoreCase(TYPE)) {
+			captcha=CaptchaUtil.createCircleCaptcha(WIDTH, HEIGHT, CODECOUNT, CODECOUNT);
+		}else if("shear".equalsIgnoreCase(TYPE)) {
+			captcha=CaptchaUtil.createShearCaptcha(WIDTH, HEIGHT, CODECOUNT, CODECOUNT);
+		}
 		
 		String captchaid=UUID.randomUUID().toString();
 		// 设置cookie
