@@ -129,8 +129,8 @@ public class WsClientManager {
         if(!ObjectUtil.isEmpty(ip)){
             clientEntity.setIp(ip);
         }else if(!ObjectUtil.isEmpty(remoteAddress)){
-            if(remoteAddress.startsWith("[")){
-                clientEntity.setIp(remoteAddress.substring(2, remoteAddress.indexOf("]")));
+            if(remoteAddress.indexOf("[")>-1){
+                clientEntity.setIp(remoteAddress.substring(remoteAddress.indexOf("[")+1, remoteAddress.indexOf("]")));
             }else if(remoteAddress.contains(":")){
                 clientEntity.setIp(remoteAddress.substring(1, remoteAddress.indexOf(":")));
             }else{
