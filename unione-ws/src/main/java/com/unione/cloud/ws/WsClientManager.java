@@ -74,14 +74,18 @@ public class WsClientManager {
         }
         if (ObjectUtil.isEmpty(token)) {
             log.error("websocket 连接失败，token不能为空");
-            client.sendEvent("error", WsResponse.error("token不能为空"));
+            WsResponse error= WsResponse.error("token不能为空");
+            error.setCode(WsConstants.ERROR_CODE_AUTH_FAIL);
+            client.sendEvent("error",error);
             client.disconnect();
             return;
         }
         UserPrincipal principal = tokenService.toPrincipal(token);
         if (principal == null || principal.getId() == null) {
             log.error("websocket 连接失败，token无效");
-            client.sendEvent("error", WsResponse.error("token无效"));
+            WsResponse error= WsResponse.error("token无效");
+            error.setCode(WsConstants.ERROR_CODE_AUTH_FAIL);
+            client.sendEvent("error",error);
             client.disconnect();
             return;
         }
