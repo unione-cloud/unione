@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,7 +192,8 @@ public class RedisService {
 	public void putList(String key, List<?> value) {
 		log.debug("设置List数据，Key:{}", key);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
-		listOps.rightPushAll(key, value);
+		Object array[]=value.toArray();
+		listOps.rightPushAll(key, array);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -199,7 +201,8 @@ public class RedisService {
 		log.debug("设置List数据，db:{}，Key:{}", db, key);
 		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
 		ListOperations<String, Object> listOps = redisTemplate.opsForList();
-		listOps.rightPushAll(key, value);
+		Object array[]=value.toArray();
+		listOps.rightPushAll(key, array);
 	}
 
 	/**
