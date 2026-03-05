@@ -57,7 +57,30 @@ public class RedisService {
 	@Value("${redis.service.msg.timeout:30}")
 	private Long PUBLISH_TIMEOUT;
 
-	/**
+
+	@SuppressWarnings("unchecked")
+	public Long incr(String key){
+		return redisTemplate.opsForValue().increment(key, 1);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Long incr(int db, String key){
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		return redisTemplate.opsForValue().increment(key, 1);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Long incr(String key,int delta){
+		return redisTemplate.opsForValue().increment(key, delta);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Long incr(int db, String key,int delta){
+		RedisTemplate redisTemplate = redisConfig.getRedisTmpls(db);
+		return redisTemplate.opsForValue().increment(key, delta);
+	}
+
+	/** 
 	 * @设置Object数据
 	 * @param key
 	 * @param value
