@@ -35,6 +35,8 @@ import com.unione.cloud.core.util.BeanUtils;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.MD5;
 import lombok.Getter;
 
 
@@ -252,6 +254,7 @@ public class SqlBuilder<T> {
 	/**
 	 * 解析查询信息
 	 */
+	@SuppressWarnings("unchecked")
 	private void resolve() {
 		TableDesc tableDesc = this.sqlManager.getTableDesc(this.tableName);
 		ClassDesc classDesc=null;
@@ -284,6 +287,33 @@ public class SqlBuilder<T> {
 
 					this.entity.getFields().add(field);
 				}
+			}else{
+				Map<String,Object> tmp=(Map<String,Object>)this.data;
+				tableDesc.getCols().stream().forEach(col->{
+					SqlField field=new SqlField();
+					String column=col.trim(); 
+					Integer asIndex = column.toUpperCase().indexOf(" AS ");
+					if(asIndex > 0) {
+						String alias = column.substring(asIndex+4);
+						column=column.substring(0, asIndex);
+						field.setAlias(alias);
+					}else{
+						field.setAlias(StrUtil.toCamelCase(column));
+					}
+					field.setColumn(column);
+
+					// 判断是否为主键字段
+					if(ObjectUtil.equal(this.keyField, field.getColumn()) || 
+							ObjectUtil.equal(this.keyField, field.getAlias())) {
+						field.setPk(true);
+						this.entity.setKeyField(field);
+					}
+					
+					// 如果data中有改字段value，则加入fields集合
+					if(tmp.get(field.getAlias())!=null){
+						this.entity.getFields().add(field);
+					}
+				});
 			}
 		}
 		
@@ -376,8 +406,33 @@ public class SqlBuilder<T> {
 			return this.entity.getSql();
 		}
 		boolean isJavaBean=!(this.data instanceof Map);
-		
 		StringBuffer buffer=new StringBuffer();
+
+		if(SqlType.INSERT.equals(type)) {
+			buffer.append("INSERT INTO ");
+			if(!StringUtils.isEmpty(this.entity.getSchema())) {
+				buffer.append(this.entity.getSchema()).append(".");
+			}
+			buffer.append(this.entity.getTable()).append(" (");
+			for(int i=0;i<this.entity.getFields().size();i++) {
+				SqlField field=this.entity.getFields().get(i);
+				buffer.append(field.getColumn());
+				if(i<this.entity.getFields().size()-1) {
+					buffer.append(",");
+				}
+			}
+			buffer.append(") VALUES (");
+			for(int i=0;i<this.entity.getFields().size();i++) {
+				SqlField field=this.entity.getFields().get(i);
+				buffer.append("#{data.").append(field.getAlias()).append("}");
+				if(i<this.entity.getFields().size()-1) {
+					buffer.append(",");
+				}
+			}	
+			buffer.append(")");
+			return buffer.toString();
+		}
+		
 		if(SqlType.SELECT.equals(type)||SqlType.SELECT_BYID.equals(type)||SqlType.SELECT_ONE.equals(type)) {
 			buffer.append("SELECT ");
 			// 查询字段处理
@@ -564,8 +619,9 @@ public class SqlBuilder<T> {
 		StackTraceElement stes[]=ThreadUtil.getStackTrace();
 		StackTraceElement ste=stes[5];
 		String clasName[]=ste.getClassName().split("\\.");
-		
-		this.nameSpace=String.format("SqlBuilder.%s",clasName[clasName.length-1]);
+
+		String fields=this.entity.getFields().stream().map(f->f.getAlias()).collect(Collectors.joining(","));
+		this.nameSpace=String.format("SqlBuilder.%s.%s",clasName[clasName.length-1],MD5.create().digestHex(fields));
 		return this.nameSpace;
 	}
 	
@@ -843,18 +899,22 @@ public class SqlBuilder<T> {
 	 * @return
 	 */
 	public SqlBuilder<T> field(String... fieldList){
-		for(String field:fieldList){
-			String[] list=field.split(",");
-			for(int i=0;i<list.length;i++) {
-				String column=list[i].trim(); 
-				Integer asIndex = column.toUpperCase().indexOf(" AS ");
-				if(asIndex > 0) {
-					String alias = column.substring(asIndex+4);
-					column=column.substring(0, asIndex);
-					this.entity.getFieldList().add(alias);
-					this.entity.getFieldList().add(column);
-				}else {
-					this.entity.getFieldList().add(column);
+		if(fieldList!=null){
+			for(String field:fieldList){
+				if(field!=null){
+					String[] list=field.split(",");
+					for(int i=0;i<list.length;i++) {
+						String column=list[i].trim(); 
+						Integer asIndex = column.toUpperCase().indexOf(" AS ");
+						if(asIndex > 0) {
+							String alias = column.substring(asIndex+4);
+							column=column.substring(0, asIndex);
+							this.entity.getFieldList().add(alias);
+							this.entity.getFieldList().add(column);
+						}else {
+							this.entity.getFieldList().add(column);
+						}
+					}
 				}
 			}
 		}
@@ -1032,6 +1092,16 @@ public class SqlBuilder<T> {
 	 */
 	public long getStart() {
 		return (page - 1) * pageSize;
+	}
+
+	/**
+	 * 设置数据库模式
+	 * @param schema
+	 * @return
+	 */
+	public SqlBuilder<T> schema(String schema){
+		this.entity.setSchema(schema);
+		return this;
 	}
 	
 }

@@ -47,6 +47,19 @@ public class DataBaseDao {
 	{
 		SQLManager.javabeanStrict(false);
 	}
+
+	public <T> int insert(SqlBuilder<T> builder) {
+		SqlId sqlId=this.loadSql(builder, SqlType.INSERT);
+		
+		SqlEntity sqlEntity=builder.getEntity();
+		SqlField idField=sqlEntity.getKeyField();
+		AssertUtil.database().notNull(idField, "未设置主键字段");
+		BeanUtils.setDefaultValue(builder.getData(), idField.getAlias(), IdGenHolder.generate());
+
+		initInsertDefualtValue(builder.getData());
+
+		return this.sqlManager.insert(sqlId, builder.toParams());
+	}
 	
 	/**
 	 *	 插入数据
@@ -55,45 +68,13 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int insert(T entity) {
-		SessionService sessionService=SessionHolder.build();
 
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, entity.getClass());
 		SqlField idField=sqlEntity.getKeyField();
 		AssertUtil.database().notNull(idField, "未设置主键字段");
 		BeanUtils.setFieldValue(entity, idField.getAlias(), IdGenHolder.generate());
 		
-		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
-		if(delFlag!=null) {
-			BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
-		}
-		SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-		if(tenantId!=null && sessionService.getTenantId()!=null) {
-			BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
-		}
-		SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-		if(organId!=null && sessionService.getOrgId()!=null) {
-			BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
-		}
-		SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-		if(userId!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
-		}
-		SqlField created=sqlEntity.getStsField(BaseField.CREATED);
-		if(created!=null) {
-			BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
-		}
-		SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-		if(createdBy!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
-		}
-		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
-		if(lastUpdated!=null) {
-			BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
-		}
-		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
-		}
+		initInsertDefualtValue(entity);
 		
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
@@ -105,44 +86,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int insertWithId(T entity) {
-		SessionService sessionService=SessionHolder.build();
-		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, entity.getClass());
-		SqlField idField=sqlEntity.getKeyField();
-		AssertUtil.database().notNull(idField, "未设置主键字段");
-
-		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
-		if(delFlag!=null) {
-			BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
-		}
-		SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-		if(tenantId!=null && sessionService.getTenantId()!=null) {
-			BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
-		}
-		SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-		if(organId!=null && sessionService.getOrgId()!=null) {
-			BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
-		}
-		SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-		if(userId!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
-		}
-		SqlField created=sqlEntity.getStsField(BaseField.CREATED);
-		if(created!=null) {
-			BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
-		}
-		SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-		if(createdBy!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
-		}
-		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
-		if(lastUpdated!=null) {
-			BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
-		}
-		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
-			BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
-		}
-
+		initInsertDefualtValue(entity);
 		return this.sqlManager.insertTemplate(entity.getClass(),entity);
 	}
 
@@ -153,46 +97,13 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int[] insertBatch(List<T> list) {
-		SessionService sessionService=SessionHolder.build();
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, list.get(0).getClass());
 		SqlField idField=sqlEntity.getKeyField();
 		AssertUtil.database().notNull(idField, "未设置主键字段");
 
 		list.stream().forEach(entity->{
 			BeanUtils.setFieldValue(entity, idField.getAlias(), IdGenHolder.generate());
-			
-			SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
-			if(delFlag!=null) {
-				BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
-			}
-			SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-			if(tenantId!=null && sessionService.getTenantId()!=null) {
-				BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
-			}
-			SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-			if(organId!=null && sessionService.getOrgId()!=null) {
-				BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
-			}
-			SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-			if(userId!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
-			}
-			SqlField created=sqlEntity.getStsField(BaseField.CREATED);
-			if(created!=null) {
-				BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
-			}
-			SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-			if(createdBy!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
-			}
-			SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
-			if(lastUpdated!=null) {
-				BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
-			}
-			SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-			if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
-			}
+			initInsertDefualtValue(entity);
 		});
 		
 		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
@@ -205,47 +116,54 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int[] insertBatchWithId(List<T> list) {
+		list.stream().forEach(entity->{
+			initInsertDefualtValue(entity);
+		});
+		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
+	}
+
+	/**
+	 * 初始化插入默认值
+	 * @param entity
+	 */
+	public void initInsertDefualtValue(Object entity){
 		SessionService sessionService=SessionHolder.build();
-		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, list.get(0).getClass());
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, entity.getClass());
 		SqlField idField=sqlEntity.getKeyField();
 		AssertUtil.database().notNull(idField, "未设置主键字段");
 
-		list.stream().forEach(entity->{
-			SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
-			if(delFlag!=null) {
-				BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
-			}
-			SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
-			if(tenantId!=null && sessionService.getTenantId()!=null) {
-				BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
-			}
-			SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
-			if(organId!=null && sessionService.getOrgId()!=null) {
-				BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
-			}
-			SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
-			if(userId!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
-			}
-			SqlField created=sqlEntity.getStsField(BaseField.CREATED);
-			if(created!=null) {
-				BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
-			}
-			SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
-			if(createdBy!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
-			}
-			SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
-			if(lastUpdated!=null) {
-				BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
-			}
-			SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
-			if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
-				BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
-			}
-		});
-		
-		return this.sqlManager.insertBatch(list.get(0).getClass(),list);
+		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
+		if(delFlag!=null) {
+			BeanUtils.setDefaultValue(entity, delFlag.getAlias(),0);
+		}
+		SqlField tenantId=sqlEntity.getStsField(BaseField.TENANT_ID);
+		if(tenantId!=null && sessionService.getTenantId()!=null) {
+			BeanUtils.setDefaultValue(entity, tenantId.getAlias(), sessionService.getTenantId());
+		}
+		SqlField organId=sqlEntity.getStsField(BaseField.ORGAN_ID);
+		if(organId!=null && sessionService.getOrgId()!=null) {
+			BeanUtils.setDefaultValue(entity, organId.getAlias(), sessionService.getOrgId());
+		}
+		SqlField userId=sqlEntity.getStsField(BaseField.USER_ID);
+		if(userId!=null && sessionService.getUserId()!=null) {
+			BeanUtils.setDefaultValue(entity, userId.getAlias(), sessionService.getUserId());
+		}
+		SqlField created=sqlEntity.getStsField(BaseField.CREATED);
+		if(created!=null) {
+			BeanUtils.setDefaultValue(entity, created.getAlias(), DateUtil.date());
+		}
+		SqlField createdBy=sqlEntity.getStsField(BaseField.CREATED_BY);
+		if(createdBy!=null && sessionService.getUserId()!=null) {
+			BeanUtils.setDefaultValue(entity, createdBy.getAlias(), sessionService.getUserId());
+		}
+		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
+		if(lastUpdated!=null) {
+			BeanUtils.setFieldValue(entity, lastUpdated.getAlias(), DateUtil.date());
+		}
+		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
+			BeanUtils.setFieldValue(entity, lastUpdatedBy.getAlias(), sessionService.getUserId());	
+		}
 	}
 
 	/**

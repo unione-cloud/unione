@@ -1,7 +1,7 @@
 package com.unione.cloud.beetsql.builder;
 
 public enum SqlType {
-	COUNT("SELECT"),
+	COUNT("SELECT"),INSERT("INSERT"),
 	SELECT("SELECT"),SELECT_ONE("SELECT"),SELECT_BYID("SELECT"),
 	UPDATE("UPDATE"),UPDATE_BYID("UPDATE"),
 	DELETE("DELETE"),DELETE_BYID("DELETE"),
