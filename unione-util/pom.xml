@@ -23,6 +23,12 @@
 			<artifactId>unione-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>cloud.unione</groupId>
+			<artifactId>unione-beetsql</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<!--minio:配置依赖信息 -->
 		<dependency>
