@@ -17,6 +17,7 @@ import com.unione.cloud.ws.model.WsDistbuteEntity;
 import com.unione.cloud.ws.model.WsEvent;
 import com.unione.cloud.ws.model.WsResponse;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -69,7 +70,17 @@ public class WsPushService {
         }
     }
 
+    /**
+     * 向指定房间中的用户推送数据
+     * 
+     * @param roomId 房间ID
+     * @param userIds 用户ID列表
+     * @param data   数据
+     */
     public void sendData(String roomId, List<Long> userIds, WsData data) {
+        if(ObjectUtil.isEmpty(userIds) || ObjectUtil.isEmpty(roomId)){
+            return;
+        }
         // 推送本地连接
         for (Long userId : userIds) {
             List<SocketIOClient> clients = wsClientManager.getLocal(userId);
@@ -136,7 +147,17 @@ public class WsPushService {
         }
     }
 
+    /**
+     * 向指定房间中的用户推送事件消息
+     * 
+     * @param roomId 房间ID
+     * @param userIds 用户ID列表
+     * @param event  事件消息
+     */
     public void sendEvent(String roomId, List<Long> userIds, WsEvent event) {
+        if(ObjectUtil.isEmpty(userIds) || ObjectUtil.isEmpty(event)){
+            return;
+        }
         // 推送本地连接
         for (Long userId : userIds) {
             List<SocketIOClient> clients = wsClientManager.getLocal(userId);
