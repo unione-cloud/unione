@@ -8,7 +8,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.web.logs.model.SysLogs;
 
 @FeignClient(
-	name = "${unione.cloud.portal:unione-portal}",
+	name = "${unione.name.portal:unione-portal}",
 	contextId = "SysLogs",
 	url = "${unione.cloud.ip:}${unione.cloud.portal:}",
 	path = "/api/common/logs"
