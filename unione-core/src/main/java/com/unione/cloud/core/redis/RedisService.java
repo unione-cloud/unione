@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
+import com.unione.cloud.core.exception.DataBaseException;
+import com.unione.cloud.core.exception.RemoteException;
 import com.unione.cloud.core.exception.ServiceException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -753,8 +754,11 @@ public class RedisService {
 				result = process.process();
 			} catch (Exception e) {
 				log.error("高可用分布式锁处理异常", e);
+				if(e instanceof ServiceException || e instanceof RemoteException || e instanceof DataBaseException){
+					throw e;
+				}
 				throw new ServiceException("高可用分布式锁处理异常", e);
-			} finally {
+			}  finally {
 				// 删除全局事务锁
 				delete(String.format("HPDL:%s", process.getHpdlName()));
 			}
