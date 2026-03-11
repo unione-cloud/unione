@@ -131,6 +131,8 @@ public class DataBaseDao {
 		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, entity.getClass());
 		SqlField idField=sqlEntity.getKeyField();
 		AssertUtil.database().notNull(idField, "未设置主键字段");
+		BeanUtils.setDefaultValue(entity, idField.getAlias(),IdGenHolder.generate());
+		
 
 		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
 		if(delFlag!=null) {
