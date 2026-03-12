@@ -192,7 +192,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 
 		long unckChildCount = dataBaseDao.findList(SqlBuilder.build(SysConfigDefine.class)
-			.where("delFlag=0 and parentId in [pids]")
+			.where("delFlag = 0 and parentId in [pids]")
 			.where("pids", ids))
 			.stream()
 			.filter(r->!ids.contains(r.getId()))

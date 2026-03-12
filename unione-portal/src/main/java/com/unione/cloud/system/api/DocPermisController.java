@@ -295,7 +295,7 @@ public class DocPermisController {
 			List<DocPermis> permis=dataBaseDao.findByIds(SqlBuilder.build(DocPermis.class).ids(ids));
 			Set<Long> fileIds=permis.stream().map(p->p.getFileId()).collect(Collectors.toSet());
 			if(!fileIds.isEmpty()){
-				permis=dataBaseDao.findList(SqlBuilder.build(DocPermis.class).where("delFlag=0 and fileId in [fileIds]").where("fileIds",fileIds));
+				permis=dataBaseDao.findList(SqlBuilder.build(DocPermis.class).where("delFlag = 0 and fileId in [fileIds]").where("fileIds",fileIds));
 				if(permis!=null && !permis.isEmpty()) {
 					LogsUtil.add("刷新文档审核结果");
 					Map<Long, Integer> totalMap=new HashMap<>();		//所有权限记录数量，doc->count

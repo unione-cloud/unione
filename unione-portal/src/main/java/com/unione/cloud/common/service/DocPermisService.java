@@ -171,7 +171,7 @@ public class DocPermisService {
 			LogsUtil.add("删除数据，len:%s",len);
 		}
 
-		long hadPermisCount = dataBaseDao.count(SqlBuilder.build(temp).where("fileId=? and delFlag=0 and ownerType!='public'"));
+		long hadPermisCount = dataBaseDao.count(SqlBuilder.build(temp).where("fileId=? and delFlag = 0 and ownerType!='public'"));
 		if(hadPermisCount>0){
 			file.setIsShare(1);
 		}
@@ -224,7 +224,7 @@ public class DocPermisService {
 			permisOwners.add(sessionService.getOrgId());
 		}
 		SqlBuilder<DocPermis> builder=SqlBuilder.build(DocPermis.class)
-				.where("delFlag=0 and auditResult in [auditResults] and (ownerId in [permisOwners] or ownerName in [ownerNames]) and fileId in [ids]")
+				.where("delFlag = 0 and auditResult in [auditResults] and (ownerId in [permisOwners] or ownerName in [ownerNames]) and fileId in [ids]")
 				.where("auditResults", Arrays.asList(2,4))
 				.where("permisOwners", permisOwners)
 				.where("ownerNames", sessionService.getUserRoles())

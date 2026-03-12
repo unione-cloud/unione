@@ -222,7 +222,7 @@ public class SelectorService {
         }
         Results<List<SysOrgan>> results=dataBaseDao.findPages(SqlBuilder.build(queryOrgan)
             .field("name","id","parentId","sn","types","descs")
-            .where("status=1 and parentId=? and name like [%?%]")
+            .where("status = 1 and parentId=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
          // 验证机构是否已经在目标中
@@ -280,7 +280,7 @@ public class SelectorService {
         }
         Results<List<SysGroup>> results=dataBaseDao.findPages(SqlBuilder.build(queryGroup)
             .field("name","id","parentId")
-            .where("status=1 and parentId=? and types=? and name like [%?%]")
+            .where("status = 1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
          // 验证分组是否已经在目标中
@@ -334,7 +334,7 @@ public class SelectorService {
         }
         Results<List<SysPost>> results=dataBaseDao.findPages(SqlBuilder.build(queryPost)
             .field("name","id","parentId")
-            .where("status=1 and parentId=? and types=? and name like [%?%]")
+            .where("status = 1 and parentId=? and types=? and name like [%?%]")
             .sort(Sort.build("ordered", "desc")));
 
         // 验证分组是否已经在目标中

@@ -68,7 +68,7 @@ public class OnlineDocService {
         if (doc == null) {
             SysOnlineDoc tmp = dataBaseDao.findOne(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id")
-                    .where("appId=? and delFlag=0")
+                    .where("appId=? and delFlag = 0")
                     .where("appId", appId)
                     .sort(Sort.build("versNo", "desc")));
             if (tmp != null) {
@@ -101,7 +101,7 @@ public class OnlineDocService {
             // 加载文档大纲
             List<SysOnlineDocItem> items = dataBaseDao.findList(SqlBuilder.build(SysOnlineDocItem.class)
                     .field("id,parentId,title,iconName")
-                    .where("docId=? and delFlag=0")
+                    .where("docId=? and delFlag = 0")
                     .where("docId", id)
                     .sort(Sort.build("ordered", "asc")));
             Map<Long, TreeNodeDto> nodeMap = new HashMap<>();
@@ -128,7 +128,7 @@ public class OnlineDocService {
             // 加载文档版本
             List<DocVersion> versList = dataBaseDao.findList(SqlBuilder.build(SysOnlineDoc.class)
                     .field("id,versNo")
-                    .where("appId=? and delFlag=0 and status in (3,4)")
+                    .where("appId=? and delFlag = 0 and status in (3,4)")
                     .where("appId",tmp.getAppId())
                     .sort(Sort.build("versNo", "desc")))
                     .stream().map(row->{

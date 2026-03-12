@@ -53,7 +53,7 @@ public class SysConfigService {
 		}
 
         List<SysConfigDefine> list = dataBaseDao.findList(SqlBuilder.build(configDefine)
-			.where("delFlag=0 and sn like ? and types=?")
+			.where("delFlag = 0 and sn like ? and types=?")
 			.sort(Sort.build("sn")));
 
         // 根据类型分组
@@ -73,7 +73,7 @@ public class SysConfigService {
             //1租户级，2机构级，3用户级
             if(ObjectUtil.equal(k, 1) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
-                    .where("delFlag=0 and status=1 and configId in [ids] and types=? and tenantId=?")
+                    .where("delFlag = 0 and status = 1 and configId in [ids] and types=? and tenantId=?")
                     .where("types", k)
                     .where("tenantId", sessionservice.getTenantId()));
             	values.forEach(r->{
@@ -82,7 +82,7 @@ public class SysConfigService {
             }
             if(ObjectUtil.equal(k, 2) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
-                   .where("delFlag=0 and status=1 and configId in [ids] and types=? and orgId=?")
+                   .where("delFlag = 0 and status = 1 and configId in [ids] and types=? and orgId=?")
                    .where("types", k)
                    .where("orgId", sessionservice.getOrgId()));
             	values.forEach(r->{
@@ -91,7 +91,7 @@ public class SysConfigService {
             }
             if(ObjectUtil.equal(k, 3) &&!ObjectUtil.isEmpty(v)){
             	List<SysConfigValue> values = dataBaseDao.findList(SqlBuilder.build(SysConfigValue.class,v)
-                  .where("delFlag=0 and status=1 and configId in [ids] and types=? and userId=?")
+                  .where("delFlag = 0 and status = 1 and configId in [ids] and types=? and userId=?")
                   .where("types", k)
                   .where("userId", sessionservice.getUserId()));
             	values.forEach(r->{

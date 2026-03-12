@@ -70,7 +70,7 @@ public class SysOnlineDocController implements PojoFeignApi<SysOnlineDoc>{
 		
 		Results<List<SysOnlineDoc>> results = dataBaseDao.findPages(SqlBuilder.build(params)
 			.field("id,title,versNo,icon,picMax,picMid,picMix,profile,ordered")
-			.where("appId=? and delFlag=0 and status in (3,4)"));
+			.where("appId=? and delFlag = 0 and status in (3,4)"));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
