@@ -1,12 +1,15 @@
 package com.unione.cloud.security.api;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.core.annotation.Action;
@@ -138,6 +141,22 @@ public class SecurityController {
 
 		// 执行登录
 		LoginResult result = loginService.doLoginBySms(param);
+		
+		return result;
+	}
+
+
+	@PostMapping("/oauth/{type}")
+	@Action(title="用户登录:OAuth2.0",type = ActionType.Login)
+	@Operation(summary="用户登录:OAuth2.0",description="")
+	public LoginResult oauth(@PathVariable("type") String type,@RequestParam("code") String code) {
+		log.info("用户登录，type:{},code:{}",type,code);
+		AssertUtil.service()
+			.notNull(code, "请求参数code不能为空")
+			.notIn(type, List.of("weixin"), "登录类型暂不支持");
+		
+		// 执行登录
+		LoginResult result = loginService.doLoginByOAuth(type, code);
 		
 		return result;
 	}

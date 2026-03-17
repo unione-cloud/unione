@@ -87,7 +87,7 @@ public class CodeBuilderFactoryTest {
 		SimpleUnioneProject mavenProject = new SimpleUnioneProject(packageName);
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 
-		factory.gen("demo_test",mavenProject);
+		factory.gen("sys_user_bind",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

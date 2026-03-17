@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-          <groupId>cloud.unione</groupId>
-          <artifactId>unione</artifactId>
-          <version>1.0.1-SNAPSHOT</version>
-    </parent>
-    <groupId>cloud.unione</groupId>
-    <artifactId>unione-pay</artifactId>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>cloud.unione</groupId>
+		<artifactId>unione</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>unione-pay</artifactId>
 
-    <dependencies>
-         <dependency>
+	<dependencies>
+		<dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-beetsql</artifactId>
@@ -26,22 +25,28 @@
 
 		<dependency>
 			<groupId>com.github.binarywang</groupId>
-			<artifactId>weixin-java-pay</artifactId>
-			<version>4.8.1-20260127.112509</version>
+			<artifactId>wx-java-pay-spring-boot-starter</artifactId>
+			<version>${wxjava.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-autoconfigure</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
-         <dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
+	<build>
+		<plugins>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
@@ -54,7 +59,7 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 
 </project>

@@ -162,3 +162,6 @@ wx:
     privateKeyPath: # apiclient_key.pem证书文件的绝对路径或者以classpath:开头的类路径. (V3商户模式需要)
     publicKeyPath: # 微信支付公钥，pub_key.pem证书文件的绝对路径或者以classpath:开头的类路径. (V3商户模式需要)
     publicKeyId: # 微信支付公钥ID (V3商户模式需要)            
+  open:
+    appId: # 移动应用 appid
+    appSecret: # 移动应用 appsecret
