@@ -92,7 +92,12 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-				// 请求信息
+
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+		// 请求信息
 		String uri=request.getRequestURI();
 		SessionHolder.build().setVar("_unione_pre_requestid", request.getHeader("_unione_requestid"));
 		String _unione_actionid = request.getHeader("_unione_actionid");
