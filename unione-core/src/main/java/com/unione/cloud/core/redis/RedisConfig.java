@@ -128,14 +128,14 @@ public class RedisConfig {
 				tmpls.setKeySerializer(stringSerializer);
 				tmpls.setHashKeySerializer(stringSerializer);
 				
-				Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
 				ObjectMapper objectMapper = new ObjectMapper();
 				objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-				objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-				jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+				objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),DefaultTyping.NON_FINAL);
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				GenericJackson2JsonRedisSerializer jsonRedisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 				
-				tmpls.setValueSerializer(jackson2JsonRedisSerializer);
-				tmpls.setHashValueSerializer(jackson2JsonRedisSerializer);
+				tmpls.setValueSerializer(jsonRedisSerializer);
+				tmpls.setHashValueSerializer(jsonRedisSerializer);
 				tmpls.afterPropertiesSet();
 				
 				redisTmplMap.put(db, tmpls);
