@@ -514,6 +514,8 @@ public class LoginService {
 					bind.setUnionId(userInfo.getUnionId());
 					bind.setTenantId(user.getTenantId());
 					bind.setUserId(user.getId());
+					bind.setCreatedBy(user.getId());
+					bind.setLastUpdatedBy(user.getId());
 					dataBaseDao.insert(bind);
 				}
 
