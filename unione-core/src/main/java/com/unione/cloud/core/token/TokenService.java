@@ -181,9 +181,10 @@ public class TokenService {
 				.build();
 
 		// token 签名处理
-		token = this.signature(principal.getUsername(), token);
+		String tmp[] = this.signature(principal.getUsername(), token);
+		token=tmp[0];
 
-		this.redisService.put(tcmDb, String.format("%s:%s:%s", tcmKey, principal.getUsername(), token), tcm,
+		this.redisService.put(tcmDb, String.format("%s:%s:%s", tcmKey, principal.getUsername(), tmp[1]), tcm,
 				Duration.ofSeconds(JWT_EXPIRES - 30));
 		SessionHolder.setToken(token);
 		SessionHolder.setUserPrincipal(principal);
@@ -212,9 +213,11 @@ public class TokenService {
 		log.debug("用户注销，清理token:{}", token);
 		if (!StringUtils.isEmpty(token)) {
 			try {
-				String username = sm4.decryptStr(token).split("@")[0];
+				String tinfo[]=sm4.decryptStr(token).split("@");
+				String username = tinfo[0];
+				String md5=tinfo[1];
 				log.debug("中心化管理token，从redis中删除，db:{} - {}:{}:{}", tcmDb, tcmKey, username, token);
-				this.redisService.delete(tcmDb, String.format("%s:%s:%s", tcmKey, username, token));
+				this.redisService.delete(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
 			} catch (Exception e) {
 				log.error("用户注销异常，token非法", e);
 			}
@@ -242,9 +245,11 @@ public class TokenService {
 	public TcmEntry getTcm(String token) {
 		if (!StringUtils.isEmpty(token)) {
 			try {
-				String username = sm4.decryptStr(token).split("@")[0];
+				String tinfo[]=sm4.decryptStr(token).split("@");
+				String username = tinfo[0];
+				String md5=tinfo[1];
 				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}", tcmDb, tcmKey, username, token);
-				TcmEntry tcm = this.redisService.getObj(tcmDb, String.format("%s:%s:%s", tcmKey, username, token));
+				TcmEntry tcm = this.redisService.getObj(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
 				return tcm;
 			} catch (Exception e) {
 				log.error("	获取当前用户tcm对象失败,token:{}", token, e);
@@ -400,11 +405,12 @@ public class TokenService {
 	 * token MD5签名
 	 * 
 	 * @param token
-	 * @return
+	 * @return [sign, md5]
 	 */
-	private String signature(String username, String token) {
-		token = String.format("%s@%s", username, DigestUtil.md5Hex(token));
-		return sm4.encryptHex(token);
+	private String[] signature(String username, String token) {
+		String md5=DigestUtil.md5Hex(token);
+		token = String.format("%s@%s", username, md5);
+		return new String[]{sm4.encryptHex(token), md5};
 	}
 
 	@Data
