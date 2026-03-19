@@ -480,6 +480,8 @@ public class LoginService {
 						user.setPwdSalt(RandomUtil.randomString(16));
 						user.setId(IdGenHolder.generate());
 						user.setUsername(userInfo.getOpenid());
+						user.setAliasName(userInfo.getNickname());
+						user.setSex(userInfo.getSex());
 						String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(userInfo.getOpenid());
 						user.setPwdText(pwd);
 						user.setTenantId(DEFUALT_TENANT_ID);
