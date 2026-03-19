@@ -164,7 +164,6 @@ public class TokenService {
 	 * @return
 	 */
 	public String build4auth(UserPrincipal principal, String password) {
-		log.debug("进入服务:根据 principal 生成token,principal:{}", principal);
 		// 生成token
 		String token = this.transform(principal, password);
 
@@ -200,7 +199,6 @@ public class TokenService {
 			}
 		}
 
-		log.debug("退出服务:根据 principal 生成token,principal:{},token:{}", principal, token);
 		return token;
 	}
 
@@ -210,13 +208,11 @@ public class TokenService {
 	 * @param token
 	 */
 	public void clean4auth(String token) {
-		log.debug("用户注销，清理token:{}", token);
 		if (!StringUtils.isEmpty(token)) {
 			try {
 				String tinfo[]=sm4.decryptStr(token).split("@");
 				String username = tinfo[0];
 				String md5=tinfo[1];
-				log.debug("中心化管理token，从redis中删除，db:{} - {}:{}:{}", tcmDb, tcmKey, username, token);
 				this.redisService.delete(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
 			} catch (Exception e) {
 				log.error("用户注销异常，token非法", e);
@@ -248,8 +244,10 @@ public class TokenService {
 				String tinfo[]=sm4.decryptStr(token).split("@");
 				String username = tinfo[0];
 				String md5=tinfo[1];
-				log.info("中心化管理token，从redis中获取令牌，db:{} - {}:{}:{}", tcmDb, tcmKey, username, token);
 				TcmEntry tcm = this.redisService.getObj(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
+				if (tcm == null) {
+					log.info("中心化管理token，从redis中获取令牌失败，db:{} - key:{}:{}:{}", tcmDb, tcmKey, username, md5);
+				}
 				return tcm;
 			} catch (Exception e) {
 				log.error("	获取当前用户tcm对象失败,token:{}", token, e);
@@ -265,7 +263,6 @@ public class TokenService {
 	 * @return
 	 */
 	public String refresh(String token) {
-		log.debug("进入服务:刷新token,token:{}", token);
 		String newToken = null;
 
 		// 获取tcm对象
@@ -282,7 +279,6 @@ public class TokenService {
 			newToken = this.build4auth(principal, tcm.getPassword());
 		}
 
-		log.debug("进入服务:刷新token,token:{},newToken:{}", token, newToken);
 		return newToken;
 	}
 
