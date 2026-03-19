@@ -1,5 +1,6 @@
 package com.unione.cloud.system.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,11 +134,11 @@ public class RegisterService {
 		LogsUtil.add("进入：用户注册方法,username:%s,realName:%s",param.getUsername(),param.getRealName());
 		AssertUtil.service()
 			.isTrue(REGISGER_ENABLE, "用户注册功能未开启");
+		List<String> required=Arrays.asList(REGISGER_REQUIRED_FIELDS.split(","));
 		if(!ObjectUtil.isEmpty(REGISGER_REQUIRED_FIELDS)){
 			AssertUtil.service().notNull(param, REGISGER_REQUIRED_FIELDS.split(","), "属性%s不能为空");
 		}
-		
-		if(REGISTER_TEL_CAPTCHA) {
+		if(REGISTER_TEL_CAPTCHA && required.contains("tel")) {
 			//短信验证码
 			AssertUtil.service().isTrue(umsSmsService.valiCaptcha("register",param.getTel(),param.getCaptcha()),"短信验证码不正确");
 		}else{
