@@ -470,7 +470,7 @@ public class LoginService {
 				SysUserBind tmp = dataBaseDao.findOne(SqlBuilder.build(bind));
 				if (tmp != null) {
 					// 已绑定
-					user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class,bind.getUserId()));
+					user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("id",tmp.getUserId()));
 				} else {
 					// 首次绑定,自动创建帐号
 					WxOAuth2UserInfo userInfo = wxOAuth2Service.getUserInfo(accessToken, "zh_CN");
@@ -526,6 +526,29 @@ public class LoginService {
 		}
 
 		if(user!=null){
+			// 用户状态验证
+			if (!LOGIN_STATUS_ALLOW.contains(user.getStatus())) {
+				String text = LOGIN_STATUS_MAP.get(user.getStatus());
+				if (StringUtils.isEmpty(text)) {
+					text = "禁用";
+				}
+				LogsUtil.add("认证失败：帐号已%s", text);
+				return LoginResult.fail(LOGIN_FAILURE_FORBID.replace("{forbid}", text));
+			}
+
+			// 单设备登录
+			if (LOGIN_SINGLELIMIT) {
+				// 如果开启了单设备登录
+				String username = user.getUsername();
+				boolean flag = redisService.execute(tcmDb, (RedisCallback<Boolean>) action -> {
+					ScanOptions options = ScanOptions.scanOptions()
+							.match(String.format("%s:%s:*", tcmKey, username)).build();
+					Cursor<byte[]> cursor = action.scan(options);
+					return cursor.hasNext();
+				});
+				AssertUtil.service().isTrue(!flag, LOGIN_SINGLETIP.replace("{username}", username));
+			}
+
 			return this.loginSuccess(user);
 		}
 		return LoginResult.fail();
