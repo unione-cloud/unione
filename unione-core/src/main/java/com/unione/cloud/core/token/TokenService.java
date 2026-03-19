@@ -404,7 +404,7 @@ public class TokenService {
 	 */
 	private String signature(String username, String token) {
 		token = String.format("%s@%s", username, DigestUtil.md5Hex(token));
-		return sm4.encryptBase64(token);
+		return sm4.encryptHex(token);
 	}
 
 	@Data
