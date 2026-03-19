@@ -477,10 +477,10 @@ public class LoginService {
 					user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username",userInfo.getOpenid()));
 					if(user==null){
 						user=new SysUser();
-						user.setPwdSalt(RandomUtil.randomString(20));
+						user.setPwdSalt(RandomUtil.randomString(16));
 						user.setId(IdGenHolder.generate());
 						user.setUsername(userInfo.getOpenid());
-						String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).decryptStr(userInfo.getOpenid());
+						String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(userInfo.getOpenid());
 						user.setPwdText(pwd);
 						user.setTenantId(DEFUALT_TENANT_ID);
 						user.setOrgId(DEFAULT_ORG_ID);
