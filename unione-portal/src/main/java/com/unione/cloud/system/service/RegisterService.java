@@ -18,6 +18,8 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.IdGenHolder;
+import com.unione.cloud.core.redis.HpdlProcess;
+import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.security.secret.SecretService;
@@ -39,21 +41,22 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 	注册服务
- * @作者	Jeking Yang
- * @日期	2023年9月30日 下午10:36:27
- * @版本	1.0.0
+ * 注册服务
+ * 
+ * @作者 Jeking Yang
+ * @日期 2023年9月30日 下午10:36:27
+ * @版本 1.0.0
  */
 @Slf4j
 @Service
 @RefreshScope
 public class RegisterService {
-	
+
 	@Autowired
 	private DataBaseDao dataBaseDao;
-	
+
 	@Autowired
-	private CaptchaService captchaService;	
+	private CaptchaService captchaService;
 
 	@Autowired
 	private UmsSmsService umsSmsService;
@@ -63,49 +66,62 @@ public class RegisterService {
 
 	@Autowired
 	private TokenService tokenService;
-	
-	
+
+	@Autowired
+	private RedisService redisService;
+
+	/**
+	 * 用户注册：默认租户ID
+	 */
+	@Value("${security.register.default.tenantId:1}")
+	private Long REGISGER_DEFAULT_TENANT_ID;
+
 	/**
 	 * 用户注册：是否开启注册功能
 	 */
 	@Value("${security.register.enable:true}")
 	private boolean REGISGER_ENABLE;
-	
+
 	/**
 	 * 用户注册：是否启用手机验证码
 	 */
 	@Value("${security.register.tel.enable:true}")
 	private boolean REGISTER_TEL_CAPTCHA;
-	
 
 	/**
 	 * 用户注册：是否开启审核
 	 */
 	@Value("${security.register.audit.enable:true}")
 	private boolean REGISGER_AUDIT_ENABLE;
-	
-	
-	private Map<Integer,List<Long>> REGISGER_DEFAULT_ROLES=new HashMap<>();	
+
+	/**
+	 * 用户注册：必填属性
+	 */
+	@Value("${security.register.required.fields:username,tel,realName,password,company}")
+	private String REGISGER_REQUIRED_FIELDS;
+
+	private Map<Integer, List<Long>> REGISGER_DEFAULT_ROLES = new HashMap<>();
+
 	@SuppressWarnings("unchecked")
 	@Value("${security.register.default.roles:{1:[105,108],2:[107,108]}}")
 	public void setRegisterDefaultRoles(String maps) {
-		REGISGER_DEFAULT_ROLES=new HashMap<>();	
-		Map<String,List<Object>> map=JSONUtil.toBean(maps, Map.class);
-		map.entrySet().stream().forEach(entry->{
-			List<Long> values=entry.getValue().stream().map(v->Long.parseLong(v.toString())).collect(Collectors.toList());
-			REGISGER_DEFAULT_ROLES.put(Integer.parseInt(entry.getKey()),values);
+		REGISGER_DEFAULT_ROLES = new HashMap<>();
+		Map<String, List<Object>> map = JSONUtil.toBean(maps, Map.class);
+		map.entrySet().stream().forEach(entry -> {
+			List<Long> values = entry.getValue().stream().map(v -> Long.parseLong(v.toString()))
+					.collect(Collectors.toList());
+			REGISGER_DEFAULT_ROLES.put(Integer.parseInt(entry.getKey()), values);
 		});
 	}
-	
-	
-	private Map<String,Object> REGISGER_DEFAULT_INFO=new HashMap<>();
+
+	private Map<String, Object> REGISGER_DEFAULT_INFO = new HashMap<>();
+
 	@SuppressWarnings("unchecked")
 	@Value("${security.register.default.info:{}}")
 	public void setRegisterDefaultInfo(String info) {
-		REGISGER_DEFAULT_INFO=JSONUtil.toBean(info, Map.class);
-	}	
-	
-	
+		REGISGER_DEFAULT_INFO = JSONUtil.toBean(info, Map.class);
+	}
+
 	/**
 	 * 用户注册
 	 * @param param
@@ -116,8 +132,10 @@ public class RegisterService {
 		log.info("进入：用户注册方法,username:{},realName:{}",param.getUsername(),param.getRealName());
 		LogsUtil.add("进入：用户注册方法,username:%s,realName:%s",param.getUsername(),param.getRealName());
 		AssertUtil.service()
-			.isTrue(REGISGER_ENABLE, "用户注册功能未开启")
-			.notNull(param, new String[] {"realName","tel","captcha","company"},"属性%s不能为空");
+			.isTrue(REGISGER_ENABLE, "用户注册功能未开启");
+		if(!ObjectUtil.isEmpty(REGISGER_REQUIRED_FIELDS)){
+			AssertUtil.service().notNull(param, REGISGER_REQUIRED_FIELDS.split(","), "属性%s不能为空");
+		}
 		
 		if(REGISTER_TEL_CAPTCHA) {
 			//短信验证码
@@ -135,31 +153,41 @@ public class RegisterService {
 			user.setId(userId);
 			user.setUserType(2);		//用户类型，字典USERTYPE 1管理员，2普通用户，9其他	
 
-			if(ObjectUtil.isEmpty(user.getUsername())){
+			if(ObjectUtil.isEmpty(user.getUsername()) && !ObjectUtil.isEmpty(user.getTel())){
 				//帐号为空，使用手机号作为帐号
 				user.setUsername(param.getTel());
 			}
 
-			//加载租户
-			SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
-				.where("name=?")
-				.where("name", param.getCompany().trim()));
-			if(tenant==null) {
-				tenant=new SysTenant();
-				tenant.setId(IdGenHolder.generate());
-				tenant.setName(param.getCompany());
-				tenant.setRegisteWay(1);
-				tenant.setAdminId(userId);
-				tenant.setSn(String.valueOf(tenant.getId()));
-				tenant.setDelFlag(0);
-				tenant.setStatus(1);
-				tenant.setCreatedBy(userId);
-				tenant.setLastUpdatedBy(userId);
-				int len = dataBaseDao.insertWithId(tenant);
-				if(len<=0){
-					return Results.failure("租户信息保存失败");
-				}
-				user.setUserType(1);
+			Long tenantId=REGISGER_DEFAULT_TENANT_ID;
+			if(!ObjectUtil.isEmpty(param.getCompany())){
+				//加载租户
+				tenantId = redisService.doHpdl(new HpdlProcess<Long>(String.format("security:register:tenant:%s", param.getCompany())) {
+					@Override
+					public Long process() {
+						SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
+							.where("name=?")
+							.where("name", param.getCompany().trim()));
+						if(tenant==null) {
+							tenant=new SysTenant();
+							tenant.setId(IdGenHolder.generate());
+							tenant.setName(param.getCompany());
+							tenant.setRegisteWay(1);
+							tenant.setAdminId(userId);
+							tenant.setSn(String.valueOf(tenant.getId()));
+							tenant.setDelFlag(0);
+							tenant.setStatus(1);
+							tenant.setCreatedBy(userId);
+							tenant.setLastUpdatedBy(userId);
+							int len = dataBaseDao.insertWithId(tenant);
+							if(len<=0){
+								return null;
+							}
+							user.setUserType(1);
+						}
+						return tenant.getId();
+					}
+				}, 500, 3);
+				AssertUtil.service().notNull(tenantId,"租户信息保存失败");
 			}
 			
 			LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());
@@ -172,8 +200,8 @@ public class RegisterService {
 			});
 			
 			LogsUtil.add("设置默认属性");
-			user.setTenantId(tenant.getId());
-			user.setOrgId(tenant.getId());
+			user.setTenantId(tenantId);
+			user.setOrgId(tenantId);
 			user.setDelFlag(0);
 			user.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
 			user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
@@ -242,7 +270,6 @@ public class RegisterService {
 			}
 		}
 		return Results.failure("用户注册失败");
-	}	
-	
+	}
 
 }
