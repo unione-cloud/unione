@@ -487,6 +487,8 @@ public class LoginService {
 						user.setUserType(9);
 						user.setStatus(1);
 						user.setDelFlag(0);
+						user.setCreatedBy(user.getId());
+						user.setLastUpdatedBy(user.getId());
 						dataBaseDao.insertWithId(user);
 
 						if (!ObjectUtil.isEmpty(DEFAULT_ROLES)) {
