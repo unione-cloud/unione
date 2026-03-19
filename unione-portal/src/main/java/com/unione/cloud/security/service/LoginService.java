@@ -504,13 +504,13 @@ public class LoginService {
 								dataBaseDao.insertWithId(userRole);
 							}
 						}
-					}else{
-						bind.setPlatData(JsonUtil.toJson(userInfo));
-						bind.setUnionId(userInfo.getUnionId());
-						bind.setTenantId(user.getTenantId());
-						bind.setUserId(user.getId());
-						dataBaseDao.insert(bind);
 					}
+					// 保存绑定帐号信息
+					bind.setPlatData(JsonUtil.toJson(userInfo));
+					bind.setUnionId(userInfo.getUnionId());
+					bind.setTenantId(user.getTenantId());
+					bind.setUserId(user.getId());
+					dataBaseDao.insert(bind);
 				}
 
 			} catch (WxErrorException e) {
