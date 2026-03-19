@@ -85,7 +85,7 @@ security:
   enabled: true
   filter:
     includes: /**
-    executions: /portal/,/portal/error,/portal/api/security/login/*,/portal/api/security/captcha/*,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view
+    executions: /portal/,/portal/error,/portal/api/security/login/*,/portal/api/security/oauth/*,/portal/api/security/captcha/*,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view
   tcm:
     autoEnable: true
   jwt:
