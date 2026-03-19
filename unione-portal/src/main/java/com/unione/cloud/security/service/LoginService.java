@@ -501,6 +501,8 @@ public class LoginService {
 								userRole.setUserId(user.getId());
 								userRole.setRoleId(Long.parseLong(role));
 								userRole.setEnDilivery(0);
+								userRole.setCreatedBy(user.getId());
+								userRole.setLastUpdatedBy(user.getId());
 								dataBaseDao.insertWithId(userRole);
 							}
 						}
