@@ -59,7 +59,8 @@ public class WeixinLogin {
             if (tmp != null) {
                 // 已绑定
                 user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("id", tmp.getUserId()));
-            } else {
+            }
+            if(user==null){
                 // 首次绑定,自动创建帐号
                 WxOAuth2UserInfo userInfo = wxOAuth2Service.getUserInfo(accessToken, "zh_CN");
                 user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username", userInfo.getOpenid()));
@@ -103,14 +104,24 @@ public class WeixinLogin {
                         }
                     }
                 }
+
                 // 保存绑定帐号信息
-                bind.setPlatData(JsonUtil.toJson(userInfo));
-                bind.setUnionId(userInfo.getUnionId());
-                bind.setTenantId(user.getTenantId());
-                bind.setUserId(user.getId());
-                bind.setCreatedBy(user.getId());
-                bind.setLastUpdatedBy(user.getId());
-                dataBaseDao.insert(bind);
+                if(tmp==null){
+                    bind.setPlatData(JsonUtil.toJson(userInfo));
+                    bind.setUnionId(userInfo.getUnionId());
+                    bind.setTenantId(user.getTenantId());
+                    bind.setUserId(user.getId());
+                    bind.setCreatedBy(user.getId());
+                    bind.setLastUpdatedBy(user.getId());
+                    dataBaseDao.insert(bind);
+                }else{
+                    tmp.setPlatData(JsonUtil.toJson(userInfo));
+                    tmp.setUnionId(userInfo.getUnionId());
+                    tmp.setTenantId(user.getTenantId());
+                    tmp.setUserId(user.getId());
+                    tmp.setLastUpdatedBy(user.getId());
+                    dataBaseDao.updateById(SqlBuilder.build(tmp).field("platData,unionId,tenantId,userId"));
+                }
             }
 
         } catch (WxErrorException e) {

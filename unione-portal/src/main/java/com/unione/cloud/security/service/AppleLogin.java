@@ -193,7 +193,8 @@ public class AppleLogin {
             if (tmp != null) {
                 // 已绑定
                 user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("id", tmp.getUserId()));
-            } else {
+            } 
+            if(user==null){
                 // 首次绑定,自动创建帐号
                 user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username", oauthDto.getOpenid()));
                 if (user == null) {
@@ -207,7 +208,9 @@ public class AppleLogin {
                     if(ObjectUtil.isEmpty(user.getAliasName())){
                         user.setAliasName(oauthDto.getRealName());
                     }
-
+                    if(!ObjectUtil.isEmpty(oauthDto.getAvatar())){
+                        user.setAvatar(oauthDto.getAvatar());
+                    }
                     String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(oauthDto.getOpenid());
                     user.setPwdText(pwd);
                     user.setTenantId(DEFUALT_TENANT_ID);
@@ -236,12 +239,20 @@ public class AppleLogin {
                     }
                 }
                 // 保存绑定帐号信息
-                bind.setPlatData(code);
-                bind.setTenantId(user.getTenantId());
-                bind.setUserId(user.getId());
-                bind.setCreatedBy(user.getId());
-                bind.setLastUpdatedBy(user.getId());
-                dataBaseDao.insert(bind);
+                if(tmp==null){
+                    bind.setPlatData(code);
+                    bind.setTenantId(user.getTenantId());
+                    bind.setUserId(user.getId());
+                    bind.setCreatedBy(user.getId());
+                    bind.setLastUpdatedBy(user.getId());
+                    dataBaseDao.insert(bind);
+                }else{
+                    tmp.setPlatData(code);
+                    tmp.setTenantId(user.getTenantId());
+                    tmp.setUserId(user.getId());
+                    tmp.setLastUpdatedBy(user.getId());
+                    dataBaseDao.updateById(SqlBuilder.build(tmp).field("platData,tenantId,userId"));
+                }
             }
         } catch (Exception e) {
             log.error("Apple授权认证失败", e);
@@ -261,6 +272,9 @@ public class AppleLogin {
 
         @Schema(title = "昵称")
         private String nickName;
+
+        @Schema(title = "头像")
+        private String avatar;
 
         @Schema(title = "邮箱")
         private String email;
