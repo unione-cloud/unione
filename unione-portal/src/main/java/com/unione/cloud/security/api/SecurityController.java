@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +34,7 @@ import com.unione.cloud.web.logs.LogsUtil;
 import cn.hutool.captcha.AbstractCaptcha;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +46,9 @@ public class SecurityController {
 	
 	@Autowired
 	private HttpServletResponse response;
+
+	@Autowired
+	private HttpServletRequest request;
 	
 	@Autowired
 	private CaptchaService captchaService;
@@ -151,14 +156,26 @@ public class SecurityController {
 	@Operation(summary="用户登录:OAuth2.0",description="")
 	public LoginResult oauth(@PathVariable("type") String type,@RequestParam("code") String code) {
 		log.info("用户登录，type:{},code:{}",type,code);
-		AssertUtil.service()
-			.notNull(code, "请求参数code不能为空")
-			.notIn(type, List.of("weixin"), "登录类型暂不支持");
 		
 		// 执行登录
 		LoginResult result = loginService.doLoginByOAuth(type, code);
 		
 		return result;
+	}
+
+	/**
+	 * 登录回调
+	 */
+	@Action(title="登录回调",type = ActionType.Login)
+	@Operation(summary="登录回调",description="")
+	@RequestMapping(value="/notice/{type}",method = {RequestMethod.POST,RequestMethod.GET})
+	public void notice(@PathVariable("type") String type){
+		// 获取请求参数
+		String code = request.getParameter("code");
+
+		// 待实现
+		// TODO
+
 	}
 	
 	@PostMapping("/logout")

@@ -84,7 +84,10 @@ public class LoginService {
 	private UmsSmsService umsSmsService;
 
 	@Autowired
-	private WxOAuth2Service wxOAuth2Service;
+	private WeixinLogin weixinLogin;
+
+	@Autowired
+	private AppleLogin appleLogin;
 
 	@Value("${security.bind.defaultTenantId:-1}")
 	private Long DEFUALT_TENANT_ID;
@@ -456,73 +459,13 @@ public class LoginService {
 		log.info("用户登录，type:{}", type);
 		AssertUtil.service()
 				.notNull(code, "请求参数code不能为空")
-				.notIn(type, List.of("weixin"), "登录类型暂不支持");
+				.notIn(type, List.of("weixin","apple"), "登录类型暂不支持");
 
 		SysUser user = null;
 		if ("weixin".equals(type)) {
-			try {
-
-				WxOAuth2AccessToken accessToken = wxOAuth2Service.getAccessToken(code);
-				String openId = accessToken.getOpenId();
-				SysUserBind bind = new SysUserBind();
-				bind.setPlatKey("weixin");
-				bind.setOpenId(openId);
-				SysUserBind tmp = dataBaseDao.findOne(SqlBuilder.build(bind));
-				if (tmp != null) {
-					// 已绑定
-					user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("id",tmp.getUserId()));
-				} else {
-					// 首次绑定,自动创建帐号
-					WxOAuth2UserInfo userInfo = wxOAuth2Service.getUserInfo(accessToken, "zh_CN");
-					user = dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username",userInfo.getOpenid()));
-					if(user==null){
-						user=new SysUser();
-						user.setPwdSalt(RandomUtil.randomString(16));
-						user.setId(IdGenHolder.generate());
-						user.setUsername(userInfo.getOpenid());
-						user.setAliasName(userInfo.getNickname());
-						user.setSex(userInfo.getSex());
-						String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(userInfo.getOpenid());
-						user.setPwdText(pwd);
-						user.setTenantId(DEFUALT_TENANT_ID);
-						user.setOrgId(DEFAULT_ORG_ID);
-						user.setUserType(9);
-						user.setStatus(1);
-						user.setDelFlag(0);
-						user.setCreatedBy(user.getId());
-						user.setLastUpdatedBy(user.getId());
-						dataBaseDao.insertWithId(user);
-
-						if (!ObjectUtil.isEmpty(DEFAULT_ROLES)) {
-							for (String role : DEFAULT_ROLES.trim().split(",")) {
-								if (StringUtils.isBlank(role)) {
-									continue;
-								}
-								SysUserRole userRole = new SysUserRole();
-								userRole.setTenantId(user.getTenantId());
-								userRole.setUserId(user.getId());
-								userRole.setRoleId(Long.parseLong(role));
-								userRole.setEnDilivery(0);
-								userRole.setCreatedBy(user.getId());
-								userRole.setLastUpdatedBy(user.getId());
-								dataBaseDao.insertWithId(userRole);
-							}
-						}
-					}
-					// 保存绑定帐号信息
-					bind.setPlatData(JsonUtil.toJson(userInfo));
-					bind.setUnionId(userInfo.getUnionId());
-					bind.setTenantId(user.getTenantId());
-					bind.setUserId(user.getId());
-					bind.setCreatedBy(user.getId());
-					bind.setLastUpdatedBy(user.getId());
-					dataBaseDao.insert(bind);
-				}
-
-			} catch (WxErrorException e) {
-				log.error("获取微信授权信息失败", e);
-				return LoginResult.fail("获取微信授权信息失败");
-			}
+			user = weixinLogin.login(code);
+		} else if("apple".equals(type)){
+			user = appleLogin.login(code);
 		}
 
 		if(user!=null){
