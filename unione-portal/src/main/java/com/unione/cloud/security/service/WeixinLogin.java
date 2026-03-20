@@ -72,6 +72,9 @@ public class WeixinLogin {
                     if(ObjectUtil.isEmpty(user.getAliasName())){
                         user.setAliasName("匿名");
                     }
+                    if(!ObjectUtil.isEmpty(userInfo.getHeadImgUrl())){
+                        user.setAvatar(userInfo.getHeadImgUrl());
+                    }
                     user.setSex(userInfo.getSex());
                     String pwd = SmUtil.sm4(user.getPwdSalt().getBytes()).encryptHex(userInfo.getOpenid());
                     user.setPwdText(pwd);
