@@ -49,7 +49,7 @@ public abstract class WsAbstractHandler<T> implements DataListener<T> {
         }
         SessionHolder.setToken(token);
         SessionHolder.setUserPrincipal(principal);
-        return client.get(WsConstants.CONNECT_ATTR_USER_ID) != null;
+        return true;
     }
 
 }
