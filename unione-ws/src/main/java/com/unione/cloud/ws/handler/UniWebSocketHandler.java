@@ -29,6 +29,7 @@ import com.corundumstudio.socketio.Transport;
 import com.corundumstudio.socketio.protocol.EngineIOVersion;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
+import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
@@ -87,8 +88,8 @@ public class UniWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         SocketIOClient client = wsClientManager.get(session.getId());
         if (client != null) {
-            client.disconnect();
             wsClientManager.remove(client);
+            client.disconnect();
         }
     }
 
@@ -210,6 +211,7 @@ public class UniWebSocketHandler extends AbstractWebSocketHandler {
                 session.sendMessage(new TextMessage(JsonUtil.toJson(packet)));
             } catch (IOException e) {
                 log.error("ws send event error", e);
+                throw new ServiceException(e);
             }
         }
 
@@ -219,6 +221,7 @@ public class UniWebSocketHandler extends AbstractWebSocketHandler {
                 session.sendMessage(new TextMessage(JsonUtil.toJson(packet)));
             } catch (IOException e) {
                 log.error("ws send packet error", e);
+                throw new ServiceException(e);
             }
         }
 

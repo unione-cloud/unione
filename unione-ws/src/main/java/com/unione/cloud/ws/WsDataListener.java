@@ -57,11 +57,15 @@ public class WsDataListener {
                         return;
                     }
                     distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && distbute.getUserId() != null) {
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
                         WsData entry = BeanUtils.toBean(distbute.getData(), WsData.class);
-                        List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
-                        for (SocketIOClient client : clients) {
-                            wsPushService.sendData(client, entry);
+                        if(distbute.getUserId() != null){
+                            List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
+                            for (SocketIOClient client : clients) {
+                                wsPushService.sendData(client, entry);
+                            }
+                        }else if(!ObjectUtil.isEmpty(distbute.getUserIds())){
+                            wsPushService.sendData(distbute.getUserIds(), entry,false);
                         }
                     }
                 } catch (Exception e) {
@@ -105,11 +109,15 @@ public class WsDataListener {
                         return;
                     }
                     distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && distbute.getUserId() != null) {
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId())) {
                         WsEvent entry = BeanUtils.toBean(distbute.getData(), WsEvent.class);
-                        List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
-                        for (SocketIOClient client : clients) {
-                            wsPushService.sendEvent(client, entry);
+                        if(distbute.getUserId() != null){
+                            List<SocketIOClient> clients = wsClientManager.getLocal(distbute.getUserId());
+                            for (SocketIOClient client : clients) {
+                                wsPushService.sendEvent(client, entry);
+                            }
+                        }else if(!ObjectUtil.isEmpty(distbute.getUserIds())){
+                            wsPushService.sendEvent(distbute.getUserIds(), entry,false);
                         }
                     }
                 } catch (Exception e) {
@@ -129,15 +137,12 @@ public class WsDataListener {
                         return;
                     }
                     distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getUserIds()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
                         WsData entry = BeanUtils.toBean(distbute.getData(), WsData.class);
-                        for (Long userId : distbute.getUserIds()) {
-                            List<SocketIOClient> clients = wsClientManager.getLocal(userId);
-                            for (SocketIOClient client : clients) {
-                                if(client.getAllRooms().contains(distbute.getRoomId())){
-                                    wsPushService.sendData(client, entry);
-                                }
-                            }
+                        if(!ObjectUtil.isEmpty(distbute.getUserIds())){
+                            wsPushService.sendData(distbute.getRoomId(), distbute.getUserIds(), entry,false);
+                        }else{
+                            wsPushService.sendData(distbute.getRoomId(), entry,false);
                         }
                     }
                 } catch (Exception e) {
@@ -157,15 +162,12 @@ public class WsDataListener {
                         return;
                     }
                     distbute =  (WsDistbuteEntity)redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getUserIds()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
+                    if (!wsProperties.getNodeId().equals(distbute.getNodeId()) && !ObjectUtil.isEmpty(distbute.getRoomId())) {
                         WsEvent entry = BeanUtils.toBean(distbute.getData(), WsEvent.class);
-                        for (Long userId : distbute.getUserIds()) {
-                            List<SocketIOClient> clients = wsClientManager.getLocal(userId);
-                            for (SocketIOClient client : clients) {
-                                if(client.getAllRooms().contains(distbute.getRoomId())){
-                                    wsPushService.sendEvent(client, entry);
-                                }
-                            }
+                        if(!ObjectUtil.isEmpty(distbute.getUserIds())){
+                            wsPushService.sendEvent(distbute.getRoomId(), distbute.getUserIds(), entry,false);
+                        }else{
+                            wsPushService.sendEvent(distbute.getRoomId(), entry,false);
                         }
                     }
                 } catch (Exception e) {
