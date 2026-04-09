@@ -85,7 +85,7 @@ security:
   enabled: true
   filter:
     includes: /**
-    executions: /portal/,/portal/error,/portal/api/security/login/*,/portal/api/security/oauth/*,/portal/api/security/captcha/*,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view
+    executions: /portal/,/portal/error,/portal/api/security/login/*,/portal/api/security/oauth/*,/portal/api/security/captcha/*,/portal/api/security/register,/portal/api/common/visit/entry,/portal/v3/api-docs/**,/portal/doc.html/**,/portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view,/portal/api/ads/*
   tcm:
     autoEnable: true
   jwt:
@@ -128,6 +128,9 @@ springdoc:
     - group: formPage
       display-name: 表单页面
       paths-to-match: /api/page/**
+    - group: ads
+      display-name: 广告接口
+      paths-to-match: /api/ads/**
     - group: ai
       display-name: AI接口
       paths-to-match: /api/ai/**
