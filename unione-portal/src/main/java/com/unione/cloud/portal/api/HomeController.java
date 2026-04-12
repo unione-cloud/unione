@@ -81,7 +81,7 @@ public class HomeController {
 				ResourceDto parent=menuMap.get(res.getParentId());
 				if(parent!=null) {
 					parent.getChildren().add(res);
-				}else if(ObjectUtil.equal(res.getTypes(), "menu")){
+				}else if(!ObjectUtil.equal(res.getTypes(), "btn")){
 					List<ResourceDto> list=appMenuMap.get(res.getAppId());
 					if(list==null) {
 						list=new ArrayList<>();
