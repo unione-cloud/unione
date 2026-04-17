@@ -42,9 +42,10 @@ public class DefaultIdGenerator implements IdGenerator {
     		Long datacenterId=NetUtil.ipv4ToLong(host)+Integer.parseInt(port);
     		
     		log.info("create Snow Flake workerId:{},datacenterId:{}",workerId,datacenterId);
-    		snowflake = IdUtil.getSnowflake(workerId%32, datacenterId%32);
+    		// 自定义Snowflake实例，增加时间回拨阈值并使用系统时钟
+    		snowflake = new Snowflake(null, workerId%32, datacenterId%32, true, 5000L);
     		
-    		log.info("================ {} {}:{} inited Snow Flake ===============",serviceName,host,port);
+    		log.info("================ {} {}:{} inited Snow Flake ================",serviceName,host,port);
     	}
     }
 
@@ -53,8 +54,26 @@ public class DefaultIdGenerator implements IdGenerator {
      */
     public Long generate(){
         log.debug("进入服务:请求生成主键");
-        Long id=snowflake.nextId();
-        log.debug("退出服务:请求生成主键,id:{}",id);
+        Long id = null;
+        int retryCount = 0;
+        while (id == null && retryCount < 3) {
+            try {
+                id = snowflake.nextId();
+                log.debug("退出服务:请求生成主键,id:{}",id);
+            } catch (Exception e) {
+                retryCount++;
+                log.warn("时钟回拨异常，第{}次重试: {}", retryCount, e.getMessage());
+                try {
+                    Thread.sleep(100);
+                } catch (Exception ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        if (id == null) {
+            log.error("生成主键失败，已达到最大重试次数");
+            throw new RuntimeException("生成主键失败，请检查系统时间");
+        }
         return id;
     }
 
