@@ -388,10 +388,6 @@
 		<jedis.version>5.2.0</jedis.version>
 		<jetcache.version>2.7.7</jetcache.version>
 
-		<!-- xxl-job index -->
-		<xxl-job.version>3.2.0</xxl-job.version>
-		<xxl-sso.version>2.0.0</xxl-sso.version>
-
 		<!-- WxJava -->
 		<wxjava.version>4.8.1-20260127.112509</wxjava.version>
 
