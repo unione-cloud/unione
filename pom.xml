@@ -404,7 +404,6 @@
 		<module>unione-beetsql</module>
 		<module>unione-web</module>
 		<module>unione-gateway</module>
-		<module>unione-job</module>
 		<module>unione-portal</module>
 		<module>unione-util</module>
 		<module>unione-starter</module>
