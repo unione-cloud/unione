@@ -31,3 +31,10 @@ create index normal on SYS_WIDGET_TMPL
    WID,
    WNAME
 );
+
+
+-- 升级动态表单：数据定义模块增加版本发布说明
+ALTER TABLE `unione`.`sys_data_define_his` 
+ADD COLUMN `VERT` varchar(200) NULL COMMENT '版本说明' AFTER `VERS`;
+ALTER TABLE `unione`.`sys_data_define_release` 
+ADD COLUMN `VERT` varchar(200) NULL COMMENT '版本说明' AFTER `VERS`;
