@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeBuilderFactoryTest",
+            "request": "launch",
+            "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
+            "projectName": "unione-starter"
+        },
+        {
+            "type": "java",
             "name": "UnioneGateway",
             "request": "launch",
             "mainClass": "com.unione.cloud.gateway.Application",

@@ -38,3 +38,65 @@ ALTER TABLE `unione`.`sys_data_define_his`
 ADD COLUMN `VERT` varchar(200) NULL COMMENT '版本说明' AFTER `VERS`;
 ALTER TABLE `unione`.`sys_data_define_release` 
 ADD COLUMN `VERT` varchar(200) NULL COMMENT '版本说明' AFTER `VERS`;
+
+-- 升级动态表单：增加数据编码模块，用于实现业务编码
+drop index UNI_NAME on SYS_DATA_CODER;
+drop table if exists SYS_DATA_CODER;
+/*==============================================================*/
+/* Table: SYS_DATA_CODER                                        */
+/*==============================================================*/
+create table SYS_DATA_CODER
+(
+   ID                   bigint not null comment '主键',
+   TENANT_ID            bigint not null comment '租户ID',
+   TITLE                varchar(100) not null comment '标题',
+   NAME                 varchar(50) not null comment '名称',
+   CODE_PREFIX          varchar(1000) not null comment '前缀，支持表达式获取数据属性，语法：${row.type}',
+   CODE_LENGTH          int(2) not null comment '长度，动态流水编码长度',
+   STATUS               int(2) not null comment '使用状态，字典USEORNOT 1使用，0停用',
+   DEL_FLAG             int(2) not null comment '删除标记，字典TUREORFALSE 1是，0否',
+   DESCS                varchar(500) comment '说明',
+   CREATED              timestamp not null,
+   CREATED_BY           bigint not null,
+   LAST_UPDATED         timestamp not null,
+   LAST_UPDATED_BY      bigint not null,
+   primary key (ID)
+);
+alter table SYS_DATA_CODER comment '系统管理：数据编码器，规则：前缀+{YYYYMMDD}+{流水号}，流水号规则：根据前缀和日期从1开始生成';
+/*==============================================================*/
+/* Index: UNI_NAME                                              */
+/*==============================================================*/
+create unique index UNI_NAME on SYS_DATA_CODER
+(
+   NAME
+);
+drop index UNI_NAME_PREFIX on SYS_DATA_CODER_VALUE;
+drop table if exists SYS_DATA_CODER_VALUE;
+/*==============================================================*/
+/* Table: SYS_DATA_CODER_VALUE                                  */
+/*==============================================================*/
+create table SYS_DATA_CODER_VALUE
+(
+   ID                   bigint not null comment '主键',
+   TENANT_ID            bigint not null comment '租户ID',
+   CODER_ID             bigint not null comment '编码器ID',
+   NAME                 varchar(50) not null comment '名称',
+   CODE_PREFIX          varchar(20) not null comment '前缀',
+   CODE_DATE            date not null comment '日期',
+   CODE_VALUE           int not null comment '当前值（每天凌晨重置）',
+   CREATED              timestamp not null,
+   CREATED_BY           bigint not null,
+   LAST_UPDATED         timestamp not null,
+   LAST_UPDATED_BY      bigint not null,
+   primary key (ID)
+);
+alter table SYS_DATA_CODER_VALUE comment '系统管理：数据编码值';
+/*==============================================================*/
+/* Index: UNI_NAME_PREFIX                                       */
+/*==============================================================*/
+create unique index UNI_NAME_PREFIX on SYS_DATA_CODER_VALUE
+(
+   NAME,
+   CODE_PREFIX
+);
+

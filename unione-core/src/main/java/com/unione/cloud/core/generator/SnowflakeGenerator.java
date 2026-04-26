@@ -9,7 +9,6 @@ import com.unione.cloud.core.exception.AssertUtil;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.IdUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
  * @版本 1.0.0
  */
 @Slf4j
-@Service
-public class DefaultIdGenerator implements IdGenerator {
+@Service("snowflakeGenerator")
+public class SnowflakeGenerator implements IdGenerator {
     
     private static Snowflake snowflake;
     
