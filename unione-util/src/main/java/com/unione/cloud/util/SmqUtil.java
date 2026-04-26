@@ -109,7 +109,7 @@ public class SmqUtil {
     }
 
     /**
-     * 获取默认消息队列实例,默认队列名称：default，类型：DB
+     * 获取默认消息队列实例,默认队列名称：default，类型：DB，自动消费，异步消费
      * 
      * @return
      */
@@ -119,6 +119,14 @@ public class SmqUtil {
             util = build("default");
         }
         return util;
+    }
+
+    /**
+     * 获取默认消息队列实例,默认队列名称：default-sync，类型：DB，自动消费，同步消费
+     * @return
+     */
+    public static SmqUtil sync(){
+        return build("default-sync", true, true);
     }
 
     /**
