@@ -80,15 +80,14 @@ public class CodeBuilderFactoryTest {
 	
 	public static void main(String[] args) {
 
-		String moduleName="data";
-		String packageName="com.unione.cloud.form";
+		String moduleName="system";
+		String packageName="com.unione.cloud";
 		
 		BuilderFactory factory = build(moduleName);
 		SimpleUnioneProject mavenProject = new SimpleUnioneProject(packageName);
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 
-		factory.gen("sys_data_coder",mavenProject);
-		factory.gen("sys_data_coder_value",mavenProject);
+		factory.gen("sys_system",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

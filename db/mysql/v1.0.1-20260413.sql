@@ -100,3 +100,43 @@ create unique index UNI_NAME_PREFIX on SYS_DATA_CODER_VALUE
    CODE_PREFIX
 );
 
+-- 添加系统信息模块
+drop index NUI_CTX on SYS_SYSTEM;
+drop table if exists SYS_SYSTEM;
+/*==============================================================*/
+/* Table: SYS_SYSTEM                                            */
+/*==============================================================*/
+create table SYS_SYSTEM
+(
+   ID                   bigint not null,
+   TENANT_ID            bigint not null comment '租户ID',
+   NAME                 varchar(100) not null comment '系统名称',
+   ALIAS                varchar(50) comment '系统简称',
+   CTX                  varchar(20) not null comment '系统ctx',
+   LOGO_LARGE           varchar(100) comment '系统logo大',
+   LOGO_SMALL           varchar(100) comment '系统logo小',
+   THEME_NAME           varchar(20) comment '系统主题',
+   VERS_NO              varchar(30) comment '版本号',
+   VERS_DESC            text comment '版本说明',
+   SECRET               varchar(50) comment '系统秘钥，令牌加密秘钥，用于实现不同系统之间token隔离',
+   FOOTER               varchar(200) comment '底部信息',
+   CONFIGS              text comment '系统配置,json对象存储，{}',
+   APP_LIST             text comment '应用列表,json数组存储，[{title,name,id}]',
+   ORDERED              int(2) not null comment '显示顺序',
+   STATUS               int(2) not null comment '系统状态，字典SYSSTATUS 1开发，2内测，3发布，4撤销',
+   DEL_FLAG             int(2) not null comment '删除状态，1是，0否',
+   DESCS                varchar(200) comment '备注',
+   CREATED              timestamp not null,
+   CREATED_BY           bigint not null,
+   LAST_UPDATED         timestamp not null,
+   LAST_UPDATED_BY      bigint not null,
+   primary key (ID)
+);
+alter table SYS_SYSTEM comment '系统管理：系统信息';
+/*==============================================================*/
+/* Index: NUI_CTX                                               */
+/*==============================================================*/
+create unique index NUI_CTX on SYS_SYSTEM
+(
+   CTX
+);
