@@ -1,42 +1,29 @@
-package com.unione.cloud.system.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
-import org.beetl.sql.annotation.entity.Table;
-import org.beetl.sql.mapper.annotation.SqlResource;
+package com.unione.cloud.system.dto;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.core.util.JsonUtil;
+import com.unione.cloud.system.model.SysSystem;
+
+import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
-import com.unione.cloud.core.model.Pojo;
-import com.unione.cloud.core.model.Validator;
-
-/**
- * @标题 	SysSystem Entity
- * @描述	系统管理：系统信息
- * @作者	Unione Cloud CodeGen
- * @日期	2026-04-26 21:20:41
- * @版本	1.0.0
- **/
 @Data
-@Builder
-@SqlResource("system.SysSystem")
-@NoArgsConstructor
-@AllArgsConstructor
-@Accessors(chain = true)
-@Table(name="sys_system")
-public class SysSystem extends Pojo {
-	/**
+public class SystemInfoDto implements Serializable {
+    /**
+	* 主键
+	*/
+	@Schema(title="主键",description="长度为：10")
+    private Long id;
+    /**
 	* 系统名称
 	*/
 	@Schema(title="系统名称",description="长度为：100")
-	@NotNull(message = "系统名称不能为空",groups = Validator.save.class)
-	@NotBlank(message = "系统名称不能为空",groups = Validator.save.class)
 	private String name;
 	/**
 	* 系统简称
@@ -47,8 +34,6 @@ public class SysSystem extends Pojo {
 	* 系统ctx
 	*/
 	@Schema(title="系统ctx",description="长度为：20")
-	@NotNull(message = "系统ctx不能为空",groups = Validator.save.class)
-	@NotBlank(message = "系统ctx不能为空",groups = Validator.save.class)
 	private String ctx;
 	/**
 	* 系统logo大
@@ -85,16 +70,7 @@ public class SysSystem extends Pojo {
 	*/
 	@Schema(title="底部信息",description="长度为：200")
 	private String footer;
-	/**
-	* 系统配置,json对象存储，{}
-	*/
-	@Schema(title="系统配置,json对象存储，{}",description="长度为：65535")
-	private String configs;
-	/**
-	* 应用列表,json数组存储，[{title,name,id}]
-	*/
-	@Schema(title="应用列表,json数组存储，[{title,name,id}]",description="长度为：65535")
-	private String appList;
+
 	/**
 	* 显示顺序
 	*/
@@ -105,10 +81,31 @@ public class SysSystem extends Pojo {
 	*/
 	@Schema(title="系统状态，字典SYSSTATUS 1开发，2内测，3发布，4撤销",description="长度为：10")
 	private Integer status;
-	/**
-	* 备注
-	*/
-	@Schema(title="备注",description="长度为：200")
-	private String descs;
+
+    /**
+     * 应用列表
+     */
+    @Schema(title = "应用列表", description = "应用列表")
+    private List<SystemAppDto> apps=new ArrayList<>();
+
+    /**
+     * 系统配置
+     */
+    @Schema(title = "系统配置", description = "系统配置")
+    private SystemConfigDto configs=new SystemConfigDto();
+
+
+    public static SystemInfoDto from(SysSystem system){
+		SystemInfoDto info=BeanUtils.copyProperties(system, SystemInfoDto.class,"configs");
+		 if(!ObjectUtil.isEmpty(system.getAppList())){
+            List<SystemAppDto> apps=JsonUtil.toList(new TypeReference<List<SystemAppDto>>() {}, system.getAppList());
+            info.setApps(apps);
+        }
+		if(!ObjectUtil.isEmpty(system.getConfigs())){
+            SystemConfigDto config=JsonUtil.toBean(SystemConfigDto.class, system.getConfigs());
+			info.setConfigs(config);
+        }
+        return info;
+    }
 
 }

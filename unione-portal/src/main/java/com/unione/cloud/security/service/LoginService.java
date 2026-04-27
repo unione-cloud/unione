@@ -25,18 +25,16 @@ import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
-import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.UserPrincipal;
 import com.unione.cloud.core.token.TokenService;
-import com.unione.cloud.core.util.JsonUtil;
 import com.unione.cloud.system.dto.LoginParam;
 import com.unione.cloud.system.dto.LoginResult;
+import com.unione.cloud.system.dto.SystemInfoDto;
 import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.system.model.SysUser;
-import com.unione.cloud.system.model.SysUserBind;
 import com.unione.cloud.system.model.SysUserOrgan;
-import com.unione.cloud.system.model.SysUserRole;
+import com.unione.cloud.system.service.SystemService;
 import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -44,14 +42,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.common.service.WxOAuth2Service;
 
 /**
  * 登录服务
@@ -88,6 +81,9 @@ public class LoginService {
 
 	@Autowired
 	private AppleLogin appleLogin;
+
+	@Autowired
+	private SystemService systemService;
 
 	@Value("${security.bind.defaultTenantId:-1}")
 	private Long DEFUALT_TENANT_ID;
@@ -299,8 +295,11 @@ public class LoginService {
 		log.info("进入：用户登录方法,username:{},captcha:{}", param.getUsername(), param.getCaptcha());
 		LogsUtil.add("用户请求登录，username:%s,captcha:%s", param.getUsername(), param.getCaptcha());
 		AssertUtil.service()
-				.notNull(param, new String[] { "username", "password" }, "请求参数%s不能为空")
-				.isTrue(captchaService.validate(param.getCaptcha()), "验证码不正确");
+				.notNull(param, new String[] { "username", "password" }, "请求参数%s不能为空");
+		SystemInfoDto system=systemService.load();
+		if(system.getConfigs().getLogin()!=null && ObjectUtil.equal(system.getConfigs().getLogin().getCaptchaEnabled(), true)){
+			AssertUtil.service().isTrue(captchaService.validate(param.getCaptcha()), "验证码不正确");
+		}
 
 		LogsUtil.add("验证帐号是否已被锁,username:%s", param.getUsername());
 		int failureCount = this.getFailure(param.getUsername());

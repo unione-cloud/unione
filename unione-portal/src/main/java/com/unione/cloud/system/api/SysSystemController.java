@@ -23,12 +23,12 @@ import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
-import com.unione.cloud.system.model.SysAppInfo;
+import com.unione.cloud.core.util.JsonUtil;
+import com.unione.cloud.system.dto.SystemInfoDto;
 import com.unione.cloud.system.model.SysSystem;
+import com.unione.cloud.system.service.SystemService;
 import com.unione.cloud.web.logs.LogsUtil;
 
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
-import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +47,9 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SystemService systemService;
 	
 	
 	@Override
@@ -70,12 +73,21 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		int len = 0;
 		BeanUtils.setDefaultValue(entity, "delFlag",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
+
+		SystemInfoDto info = SystemInfoDto.from(entity);
+		entity.setConfigs(JsonUtil.toJson(info.getConfigs()));
+		entity.setAppList(JsonUtil.toJson(info.getApps()));
+
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
 			String[] fields = {"name","alias","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","versNo","versDesc","ordered","status","descs"};
 			SqlBuilder<SysSystem> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
+		}
+		if(len>0){
+			systemService.clear(entity.getCtx());
 		}
 		return Results.build(len>0, entity.getId());
 	}
@@ -125,11 +137,19 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
+
+		List<SysSystem> rows = dataBaseDao.findByIds(SqlBuilder.build(SysSystem.class,new ArrayList<>(ids)));
 		
 		// 执行删除
-		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
+		LogsUtil.add("删除数ids:"+JsonUtil.toJson(ids));
 		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(SysSystem.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
+
+		if(count>0){
+			rows.stream().forEach(row->{
+				systemService.clear(row.getCtx());
+			});
+		}
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
