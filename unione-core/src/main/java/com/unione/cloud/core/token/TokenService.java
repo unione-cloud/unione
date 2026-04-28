@@ -180,10 +180,10 @@ public class TokenService {
 				.build();
 
 		// token 签名处理
-		String tmp[] = this.signature(principal.getUsername(), token);
+		String tmp[] = this.signature(principal, token);
 		token=tmp[0];
 
-		this.redisService.put(tcmDb, String.format("%s:%s:%s", tcmKey, principal.getUsername(), tmp[1]), tcm,
+		this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), tmp[1]), tcm,
 				Duration.ofSeconds(JWT_EXPIRES - 30));
 		SessionHolder.setToken(token);
 		SessionHolder.setUserPrincipal(principal);
@@ -210,10 +210,14 @@ public class TokenService {
 	public void clean4auth(String token) {
 		if (!StringUtils.isEmpty(token)) {
 			try {
-				String tinfo[]=sm4.decryptStr(token).split("@");
-				String username = tinfo[0];
-				String md5=tinfo[1];
-				this.redisService.delete(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
+				if(!token.contains("@")){
+					token=sm4.decryptStr(token);
+				}
+				String tinfo[]=token.split("@");
+				String tenantId=tinfo[0];
+				String username = tinfo[1];
+				String md5=tinfo[2];
+				this.redisService.delete(tcmDb, String.format("%s:%s:%s:%s", tcmKey,tenantId, username, md5));
 			} catch (Exception e) {
 				log.error("用户注销异常，token非法", e);
 			}
@@ -242,11 +246,12 @@ public class TokenService {
 		if (!StringUtils.isEmpty(token)) {
 			try {
 				String tinfo[]=sm4.decryptStr(token).split("@");
-				String username = tinfo[0];
-				String md5=tinfo[1];
-				TcmEntry tcm = this.redisService.getObj(tcmDb, String.format("%s:%s:%s", tcmKey, username, md5));
+				String tenantId=tinfo[0];
+				String username = tinfo[1];
+				String md5=tinfo[2];
+				TcmEntry tcm = this.redisService.getObj(tcmDb, String.format("%s:%s:%s:%s", tcmKey,tenantId, username, md5));
 				if (tcm == null) {
-					log.info("中心化管理token，从redis中获取令牌失败，db:{} - key:{}:{}:{}", tcmDb, tcmKey, username, md5);
+					log.info("中心化管理token，从redis中获取令牌失败，db:{} - key:{}:{}:{}", tcmDb, tcmKey,tenantId, username, md5);
 				}
 				return tcm;
 			} catch (Exception e) {
@@ -382,7 +387,7 @@ public class TokenService {
 							.userName(principal.getUsername())
 							.times(DateUtil.current())
 							.build();
-					this.redisService.put(tcmDb, String.format("%s:%s:%s", tcmKey, principal.getUsername(), origToken),
+					this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), origToken),
 							tcm, Duration.ofSeconds(JWT_EXPIRES - 30));
 				}
 			}
@@ -403,10 +408,14 @@ public class TokenService {
 	 * @param token
 	 * @return [sign, md5]
 	 */
-	private String[] signature(String username, String token) {
+	private String[] signature(UserPrincipal principal, String token) {
 		String md5=DigestUtil.md5Hex(token);
-		token = String.format("%s@%s", username, md5);
+		token = String.format("%s@%s@%s",principal.getTenantId(), principal.getUsername(), md5);
 		return new String[]{sm4.encryptHex(token), md5};
+	}
+
+	public String decrypt(String token) {
+		return sm4.decryptStr(token);
 	}
 
 	@Data

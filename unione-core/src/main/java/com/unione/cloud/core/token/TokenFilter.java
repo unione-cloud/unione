@@ -67,6 +67,22 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 	 */
 	@Value("${security.filter.executions:}")
 	private List<String> EXECUTIONS_URL=new ArrayList<>();
+
+	private List<String> EXECUTIONS_INNER=new ArrayList<>();
+	{
+		EXECUTIONS_INNER.add("/");
+		EXECUTIONS_INNER.add("/error");
+		EXECUTIONS_INNER.add("/api/entry");
+		EXECUTIONS_INNER.add("/doc.html/**");
+		EXECUTIONS_INNER.add("/v3/api-docs/**");
+		EXECUTIONS_INNER.add("/api/lic/mac");
+		EXECUTIONS_INNER.add("/api/lic/install");
+		EXECUTIONS_INNER.add("/api/security/login/*");
+		EXECUTIONS_INNER.add("/api/security/oauth/*");
+		EXECUTIONS_INNER.add("/api/security/captcha/*");
+		EXECUTIONS_INNER.add("/api/security/register");
+		EXECUTIONS_INNER.add("/api/common/visit/entry");
+	}
 	
 	private PathMatcher matcher = new AntPathMatcher();
 
@@ -82,7 +98,7 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 		
 		InterceptorRegistration registration=registry.addInterceptor(this);
 		INCLUDES_URL.stream().forEach(item->registration.addPathPatterns(item));
-//		EXECUTIONS_URL.stream().forEach(item->registration.excludePathPatterns(item));
+		EXECUTIONS_INNER.stream().forEach(item->registration.excludePathPatterns(item));
 		RESOURCE_URL.stream().forEach(item->registration.excludePathPatterns(item));
 		
 	}
