@@ -136,6 +136,9 @@ springdoc:
     - group: ai
       display-name: AI接口
       paths-to-match: /api/ai/**
+    - group: license
+      display-name: License接口
+      paths-to-match: /api/lic/**
   default-flat-param-object: true
 knife4j:
   enable: true
