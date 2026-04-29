@@ -8,7 +8,7 @@ FROM SYS_ROLE R
 LEFT JOIN SYS_USER_ROLE UR ON UR.ROLE_ID=R.ID 
 WHERE R.STATUS=1
 -- @if(isNotEmpty(params.isTenantAdmin)){
-  AND (R.TYPES=1 OR R.TENANT_ID = #{params.tenantId})
+  AND (R.TYPES=1 AND R.SN NOT IN ('SUPPER-ADMIN','TENANT-ADMIN') OR R.TENANT_ID = #{params.tenantId})
 -- @}
 -- @if(isNotEmpty(params.isOrganAdmin)){
   AND (

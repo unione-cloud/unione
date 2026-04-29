@@ -2,7 +2,6 @@ package com.unione.cloud.common.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +23,6 @@ import com.unione.cloud.common.dto.SelectorRoleDto;
 import com.unione.cloud.common.dto.SelectorRoleParam;
 import com.unione.cloud.common.dto.SelectorUserDto;
 import com.unione.cloud.common.dto.SelectorUserParam;
-import com.unione.cloud.common.dto.TreeNodeDto;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -36,6 +34,7 @@ import com.unione.cloud.system.model.SysPost;
 import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserRole;
 
+import cn.hutool.core.collection.ListUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -153,10 +152,15 @@ public class SelectorService {
         String sqlName="selectRole4Use";
         if(Objects.equals(params.getBody().getTargetType(), "permis") || Objects.equals(params.getBody().getTargetType(), "assign")){
             sqlName="selectRole4Auth";
-            if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
+            if(sessionService.isAdmin()||sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+                builder.where("isSupperAdmin", true);
+            }else if(sessionService.hasRole(UserRoles.TENANT_ADMIN)){
                 builder.where("isTenantAdmin", true);
             }else if(sessionService.hasRole(UserRoles.ORGAN_ADMIN)){
                 builder.where("isOrganAdmin", true);
+            }else{
+                // 无权限，返回空列表
+                return Results.success(ListUtil.empty());
             }
         }
        
