@@ -114,7 +114,7 @@ springdoc:
       paths-to-match: /api/pay/**    
     - group: security
       display-name: 认证接口
-      paths-to-match: /api/security/**
+      paths-to-match: /api/security/**,/api/session/**
     - group: portal
       display-name: 门户接口
       paths-to-match: /api/portal/**,/api/ucenter/**

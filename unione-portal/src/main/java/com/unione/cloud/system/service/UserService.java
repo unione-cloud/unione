@@ -54,7 +54,7 @@ public class UserService {
 	 * @param ids
 	 * @return
 	 */
-	public Map<Long, SysUser> loadOrgan(Set<Long> ids) {
+	public Map<Long, SysUser> loadUser(Set<Long> ids) {
 		log.debug("进入：加载用户信息方法,ids:{}",ids);
 		if(ObjectUtil.isEmpty(ids)) {
 			return MapUtil.empty();

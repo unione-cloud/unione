@@ -53,7 +53,7 @@ public class TenantService {
 	 * @param ids
 	 * @return
 	 */
-	public Map<Long, SysTenant> loadOrgan(Set<Long> ids) {
+	public Map<Long, SysTenant> loadTenant(Set<Long> ids) {
 		log.debug("进入：加载租户信息方法,ids:{}",ids);
 		if(ObjectUtil.isEmpty(ids)) {
 			return MapUtil.empty();

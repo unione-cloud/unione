@@ -24,6 +24,8 @@ import com.unione.cloud.core.exception.ServiceException;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionHolder;
 import com.unione.cloud.core.security.UserPrincipal;
+import com.unione.cloud.core.util.RequestUtils;
+import com.unione.cloud.core.util.RequestUtils.ClientLocation;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
@@ -96,6 +98,12 @@ public class TokenService {
 	private int tcmAutoLiteTime;
 
 	/**
+	 * Token Center Manage 令牌中心化管理，ip验证，令牌ip验证，开启后，验证令牌ip和请求ip是否一致，如果不一致拒绝访问
+	 */
+	@Value("${security.tcm.ipVerify:true}")
+	private boolean ipVerify;
+
+	/**
 	 * Redis 服务
 	 */
 	@Autowired(required = false)
@@ -107,6 +115,9 @@ public class TokenService {
 	public void setKey(String key) {
 		sm4 = SmUtil.sm4(Base64.decode(key.getBytes()));
 	}
+
+	@Autowired
+	private HttpServletRequest request;
 
 	/**
 	 * 
@@ -178,10 +189,20 @@ public class TokenService {
 				.password(password)
 				.times(DateUtil.current())
 				.build();
+		if(request!=null){
+			tcm.setOs(RequestUtils.getClientOs(request));
+			tcm.setDevice(RequestUtils.getClientExplorer(request));
+			tcm.setIpAddr(RequestUtils.getClientIp(request));
+			ClientLocation location=RequestUtils.getClientLocation(request);
+			if(!ObjectUtil.isEmpty(location.getCity())){
+				tcm.setIpCity(String.format("%s/%s/%s", location.getCountry(), location.getProvince(), location.getCity()));
+			}
+		}
 
 		// token 签名处理
 		String tmp[] = this.signature(principal, token);
 		token=tmp[0];
+		tcm.setId(tmp[1]);
 
 		this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), tmp[1]), tcm,
 				Duration.ofSeconds(JWT_EXPIRES - 30));
@@ -245,7 +266,10 @@ public class TokenService {
 	public TcmEntry getTcm(String token) {
 		if (!StringUtils.isEmpty(token)) {
 			try {
-				String tinfo[]=sm4.decryptStr(token).split("@");
+				if(!token.contains("@")){
+					token=sm4.decryptStr(token);
+				}
+				String tinfo[]=token.split("@");
 				String tenantId=tinfo[0];
 				String username = tinfo[1];
 				String md5=tinfo[2];
@@ -348,6 +372,15 @@ public class TokenService {
 		UserPrincipal principal = null;
 		String origToken = token;
 
+		if(ipVerify && request!=null){
+			if(!tcm.getIpAddr().equals(RequestUtils.getClientIp(request))){
+				String key=String.format("%s:%s:%s:%s", tcmKey,tcm.getTenantId(), tcm.getUserName(), tcm.getId());
+				log.warn("中心化管理token，从redis中获取令牌失败，ip验证不通过，db:{} - key:{},token ip:{},request ip:{}", tcmDb, key, 
+					tcm.getIpAddr(), RequestUtils.getClientIp(request));
+				return null;
+			}
+		}
+
 		try {
 			JWTVerifier jwtv = JWT.require(Algorithm.HMAC256(tcm.getPassword())).build();
 			DecodedJWT jwt = null;
@@ -381,12 +414,23 @@ public class TokenService {
 					String newToken = transform(principal, tcm.getPassword());
 					log.info("token中心化管理，token即将过期，剩余时间:{}ms，自动续期", timelife);
 					tcm = TcmEntry.builder()
+							.id(tcm.getId())
+							.type(tcm.getType())
 							.token(newToken)
 							.tenantId(principal.getTenantId())
 							.userId(principal.getId())
 							.userName(principal.getUsername())
 							.times(DateUtil.current())
 							.build();
+					if(request!=null){
+						tcm.setOs(RequestUtils.getClientOs(request));
+						tcm.setDevice(RequestUtils.getClientExplorer(request));
+						tcm.setIpAddr(RequestUtils.getClientIp(request));
+						ClientLocation location=RequestUtils.getClientLocation(request);
+						if(!ObjectUtil.isEmpty(location.getCity())){
+							tcm.setIpCity(String.format("%s/%s/%s", location.getCountry(), location.getProvince(), location.getCity()));
+						}
+					}
 					this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), origToken),
 							tcm, Duration.ofSeconds(JWT_EXPIRES - 30));
 				}
@@ -424,6 +468,7 @@ public class TokenService {
 	@AllArgsConstructor
 	@Accessors(chain = true)
 	public static class TcmEntry {
+		private String id;
 		/**
 		 * 令牌类型：user:用户令牌,server:服务令牌
 		 */
@@ -456,5 +501,25 @@ public class TokenService {
 		 * 用户密码（加密）
 		 */
 		private String password;
+
+		/**
+		 * 操作系统
+		 */
+		private String os;
+
+		/**
+		 * 设备信息
+		 */
+		private String device;
+
+		/**
+		 * ip地址
+		 */
+		private String ipAddr;
+
+		/**
+		 * ip城市
+		 */
+		private String ipCity;
 	}
 }

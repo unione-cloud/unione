@@ -90,7 +90,7 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 			
 			// 获取租户信息
 			Set<Long> tids = results.getBody().stream().map(CodeLvsnDto::getTenantId).collect(Collectors.toSet());
-			Map<Long,SysTenant> tmap = tenantService.loadOrgan(tids);
+			Map<Long,SysTenant> tmap = tenantService.loadTenant(tids);
 			// 获取组织信息
 			Set<Long> oids = results.getBody().stream().map(CodeLvsnDto::getOrgId).collect(Collectors.toSet());
 			Map<Long,SysOrgan> omap = organService.loadOrgan(oids);
