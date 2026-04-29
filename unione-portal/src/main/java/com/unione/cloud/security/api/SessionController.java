@@ -94,6 +94,14 @@ public class SessionController {
             String key = cursor.next();
             TcmEntry tcm = redisService.getObj(tcmDb, key);
             if(!ObjectUtil.isEmpty(tcm)){
+
+                // 帐号模糊查询
+                if(!ObjectUtil.isEmpty(params.getKeywords())){
+                    if(!tcm.getUserName().contains(params.getKeywords().trim())){
+                        continue;
+                    }
+                }
+
                 PrincipalSession session=BeanUtils.copyProperties(tcm, PrincipalSession.class, "times");
                 session.setTimes(DateUtil.date(tcm.getTimes()));
                 sessionList.add(session);
@@ -135,6 +143,9 @@ public class SessionController {
                 item.setUserName(user.getUsername());
                 item.setRealName(user.getRealName());
             }
+            if(ObjectUtil.equal(item.getId(), sessionService.getPrincipal().getSessionId())){
+                item.setUserName(String.format("%s(我)",item.getUserName()));
+            }
         });
 
         return Results.success(sessionList);
@@ -144,12 +155,14 @@ public class SessionController {
     @PostMapping("/kick")
     @Operation(summary = "踢出会话")
     @Action(title="踢出会话",type=ActionType.Delete,roles={UserRoles.TENANTADMIN})
-    public Results<Void> kick(@RequestBody PrincipalSession session){
-        AssertUtil.service().notNull(session,new String[]{"id","tenantId","userName"}, "属性%s不能为空");
-        if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
-            AssertUtil.service().notEq(session.getTenantId(), sessionService.getTenantId(), "无该会话操作权限");
-        }
-        tokenService.clean4auth(String.format("%s@%s@%s", session.getTenantId(),session.getUserName(),session.getId()));
+    public Results<Void> kick(@RequestBody List<PrincipalSession> sessions){
+        sessions.stream().forEach(session->{
+            AssertUtil.service().notNull(session,new String[]{"id","tenantId","userName"}, "属性%s不能为空");
+            if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+                AssertUtil.service().notEq(session.getTenantId(), sessionService.getTenantId(), "无该会话操作权限");
+            }
+            tokenService.clean4auth(String.format("%s@%s@%s", session.getTenantId(),session.getUserName(),session.getId()));
+        });
         return Results.success();
     }
 
