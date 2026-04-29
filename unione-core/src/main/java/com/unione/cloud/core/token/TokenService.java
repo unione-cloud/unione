@@ -1,5 +1,6 @@
 package com.unione.cloud.core.token;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
@@ -116,8 +117,6 @@ public class TokenService {
 		sm4 = SmUtil.sm4(Base64.decode(key.getBytes()));
 	}
 
-	@Autowired
-	private HttpServletRequest request;
 
 	/**
 	 * 
@@ -130,6 +129,32 @@ public class TokenService {
 			Map<String, Object> header = new HashMap<>();
 			header.put("typ", "JWT");
 			header.put("alg", "HS256");
+
+			if(RequestContextHolder.getRequestAttributes()!=null && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes){
+				HttpServletRequest request=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+				String referer=request.getHeader("referer");
+				String ctx="portal";
+				try {
+					String path = new URI(referer).getPath();
+					if (path != null && !path.isEmpty()){
+						String[] parts = path.split("/");
+						for (String p : parts) {
+							if (!p.isEmpty()) {
+								ctx=p;
+								break;
+							}
+						}
+					}
+				} catch (Exception e) {
+				}
+				if(ObjectUtil.isEmpty(ctx) || ctx.equals("/") || ctx.equals("login")){
+					ctx="portal";
+				}
+				if(ctx.startsWith("/")){
+					ctx=ctx.substring(1);
+				}
+				principal.setSysctx(ctx);
+			}
 
 			// 获得有效时间
 			Calendar ca = Calendar.getInstance();
@@ -189,7 +214,8 @@ public class TokenService {
 				.password(password)
 				.times(DateUtil.current())
 				.build();
-		if(request!=null){
+		if(RequestContextHolder.getRequestAttributes()!=null && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes){
+			HttpServletRequest request=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 			tcm.setOs(RequestUtils.getClientOs(request));
 			tcm.setDevice(RequestUtils.getClientExplorer(request));
 			tcm.setIpAddr(RequestUtils.getClientIp(request));
@@ -203,6 +229,7 @@ public class TokenService {
 		String tmp[] = this.signature(principal, token);
 		token=tmp[0];
 		tcm.setId(tmp[1]);
+		principal.setSessionId(tmp[1]);
 
 		this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), tmp[1]), tcm,
 				Duration.ofSeconds(JWT_EXPIRES - 30));
@@ -221,6 +248,12 @@ public class TokenService {
 		}
 
 		return token;
+	}
+
+
+	public void clean4auth(UserPrincipal principal) {
+		String token=String.format("%s@%s@%s", principal.getTenantId(), principal.getUsername(), principal.getSessionId());
+		this.clean4auth(token);
 	}
 
 	/**
@@ -372,12 +405,15 @@ public class TokenService {
 		UserPrincipal principal = null;
 		String origToken = token;
 
-		if(ipVerify && request!=null){
-			if(!tcm.getIpAddr().equals(RequestUtils.getClientIp(request))){
-				String key=String.format("%s:%s:%s:%s", tcmKey,tcm.getTenantId(), tcm.getUserName(), tcm.getId());
-				log.warn("中心化管理token，从redis中获取令牌失败，ip验证不通过，db:{} - key:{},token ip:{},request ip:{}", tcmDb, key, 
-					tcm.getIpAddr(), RequestUtils.getClientIp(request));
-				return null;
+		if(ipVerify){
+			if(RequestContextHolder.getRequestAttributes()!=null && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes){
+				HttpServletRequest request=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+				if(!tcm.getIpAddr().equals(RequestUtils.getClientIp(request))){
+					String key=String.format("%s:%s:%s:%s", tcmKey,tcm.getTenantId(), tcm.getUserName(), tcm.getId());
+					log.warn("中心化管理token，从redis中获取令牌失败，ip验证不通过，db:{} - key:{},token ip:{},request ip:{}", tcmDb, key, 
+						tcm.getIpAddr(), RequestUtils.getClientIp(request));
+					return null;
+				}
 			}
 		}
 
@@ -422,7 +458,8 @@ public class TokenService {
 							.userName(principal.getUsername())
 							.times(DateUtil.current())
 							.build();
-					if(request!=null){
+					if(RequestContextHolder.getRequestAttributes()!=null && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes){
+						HttpServletRequest request=((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 						tcm.setOs(RequestUtils.getClientOs(request));
 						tcm.setDevice(RequestUtils.getClientExplorer(request));
 						tcm.setIpAddr(RequestUtils.getClientIp(request));
@@ -436,13 +473,14 @@ public class TokenService {
 				}
 			}
 
+			principal.setSessionId(tcm.getId());
 		} catch (Exception e) {
 			principal = null;
 			log.error("验证token并获取UserPrincipal信息失败,token:{}", token, e);
 		} finally {
 			log.debug("退出服务:验证token并获取UserPrincipal信息,token:{},principal:{}", token, principal);
 		}
-
+		
 		return principal;
 	}
 
@@ -522,4 +560,5 @@ public class TokenService {
 		 */
 		private String ipCity;
 	}
+	
 }

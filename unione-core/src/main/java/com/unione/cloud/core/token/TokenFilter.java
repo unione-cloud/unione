@@ -97,6 +97,7 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 		log.info("设置排除资源路径,size:{}",EXECUTIONS_URL.size());
 		
 		InterceptorRegistration registration=registry.addInterceptor(this);
+		registration.order(5);
 		INCLUDES_URL.stream().forEach(item->registration.addPathPatterns(item));
 		EXECUTIONS_INNER.stream().forEach(item->registration.excludePathPatterns(item));
 		RESOURCE_URL.stream().forEach(item->registration.excludePathPatterns(item));
