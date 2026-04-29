@@ -21,6 +21,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -44,6 +45,9 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
@@ -64,6 +68,18 @@ public class SysRoleController implements PojoFeignApi<SysRole>{
 	public Results<Long> save(@Validated(Validator.save.class) SysRole entity) {
 		// 参数处理
 		int len = 0;
+
+		// 角色类型验证
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			if(sessionService.getUserRoles().contains(UserRoles.TENANTADMIN)){
+				//租户管理员
+				AssertUtil.service().notIn(entity.getTypes(), List.of(2,3), "参数types取值范围[2,3]");
+			}else{
+				// 机构管理员
+				entity.setTypes(3);
+			}
+		}
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 			LogsUtil.add("保存数据,len:"+len);
