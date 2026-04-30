@@ -23,10 +23,6 @@ public class UserPrincipal implements Serializable {
 	
 	private static final long serialVersionUID = -8604458874915692692L;
 	/**
-	 * 会话ID
-	 */
-	private String sessionId;
-	/**
 	 * 系统上下文
 	 */
 	private String sysctx;

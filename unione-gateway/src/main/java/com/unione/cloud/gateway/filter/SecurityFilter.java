@@ -538,7 +538,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 		if(!ObjectUtil.isEmpty(token)){
 			TcmEntry entry = tokenService.getTcm(token);
 			if(entry!=null){
-				reqBuilder.header(String.format("ServiceToken", config.getTokenName()), tokenService.getTcm(token).getToken());
+				reqBuilder.header("ServiceToken", entry.getToken());
 			}
 		}
 		return exchange.mutate().request(reqBuilder.build()).build();

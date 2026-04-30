@@ -19,6 +19,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.exception.ServiceException;
@@ -167,6 +168,8 @@ public class TokenService {
 			ca.add(Calendar.SECOND, JWT_EXPIRES);
 			Date expires = ca.getTime();
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+			mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 			com.auth0.jwt.JWTCreator.Builder builder = JWT.create()
 					.withHeader(header)
 					.withExpiresAt(expires)
@@ -229,7 +232,6 @@ public class TokenService {
 		String tmp[] = this.signature(principal, token);
 		token=tmp[0];
 		tcm.setId(tmp[1]);
-		principal.setSessionId(tmp[1]);
 
 		this.redisService.put(tcmDb, String.format("%s:%s:%s:%s", tcmKey,principal.getTenantId(), principal.getUsername(), tmp[1]), tcm,
 				Duration.ofSeconds(JWT_EXPIRES - 30));
@@ -250,11 +252,6 @@ public class TokenService {
 		return token;
 	}
 
-
-	public void clean4auth(UserPrincipal principal) {
-		String token=String.format("%s@%s@%s", principal.getTenantId(), principal.getUsername(), principal.getSessionId());
-		this.clean4auth(token);
-	}
 
 	/**
 	 * 用户注销，清理token
@@ -473,7 +470,6 @@ public class TokenService {
 				}
 			}
 
-			principal.setSessionId(tcm.getId());
 		} catch (Exception e) {
 			principal = null;
 			log.error("验证token并获取UserPrincipal信息失败,token:{}", token, e);

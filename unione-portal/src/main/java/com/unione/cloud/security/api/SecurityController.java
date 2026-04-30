@@ -183,7 +183,7 @@ public class SecurityController {
 	public Results<Void> logout(){
 		log.info("用户注销，usrename:{}",sessionService.getUsername());
 		
-		tokenService.clean4auth(sessionService.getPrincipal());
+		tokenService.clean4auth(sessionService.getToken());
 		
 		return Results.success();
 	}

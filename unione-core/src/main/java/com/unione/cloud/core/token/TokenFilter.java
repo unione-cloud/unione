@@ -136,41 +136,26 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 		SessionHolder.setToken(null);
 		SessionHolder.setUserPrincipal(null);
 
+		String token=getToken(request);
 		String serviceToken=request.getHeader("ServiceToken");
 		if(!StrUtil.isEmpty(serviceToken)){
 			// 验证serviceToken
 			UserPrincipal principal=tokenService.resolveToken(serviceToken);
 			if(principal!=null) {
 				SessionHolder.build().setVar("ServiceToken", serviceToken);
+				SessionHolder.setToken(token);
 				SessionHolder.setUserPrincipal(principal);
 				return true;
 			}
 		}
 		
-		// 从header中获取
-		String token=request.getHeader(REQUEST_TOKEN);
-		// 从cookie中获取
-		if(StringUtils.isEmpty(token) && request.getCookies()!=null) {
-			for(int i=0;i<request.getCookies().length;i++) {
-				Cookie ck=request.getCookies()[i];
-				if(ck!=null && REQUEST_TOKEN.equals(ck.getName())){
-					token=ck.getValue();
-					break;
-				}
-			}
-		}
-		// 从params中获取
-		if(StringUtils.isEmpty(token)) {
-			token=request.getParameter(REQUEST_TOKEN);
-		}
-		
+		// 正常用户请求
 		if(StringUtils.isEmpty(token)) {
 			// 如果token为空则验证当前请求是否在白名单内
 			if (EXECUTIONS_URL.stream().anyMatch(x -> matcher.match(x, uri))) {
 				log.debug("url白名单,直接放行,uri:{}",uri);
 				return true;
 			}
-			
 			log.error("request uri:{},token 获取失败",request.getRequestURI());
 			this.writeResult(response);
 			return false;
@@ -201,7 +186,27 @@ public class TokenFilter implements HandlerInterceptor,WebMvcConfigurer {
 		
 		return true;
 	}
-	
+
+	private String getToken(HttpServletRequest request) {
+		// 从header中获取
+		String token=request.getHeader(REQUEST_TOKEN);
+
+		// 从cookie中获取
+		if(StringUtils.isEmpty(token) && request.getCookies()!=null) {
+			for(int i=0;i<request.getCookies().length;i++) {
+				Cookie ck=request.getCookies()[i];
+				if(ck!=null && REQUEST_TOKEN.equals(ck.getName())){
+					token=ck.getValue();
+					break;
+				}
+			}
+		}
+		// 从params中获取
+		if(StringUtils.isEmpty(token)) {
+			token=request.getParameter(REQUEST_TOKEN);
+		}
+		return StringUtils.trimToNull(token);
+	}
 
 
 	private void writeResult(ServletResponse servletResponse){

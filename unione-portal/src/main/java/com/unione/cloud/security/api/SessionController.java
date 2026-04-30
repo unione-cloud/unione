@@ -128,6 +128,8 @@ public class SessionController {
         Map<Long,SysOrgan> omap = organService.loadOrgan(oids);
         Map<Long,SysUser> umap = userService.loadUser(uids);
 
+        String sessionId=tokenService.decrypt(sessionService.getToken()).split("@")[2];
+
         // 渲染会话列表
         sessionList.forEach(item -> {
             SysTenant tenant=tmap.get(item.getTenantId());
@@ -143,7 +145,7 @@ public class SessionController {
                 item.setUserName(user.getUsername());
                 item.setRealName(user.getRealName());
             }
-            if(ObjectUtil.equal(item.getId(), sessionService.getPrincipal().getSessionId())){
+            if(ObjectUtil.equal(item.getId(), sessionId)){
                 item.setUserName(String.format("%s(我)",item.getUserName()));
             }
         });
