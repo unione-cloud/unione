@@ -305,6 +305,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		// 加载资源列表
 		Map<Long,Boolean> hadAppMap=new HashMap<>();
 		List<SysResource> resList = new ArrayList<>();
+		Map<Long,SysResource> resMap = new HashMap<>();
 		if(!ObjectUtil.isEmpty(appIds)) {
 			Map<String,Object> paramsMap = new HashMap<>();
 			paramsMap.put("appIds", appIds);
@@ -315,6 +316,9 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 				paramsMap.put("isAdmin", true);
 			}
 			resList = dataBaseDao.findList("loadSysResourceTree", paramsMap, SysResource.class);
+			resList.forEach(row->{
+				resMap.put(row.getId(), row);
+			});
 		}
 
 		Map<Long,Boolean> hadResMap=new HashMap<>();
@@ -396,6 +400,8 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 			node.setRefId(row.getRefId());
 			if(ObjectUtil.equal(-1L, row.getParentId())){
 				node.setPid(row.getAppId());
+			}else if(resMap.get(row.getParentId())==null){
+				return;
 			}
 			if(hadResMap.get(row.getId())!=null){
 				node.setChecked(true);
