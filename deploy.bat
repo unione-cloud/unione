@@ -33,7 +33,7 @@ REM 删除旧的jar包
 plink -pw %UNIONE_PASSWD% root@%UNIONE_HOST% "cd /opt/builder/jars ; rm -f %APP%.jar"
 
 REM 使用 pscp 上传jar包
-if %APP%=="portal" (
+if %APP%==portal (
     pscp -pw %UNIONE_PASSWD% unione-starter/target/%APP%.jar root@%UNIONE_HOST%:/opt/builder/jars
 ) else (
     pscp -pw %UNIONE_PASSWD% unione-%APP%/target/%APP%.jar root@%UNIONE_HOST%:/opt/builder/jars
