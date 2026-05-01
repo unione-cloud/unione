@@ -112,6 +112,7 @@ create table SYS_SYSTEM
    TENANT_ID            bigint not null comment '租户ID',
    NAME                 varchar(100) not null comment '系统名称',
    ALIAS                varchar(50) comment '系统简称',
+   TYPES                varchar(10) not null comment '系统类型，字典APPTYPES pc：PC，app：APP',
    CTX                  varchar(20) not null comment '系统ctx',
    LOGO_LARGE           varchar(100) comment '系统logo大',
    LOGO_SMALL           varchar(100) comment '系统logo小',
@@ -122,6 +123,12 @@ create table SYS_SYSTEM
    FOOTER               varchar(200) comment '底部信息',
    CONFIGS              text comment '系统配置,json对象存储，{}',
    APP_LIST             text comment '应用列表,json数组存储，[{title,name,id}]',
+   NAV_LIST             text comment '导航配置，导航条组件，json存储{
+               barStyle:{},//导航条样式
+               itemStyle:{},   //导航项样式
+               activeStyle:{},  // 活动项样式
+               itemList:[{title,name,icon,iconActive,enable,roles}]  //导航项
+            }',
    ORDERED              int(2) not null comment '显示顺序',
    STATUS               int(2) not null comment '系统状态，字典SYSSTATUS 1开发，2内测，3发布，4撤销',
    DEL_FLAG             int(2) not null comment '删除状态，1是，0否',

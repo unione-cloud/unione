@@ -44,6 +44,11 @@ public class SysSystem extends Pojo {
 	@Schema(title="系统简称",description="长度为：50")
 	private String alias;
 	/**
+	* 系统类型，字典APPTYPES pc:PC端，app:移动端
+	*/
+	@Schema(title="系统类型，字典APPTYPES pc:PC端，app:移动端",description="长度为：10")
+	private String types;
+	/**
 	* 系统ctx
 	*/
 	@Schema(title="系统ctx",description="长度为：20")
@@ -95,6 +100,16 @@ public class SysSystem extends Pojo {
 	*/
 	@Schema(title="应用列表,json数组存储，[{title,name,id}]",description="长度为：65535")
 	private String appList;
+	/**
+	 * 导航配置，导航条组件，json存储{
+   	 * barStyle:{},//导航条样式
+   	 * itemStyle:{},   //导航项样式
+   	 * activeStyle:{},  // 活动项样式
+   	 * itemList:[{title,name,icon,iconActive,enable,roles}]  //导航项
+	 * }
+	 */
+	@Schema(title="导航配置",description="长度为：65535")
+	private String navList;
 	/**
 	* 显示顺序
 	*/
