@@ -73,6 +73,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		int len = 0;
 		BeanUtils.setDefaultValue(entity, "delFlag",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
+		BeanUtils.setDefaultValue(entity, "types","pc");
 
 		SystemInfoDto info = SystemInfoDto.from(entity);
 		entity.setConfigs(JsonUtil.toJson(info.getConfigs()));
@@ -82,7 +83,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"name","alias","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","versNo","versDesc","ordered","status","descs"};
+			String[] fields = {"name","alias","types","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","navList","versNo","versDesc","ordered","status","descs"};
 			SqlBuilder<SysSystem> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
