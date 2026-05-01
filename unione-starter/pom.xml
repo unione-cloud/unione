@@ -45,6 +45,7 @@
 	</dependencies>
 	
 	<build>
+		<finalName>portal</finalName>
 		<plugins>
 			<!-- spring-boot-maven-plugin:应用打包插件 -->
 			<plugin>
