@@ -42,7 +42,6 @@ public class SysResource extends Pojo {
 	* 应用ID
 	*/
 	@Schema(title="应用ID",description="长度为：19")
-	@NotNull(message="应用ID不能为空",groups = {Validator.save.class,Validator.update.class})
 	private Long appId;
 	/**
 	* 上级菜单ID(根节点为-1)
