@@ -211,6 +211,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		}
 
 		List<SysResource> resources = dataBaseDao.findList(SqlBuilder.build(params)
+			.where("appId is null and sysId = ?")
 			.sort(Sort.build("ordered", "asc"))
 			.dataPermis(PermisRule.ALL));
 		resources.stream().forEach(res->{
