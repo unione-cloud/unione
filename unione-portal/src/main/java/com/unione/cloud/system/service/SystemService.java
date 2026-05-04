@@ -1,9 +1,13 @@
 package com.unione.cloud.system.service;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.CacheManager;
@@ -15,7 +19,9 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.HpdlProcess;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.system.dto.SystemInfoDto;
+import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysSystem;
+import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +43,6 @@ public class SystemService {
     @Autowired
     private HttpServletRequest request;
 
-
     private Cache<String, SystemInfoDto> getCache() {
         Cache<String, SystemInfoDto> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:INFO")
                 .cacheType(CacheType.BOTH)
@@ -46,64 +51,65 @@ public class SystemService {
         return cache;
     }
 
-
     /**
      * 加载用户当前访问的系统
+     * 
      * @return
      */
-    public SystemInfoDto load(){
-        String referer=request.getHeader("referer");
-        String ctx="portal";
+    public SystemInfoDto load() {
+        String referer = request.getHeader("referer");
+        String ctx = "portal";
         try {
             String path = new URI(referer).getPath();
-            if (path != null && !path.isEmpty()){
+            if (path != null && !path.isEmpty()) {
                 String[] parts = path.split("/");
                 for (String p : parts) {
                     if (!p.isEmpty()) {
-                        ctx=p;
+                        ctx = p;
                         break;
                     }
                 }
             }
         } catch (Exception e) {
         }
-        if(ObjectUtil.isEmpty(ctx) || ctx.equals("/") || ctx.equals("login")){
-            ctx="portal";
+        if (ObjectUtil.isEmpty(ctx) || ctx.equals("/") || ctx.equals("login")) {
+            ctx = "portal";
         }
-        if(ctx.startsWith("/")){
-            ctx=ctx.substring(1);
+        if (ctx.startsWith("/")) {
+            ctx = ctx.substring(1);
         }
         return load(ctx);
     }
 
     /**
      * 加载指定的系统
+     * 
      * @param ctx
      * @return
      */
-    public SystemInfoDto load(String ctx){
-        SystemInfoDto sys=getCache().get(ctx);
-        if(sys==null){
-           sys=redisService.doHpdl(new HpdlProcess<SystemInfoDto>(String.format("hpdl:system:%s", ctx)) {
-            @Override
-            public SystemInfoDto process() {
-                SystemInfoDto tmp=getCache().get(ctx);
-                if(tmp==null){
-                    SysSystem sys=new SysSystem();
-                    sys.setCtx(ctx);
-                    sys.setDelFlag(0);
-                    sys=dataBaseDao.findOne(SqlBuilder.build(sys));
-                    if(sys==null){
-                        tmp=new SystemInfoDto();
-                    }else{
-                        tmp=SystemInfoDto.from(sys);
+    public SystemInfoDto load(String ctx) {
+        SystemInfoDto sys = getCache().get(ctx);
+        if (sys == null) {
+            sys = redisService.doHpdl(new HpdlProcess<SystemInfoDto>(String.format("hpdl:system:%s", ctx)) {
+                @Override
+                public SystemInfoDto process() {
+                    SystemInfoDto tmp = getCache().get(ctx);
+                    if (tmp == null) {
+                        SysSystem sys = new SysSystem();
+                        sys.setCtx(ctx);
+                        sys.setDelFlag(0);
+                        sys = dataBaseDao.findOne(SqlBuilder.build(sys));
+                        if (sys == null) {
+                            tmp = new SystemInfoDto();
+                        } else {
+                            tmp = SystemInfoDto.from(sys);
+                        }
+                        getCache().put(ctx, tmp);
+                        return tmp;
                     }
-                    getCache().put(ctx, tmp);
                     return tmp;
                 }
-                return tmp;
-            }
-           }, 300, 3);
+            }, 300, 3);
         }
         AssertUtil.service().notNull(sys, "系统信息不存在").notNull(sys.getId(), "系统信息不存在");
         return sys;
@@ -111,11 +117,37 @@ public class SystemService {
 
     /**
      * 清除指定的系统缓存
+     * 
      * @param ctx
      */
-    public void clear(String ctx){
+    public void clear(String ctx) {
         getCache().remove(ctx);
     }
 
+    /**
+     * 删除系统页面
+     * @param ids
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deletePage(Set<Long> ids) {
+        AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
+        List<SysResource> rows = dataBaseDao.findByIds(SqlBuilder.build(SysResource.class, new ArrayList<>(ids)));
+        LogsUtil.add("批量删除资源:%s", rows.size());
+        List<Long> refIds = new ArrayList<>();
+        rows.stream().forEach(row -> {
+            if ("page".equals(row.getTypes()) && row.getRefId() != null) {
+                refIds.add(row.getRefId());
+            }
+        });
+        LogsUtil.add("批量删除页面:%s", refIds.size());
+
+        dataBaseDao.deleteById(SqlBuilder.build(SysResource.class, ids));
+        if (!refIds.isEmpty()) {
+            int len = dataBaseDao.deleteById("deleteSystemPage", SqlBuilder.build(SysSystem.class, refIds));
+            if(len<refIds.size()){
+                dataBaseDao.deleteById("deleteSystemPageLogic", SqlBuilder.build(SysSystem.class, refIds));
+            }
+        }
+    }
 
 }

@@ -409,6 +409,30 @@ public class DataBaseDao {
 		return this.sqlManager.deleteById(cls, id);
 	}
 	
+	/**
+	 * 	根据数据id删除
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteById(String sqlName,SqlBuilder<T> builder) {
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+		
+		SessionService sessionService=SessionHolder.build();
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
+
+		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
+		if(lastUpdated!=null) {
+			BeanUtils.setFieldValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
+			sqlEntity.getFieldList().add(lastUpdated.getAlias());
+		}
+		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
+			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
+			sqlEntity.getFieldList().add(lastUpdatedBy.getAlias());
+		}
+		
+		return this.sqlManager.update(sqlId,builder.toParams());
+	}
 	
 	/**
 	 * 	根据数据id删除
@@ -534,6 +558,36 @@ public class DataBaseDao {
 		SqlId sqlId=this.loadSql(builder, SqlType.DELETE_LOGIC);
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
+
+	/**
+	 * 	逻辑删除(根据id或ids集合删除数据)
+	 * @param params
+	 * @return
+	 */
+	public <T> int deleteLogicById(String sqlName,SqlBuilder<T> builder) {
+		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
+
+		SessionService sessionService=SessionHolder.build();
+		SqlEntity sqlEntity=SqlKit.buildEntity(sqlManager, builder.getData().getClass());
+		SqlField delFlag=sqlEntity.getStsField(BaseField.DEL_FLAG);
+		AssertUtil.database().notNull(delFlag, "未设置逻辑删除字段");
+		BeanUtils.setFieldValue(builder.getData(), delFlag.getAlias(), 1);
+		builder.getEntity().getFieldList().add(delFlag.getAlias());
+
+		SqlField lastUpdated=sqlEntity.getStsField(BaseField.LAST_UPDATED);
+		if(lastUpdated!=null) {
+			BeanUtils.setFieldValue(builder.getData(), lastUpdated.getAlias(), DateUtil.date());
+			builder.getEntity().getFieldList().add(lastUpdated.getAlias());
+		}
+		SqlField lastUpdatedBy=sqlEntity.getStsField(BaseField.LAST_UPDATED_BY);
+		if(lastUpdatedBy!=null && sessionService.getUserId()!=null) {
+			BeanUtils.setFieldValue(builder.getData(), lastUpdatedBy.getAlias(), sessionService.getUserId());	
+			builder.getEntity().getFieldList().add(lastUpdatedBy.getAlias());
+		}
+
+		return this.sqlManager.update(sqlId, builder.toParams());
+	}
+	
 	
 	/**
 	 * 	逻辑删除(根据id或ids集合删除数据)

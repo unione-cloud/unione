@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.Sort;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.common.dto.TreeNodeDto;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Params;
@@ -24,11 +28,14 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
+import com.unione.cloud.system.dto.SystemAppDto;
 import com.unione.cloud.system.dto.SystemInfoDto;
+import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysSystem;
 import com.unione.cloud.system.service.SystemService;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -157,6 +164,81 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		results.setBody(count);
 
 		return results;
+	}
+
+
+	@PostMapping("/res/tree")
+	@Operation(summary = "加载系统资源树")
+	@Action(title="加载系统资源树",type = ActionType.Query,roles = {UserRoles.FORMDEV})
+	public Results<List<TreeNodeDto>> resTree(@RequestBody Params<SysResource> params){
+		AssertUtil.service().notNull(params.getBody(), "请求参数body不能为空")
+			.notNull(params.getBody().getSysId(),"参数body.sysId不能为空");
+
+		SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,params.getBody().getSysId()));
+		AssertUtil.service().notNull(tmp, "记录未找到");
+
+		if(ObjectUtil.isEmpty(params.getKeywords())){
+			BeanUtils.setDefaultValue(params.getBody(), "parentId", -1L);
+			if(!ObjectUtil.equal(params.getBody().getParentId(), -1L)){
+				params.getBody().setSysId(null);
+			}
+		}else{
+			params.getBody().setParentId(-1L);
+		}
+
+		List<TreeNodeDto> treeNodes = new ArrayList<>();
+		SystemInfoDto system=SystemInfoDto.from(tmp);
+		if(!ObjectUtil.isEmpty(system.getApps()) && ObjectUtil.equal(params.getBody().getParentId(), -1L)){
+			Set<Long> appIds = system.getApps().stream().map(SystemAppDto::getId).collect(Collectors.toSet());
+			if(!appIds.isEmpty()){
+				system.getApps().stream().forEach(app->{
+					TreeNodeDto node = new TreeNodeDto();
+					node.setNtype("app");
+					node.setPid(-1L);
+					node.setId(app.getId());
+					node.setTitle(app.getName());
+					treeNodes.add(node);
+				});
+				List<SysResource> appResources = dataBaseDao.findList(SqlBuilder.build(SysResource.class,appIds)
+					.where("appId in [query.ids] and parentId=-1 and (title like ['%'+query.keywords+'%'] or name like ['%'+query.keywords+'%'] or descs like ['%'+query.keywords+'%'])")
+					.sort(Sort.build("ordered", "asc"))
+					.dataPermis(PermisRule.ALL));
+				appResources.stream().forEach(res->{
+					TreeNodeDto node = new TreeNodeDto();
+					node.setNtype("res");
+					node.setPid(res.getAppId());
+					node.setId(res.getId());
+					node.setTitle(res.getTitle());
+					node.setIconName(res.getIconName());
+					node.setData(res);
+					treeNodes.add(node);
+				});
+			}
+		}
+
+		List<SysResource> resources = dataBaseDao.findList(SqlBuilder.build(params)
+			.sort(Sort.build("ordered", "asc"))
+			.dataPermis(PermisRule.ALL));
+		resources.stream().forEach(res->{
+			TreeNodeDto node = new TreeNodeDto();
+			node.setNtype("res");
+			node.setPid(params.getBody().getParentId());
+			node.setId(res.getId());
+			node.setTitle(res.getTitle());
+			node.setIconName(res.getIconName());
+			node.setData(res);
+			treeNodes.add(node);
+		});
+
+		return Results.success(treeNodes);
+	}
+
+	@PostMapping("/res/delete")
+	@Operation(summary = "删除系统资源")
+	@Action(title="删除系统资源",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
+	public Results<Void> resDelete( @RequestBody Set<Long> ids){
+		systemService.deletePage(ids);
+		return Results.success();
 	}
 
 

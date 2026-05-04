@@ -147,3 +147,31 @@ create unique index NUI_CTX on SYS_SYSTEM
 (
    CTX
 );
+
+-- 升级页面定义，页面发布模块，增加：上级ID，系统ID
+ALTER TABLE `unione`.`sys_page_define` 
+ADD COLUMN `PARENT_ID` bigint NULL COMMENT '上级ID' AFTER `ID`,
+ADD COLUMN `SYS_ID` bigint NULL COMMENT '系统ID' AFTER `TENANT_ID`,
+MODIFY COLUMN `APP_ID` bigint(0) NULL COMMENT '应用ID' AFTER `TENANT_ID`;
+ALTER TABLE `unione`.`sys_page_release` 
+ADD COLUMN `PARENT_ID` bigint NULL COMMENT '上级ID' AFTER `ID`,
+ADD COLUMN `SYS_ID` bigint NULL COMMENT '系统ID' AFTER `TENANT_ID`,
+MODIFY COLUMN `APP_ID` bigint(0) NULL COMMENT '应用ID' AFTER `TENANT_ID`;
+UPDATE sys_page_define SET PARENT_ID=-1 WHERE PARENT_ID IS NULL;
+UPDATE sys_page_release SET PARENT_ID=-1 WHERE PARENT_ID IS NULL;
+ALTER TABLE `unione`.`sys_page_define` 
+MODIFY COLUMN `PARENT_ID` bigint(0) NOT NULL COMMENT '上级ID' AFTER `ID`;
+ALTER TABLE `unione`.`sys_page_release` 
+MODIFY COLUMN `PARENT_ID` bigint(0) NOT NULL COMMENT '上级ID' AFTER `ID`;
+--升级：系统资源表，增加系统ID字段并设置应用ID为非必填
+ALTER TABLE `unione`.`sys_resource` 
+ADD COLUMN `SYS_ID` bigint NULL COMMENT '系统ID' AFTER `TENANT_ID`,
+MODIFY COLUMN `APP_ID` bigint(0) NULL COMMENT '应用ID' AFTER `TENANT_ID`;
+
+-- 页面定义模块，增加逻辑删除字段
+ALTER TABLE `unione`.`sys_page_define` 
+ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否' AFTER `STATUS`;
+ALTER TABLE `unione`.`sys_page_release` 
+ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否' AFTER `STATUS`;
+ALTER TABLE `unione`.`sys_page_his` 
+ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否' AFTER `STATUS`;

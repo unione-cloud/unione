@@ -36,6 +36,9 @@ public class TreeNodeDto implements Serializable{
     @Schema(title="是否选中",description="true：选中，false：未选中")
     private Boolean checked;
 
+    @Schema(title="节点数据",description="节点数据")
+    private Object data;
+
     @Schema(title="子节点列表")
     private List<TreeNodeDto> children=new ArrayList<>();
 }

@@ -34,6 +34,11 @@ import lombok.experimental.Accessors;
 @Table(name="sys_resource")
 public class SysResource extends Pojo {
 	/**
+	* 系统ID
+	*/
+	@Schema(title="系统ID",description="长度为：19")
+	private Long sysId;
+	/**
 	* 应用ID
 	*/
 	@Schema(title="应用ID",description="长度为：19")
