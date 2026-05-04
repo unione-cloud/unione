@@ -177,18 +177,9 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,params.getBody().getSysId()));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 
-		if(ObjectUtil.isEmpty(params.getKeywords())){
-			BeanUtils.setDefaultValue(params.getBody(), "parentId", -1L);
-			if(!ObjectUtil.equal(params.getBody().getParentId(), -1L)){
-				params.getBody().setSysId(null);
-			}
-		}else{
-			params.getBody().setParentId(-1L);
-		}
-
 		List<TreeNodeDto> treeNodes = new ArrayList<>();
 		SystemInfoDto system=SystemInfoDto.from(tmp);
-		if(!ObjectUtil.isEmpty(system.getApps()) && ObjectUtil.equal(params.getBody().getParentId(), -1L)){
+		if(!ObjectUtil.isEmpty(system.getApps())){
 			Set<Long> appIds = system.getApps().stream().map(SystemAppDto::getId).collect(Collectors.toSet());
 			if(!appIds.isEmpty()){
 				system.getApps().stream().forEach(app->{
@@ -200,13 +191,16 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 					treeNodes.add(node);
 				});
 				List<SysResource> appResources = dataBaseDao.findList(SqlBuilder.build(SysResource.class,appIds)
-					.where("appId in [query.ids] and parentId=-1 and (title like ['%'+query.keywords+'%'] or name like ['%'+query.keywords+'%'] or descs like ['%'+query.keywords+'%'])")
+					.where("appId in [query.ids]")
 					.sort(Sort.build("ordered", "asc"))
 					.dataPermis(PermisRule.ALL));
 				appResources.stream().forEach(res->{
 					TreeNodeDto node = new TreeNodeDto();
 					node.setNtype("res");
-					node.setPid(res.getAppId());
+					node.setPid(res.getParentId());
+					if(ObjectUtil.equal(res.getParentId(), -1L)){
+						node.setPid(res.getAppId());
+					}
 					node.setId(res.getId());
 					node.setTitle(res.getTitle());
 					node.setIconName(res.getIconName());
