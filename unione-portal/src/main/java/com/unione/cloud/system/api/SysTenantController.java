@@ -23,6 +23,7 @@ import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.system.model.SysTenant;
+import com.unione.cloud.system.service.TenantService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -44,6 +45,9 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private TenantService tenantService;
 	
 	
 	@Override
@@ -70,6 +74,7 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 			String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","timeLimitStart","timeLimitEnd","status","descs"};
 			SqlBuilder<SysTenant> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
+			tenantService.clear(entity.getId());
 		}
 		
 		return Results.build(len>0, entity.getId());
@@ -84,6 +89,7 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 			.notIn(entity.getStatus(), Arrays.asList(1,2,3), "参数status取值范围[1,2,3]");
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		tenantService.clear(entity.getId());
 		
 		return Results.build(len>0);
 	}
@@ -122,6 +128,12 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
 		int count = dataBaseDao.deleteById(SqlBuilder.build(SysTenant.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
+
+		if(count>0){
+			ids.stream().forEach(id->{
+				tenantService.clear(id);
+			});
+		}
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");

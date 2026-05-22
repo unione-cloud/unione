@@ -515,10 +515,10 @@ public class LoginService {
 		SysTenant tenant = tenantService.loadTenant(user.getTenantId());
 		AssertUtil.service().notIn(tenant.getStatus(), List.of(1,2), "租户已注销");
 		if(tenant.getTimeLimitStart()!=null){
-			AssertUtil.service().isTrue(DateUtil.date().isBefore(tenant.getTimeLimitStart()), String.format("请在%s后登录", DateUtil.format(tenant.getTimeLimitStart(), "yyyy-MM-dd")));
+			AssertUtil.service().isTrue(DateUtil.date().isAfter(tenant.getTimeLimitStart()), String.format("请在%s后登录", DateUtil.format(tenant.getTimeLimitStart(), "yyyy-MM-dd")));
 		}
 		if(tenant.getTimeLimitEnd()!=null){
-			AssertUtil.service().isTrue(DateUtil.date().isAfter(tenant.getTimeLimitEnd()), String.format("当前帐号已过期,过期时间:%s", DateUtil.format(tenant.getTimeLimitEnd(), "yyyy-MM-dd")));
+			AssertUtil.service().isTrue(DateUtil.date().isBefore(tenant.getTimeLimitEnd()), String.format("当前帐号已过期,过期时间:%s", DateUtil.format(tenant.getTimeLimitEnd(), "yyyy-MM-dd")));
 		}
 		if(tenant.getMaxUserOnline()!=null){
 			List<String> tokens = tokenService.getTokens(user.getTenantId());
