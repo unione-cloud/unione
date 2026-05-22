@@ -35,6 +35,8 @@ import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SmUtil;
@@ -71,11 +73,44 @@ public class RegisterService {
 	@Autowired
 	private RedisService redisService;
 
+	@Autowired
+	private TenantService tenantService;
+
 	/**
 	 * 用户注册：默认租户ID
 	 */
 	@Value("${security.register.default.tenantId:1}")
 	private Long REGISGER_DEFAULT_TENANT_ID;
+
+
+	@Value("${security.register.default.maxUserCount:2}")
+	private int REGISGER_DEFAULT_MAX_USER_COUNT=0;
+
+	/**
+	 * 用户注册：默认最大用户数量
+	 */
+	@Value("${security.register.default.maxOnlineCount:1}")
+	private int REGISGER_DEFAULT_MAX_ONLINE_COUNT;
+
+	/**
+	 * 用户注册：默认最大组织数量
+	 */
+	@Value("${security.register.default.maxOrgCount:0}")
+	private int REGISGER_DEFAULT_MAX_ORG_COUNT;
+
+	/**
+	 * 用户注册：默认最大组织用户数量
+	 */
+	@Value("${security.register.default.maxOrgUserCount:0}")
+	private int  REGISGER_DEFAULT_MAX_ORG_USER_COUNT;
+
+	/**
+	 * 用户注册：默认时间限制天数
+	 */
+	@Value("${security.register.default.timeLimitDay:7}")
+	private int REGISGER_DEFAULT_TIME_LIMIT_DAY;
+
+
 
 	/**
 	 * 用户注册：是否开启注册功能
@@ -162,33 +197,46 @@ public class RegisterService {
 			Long tenantId=REGISGER_DEFAULT_TENANT_ID;
 			if(!ObjectUtil.isEmpty(param.getCompany())){
 				//加载租户
-				tenantId = redisService.doHpdl(new HpdlProcess<Long>(String.format("security:register:tenant:%s", param.getCompany())) {
-					@Override
-					public Long process() {
-						SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
-							.where("name=?")
-							.where("name", param.getCompany().trim()));
-						if(tenant==null) {
-							tenant=new SysTenant();
-							tenant.setId(IdGenHolder.generate());
-							tenant.setName(param.getCompany());
-							tenant.setRegisteWay(1);
-							tenant.setAdminId(userId);
-							tenant.setSn(String.valueOf(tenant.getId()));
-							tenant.setDelFlag(0);
-							tenant.setStatus(1);
-							tenant.setCreatedBy(userId);
-							tenant.setLastUpdatedBy(userId);
-							int len = dataBaseDao.insertWithId(tenant);
-							if(len<=0){
-								return null;
+				SysTenant tenant=tenantService.loadTenant(param.getCompany().trim());
+				if(tenant!=null){
+					tenantId=tenant.getId();
+				}else{
+					tenantId = redisService.doHpdl(new HpdlProcess<Long>(String.format("security:register:tenant:%s", param.getCompany())) {
+						@Override
+						public Long process() {
+							SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
+								.where("name=?")
+								.where("name", param.getCompany().trim()));
+							if(tenant==null) {
+								tenant=new SysTenant();
+								tenant.setId(IdGenHolder.generate());
+								tenant.setName(param.getCompany());
+								tenant.setRegisteWay(1);
+								tenant.setAdminId(userId);
+								tenant.setMaxUserCount(REGISGER_DEFAULT_MAX_USER_COUNT);
+								tenant.setMaxUserOnline(REGISGER_DEFAULT_MAX_ONLINE_COUNT);
+								tenant.setMaxOrganCount(REGISGER_DEFAULT_MAX_ORG_COUNT);
+								tenant.setMaxOrganUserCouint(REGISGER_DEFAULT_MAX_ORG_USER_COUNT);
+								tenant.setTimeLimitStart(DateUtil.date());
+								if(REGISGER_DEFAULT_TIME_LIMIT_DAY>0){
+									tenant.setTimeLimitEnd(DateUtil.date().offset(DateField.DAY_OF_YEAR, REGISGER_DEFAULT_TIME_LIMIT_DAY));
+								}
+								tenant.setSn(String.valueOf(tenant.getId()));
+								tenant.setDelFlag(0);
+								tenant.setStatus(1);
+								tenant.setCreatedBy(userId);
+								tenant.setLastUpdatedBy(userId);
+								int len = dataBaseDao.insertWithId(tenant);
+								if(len<=0){
+									return null;
+								}
+								user.setUserType(1);
 							}
-							user.setUserType(1);
+							return tenant.getId();
 						}
-						return tenant.getId();
-					}
-				}, 500, 3);
-				AssertUtil.service().notNull(tenantId,"租户信息保存失败");
+					}, 500, 3);
+					AssertUtil.service().notNull(tenantId,"租户信息保存失败");
+				}
 			}
 			
 			LogsUtil.add("验证用户账号和手机号是否已存在,usrename:%s,tel:%s",param.getUsername(),param.getTel());

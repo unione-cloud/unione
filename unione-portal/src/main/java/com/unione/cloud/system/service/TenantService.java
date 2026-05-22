@@ -49,7 +49,7 @@ public class TenantService {
 	private long CACHE_TIME;
 
 	private Cache<Long, SysTenant> getCache(){
-		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT")
+		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:ID")
 			.cacheType(CacheType.BOTH)
 			.cacheNullValue(true)
 			.expire(Duration.ofSeconds(CACHE_TIME))
@@ -57,6 +57,14 @@ public class TenantService {
 			.build());
 	}
 	
+	private Cache<String, Long> getCache2(){
+		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:NAME")
+			.cacheType(CacheType.BOTH)
+			.cacheNullValue(true)
+			.expire(Duration.ofSeconds(CACHE_TIME))
+			.localExpire(Duration.ofSeconds(30))
+			.build());
+	} 
 	
 	/**
 	 * 	加载租户信息
@@ -77,6 +85,8 @@ public class TenantService {
 						tenant = dataBaseDao.findById(SqlBuilder.build(SysTenant.class).id(id));
 						if(tenant==null){
 							tenant = new SysTenant();
+						}else{
+							getCache2().put(tenant.getName(), id);
 						}
 						cache.put(id, tenant);
 					}
@@ -89,6 +99,42 @@ public class TenantService {
 		return target;
 	}
 	
+	/**
+	 * 	加载租户信息
+	 * @param name
+	 * @return
+	 */
+	public SysTenant loadTenant(String name){
+		AssertUtil.service().notNull(name, "租户名称不能为空");
+		Cache<String, Long> cache = getCache2();
+		Long id=cache.get(name);
+		if(id==null){
+			SysTenant tenant=redisService.doHpdl(new HpdlProcess<SysTenant>(String.format("hpdl:tenant:%s",name)) {
+				@Override
+				public SysTenant process() {
+					Long tmp=cache.get(name);
+					if(tmp!=null){
+						return loadTenant(tmp);
+					}
+					SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class)
+						.where("name=?")
+						.where("name", name.trim()));
+					if(tenant!=null){
+						cache.put(tenant.getName(), tenant.getId());
+						getCache().put(tenant.getId(), tenant);
+					}else{
+						cache.put(name, -1L);
+					}
+					return tenant;
+				}
+			}, 500, 3);
+			return tenant;
+		}
+		if(id==-1L){
+			return null;
+		}
+		return loadTenant(id);
+	}
 	
 	/**
 	 * 	加载租户信息
@@ -125,6 +171,7 @@ public class TenantService {
 						.stream().forEach(row->{
 							map.put(row.getId(), row);
 							cache.put(row.getId(), row);
+							getCache2().put(row.getName(), row.getId());
 						});
 					}
 					return null;
@@ -146,6 +193,10 @@ public class TenantService {
 	 */
 	public void clear(long id){
 		Cache<Long, SysTenant> cache = getCache();
+		SysTenant tenant=cache.get(id);
+		if(tenant!=null){
+			getCache2().remove(tenant.getName());
+		}
 		cache.remove(id);
 	}
 
