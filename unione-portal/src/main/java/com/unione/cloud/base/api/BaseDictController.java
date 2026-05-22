@@ -22,6 +22,7 @@ import com.unione.cloud.base.dto.DictShowDto;
 import com.unione.cloud.base.model.BaseDict;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Sort;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -61,7 +62,8 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	public Results<List<BaseDict>> load(@PathVariable("name") String name){
 		log.debug("进入:加载基础字典信息方法,name:{}",name);
 		List<BaseDict> list = dataBaseDao.findList(SqlBuilder.build(BaseDict.builder()
-				.dictName(name).status(1).build()).sort(Sort.build("ordered", "asc")));
+				.dictName(name).status(1).build()).sort(Sort.build("ordered", "asc"))
+				.dataPermis(PermisRule.ALL));
 		
 		list.stream().forEach(row->{
 			row.setCreated(null);
@@ -85,7 +87,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		}
 		params.getBody().setParentId(-1L);
 		params.getBody().setStatus(1);
-		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
