@@ -67,7 +67,7 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","status","descs"};
+			String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","timeLimitStart","timeLimitEnd","status","descs"};
 			SqlBuilder<SysTenant> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 		}

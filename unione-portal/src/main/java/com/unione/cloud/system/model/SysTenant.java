@@ -122,6 +122,20 @@ public class SysTenant extends Pojo {
 	@Schema(title="每个结构最大用户数",description="长度为：10")
 	private Integer maxOrganUserCouint;
 	/**
+	* 限制时间起
+	*/
+	@Schema(title="限制时间起",description="长度为：10")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private Date timeLimitStart;
+	/**
+	* 限制时间止
+	*/
+	@Schema(title="限制时间止",description="长度为：10")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private Date timeLimitEnd;
+	/**
 	* 租户状态,字典TENANTSTATUS 1试用，2开通，3关闭
 	*/
 	@Schema(title="租户状态,字典TENANTSTATUS 1试用，2开通，3关闭",description="长度为：10")

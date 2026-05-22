@@ -2,15 +2,19 @@ package com.unione.cloud.core.token;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -45,6 +49,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import reactor.util.function.Tuple2;
 
 /**
  * Token SessionService
@@ -495,6 +500,32 @@ public class TokenService {
 	public String decrypt(String token) {
 		return sm4.decryptStr(token);
 	}
+
+
+	/**
+	 * 获取租户下所有令牌
+	 * @param tenantId 	租户id，为空，则是所有令牌
+	 * @param userName 	用户id,为空则是指定租户所有用户
+	 * @return
+	 */
+	public List<String> getTokens(Long tenantId, String ...userName) {
+		List<String> list=new ArrayList<>();
+		Cursor<String> cursor = null;
+		if(tenantId!=null){
+			if(userName.length>0){
+				cursor = redisService.template(tcmDb).scan(ScanOptions.scanOptions().match(String.format("%s:%s:%s:*", tcmKey,tenantId,userName[0])).build());
+			}else{
+				cursor = redisService.template(tcmDb).scan(ScanOptions.scanOptions().match(String.format("%s:%s:*", tcmKey,tenantId)).build());
+			}
+		}else{
+			cursor = redisService.template(tcmDb).scan(ScanOptions.scanOptions().match(String.format("%s:*", tcmKey)).build());
+		}
+		while(cursor.hasNext()){
+			list.add(cursor.next());
+		}
+		return list;
+	}
+
 
 	@Data
 	@Builder

@@ -175,3 +175,8 @@ ALTER TABLE `unione`.`sys_page_release`
 ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否' AFTER `STATUS`;
 ALTER TABLE `unione`.`sys_page_his` 
 ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否' AFTER `STATUS`;
+
+-- 升级租户模块，增加：限制时间起，限制时间止字段
+ALTER TABLE `unione`.`sys_tenant` 
+ADD COLUMN `TIME_LIMIT_START` date NULL COMMENT '限制时间起' AFTER `MAX_ORGAN_USER_COUINT`,
+ADD COLUMN `TIME_LIMIT_END` date NULL COMMENT '限制时间止' AFTER `TIME_LIMIT_START`;

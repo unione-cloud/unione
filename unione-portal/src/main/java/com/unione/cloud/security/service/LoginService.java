@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -32,9 +33,11 @@ import com.unione.cloud.system.dto.LoginParam;
 import com.unione.cloud.system.dto.LoginResult;
 import com.unione.cloud.system.dto.SystemInfoDto;
 import com.unione.cloud.system.model.SysRole;
+import com.unione.cloud.system.model.SysTenant;
 import com.unione.cloud.system.model.SysUser;
 import com.unione.cloud.system.model.SysUserOrgan;
 import com.unione.cloud.system.service.SystemService;
+import com.unione.cloud.system.service.TenantService;
 import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -84,6 +87,9 @@ public class LoginService {
 
 	@Autowired
 	private SystemService systemService;
+
+	@Autowired
+	private TenantService tenantService;
 
 	@Value("${security.bind.defaultTenantId:-1}")
 	private Long DEFUALT_TENANT_ID;
@@ -504,6 +510,22 @@ public class LoginService {
 	 */
 	private LoginResult loginSuccess(SysUser user) {
 		LogsUtil.add("用户登录成功，username:%s", user.getUsername());
+
+		// 验证租户信息
+		SysTenant tenant = tenantService.loadTenant(user.getTenantId());
+		AssertUtil.service().notIn(tenant.getStatus(), List.of(1,2), "租户已注销");
+		if(tenant.getTimeLimitStart()!=null){
+			AssertUtil.service().isTrue(DateUtil.date().isBefore(tenant.getTimeLimitStart()), String.format("请在%s后登录", DateUtil.format(tenant.getTimeLimitStart(), "yyyy-MM-dd")));
+		}
+		if(tenant.getTimeLimitEnd()!=null){
+			AssertUtil.service().isTrue(DateUtil.date().isAfter(tenant.getTimeLimitEnd()), String.format("当前帐号已过期,过期时间:%s", DateUtil.format(tenant.getTimeLimitEnd(), "yyyy-MM-dd")));
+		}
+		if(tenant.getMaxUserOnline()!=null){
+			List<String> tokens = tokenService.getTokens(user.getTenantId());
+			if(tokens.size()>=tenant.getMaxUserOnline()){
+				tokenService.clean4auth(tokens.get(0));
+			}
+		}
 
 		// 实例化用户认证对象
 		UserPrincipal principal = new UserPrincipal();
