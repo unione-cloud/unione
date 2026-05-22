@@ -43,12 +43,12 @@ public class SqlEntity {
 	 * 	查询条件集合
 	 */
 	private List<SqlCondition> conditions=new ArrayList<>();
+
+	/**
+	 * 	排除条件集合
+	 */
+	private List<SqlNot> nots=new ArrayList<>();
 	
-//	/**
-//	 * 	id查询条件集合
-//	 */
-//	private List<SqlCondition> idsConditions=new ArrayList<>();
-//	
 	/**
 	 * 	查询条件
 	 */

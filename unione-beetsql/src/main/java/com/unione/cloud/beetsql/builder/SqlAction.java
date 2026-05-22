@@ -12,6 +12,8 @@ public enum SqlAction {
 	
 	ID(" = ","#{query.","}"),
 	IDS(" IN ","(#{join(query.",")})"),
+	NOT_IN(" NOT IN ","(#{join(query.",")})"),
+	NOT_EQ(" != ","#{query.","}"),
 	KEYWORD(" LIKE ","#{'%'+query.","+'%'}");
 	
 	private SqlAction(String action,String prefix,String sufix) {

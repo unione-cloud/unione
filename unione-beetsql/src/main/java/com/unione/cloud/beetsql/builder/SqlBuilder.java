@@ -1,12 +1,14 @@
 package com.unione.cloud.beetsql.builder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -578,6 +580,12 @@ public class SqlBuilder<T> {
 			this.linkEntitys.stream().forEach(link->{
 				buffer.append(link.toSql(sqlManager));
 			});
+			// not 条件处理
+			if(!this.entity.getNots().isEmpty()){
+				this.entity.getNots().stream().forEach(not->{
+					not.toSql(buffer);
+				});
+			}
 		}else if(!this.entity.getConditions().isEmpty()){
 			buffer.append("\n-- @sqlWhere(){\n");
 			this.entity.getConditions().stream().forEach(con->{
@@ -586,9 +594,14 @@ public class SqlBuilder<T> {
 			this.linkEntitys.stream().forEach(link->{
 				buffer.append(link.toSql(sqlManager));
 			});
+			// not 条件处理
+			if(!this.entity.getNots().isEmpty()){
+				this.entity.getNots().stream().forEach(not->{
+					not.toSql(buffer);
+				});
+			}
 			buffer.append("-- @}\n");
 		}
-
 		
 		// sort 排序处理
 		if(SqlType.SELECT.equals(type) || SqlType.SELECT_ONE.equals(type) || SqlType.SELECT_BYID.equals(type)) {
@@ -683,6 +696,12 @@ public class SqlBuilder<T> {
 		query.put("ids", this.ids);
 		params.put("principal", SessionHolder.build().getPrincipal());
 		params.put("query", query);
+		// not 条件处理
+		if(!this.entity.getNots().isEmpty()){
+			this.entity.getNots().stream().forEach(not->{
+				not.toParams(query);
+			});
+		}
 
 		// 关联查询条件
 		this.linkEntitys.stream().forEach(link->{
@@ -1012,6 +1031,28 @@ public class SqlBuilder<T> {
 	 */
 	public SqlBuilder<T> where(String name,Object value){
 		BeanUtils.setFieldValue(this.params, name, value);
+		return this;
+	}
+
+	/**
+	 * 设置排除参数
+	 * @param field
+	 * @param value
+	 * @return
+	 */
+	public SqlBuilder<T> notIn(String field,Collection<?> value){
+		this.entity.getNots().add(new SqlNot().setField(field).setAction(SqlAction.NOT_IN).setValue(value));
+		return this;
+	}
+
+	/**
+	 * 设置排除参数
+	 * @param field
+	 * @param value
+	 * @return
+	 */
+	public SqlBuilder<T> notEq(String field,Object value){
+		this.entity.getNots().add(new SqlNot().setField(field).setAction(SqlAction.NOT_EQ).setValue(value));
 		return this;
 	}
 
