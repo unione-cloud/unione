@@ -27,6 +27,7 @@ import com.unione.cloud.core.feign.api.FeignFind;
 import com.unione.cloud.core.feign.api.FeignFindById;
 import com.unione.cloud.core.feign.api.FeignSave;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.security.secret.SecretService;
 import com.unione.cloud.system.dto.UserInfoDto;
@@ -62,6 +63,9 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 	
 	@Autowired
 	private OrganService organService;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
@@ -69,7 +73,7 @@ public class SysUserController implements FeignSave<SysUser>,FeignDelete<SysUser
 	public Results<List<UserInfoDto>> find(Params<UserInfoDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<UserInfoDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<UserInfoDto>> results = dataBaseDao.findPages(SqlBuilder.build(params).notEq("id", sessionService.getUserId()));
 		LogsUtil.add("分页数据查询，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
