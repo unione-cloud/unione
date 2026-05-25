@@ -79,7 +79,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 
 
 	@Override
-	@Action(title="保存资源",type = ActionType.Save)
+	@Action(title="保存资源",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysResource entity) {
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
@@ -117,7 +117,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 
 
 	@PostMapping("/release")
-	@Action(title="发布资源",type = ActionType.Save)
+	@Action(title="发布资源",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "发布资源", description="发布资源：表单发布，流程发布")
 	public Results<Long> release(@RequestBody Params<SysResource> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空")
@@ -209,7 +209,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 
 
 	@PostMapping("/status")
-	@Action(title="设置资源状态",type = ActionType.Save,roles = {UserRoles.SYS3PCONFIG})
+	@Action(title="设置资源状态",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "设置资源状态", description="USEORNOT 1使用，0停用")
 	public Results<Void> setStatus(@RequestBody SysResource entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
@@ -243,7 +243,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	
 
 	@Override
-	@Action(title="删除资源",type = ActionType.Delete)
+	@Action(title="删除资源",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		// 参数处理

@@ -22,6 +22,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.system.dto.CodeLvsnDto;
 import com.unione.cloud.system.model.SysCodeTree;
 import com.unione.cloud.system.model.SysOrgan;
@@ -120,7 +121,7 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 
 
 	@Override
-	@Action(title="保存层级树",type = ActionType.Save)
+	@Action(title="保存层级树",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysCodeTree entity) {
 		// 参数处理
 		int len = 0;
@@ -161,7 +162,7 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 	
 
 	@Override
-	@Action(title="删除层级树",type = ActionType.Delete)
+	@Action(title="删除层级树",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		

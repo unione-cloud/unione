@@ -60,7 +60,7 @@ public class SysResourceApiController implements PojoFeignApi<SysResourceApi>{
 
 
 	@Override
-	@Action(title="保存资源接口",type = ActionType.Save,roles = {UserRoles.SYS3PCONFIG})
+	@Action(title="保存资源接口",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysResourceApi entity) {
 		// 参数处理
 		int len = 0;
@@ -77,7 +77,7 @@ public class SysResourceApiController implements PojoFeignApi<SysResourceApi>{
 
 
 	@PostMapping("/status")
-	@Action(title="设置资源接口状态",type = ActionType.Save,roles = {UserRoles.SYS3PCONFIG})
+	@Action(title="设置资源接口状态",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "设置资源接口状态", description="USEORNOT 1使用，0停用")
 	public Results<Void> setStatus(@RequestBody SysResourceApi entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
@@ -111,7 +111,7 @@ public class SysResourceApiController implements PojoFeignApi<SysResourceApi>{
 	
 
 	@Override
-	@Action(title="删除资源接口",type = ActionType.Delete,roles = {UserRoles.SYS3PCONFIG})
+	@Action(title="删除资源接口",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		// 参数处理

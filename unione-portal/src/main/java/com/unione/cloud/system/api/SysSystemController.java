@@ -74,7 +74,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 
 
 	@Override
-	@Action(title="保存系统信息",type = ActionType.Save)
+	@Action(title="保存系统信息",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysSystem entity) {
 		// 参数处理
 		int len = 0;
@@ -101,7 +101,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 	}
 
 	@PostMapping("/status")
-	@Action(title="设置系统状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="设置系统状态",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "设置系统状态", description="SYSSTATUS 1新建，2内测，3发布，4撤销")
 	public Results<Void> setStatus(@RequestBody SysSystem entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
@@ -139,7 +139,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 	
 
 	@Override
-	@Action(title="删除系统信息",type = ActionType.Delete)
+	@Action(title="删除系统信息",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		

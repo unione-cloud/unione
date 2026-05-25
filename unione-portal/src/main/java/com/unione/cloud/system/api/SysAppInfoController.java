@@ -96,7 +96,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 
 
 	@Override
-	@Action(title = "保存应用",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title = "保存应用",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) SysAppInfo entity) {
 		BeanUtils.setDefaultValue(entity, "ordered",0);
 		BeanUtils.setDefaultValue(entity, "types","pc");
@@ -121,7 +121,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 
 
 	@PostMapping("/status")
-	@Action(title="设置应用状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="设置应用状态",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "设置应用状态", description="APPSTATUS 1新建，2内测，3发布，4撤销")
 	public Results<Void> setStatus(@RequestBody SysAppInfo entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
@@ -156,7 +156,7 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	
 
 	@Override
-	@Action(title = "删除应用",type = ActionType.Delete,roles = {UserRoles.SYSOPSUSER})
+	@Action(title = "删除应用",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		
