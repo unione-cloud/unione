@@ -22,6 +22,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysAppInfo;
@@ -46,6 +47,9 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	@PostMapping("/query")
 	@Action(title = "查询应用:公开",type = ActionType.Query)
@@ -57,6 +61,20 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 			.where("category in ('component','service','platform') and category=? and status in (1,2,3) and status=? and trades=?")
 			.dataPermis(PermisRule.ALL));
 				
+		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
+		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+		
+		return results;
+	}
+
+	@PostMapping("/load")
+	@Action(title = "查询应用:列表",type = ActionType.Query,nolog = true)
+	public Results<List<SysAppInfo>> load(@RequestBody Params<SysAppInfo> params) {
+		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
+		
+		params.getBody().setTenantId(sessionService.getTenantId());
+		Results<List<SysAppInfo>> results = dataBaseDao.findPages(SqlBuilder.build(params)
+			.where("category=? and status in (1,2,3) and status=? and (isPlatform = 1 or tenantId=?)").dataPermis(PermisRule.ALL));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
