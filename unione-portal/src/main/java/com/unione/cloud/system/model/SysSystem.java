@@ -1,8 +1,10 @@
 package com.unione.cloud.system.model;
-import java.util.Date;
-import org.beetl.sql.annotation.entity.*;
 import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
+
+import com.unione.cloud.beetsql.annotation.DataPermis;
+import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -13,9 +15,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import com.unione.cloud.core.model.Pojo;
-import com.unione.cloud.core.model.Validator;
-
 /**
  * @标题 	SysSystem Entity
  * @描述	系统管理：系统信息
@@ -25,6 +24,7 @@ import com.unione.cloud.core.model.Validator;
  **/
 @Data
 @Builder
+@DataPermis
 @SqlResource("system.SysSystem")
 @NoArgsConstructor
 @AllArgsConstructor

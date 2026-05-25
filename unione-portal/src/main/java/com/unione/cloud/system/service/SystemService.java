@@ -14,6 +14,7 @@ import com.alicp.jetcache.CacheManager;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.redis.HpdlProcess;
@@ -98,7 +99,7 @@ public class SystemService {
                         SysSystem sys = new SysSystem();
                         sys.setCtx(ctx);
                         sys.setDelFlag(0);
-                        sys = dataBaseDao.findOne(SqlBuilder.build(sys));
+                        sys = dataBaseDao.findOne(SqlBuilder.build(sys).dataPermis(PermisRule.ALL));
                         if (sys == null) {
                             tmp = new SystemInfoDto();
                         } else {
