@@ -5,6 +5,8 @@ loadAppPermisForUser
 SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3) AND TYPES = #{params.type}
 -- @if(params.isAdmin==false){
  AND (
+    app.CREATED_BY=#{params.user.id}
+    OR
     EXISTS (select 1 from sys_user_permis where APP_ID = app.ID AND RES_TYPE='app' and USER_ID=#{params.user.id})
     -- @if(isNotEmpty(params.user.userRoles)){
     OR EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp LEFT JOIN SYS_ROLE SR ON srp.ROLE_ID = sr.ID WHERE APP_ID = app.ID AND RES_TYPE='app' AND sr.SN in (#{join(params.user.userRoles)}))
@@ -21,6 +23,8 @@ loadResorucePermisForUser
 SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND APP_ID IN (#{join(params.appIds)})
 -- @if(params.isAdmin==false){
  AND (
+    res.CREATED_BY=#{params.user.id}
+    OR
     EXISTS (SELECT 1 FROM SYS_USER_PERMIS WHERE RES_ID = res.ID AND USER_ID=#{params.user.id})
     -- @if(isNotEmpty(params.user.userRoles)){
     OR EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp LEFT JOIN SYS_ROLE SR ON srp.ROLE_ID = sr.ID WHERE RES_ID = res.ID AND sr.SN IN (#{join(params.user.userRoles)}))
