@@ -22,6 +22,7 @@ import com.unione.cloud.core.exception.ServiceException;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -133,7 +134,13 @@ public class XlsUtils {
       */
     public static File write(InputStream tmpl,XlsHeader header, List<Map<String,Object>> data) {
         File outputFile = FileUtil.createTempFile("xls_output_", ".xlsx", true);
-        FileUtil.writeFromStream(tmpl, outputFile);
+
+        // 生成标题
+        if(!ObjectUtil.isEmpty(header.getTitle())){
+            EasyExcel.write(outputFile).withTemplate(tmpl).sheet().doFill(header);
+        }else{
+            FileUtil.writeFromStream(tmpl, outputFile);
+        }
 
         ExcelWriter writer = ExcelUtil.getWriter(outputFile);
         writer.setSheet(0);
@@ -155,6 +162,34 @@ public class XlsUtils {
                     .filter(range->range.isInRange(header.getRow()-2, header.getCol()-1)).findFirst().orElse(null);
                 if(rangeAddress!=null){
                     rangeAddress.setLastColumn(rangeAddress.getLastColumn()+header.getNames().size()-1);
+                }
+            }
+
+            // 合并标题
+            if(writer.getSheet().getMergedRegions()!=null){
+                for(int index=0;index<writer.getSheet().getMergedRegions().size();index++){
+                    CellRangeAddress rangeAddress=writer.getSheet().getMergedRegions().get(index);
+                    if(rangeAddress.isInRange(header.getRow()-2, header.getCol()-1)){
+                        rangeAddress.setLastColumn(rangeAddress.getLastColumn()+header.getNames().size()-1);
+
+                        Row rowMerg = writer.getOrCreateRow(header.getRow()-2);
+                        Cell cellMerg = rowMerg.getCell(rangeAddress.getFirstColumn());
+                        // 在删除合并区域前保存原始样式
+                        org.apache.poi.ss.usermodel.CellStyle originalStyle = cellMerg.getCellStyle();
+
+                        writer.getSheet().removeMergedRegion(index);
+                        writer.getSheet().addMergedRegion(rangeAddress);
+
+                        // 将样式应用到合并区域中的所有单元格
+                        for(int colIndex = rangeAddress.getFirstColumn(); colIndex <= rangeAddress.getLastColumn(); colIndex++){
+                            Cell cell = rowMerg.getCell(colIndex);
+                            if(cell == null){
+                                cell = rowMerg.createCell(colIndex);
+                            }
+                            cell.setCellStyle(originalStyle);
+                        }
+                        break;
+                    }
                 }
             }
         }catch(Exception e){
@@ -257,7 +292,10 @@ public class XlsUtils {
          * 标题列表
          */
         private List<String> names;
-
+        /**
+         * 标题
+         */
+        private String title;
     }
 
     private static class XlsHeaderItem {
@@ -357,6 +395,7 @@ public class XlsUtils {
         header.setRow(3);
         header.setCol(3);
         header.setNames(List.of("状态", "台账名称"));
+        header.setTitle("台账");
         file = write(FileUtil.getInputStream("d://xls_base.xlsx"),header, data);
         System.out.println(file.getAbsolutePath());
     }
