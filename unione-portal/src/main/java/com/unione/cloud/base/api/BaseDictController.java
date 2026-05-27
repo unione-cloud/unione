@@ -34,6 +34,7 @@ import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
+import com.unione.cloud.util.DictUtil;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
@@ -139,6 +140,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 				LogsUtil.add("设置父节点isLeaf属性,nid:%s,len:%s",parent.getId(),len);
 			}
 			AssertUtil.service().isTrue(len>0, "保存失败");
+			DictUtil.clear(entity.getDictName());
 		}else {
 			return update(entity);
 		}
@@ -202,7 +204,8 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 			len = dataBaseDao.updateById(sqlBuilder);
 			LogsUtil.add("保存数据,len:"+len);
 		}
-		
+
+		DictUtil.clear(entity.getDictName());
 		results.setBody(entity.getId());
 		results.setSuccess(len>0);
 		results.setMessage(len>0?"操作成功":"操作失败");
@@ -218,6 +221,12 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[0,1]");
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		if(len>0){
+			BaseDict tmp = dataBaseDao.findById(SqlBuilder.build(BaseDict.class, entity.getId()));
+			if(tmp!=null){
+				DictUtil.clear(tmp.getDictName());
+			}
+		}
 		
 		return Results.build(len>0);
 	}
@@ -252,11 +261,19 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		Results<Integer> results = new Results<>();
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
+
+		List<BaseDict> dicts=dataBaseDao.findByIds(SqlBuilder.build(BaseDict.class,ids));
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
 		int count = dataBaseDao.deleteById(SqlBuilder.build(BaseDict.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
+
+		if(count>0){
+			dicts.forEach(dict->{
+				DictUtil.clear(dict.getDictName());
+			});
+		}
 		
 		results.setSuccess(count>0);
 		results.setMessage(count>0?"操作成功":"操作失败");
