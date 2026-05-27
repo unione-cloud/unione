@@ -13,7 +13,8 @@
 	
 	<properties>
 		<minio.version>8.4.3</minio.version>
-		<commons-io.version>2.11.0</commons-io.version>
+		<commons-io.version>2.15.1</commons-io.version>
+		<commons-compress.version>1.26.2</commons-compress.version>
 	</properties>
 	
 	
@@ -61,6 +62,20 @@
 			<artifactId>graal-sdk</artifactId>
 			<version>22.3.5</version>
 		</dependency>
+
+		<!-- easyexcel:配置依赖信息 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>easyexcel</artifactId>
+			<version>4.0.3</version>
+		</dependency>
+		
+		<!-- commons-compress:与EasyExcel 4.0.3兼容版本，解决ZipArchiveOutputStream.putArchiveEntry方法找不到问题 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${commons-compress.version}</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -85,7 +100,7 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-		</plugins>
+			</plugins>
 	</build>
 	
 </project>
