@@ -124,25 +124,22 @@ public class XlsUtils {
     }
 
 
-     /**
-      * 写入Excel文件
-      * @param tmpl 模板文件输入流
-      * @param header 表头
-      * @param data 数据列表
-      * @param headRow 表头行索引
-      * @return 生成的Excel文件
-      */
-    public static File write(InputStream tmpl,XlsHeader header, List<Map<String,Object>> data) {
-        File outputFile = FileUtil.createTempFile("xls_output_", ".xlsx", true);
-
+    /**
+     * 创建Excel写入对象
+     * @param tmpl
+     * @param destFile
+     * @param header
+     * @return
+     */
+    public static ExcelWriter createWriter(InputStream tmpl,File destFile,XlsHeader header){
         // 生成标题
         if(!ObjectUtil.isEmpty(header.getTitle())){
-            EasyExcel.write(outputFile).withTemplate(tmpl).sheet().doFill(header);
+            EasyExcel.write(destFile).withTemplate(tmpl).sheet().doFill(header);
         }else{
-            FileUtil.writeFromStream(tmpl, outputFile);
+            FileUtil.writeFromStream(tmpl, destFile);
         }
 
-        ExcelWriter writer = ExcelUtil.getWriter(outputFile);
+        ExcelWriter writer = ExcelUtil.getWriter(destFile);
         writer.setSheet(0);
 
         // 生成表头
@@ -196,7 +193,16 @@ public class XlsUtils {
             writer.close();
             throw new ServiceException("生成表头失败", e);
         }
+        return writer;
+    }
 
+    /**
+     * 写入数据
+     * @param writer
+     * @param header
+     * @param data
+     */
+    public static void doWrite(ExcelWriter writer,XlsHeader header,List<Map<String,Object>> data){
         // 生成数据
         try{
             Row rowTmpl = writer.getOrCreateRow(header.getRow());
@@ -206,7 +212,7 @@ public class XlsUtils {
                 colSeq=rowTmpl.getCell(header.getCol()-2);
             }
             
-            int headRow=header.getRow();
+            int headRow=header.getRow()+header.getDataCount();
             for(int rowIndex=0;rowIndex<data.size();rowIndex++){
                 Map<String,Object> rowData=data.get(rowIndex);
                 Row rowObj = writer.getOrCreateRow(headRow + rowIndex);
@@ -221,6 +227,10 @@ public class XlsUtils {
                 }
                 for(int colIndex=0;colIndex<header.getNames().size();colIndex++){
                     String name=header.getNames().get(colIndex);
+                    if(header.getAlias()!=null){
+                        //如果有别名就使用别名获取数据
+                        name=header.getAlias().get(colIndex);
+                    }
                     Cell cell = null;
                     if(rowIndex==0 && colIndex==0){
                         cell=colTmp;
@@ -244,11 +254,26 @@ public class XlsUtils {
                     }
                 }
             }
+            header.setDataCount(header.getDataCount()+data.size());
         }catch(Exception e){
             throw new ServiceException("生成数据失败", e);
-        }finally{
-            writer.close();
         }
+    }
+
+     /**
+      * 写入Excel文件
+      * @param tmpl 模板文件输入流
+      * @param header 表头
+      * @param data 数据列表
+      * @param headRow 表头行索引
+      * @return 生成的Excel文件
+      */
+    public static File write(InputStream tmpl,XlsHeader header, List<Map<String,Object>> data) {
+        File outputFile = FileUtil.createTempFile("xls_output_", ".xlsx", true);
+
+        ExcelWriter writer = createWriter(tmpl, outputFile, header);
+        doWrite(writer,header,data);
+        IoUtil.close(writer);
 
         return outputFile;
     }
@@ -293,9 +318,17 @@ public class XlsUtils {
          */
         private List<String> names;
         /**
+         * 别名列表
+         */
+        private List<String> alias;
+        /**
          * 标题
          */
         private String title;
+        /**
+         * 数据行数
+         */
+        private int dataCount;
     }
 
     private static class XlsHeaderItem {
