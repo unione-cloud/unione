@@ -192,7 +192,7 @@ public class SecurityFilter extends AbstractGatewayFilterFactory<SecurityFilter.
 				log.debug("url白名单,直接放行,uri:{}",requestUri);
 				ServerWebExchange ex = setRequestHeader(exchange,config, token, ip);
 				return chain.filter(ex).then(Mono.fromRunnable(()->{
-					after(exchange, config);
+					after(ex, config);
 				}));
 			}
 			
