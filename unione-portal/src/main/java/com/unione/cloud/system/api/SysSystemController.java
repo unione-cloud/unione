@@ -156,7 +156,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
 		
-		SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,id));
+		SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,id).dataPermis(PermisRule.ALL));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		return Results.success(tmp);
