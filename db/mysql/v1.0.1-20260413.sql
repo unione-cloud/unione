@@ -180,3 +180,38 @@ ADD COLUMN `DEL_FLAG` int(2) NULL DEFAULT 0 COMMENT '删除标记，1是，0否'
 ALTER TABLE `unione`.`sys_tenant` 
 ADD COLUMN `TIME_LIMIT_START` date NULL COMMENT '限制时间起' AFTER `MAX_ORGAN_USER_COUINT`,
 ADD COLUMN `TIME_LIMIT_END` date NULL COMMENT '限制时间止' AFTER `TIME_LIMIT_START`;
+
+
+
+-- 升级数据源：增加是否全局字段
+ALTER TABLE `unione`.`sys_data_source` 
+ADD COLUMN `IS_GLOBAL` varchar(255) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `CONFIGS`;
+
+-- 升级数据定义：增加是否全局，是否无表单字段
+ALTER TABLE `unione`.`sys_data_define` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `URL`,
+ADD COLUMN `IS_NO_FORM` int(2) NULL COMMENT '无表单，开启后无表单页面，字典TUREORFALSE 1是，0否' AFTER `IS_NO_LIST`;
+
+ALTER TABLE `unione`.`sys_data_define_his` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `URL`,
+ADD COLUMN `IS_NO_FORM` int(2) NULL COMMENT '无表单，开启后无表单页面，字典TUREORFALSE 1是，0否' AFTER `IS_NO_LIST`;
+
+ALTER TABLE `unione`.`sys_data_define_release` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `URL`,
+ADD COLUMN `IS_NO_FORM` int(2) NULL COMMENT '无表单，开启后无表单页面，字典TUREORFALSE 1是，0否' AFTER `IS_NO_LIST`;
+
+
+-- 流程模版：增加是否全局字段
+ALTER TABLE `unione`.`flow_lite_tmpl` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0  COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `FORM_URL`;
+
+ALTER TABLE `unione`.`flow_lite_release` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0  COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `FORM_URL`;
+
+-- 系统信息：增加是否全局字段
+ALTER TABLE `unione`.`sys_system` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `CONFIGS`;
+
+-- 字典信息：增加是否全局字段
+ALTER TABLE `unione`.`base_dict` 
+ADD COLUMN `IS_GLOBAL` int(2) NOT NULL DEFAULT 0 COMMENT '是否全局，字典TUREORFALSE 1是，0否' AFTER `IS_LEAF`;
