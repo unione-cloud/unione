@@ -96,6 +96,11 @@ public class SysSystem extends Pojo {
 	@Schema(title="系统配置,json对象存储，{}",description="长度为：65535")
 	private String configs;
 	/**
+	* 是否全局，字典TUREORFALSE 1是，0否
+	*/
+	@Schema(title="是否全局，字典TUREORFALSE 1是，0否",description="长度为：10")
+	private Integer isGlobal;
+	/**
 	* 应用列表,json数组存储，[{title,name,id}]
 	*/
 	@Schema(title="应用列表,json数组存储，[{title,name,id}]",description="长度为：65535")

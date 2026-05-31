@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unione.cloud.base.model.BaseDict;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.Sort;
 import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
@@ -25,6 +26,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
@@ -57,6 +59,9 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 
 	@Autowired
 	private SystemService systemService;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
@@ -64,8 +69,11 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 	public Results<List<SysSystem>> find(Params<SysSystem> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		params.getBody().setDelFlag(0);
-		Results<List<SysSystem>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			params.getBody().setTenantId(sessionService.getTenantId());
+		}
+		Results<List<SysSystem>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and types=? and status=? and delFlag = 0"));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
@@ -81,6 +89,10 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		BeanUtils.setDefaultValue(entity, "delFlag",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
 		BeanUtils.setDefaultValue(entity, "types","pc");
+		BeanUtils.setDefaultValue(entity, "isGlobal", 0);
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			entity.setIsGlobal(0);
+		}
 
 		SystemInfoDto info = SystemInfoDto.from(entity);
 		entity.setConfigs(JsonUtil.toJson(info.getConfigs()));
@@ -90,7 +102,13 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"name","alias","types","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","navList","versNo","versDesc","ordered","status","descs"};
+			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+				SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,entity.getId()).dataPermis(PermisRule.ALL));
+				AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+					.isTrue(ObjectUtil.equal(tmp.getIsGlobal(), 0), "当前帐号无权修改全局数据")
+					.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+			}
+			String[] fields = {"name","alias","types","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","navList","versNo","versDesc","ordered","isGlobal","status","descs"};
 			SqlBuilder<SysSystem> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
@@ -107,6 +125,13 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(1,2,3,4), "参数status取值范围[1,2,3,4]");
 		
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,entity.getId()).dataPermis(PermisRule.ALL));
+			AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+				.isTrue(ObjectUtil.equal(tmp.getIsGlobal(), 0), "当前帐号无权修改全局数据")
+				.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+		}
+
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
 		
 		return Results.build(len>0);
@@ -146,7 +171,17 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 
-		List<SysSystem> rows = dataBaseDao.findByIds(SqlBuilder.build(SysSystem.class,new ArrayList<>(ids)));
+		List<SysSystem> rows = dataBaseDao.findByIds(SqlBuilder.build(SysSystem.class,new ArrayList<>(ids)).dataPermis(PermisRule.ALL));
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			for(SysSystem row:rows){
+				if(ObjectUtil.equal(row.getIsGlobal(), 1)){
+					return Results.error("当前帐号无权删除全局数据");
+				}
+				if(!ObjectUtil.equal(row.getTenantId(), sessionService.getTenantId())){
+					return Results.error("记录未找到");
+				}
+			}
+		}
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JsonUtil.toJson(ids));
@@ -174,7 +209,13 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		AssertUtil.service().notNull(params.getBody(), "请求参数body不能为空")
 			.notNull(params.getBody().getSysId(),"参数body.sysId不能为空");
 
-		SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,params.getBody().getSysId()));
+		SysSystem tmp = new SysSystem();
+		tmp.setId(params.getBody().getSysId());
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			tmp.setTenantId(sessionService.getTenantId());
+		}
+		tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,tmp).dataPermis(PermisRule.ALL)
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and id=? and delFlag = 0"));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 
 		List<TreeNodeDto> treeNodes = new ArrayList<>();
