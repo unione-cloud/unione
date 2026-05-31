@@ -121,7 +121,7 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 
 
 	@Override
-	@Action(title="保存层级树",type = ActionType.Save,roles = {UserRoles.FORMDEV})
+	@Action(title="保存层级树",type = ActionType.Save,roles = {UserRoles.SUPPERADMIN})
 	public Results<Long> save(@Validated(Validator.save.class) SysCodeTree entity) {
 		// 参数处理
 		int len = 0;
@@ -162,7 +162,7 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 	
 
 	@Override
-	@Action(title="删除层级树",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
+	@Action(title="删除层级树",type = ActionType.Delete,roles = {UserRoles.SUPPERADMIN})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		

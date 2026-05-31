@@ -83,7 +83,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 	} 
 
 	@PostMapping("/setValue")
-	@Action(title="设置配置value",type = ActionType.Save)
+	@Action(title="设置配置value",type = ActionType.Save,roles = UserRoles.SUPPERADMIN)
 	@Operation(summary = "设置配置value", description = "参数name：配置名称，value：配置值")
 	public Results<Void> setValue(@RequestParam("sn") String sn,@RequestParam("value") String value){
 		sysConfigService.setValue(sn, value);
@@ -106,7 +106,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 
 
 	@Override
-	@Action(title="保存统一配置",type = ActionType.Save)
+	@Action(title="保存统一配置",type = ActionType.Save,roles = UserRoles.SUPPERADMIN)
 	public Results<Long> save(@Validated(Validator.save.class) SysConfigDefine entity) {
 		// 参数处理
 		BeanUtils.setDefaultValue(entity, "parentId",-1L);
@@ -146,7 +146,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 	}
 
 	@PostMapping("/status")
-	@Action(title="设置配置状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="设置配置状态",type = ActionType.Save,roles = {UserRoles.SUPPERADMIN})
 	@Operation(summary = "设置配置状态", description="USEORNOT 1 使用，0停用")
 	public Results<Void> setStatus(@RequestBody SysConfigDefine entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
@@ -184,7 +184,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 	
 
 	@Override
-	@Action(title="删除统一配置",type = ActionType.Delete)
+	@Action(title="删除统一配置",type = ActionType.Delete,roles = UserRoles.SUPPERADMIN)
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		
