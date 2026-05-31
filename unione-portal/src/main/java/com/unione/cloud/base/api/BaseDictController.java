@@ -111,7 +111,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 			params.getBody().setTenantId(sessionService.getTenantId());
 		}
 		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
-			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and dictType=? and status=?"));
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and dictType=? and status=? dictName=? and parentId=?"));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
