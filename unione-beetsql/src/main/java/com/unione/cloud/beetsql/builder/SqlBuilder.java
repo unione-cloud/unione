@@ -789,23 +789,23 @@ public class SqlBuilder<T> {
 		if(dataPermis!=null && !dataPermis.equals(PermisRule.ALL)) {
 			switch (dataPermis) {
 			case TENANTID:
-				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
+				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
 					BaseField.TENANT_ID.getName(),BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
 				break;
 			case ORGANID:
-				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
+				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
 					BaseField.ORGAN_ID.getName(),BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
 				break;	
 			case ORGANCODE:
-				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
+				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
 					whereSql,BaseField.ORGAN_CODE.getName(),BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
 				break;	
 			case AREACODE:
-				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
+				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
 					whereSql,BaseField.AREA_CODE.getName(),BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
 				break;	
 			default:
-				whereSql=String.format("(%s)\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",
+				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",
 					whereSql,BaseField.USER_ID.getName(),BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());
 				break;
 			}

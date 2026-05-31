@@ -35,9 +35,29 @@ public class TagSqlTrim extends TrimTag {
 				
 				// AND OR , 处理
 				if (sql.toUpperCase().startsWith("AND ")) {
-					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(4, sql.length()),suffix));
+					String resql=sql.substring(4, sql.length());
+					while(resql.toUpperCase().startsWith("AND ")){
+						resql=resql.substring(4, resql.length());
+					}
+					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,resql,suffix));
+				}else if (sql.toUpperCase().endsWith(" AND")) {
+					String resql=sql.substring(0, sql.length() - 4);
+					while(resql.toUpperCase().endsWith(" AND")){
+						resql=resql.substring(0, resql.length() - 4);
+					}
+					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,resql,suffix));
 				}else if (sql.toUpperCase().startsWith("OR ")) {
-					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(3, sql.length()),suffix));
+					String resql=sql.substring(3, sql.length());
+					while(resql.toUpperCase().startsWith("OR ")){
+						resql=resql.substring(3, resql.length());
+					}
+					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,resql,suffix));
+				}else if (sql.toUpperCase().endsWith(" OR")) {
+					String resql=sql.substring(0, sql.length() - 3);
+					while(resql.toUpperCase().endsWith(" OR")){
+						resql=resql.substring(0, resql.length() - 3);
+					}
+					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,resql,suffix));
 				} else if (sql.startsWith(",")) {
 					this.ctx.byteWriter.writeString(String.format("%s%s%s", prefix,sql.substring(1, sql.length()),suffix));
 				}else if (sql.endsWith(",")) {
