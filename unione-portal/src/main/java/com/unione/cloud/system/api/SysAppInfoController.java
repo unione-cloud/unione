@@ -26,8 +26,10 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.model.SysAppInfo;
+import com.unione.cloud.system.model.SysSystem;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -72,9 +74,11 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	public Results<List<SysAppInfo>> load(@RequestBody Params<SysAppInfo> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 		
-		params.getBody().setTenantId(sessionService.getTenantId());
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			params.getBody().setTenantId(sessionService.getTenantId());
+		}
 		Results<List<SysAppInfo>> results = dataBaseDao.findPages(SqlBuilder.build(params)
-			.where("category=? and status in (1,2,3) and status=? and (isPlatform = 1 or tenantId=?)").dataPermis(PermisRule.ALL));
+			.where("category=? and status in (1,2,3) and status=? and (isPlatform = 1 or isPlatform = 0 and tenantId=?)").dataPermis(PermisRule.ALL));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
@@ -86,7 +90,11 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	public Results<List<SysAppInfo>> find(Params<SysAppInfo> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysAppInfo>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			params.getBody().setTenantId(sessionService.getTenantId());
+		}
+		Results<List<SysAppInfo>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
+			.where("category=? and types=? and status=? and isPlatform=? and isMp=? and (isPlatform = 1 or isPlatform = 0 and tenantId=?)"));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -103,14 +111,22 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 		BeanUtils.setDefaultValue(entity, "isPlatform",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
 		BeanUtils.setDefaultValue(entity, "isTmpl",0);
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			entity.setIsPlatform(0);
+		}
 
 		// 参数处理
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			SysAppInfo tmp = dataBaseDao.findById(SqlBuilder.build(SysAppInfo.class,entity.getId()));
+			SysAppInfo tmp = dataBaseDao.findById(SqlBuilder.build(SysAppInfo.class,entity.getId()).dataPermis(PermisRule.ALL));
 			AssertUtil.service().notNull(tmp, "记录未找到");
+			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+				AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+					.isTrue(ObjectUtil.equal(tmp.getIsPlatform(), 0), "当前帐号无权修改全局数据")
+					.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+			}
 
 			String[] fields = {"category","name","sn","isMp","url","welcome","versNo","versDesc","icon","picMax","picMid","picMix","ordered","trades","types","isPlatform","status","descs"};
 			SqlBuilder<SysAppInfo> sqlBuilder=SqlBuilder.build(entity).field(fields);
@@ -126,6 +142,14 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 	public Results<Void> setStatus(@RequestBody SysAppInfo entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(1,2,3,4), "参数status取值范围[1,2,3,4]");
+		
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			SysAppInfo tmp = dataBaseDao.findById(SqlBuilder.build(SysAppInfo.class,entity.getId()).dataPermis(PermisRule.ALL));
+			AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+				.isTrue(ObjectUtil.equal(tmp.getIsPlatform(), 0), "当前帐号无权修改全局数据")
+				.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+		}
+
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
 		
@@ -162,6 +186,18 @@ public class SysAppInfoController implements PojoFeignApi<SysAppInfo>{
 		
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
+
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			List<SysAppInfo> rows = dataBaseDao.findByIds(SqlBuilder.build(SysAppInfo.class,new ArrayList<>(ids)).dataPermis(PermisRule.ALL));
+			for(SysAppInfo row:rows){
+				if(ObjectUtil.equal(row.getIsPlatform(), 1)){
+					return Results.error("当前帐号无权删除全局数据");
+				}
+				if(!ObjectUtil.equal(row.getTenantId(), sessionService.getTenantId())){
+					return Results.error("记录未找到");
+				}
+			}
+		}
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
