@@ -1,5 +1,7 @@
 package com.unione.cloud.base.api;
 
+import static org.mockito.ArgumentMatchers.endsWith;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,12 +33,14 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.TreeFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.core.util.JsonUtil;
 import com.unione.cloud.util.DictUtil;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,6 +60,9 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Operation(description="加载字典")
@@ -99,8 +106,12 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	@Action(title="查询字典",type = ActionType.Query)
 	public Results<List<BaseDict>> find(Params<BaseDict> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
-				
-		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			params.getBody().setTenantId(sessionService.getTenantId());
+		}
+		Results<List<BaseDict>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and dictType=? and status=?"));
 				
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
@@ -109,7 +120,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 
 
 	@Override
-	@Action(title="保存字典",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="保存字典",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	public Results<Long> save(@Validated(Validator.save.class) BaseDict entity) {
 		// 验证字典名称是否已存在
 		BaseDict parent=null;
@@ -130,6 +141,11 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		BeanUtils.setDefaultValue(entity, "ordered",0);
 		BeanUtils.setDefaultValue(entity, "status",1);
 		BeanUtils.setDefaultValue(entity, "isLeaf",1);
+		BeanUtils.setDefaultValue(entity, "isGlobal", 0);
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			entity.setIsGlobal(0);
+		}
+
 		int len = 0;
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
@@ -152,7 +168,16 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	
 	private Results<Long> update(@Validated(Validator.update.class) BaseDict entity) {
 		Results<Long> results = new Results<>();
+		AssertUtil.service().notNull(entity.getId(), "参数id不能为空");
 		int len = 0;
+
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			BaseDict tmp = dataBaseDao.findById(SqlBuilder.build(BaseDict.class,entity.getId()).dataPermis(PermisRule.ALL));
+			AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+				.isTrue(ObjectUtil.equal(tmp.getIsGlobal(), 0), "当前帐号无权修改全局数据")
+				.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+		}
+
 		if(Objects.equals(-1L, entity.getParentId())) {
 			LogsUtil.add("加载字典信息,id:%s",entity.getId());
 			BaseDict tmp=dataBaseDao.findById(BaseDict.class, entity.getId());
@@ -164,7 +189,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 			BeanUtils.setDefaultValue(entity, "ordered",0);
 			BeanUtils.setDefaultValue(entity, "status",1);
 			BeanUtils.setDefaultValue(entity, "dictShow","{\"type\":\"text\"}");
-			String[] fields = {"appId","appName","dictType","dictValue","dictShow","ordered","isLeaf","status"};
+			String[] fields = {"appId","appName","dictType","dictValue","dictShow","ordered","isLeaf","isGlobal","status"};
 			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 			LogsUtil.add("保存数据,len:"+len);
@@ -199,7 +224,7 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 			}
 		}else {
 			// 修改字典项信息
-			String[] fields = {"dictKey","dictValue","dictShow","ordered","status"};
+			String[] fields = {"dictKey","dictValue","dictShow","ordered","isGlobal","status"};
 			SqlBuilder<BaseDict> sqlBuilder=SqlBuilder.build(entity).field(fields);
 			len = dataBaseDao.updateById(sqlBuilder);
 			LogsUtil.add("保存数据,len:"+len);
@@ -214,15 +239,23 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 
 
 	@PostMapping("/status")
-	@Action(title="设置字典状态",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="设置字典状态",type = ActionType.Save,roles = {UserRoles.FORMDEV})
 	@Operation(summary = "设置字典状态", description="USEORNOT 1 使用，0停用")
 	public Results<Void> setStatus(@RequestBody BaseDict entity){
 		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
 			.notIn(entity.getStatus(), Arrays.asList(0,1), "参数status取值范围[0,1]");
+
+		BaseDict tmp = null;
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			tmp = dataBaseDao.findById(SqlBuilder.build(BaseDict.class,entity.getId()).dataPermis(PermisRule.ALL));
+			AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+				.isTrue(ObjectUtil.equal(tmp.getIsGlobal(), 0), "当前帐号无权修改全局数据")
+				.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+		}
 		
 		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
 		if(len>0){
-			BaseDict tmp = dataBaseDao.findById(SqlBuilder.build(BaseDict.class, entity.getId()));
+			tmp = tmp!=null?tmp:dataBaseDao.findById(SqlBuilder.build(BaseDict.class, entity.getId()));
 			if(tmp!=null){
 				DictUtil.clear(tmp.getDictName());
 			}
@@ -256,13 +289,23 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 	
 
 	@Override
-	@Action(title="删除字典",type = ActionType.Delete,roles = {UserRoles.SYSOPSUSER})
+	@Action(title="删除字典",type = ActionType.Delete,roles = {UserRoles.FORMDEV})
 	public Results<Integer> delete(Set<Long> ids){
 		Results<Integer> results = new Results<>();
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
 
-		List<BaseDict> dicts=dataBaseDao.findByIds(SqlBuilder.build(BaseDict.class,ids));
+		List<BaseDict> dicts=dataBaseDao.findByIds(SqlBuilder.build(BaseDict.class,ids).dataPermis(PermisRule.ALL));
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			for(BaseDict row:dicts){
+				if(ObjectUtil.equal(row.getIsGlobal(), 1)){
+					return Results.error("当前帐号无权删除全局数据");
+				}
+				if(!ObjectUtil.equal(row.getTenantId(), sessionService.getTenantId())){
+					return Results.error("记录未找到");
+				}
+			}
+		}
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
@@ -291,8 +334,11 @@ public class BaseDictController implements TreeFeignApi<BaseDict>{
 		BaseDict params = new BaseDict();
 		params.setParentId(id);
 		LogsUtil.add("parentId:%s",id);
-	
-		List<BaseDict> rows = dataBaseDao.findList(SqlBuilder.build(params));
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			params.setTenantId(sessionService.getTenantId());
+		}
+		List<BaseDict> rows = dataBaseDao.findList(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and parentId=?"));
 		
 		return Results.success(rows);
 	}

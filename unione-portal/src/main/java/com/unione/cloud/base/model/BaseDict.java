@@ -101,6 +101,11 @@ public class BaseDict extends Pojo {
 	@Schema(title="是否叶子节点，字典TUREORFALSE 1是，0否",description="长度为：10")
 	private Integer isLeaf;
 	/**
+	* 是否全局，字典TUREORFALSE 1是，0否
+	*/
+	@Schema(title="是否全局，字典TUREORFALSE 1是，0否",description="长度为：10")
+	private Integer isGlobal;
+	/**
 	* 状态 是否使用，字典USEORNOT 1 使用，0停用
 	*/
 	@Schema(title="状态 是否使用，字典USEORNOT 1 使用，0停用",description="长度为：10")
