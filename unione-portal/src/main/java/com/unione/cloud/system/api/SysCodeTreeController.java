@@ -1,6 +1,7 @@
 package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import com.unione.cloud.system.service.TenantService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.json.JSONUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -133,6 +135,18 @@ public class SysCodeTreeController implements PojoFeignApi<SysCodeTree>{
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
 		return Results.build(len>0, entity.getId());
+	}
+
+	@PostMapping("/status")
+	@Action(title="设置层级树状态",type = ActionType.Save,roles = {UserRoles.SUPPERADMIN})
+	@Operation(summary = "设置层级树状态", description="USEORNOT 1使用，2停用")
+	public Results<Void> setStatus(@RequestBody SysCodeTree entity){
+		AssertUtil.service().notNull(entity, new String[] {"id","status"},"属性%s不能为空")
+			.notIn(entity.getStatus(), Arrays.asList(1,0), "参数status取值范围[0,1]");
+		
+		int len = dataBaseDao.updateById(SqlBuilder.build(entity).field("status"));
+		
+		return Results.build(len>0);
 	}
 
 	@Override
