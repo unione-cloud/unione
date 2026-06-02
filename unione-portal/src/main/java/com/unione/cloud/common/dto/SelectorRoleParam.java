@@ -5,6 +5,8 @@ import java.util.List;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -20,5 +22,9 @@ public class SelectorRoleParam extends SelectorParam{
     @JsonIgnore
     @Schema(title="主键集合")
     private List<Long> ids;
+
+    @JsonProperty(access = Access.WRITE_ONLY)
+    @Schema(title="角色编码集合")
+    private List<String> sns;
 
 }

@@ -1,4 +1,8 @@
-
+selectRole4View
+===
+```sql
+SELECT ID,NAME AS TITLE,TYPES AS RTYPE,SN,DESCS FROM SYS_ROLE WHERE STATUS=1 AND SN IN (#{join(params.sns)})
+```
 
 selectRole4Auth
 ===

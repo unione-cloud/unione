@@ -162,6 +162,10 @@ public class SelectorService {
                 // 无权限，返回空列表
                 return Results.success(ListUtil.empty());
             }
+        }else if(Objects.equals(params.getBody().getTargetType(), "view")){
+            sqlName="selectRole4View";
+            builder.where("sns", params.getBody().getSns());
+            AssertUtil.service().notEmpty(params.getBody().getSns(), "角色编码集合不能为空");
         }
        
         // 执行数据查询
