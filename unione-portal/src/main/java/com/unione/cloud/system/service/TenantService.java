@@ -22,6 +22,7 @@ import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
@@ -253,7 +254,8 @@ public class TenantService {
 			// 验证租户管理员帐号是否已存在
 			SysUser admin=dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username=? or tel=?")
 				.where("username",entity.getSn())
-				.where("tel",entity.getLinkTel()));
+				.where("tel",entity.getLinkTel())
+				.dataPermis(PermisRule.ALL));
 			if(admin!=null){
 				StringBuffer buf=new StringBuffer();
 				if(entity.getSn().equals(admin.getUsername())){
@@ -307,7 +309,7 @@ public class TenantService {
 
 			if(tenant!=null && tenant.getAdminId()!=null){
 				// 加载管理员账户
-				SysUser admin=dataBaseDao.findById(SqlBuilder.build(SysUser.class,tenant.getAdminId()));
+				SysUser admin=dataBaseDao.findById(SqlBuilder.build(SysUser.class,tenant.getAdminId()).dataPermis(PermisRule.ALL));
 				if(admin==null){
 					return Results.failure(String.format("租户管理员帐号%s不存在", entity.getSn()));
 				}

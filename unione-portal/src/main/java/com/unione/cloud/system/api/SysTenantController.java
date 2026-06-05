@@ -23,6 +23,7 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.system.dto.TenantInfoDto;
 import com.unione.cloud.system.dto.UserRoleDto;
@@ -52,12 +53,19 @@ public class SysTenantController implements PojoFeignApi<TenantInfoDto>{
 
 	@Autowired
 	private TenantService tenantService;
+
+	@Autowired
+	private SessionService sessionService;
 	
 	
 	@Override
 	@Action(title="查询租户",type = ActionType.Query)
 	public Results<List<TenantInfoDto>> find(Params<TenantInfoDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
+
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)) {
+			params.getBody().setCreatedBy(sessionService.getUserId());
+		}
 				
 		Results<List<TenantInfoDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
