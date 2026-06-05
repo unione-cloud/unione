@@ -230,7 +230,7 @@ public class TenantService {
 			.where("sn",entity.getSn())
 			.where("name",entity.getName()));
 		if(tenant!=null){
-			if(entity.getId()==null || entity.getId()!=tenant.getId()){
+			if(entity.getId()==null || !ObjectUtil.equal(entity.getId(),tenant.getId())){
 				StringBuffer buf=new StringBuffer();
 				if(entity.getSn().equals(tenant.getSn())){
 					buf.append(String.format("编码%s,", entity.getSn()));
@@ -312,7 +312,7 @@ public class TenantService {
 					return Results.failure(String.format("租户管理员帐号%s不存在", entity.getSn()));
 				}
 
-				List<String> fieldList=Arrays.asList();
+				List<String> fieldList=new ArrayList<>();
 				// 更新管理员账户密码
 				if(!ObjectUtil.isEmpty(entity.getPassword())){
 					String password=secretService.decrypt(entity.getPassword());
@@ -356,7 +356,7 @@ public class TenantService {
 
 					// 删除管理员角色
 					if(!roleMap.isEmpty()){
-						int len2 = dataBaseDao.delete(SqlBuilder.build(SysUserRole.class,roleMap.values().stream().map(r->r.getId())));
+						int len2 = dataBaseDao.deleteById(SqlBuilder.build(SysUserRole.class,roleMap.values().stream().map(r->r.getId()).collect(Collectors.toList())));
 						LogsUtil.add(String.format("删除租户管理员角色，roles:%s,len:%s",roleMap.keySet(),len2));
 					}
 					// 新增管理员角色
