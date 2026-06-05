@@ -3,7 +3,9 @@ package com.unione.cloud.system.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,8 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
 import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.system.dto.TenantInfoDto;
+import com.unione.cloud.system.dto.UserRoleDto;
 import com.unione.cloud.system.model.SysTenant;
 import com.unione.cloud.system.service.TenantService;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -41,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Tag(name = "系统管理：租户信息",description="SysTenant")
 @RequestMapping("/api/system/tenant")	 //TreeFeignApi
-public class SysTenantController implements PojoFeignApi<SysTenant>{
+public class SysTenantController implements PojoFeignApi<TenantInfoDto>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
@@ -52,12 +56,24 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 	
 	@Override
 	@Action(title="查询租户",type = ActionType.Query)
-	public Results<List<SysTenant>> find(Params<SysTenant> params) {
+	public Results<List<TenantInfoDto>> find(Params<TenantInfoDto> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
-		Results<List<SysTenant>> results = dataBaseDao.findPages(SqlBuilder.build(params));
+		Results<List<TenantInfoDto>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
+
+		Set<Long> adminIds = results.getBody().stream().filter(r->r.getAdminId()!=null).map(r->r.getAdminId()).collect(Collectors.toSet());
+		if(!adminIds.isEmpty()) {
+			List<UserRoleDto> list=dataBaseDao.findList("loadUserRoleList",SqlBuilder.build(UserRoleDto.class,adminIds));
+			Map<Long, List<String>> map = list.stream().collect(Collectors.groupingBy(UserRoleDto::getUserId, Collectors.mapping(UserRoleDto::getRoleSn, Collectors.toList())));
+			results.getBody().forEach(r->{
+				if(map.get(r.getAdminId())==null) {
+					return;
+				}
+				r.setRoleList(map.get(r.getAdminId()).stream().collect(Collectors.joining(",")));
+			});
+		}
 		
 		return results;
 	}
@@ -65,19 +81,8 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 
 	@Override
 	@Action(title="保存租户",type = ActionType.Save,roles = {UserRoles.SYSOPSUSER})
-	public Results<Long> save(@Validated(Validator.save.class) SysTenant entity) {
-		// 参数处理
-		int len = 0;
-		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
-		}else {
-			String[] fields = {"sn","name","domain","logo","loginAd","registeWay","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","timeLimitStart","timeLimitEnd","status","descs"};
-			SqlBuilder<SysTenant> sqlBuilder=SqlBuilder.build(entity).field(fields);
-			len = dataBaseDao.updateById(sqlBuilder);
-			tenantService.clear(entity.getId());
-		}
-		
-		return Results.build(len>0, entity.getId());
+	public Results<Long> save(@Validated(Validator.save.class) TenantInfoDto entity) {
+		return tenantService.save(entity);
 	}
 
 
@@ -96,20 +101,20 @@ public class SysTenantController implements PojoFeignApi<SysTenant>{
 
 
 	@Override
-	public Results<List<SysTenant>> findByIds(Set<Long> ids) {
+	public Results<List<TenantInfoDto>> findByIds(Set<Long> ids) {
 		// 参数处理
 		AssertUtil.service().isTrue(!ids.isEmpty(), "参数ids不能为空");
-		List<SysTenant> rows = dataBaseDao.findByIds(SqlBuilder.build(SysTenant.class,new ArrayList<>(ids)));
+		List<TenantInfoDto> rows = dataBaseDao.findByIds(SqlBuilder.build(TenantInfoDto.class,new ArrayList<>(ids)));
 		
 		return Results.success(rows);
 	}
 
 
 	@Override
-	public Results<SysTenant> detail(Long id) {
+	public Results<TenantInfoDto> detail(Long id) {
 		// 参数处理
 		AssertUtil.service().notNull(id,"参数id不能为空");
-		SysTenant tmp = dataBaseDao.findById(SqlBuilder.build(SysTenant.class,id));
+		TenantInfoDto tmp = dataBaseDao.findById(SqlBuilder.build(TenantInfoDto.class,id));
 		AssertUtil.service().notNull(tmp, "记录未找到");
 		
 		return Results.success(tmp);

@@ -2,14 +2,19 @@ package com.unione.cloud.system.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.CacheManager;
@@ -18,14 +23,25 @@ import com.alicp.jetcache.anno.Cached;
 import com.alicp.jetcache.template.QuickConfig;
 import com.unione.cloud.beetsql.DataBaseDao;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
+import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
+import com.unione.cloud.core.generator.IdGenHolder;
 import com.unione.cloud.core.redis.HpdlProcess;
 import com.unione.cloud.core.redis.RedisService;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.secret.SecretService;
+import com.unione.cloud.system.dto.TenantInfoDto;
+import com.unione.cloud.system.dto.UserRoleDto;
+import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.system.model.SysTenant;
+import com.unione.cloud.system.model.SysUser;
+import com.unione.cloud.system.model.SysUserRole;
+import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.SmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -43,6 +59,10 @@ public class TenantService {
 
 	@Autowired
 	private SessionService sessionService;
+
+	@Autowired
+	private SecretService secretService;
+
 
 
 	@Value("${unione.cache.tenant.expire:72000}")
@@ -198,6 +218,167 @@ public class TenantService {
 			getCache2().remove(tenant.getName());
 		}
 		cache.remove(id);
+	}
+
+
+	@Transactional(rollbackFor = Exception.class)
+	public Results<Long> save(TenantInfoDto entity){
+		AssertUtil.service().notNull(entity, new String[]{"sn","name","linkMan","linkTel","status"},"租户%s不能为空");
+
+		// 验证租户编码、租户名称是否已存在
+		SysTenant tenant=dataBaseDao.findOne(SqlBuilder.build(SysTenant.class).where("sn=? or name=?")
+			.where("sn",entity.getSn())
+			.where("name",entity.getName()));
+		if(tenant!=null){
+			if(entity.getId()==null || entity.getId()!=tenant.getId()){
+				StringBuffer buf=new StringBuffer();
+				if(entity.getSn().equals(tenant.getSn())){
+					buf.append(String.format("编码%s,", entity.getSn()));
+				}
+				if(entity.getName().equals(tenant.getName())){
+					buf.append(String.format("名称%s,", entity.getName()));
+				}
+				return Results.failure(String.format("租户%s已存在", buf.subSequence(0, buf.length()-1)));
+			}
+		}
+
+		// 参数处理
+		int len = 0;
+		if(entity.getId()==null) {
+			if(ObjectUtil.isEmpty(entity.getPassword())){
+				return Results.failure("登录密码不能为空");
+			}
+			entity.setId(IdGenHolder.generate());
+
+			// 验证租户管理员帐号是否已存在
+			SysUser admin=dataBaseDao.findOne(SqlBuilder.build(SysUser.class).where("username=? or tel=?")
+				.where("username",entity.getSn())
+				.where("tel",entity.getLinkTel()));
+			if(admin!=null){
+				StringBuffer buf=new StringBuffer();
+				if(entity.getSn().equals(admin.getUsername())){
+					buf.append(String.format("帐号%s,", entity.getSn()));
+				}
+				if(entity.getLinkTel().equals(admin.getTel())){
+					buf.append(String.format("手机号%s,", entity.getLinkTel()));
+				}
+				return Results.failure(String.format("管理员%s已存在", buf.subSequence(0, buf.length()-1)));
+			}
+
+			// 初始化管理员帐号
+			admin=new SysUser();
+			admin.setUserType(1);
+			admin.setUsername(entity.getSn());
+			admin.setRealName(entity.getLinkMan());
+			admin.setOrgId(-1L);
+			admin.setTenantId(entity.getId());
+			admin.setPwdSalt(RandomUtil.randomString(16));
+			admin.setDelFlag(0);
+			admin.setStatus(1);	//用户状态，字典USERSTATUS 1正常，2禁用，3注销，4锁定	
+			admin.setTel(entity.getLinkTel());
+			String password=secretService.decrypt(entity.getPassword());
+			password = SmUtil.sm4(admin.getPwdSalt().getBytes()).encryptHex(password);
+			admin.setPwdText(password);
+			dataBaseDao.insert(admin);
+
+			// 保存角色
+			if(!ObjectUtil.isEmpty(entity.getRoleList())){
+				List<String> roleList=Stream.of(entity.getRoleList().split(",")).collect(Collectors.toList());
+				List<SysRole> roles = dataBaseDao.findList(SqlBuilder.build(SysRole.class).where("sn in [sns]").where("sns",roleList));
+				for(SysRole role:roles){
+					SysUserRole userRole=new SysUserRole();
+					userRole.setTenantId(entity.getId());
+					userRole.setUserId(admin.getId());
+					userRole.setRoleId(role.getId());
+					userRole.setEnDilivery(0);
+					dataBaseDao.insert(userRole);
+				}
+			}
+
+			// 保存租户
+			entity.setAdminId(admin.getId());
+			entity.setRegisteWay(2);
+			len = dataBaseDao.insertWithId(entity);
+		}else {
+			String[] fields = {"domain","logo","loginAd","linkMan","linkAdd","linkTel","locationCity","locationProvince","openTime","maxUserCount","maxUserOnline","maxOrganCount","maxOrganUserCouint","timeLimitStart","timeLimitEnd","status","descs"};
+			SqlBuilder<TenantInfoDto> sqlBuilder=SqlBuilder.build(entity).field(fields);
+			len = dataBaseDao.updateById(sqlBuilder);
+			this.clear(entity.getId());
+
+			if(tenant!=null && tenant.getAdminId()!=null){
+				// 加载管理员账户
+				SysUser admin=dataBaseDao.findById(SqlBuilder.build(SysUser.class,tenant.getAdminId()));
+				if(admin==null){
+					return Results.failure(String.format("租户管理员帐号%s不存在", entity.getSn()));
+				}
+
+				List<String> fieldList=Arrays.asList();
+				// 更新管理员账户密码
+				if(!ObjectUtil.isEmpty(entity.getPassword())){
+					String password=secretService.decrypt(entity.getPassword());
+					password = SmUtil.sm4(admin.getPwdSalt().getBytes()).encryptHex(password);
+					admin.setPwdText(password);
+					fieldList.add("pwdText");
+				}
+				if(!ObjectUtil.equal(admin.getStatus(), entity.getStatus())){
+					fieldList.add("status");
+					if(ObjectUtil.equal(entity.getStatus(), 3)){
+						// 关闭租户，禁用管理员帐号
+						admin.setStatus(2);
+					}else{
+						// 开启租户，启用管理员帐号
+						admin.setStatus(1);
+					}
+				}
+				if(!fieldList.isEmpty()){
+					dataBaseDao.updateById(SqlBuilder.build(admin).field(fieldList.toArray(new String[0])));
+				}
+
+				// 管理员角色处理
+				if(ObjectUtil.isEmpty(entity.getRoleList())){
+					// 清空管理员角色
+					SysUserRole ur=new SysUserRole();
+					ur.setUserId(admin.getId());
+					int len2 = dataBaseDao.delete(SqlBuilder.build(ur));
+					LogsUtil.add(String.format("清空租户管理员角色，len:%s",len2));
+				}else{
+					// 修改管理员角色列表
+					List<UserRoleDto> list=dataBaseDao.findList("loadUserRoleList",SqlBuilder.build(UserRoleDto.class,List.of(admin.getId())));
+					Map<String,UserRoleDto> roleMap=list.stream().collect(Collectors.toMap(UserRoleDto::getRoleSn, Function.identity()));
+					Set<String> roleSet=Stream.of(entity.getRoleList().split(",")).collect(Collectors.toSet());
+					Set<String> addRoles=new HashSet<>();
+					for(String roleSn:roleSet){
+						if(!roleMap.containsKey(roleSn)){
+							addRoles.add(roleSn);
+							roleMap.remove(roleSn);
+						}
+					}
+
+					// 删除管理员角色
+					if(!roleMap.isEmpty()){
+						int len2 = dataBaseDao.delete(SqlBuilder.build(SysUserRole.class,roleMap.values().stream().map(r->r.getId())));
+						LogsUtil.add(String.format("删除租户管理员角色，roles:%s,len:%s",roleMap.keySet(),len2));
+					}
+					// 新增管理员角色
+					if(!addRoles.isEmpty()){
+						List<SysRole> roles = dataBaseDao.findList(SqlBuilder.build(SysRole.class).where("sn in [sns]").where("sns",addRoles));
+						for(SysRole role:roles){
+							SysUserRole userRole=new SysUserRole();
+							userRole.setTenantId(entity.getId());
+							userRole.setUserId(admin.getId());
+							userRole.setRoleId(role.getId());
+							userRole.setEnDilivery(0);
+							dataBaseDao.insert(userRole);
+						}
+						LogsUtil.add(String.format("新增租户管理员角色，roles:%s",addRoles));
+					}
+				}
+
+			}
+
+		}
+		
+		return Results.build(len>0, entity.getId());
 	}
 
 
