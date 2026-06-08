@@ -304,6 +304,10 @@ public class UmsSmsService {
         if(ObjectUtil.isEmpty(sms.getGateway())){
             sms.setGateway(GTW_DEFAULT);
         }
+        if(sms.getBizId()==null){
+            //如果为空，则生成一个业务ID
+            sms.setBizId(IdGenHolder.generate());
+        }
 
         StringBuffer sendLogs=new StringBuffer();
         sendLogs.append(DateUtil.now()).append("\t短信网关:发送开始\n");
