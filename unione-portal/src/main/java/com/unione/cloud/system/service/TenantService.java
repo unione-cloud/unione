@@ -70,7 +70,7 @@ public class TenantService {
 	private long CACHE_TIME;
 
 	private Cache<Long, SysTenant> getCache(){
-		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:ID")
+		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:ID:")
 			.cacheType(CacheType.BOTH)
 			.cacheNullValue(true)
 			.expire(Duration.ofSeconds(CACHE_TIME))
@@ -79,7 +79,7 @@ public class TenantService {
 	}
 	
 	private Cache<String, Long> getCache2(){
-		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:NAME")
+		return cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:TENANT:NAME:")
 			.cacheType(CacheType.BOTH)
 			.cacheNullValue(true)
 			.expire(Duration.ofSeconds(CACHE_TIME))
