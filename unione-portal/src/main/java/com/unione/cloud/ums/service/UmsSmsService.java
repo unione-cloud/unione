@@ -322,6 +322,7 @@ public class UmsSmsService {
 
         UmsTmpl tmpl=ObjectUtil.isNotEmpty(sms.getTmpl())?umsTmplService.loadTmpl(sms.getTmpl()):null;
         String contents=umsTmplService.renderContents(tmpl, sms);
+        sms.setContents(contents);
 
         // 生成短信记录
         sendLogs.append(DateUtil.now()).append("\t迭代手机号，生成短信记录:").append("\n");
