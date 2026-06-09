@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.common.dto.DocFileDto;
 import com.unione.cloud.common.model.DocFile;
@@ -801,7 +802,7 @@ public class DocStoreController implements DocStoreService{
 			// 直接输出错误信息
 			AttachUtil.sendHtmlMessage(cache.getError(), response);
 		}else if(cache==null || file==null) {
-			DocFile tmp=dataBaseDao.findById(SqlBuilder.build(DocFile.class,fileId));
+			DocFile tmp=dataBaseDao.findById(SqlBuilder.build(DocFile.class,fileId).dataPermis(PermisRule.ALL));
 			
 			// 数据验证
 			if(tmp==null || tmp.getIsPublic()==null || tmp.getIsPublic()!=1) {
