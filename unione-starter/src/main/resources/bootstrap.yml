@@ -87,7 +87,7 @@ security:
   enabled: true
   filter:
     includes: /**
-    executions: /portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view,/portal/api/ads/*
+    executions: /portal/druid/**,/portal/api/system/contactUs/save,/portal/api/system/trendRss/save,/portal/api/system/changeLog/find,/portal/api/system/appInfo/query,/portal/api/system/onlineDoc/load,/portal/api/system/onlineDoc/view,/portal/api/system/onlineDoc/item/load,/portal/api/system/onlineDoc/item/view,/portal/api/ads/*,/portal/api/common/store/preview/public/*
   tcm:
     autoEnable: true
   jwt:
