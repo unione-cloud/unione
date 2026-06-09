@@ -45,7 +45,7 @@ public class SystemService {
     private HttpServletRequest request;
 
     private Cache<String, SystemInfoDto> getCache() {
-        Cache<String, SystemInfoDto> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:INFO")
+        Cache<String, SystemInfoDto> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:INFO:")
                 .cacheType(CacheType.BOTH)
                 .cacheNullValue(true)
                 .build());
@@ -89,6 +89,7 @@ public class SystemService {
      * @return
      */
     public SystemInfoDto load(String ctx) {
+        LogsUtil.add("加载系统:%s", ctx);
         SystemInfoDto sys = getCache().get(ctx);
         if (sys == null) {
             sys = redisService.doHpdl(new HpdlProcess<SystemInfoDto>(String.format("hpdl:system:%s", ctx)) {
@@ -112,7 +113,7 @@ public class SystemService {
                 }
             }, 300, 3);
         }
-        AssertUtil.service().notNull(sys, "系统信息不存在").notNull(sys.getId(), "系统信息不存在");
+        AssertUtil.service().notNull(sys, String.format("系统信息[%s]不存在", ctx)).notNull(sys.getId(), String.format("系统信息[%s]不存在", ctx));
         return sys;
     }
 
