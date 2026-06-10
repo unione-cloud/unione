@@ -83,7 +83,7 @@ public class SysConfigDefineController implements TreeFeignApi<SysConfigDefine>{
 	} 
 
 	@PostMapping("/setValue")
-	@Action(title="设置配置value",type = ActionType.Save,roles = UserRoles.SUPPERADMIN)
+	@Action(title="设置配置value",type = ActionType.Save)
 	@Operation(summary = "设置配置value", description = "参数name：配置名称，value：配置值")
 	public Results<Void> setValue(@RequestParam("sn") String sn,@RequestParam("value") String value){
 		sysConfigService.setValue(sn, value);
