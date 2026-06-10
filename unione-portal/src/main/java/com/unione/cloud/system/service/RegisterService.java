@@ -31,6 +31,7 @@ import com.unione.cloud.system.dto.UserRegister;
 import com.unione.cloud.system.model.SysTenant;
 import com.unione.cloud.system.model.SysUser;
 import com.unione.cloud.system.model.SysUserRole;
+import com.unione.cloud.ums.dto.SmsEntity;
 import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
@@ -133,13 +134,13 @@ public class RegisterService {
 	/**
 	 * 用户注册：必填属性
 	 */
-	@Value("${security.register.required.fields:username,tel,realName,password,company}")
+	@Value("${security.register.required.fields:username,tel,realName,company}")
 	private String REGISGER_REQUIRED_FIELDS;
 
 	private Map<Integer, List<Long>> REGISGER_DEFAULT_ROLES = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
-	@Value("${security.register.default.roles:{1:[105,108],2:[107,108]}}")
+	@Value("${security.register.default.roles:{1:[105,108,200,2057740052102303744],2:[107,108,200,2057740052102303744]}}")
 	public void setRegisterDefaultRoles(String maps) {
 		REGISGER_DEFAULT_ROLES = new HashMap<>();
 		Map<String, List<Object>> map = JSONUtil.toBean(maps, Map.class);
@@ -244,8 +245,8 @@ public class RegisterService {
 			List<SysUser> untelList = dataBaseDao.findList(untelBuilder);
 			untelList.stream().forEach(row->{
 				AssertUtil.service()
-					.isTrue(ObjectUtil.notEqual(row.getUsername(), param.getUsername()),"账号已存在")
-					.isTrue(ObjectUtil.notEqual(row.getTel(),param.getTel()),"手机号已存在");			
+					.isTrue(ObjectUtil.notEqual(row.getTel(),param.getTel()),"手机号已存在")
+					.isTrue(ObjectUtil.notEqual(row.getUsername(), param.getUsername()),"账号已存在");			
 			});
 			
 			LogsUtil.add("设置默认属性");
@@ -256,7 +257,7 @@ public class RegisterService {
 			user.setAuditSts(REGISGER_AUDIT_ENABLE?1:2);	//审核状态，字典USERAUDITSTS 1待审核，2审核通过，3审核不通过	
 			user.setCreatedBy(userId);
 			user.setLastUpdatedBy(userId);	
-			
+			user.setPwdText(param.getPwdText());
 			
 			LogsUtil.add("生成用户密码盐并对密码进行加密处理");
 			user.setPwdSalt(RandomUtil.randomString(16));
@@ -294,18 +295,26 @@ public class RegisterService {
 				LogsUtil.add("成功分配用户角色,roles:%s",roles);
 			}
 
-			// 如果是手机号注册，发送随机密码到手机号
-			if(!ObjectUtil.isEmpty(randomPwd)){
-				// LogsUtil.add("发送随机密码到手机号,randomPwd:%s,tel:%s",randomPwd,param.getTel());
-				// TODO
-			}
-
 			// 生成用户token
 			UserPrincipal principal=new UserPrincipal();
 			BeanUtil.copyProperties(user, principal);
 			String token = tokenService.transform(principal,user.getPwdText());
 			SessionHolder.setToken(token);
         	SessionHolder.setUserPrincipal(principal);
+
+			// 如果是手机号注册，发送随机密码到手机号
+			if(!ObjectUtil.isEmpty(randomPwd)){
+				// LogsUtil.add("发送随机密码到手机号,randomPwd:%s,tel:%s",randomPwd,param.getTel());
+				SmsEntity sms=new SmsEntity();
+				sms.setTels(List.of(user.getTel()));
+				sms.setScene("regsuccess");
+				sms.getVars().put("pwd", randomPwd);
+				sms.getVars().put("username", user.getUsername());
+				sms.getVars().put("realname", user.getRealName());
+				sms.getVars().put("company", param.getCompany());
+				sms.setContents("您好，您的账号已注册成功。登录账号:${username}，初始密码：${pwd}。请及时登录并修改密码，切勿泄露他人。");
+				umsSmsService.sendAsync(sms);
+			}
 
 			return Results.success();
 		}catch(Exception e) {

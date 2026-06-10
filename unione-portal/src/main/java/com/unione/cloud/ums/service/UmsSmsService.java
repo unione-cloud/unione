@@ -15,6 +15,7 @@ import javax.script.SimpleScriptContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.alicp.jetcache.Cache;
@@ -359,7 +360,15 @@ public class UmsSmsService {
         return Results.success(batchid);
     }
 
-    
+    /**
+     * 异步发送短信
+     * @param sms
+     * @return
+     */
+    @Async
+    public Results<Long> sendAsync(SmsEntity sms) {
+        return this.send(sms);
+    }
 
     /**
      * 发送验证码短信
