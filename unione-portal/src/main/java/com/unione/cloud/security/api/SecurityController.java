@@ -31,6 +31,7 @@ import com.unione.cloud.ums.service.UmsSmsService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.captcha.AbstractCaptcha;
+import cn.hutool.core.util.ObjectUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -204,6 +205,9 @@ public class SecurityController {
 	@Action(title="用户注册",type = ActionType.Register)
 	@Operation(summary= "用户注册",description = "需要开启注册功能并设置默认分配角色等信息")
 	public Results<Void> register(@RequestBody UserRegister param){
+		if(ObjectUtil.isEmpty(param.getUsername())){
+			param.setUsername(param.getTel());
+		}
 		log.info("用户注册：usrename:{}",param.getUsername());
 		LogsUtil.setUsername(param.getUsername());
 		
