@@ -118,6 +118,9 @@
 				</executions>
 				<configuration>
 					<skip>${maven.source.skip}</skip>
+					<excludes>
+						<exclude>**/*.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<!-- Javadoc -->
