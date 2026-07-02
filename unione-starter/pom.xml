@@ -27,19 +27,19 @@
 		<dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-form</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<!-- <dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-license</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency> -->
 
 		<!-- <dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-ads</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency> -->
 		
 	</dependencies>
