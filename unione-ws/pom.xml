@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>unione-ws</artifactId>
+    <name>unione-ws</name>
 
     <dependencies>
          <dependency>

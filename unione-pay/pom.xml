@@ -9,6 +9,7 @@
 		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>unione-pay</artifactId>
+    <name>unione-pay</name>
 
 	<dependencies>
 		<dependency>
