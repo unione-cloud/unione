@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>cloud.unione</groupId>
 		<artifactId>unione</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 	<artifactId>unione-codegen</artifactId>
 	<name>unione-codegen</name>
