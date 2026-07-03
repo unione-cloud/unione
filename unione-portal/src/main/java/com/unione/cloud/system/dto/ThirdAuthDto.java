@@ -12,7 +12,7 @@ public class ThirdAuthDto {
     @Schema(title = "认证URL")
     private String url;
 
-    @Schema(title = "认证类型",description="normal:常规认证、app:app认证、api:api认证、auth2:auth2认证")
+    @Schema(title = "认证类型",description="normal:常规认证、token:令牌认证、app:app认证、api:api认证、oauth2:Oauth2认证")
     private String type;
 
     //常规认证信息
