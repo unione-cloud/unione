@@ -34,7 +34,7 @@ public class CodeBuilderFactoryTest {
 	
 	private static   DataSource datasource() {
 		HikariDataSource ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8");
+		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:2706/unione?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8");
 		ds.setUsername("unione");
 		ds.setPassword("unione@db");
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -87,7 +87,7 @@ public class CodeBuilderFactoryTest {
 		SimpleUnioneProject mavenProject = new SimpleUnioneProject(packageName);
 		mavenProject.setRoot("d://codegen_"+DateUtil.format(new Date(), "yyyyMMdd-HHmmss"));
 
-		factory.gen("sys_system",mavenProject);
+		factory.gen("sys_3rd_auth",mavenProject);
 //		factory.genAll(mavenProject);
 	}
 

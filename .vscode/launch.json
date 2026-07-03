@@ -40,7 +40,7 @@
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
             "projectName": "unione-starter",
-            "vmArgs": "-Dfile.encoding=UTF-8 -Dspring.cloud.nacos.config.enabled=true -Dspring.cloud.nacos.config.server-addr=127.0.0.1:8848"
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dspring.cloud.nacos.config.enabled=false -Dspring.cloud.nacos.config.server-addr=127.0.0.1:2750"
         }
     ]
 }
