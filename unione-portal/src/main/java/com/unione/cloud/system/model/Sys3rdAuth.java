@@ -3,9 +3,6 @@ import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.beetsql.annotation.DataPermis;
-import com.unione.cloud.beetsql.annotation.QueryIgnore;
-import com.unione.cloud.beetsql.annotation.QueryIgnore.QueryType;
-import com.unione.cloud.beetsql.builder.SqlAction;
 import com.unione.cloud.core.model.Pojo;
 import com.unione.cloud.core.model.Validator;
 
@@ -85,13 +82,11 @@ public class Sys3rdAuth extends Pojo {
 	/**
 	* 认证信息，json存储
 	*/
-	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="认证信息，json存储",description="")
 	private String dataJson;
 	/**
 	* 认证脚本
 	*/
-	@QueryIgnore(QueryType.SELECT_LIST)
 	@Schema(title="认证脚本",description="长度为：65535")
 	private String scriptTxt;
 	/**
