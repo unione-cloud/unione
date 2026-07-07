@@ -143,7 +143,7 @@ public class DocFileController implements DocFileService{
 		}
 		
 		Results<List<DocFileDto>> result = dataBaseDao.findPages(SqlBuilder.build(params)
-		.where("tenantId=? and delFlag = 0 and isPublic=? and isShare=? and auditStatus=? and dirId=? and (userId=? or orgId=?) and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
+		.where("appCode=? and tenantId=? and delFlag = 0 and isPublic=? and isShare=? and auditStatus=? and dirId=? and (userId=? or orgId=?) and lvSn like [lvSn%] and title like [%title%] and type in [incTypes] and type not in [ninTypes]"));
 		
 		return Results.success(result.getBody().stream().map(item->BeanUtil.copyProperties(item, DocFile.class)).collect(Collectors.toList()))
 			.setPage(result.getPage())
