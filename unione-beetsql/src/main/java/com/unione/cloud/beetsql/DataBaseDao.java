@@ -228,7 +228,7 @@ public class DataBaseDao {
 		return this.sqlManager.update(sqlId, builder.toParams());
 	}
 
-		/**
+	/**
 	 * 	更新数据
 	 * @param builder
 	 * @return
@@ -251,6 +251,16 @@ public class DataBaseDao {
 		
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		return this.sqlManager.update(sqlId, builder.toParams());
+	}
+
+	/**
+	 * 	更新数据
+	 * @param sqlName
+	 * @param params
+	 * @return
+	 */
+	public <T> int update(String sqlName,Map<String,Object> params) {
+		return this.sqlManager.update(SqlId.of(sqlName), params);
 	}
 
 	/**
