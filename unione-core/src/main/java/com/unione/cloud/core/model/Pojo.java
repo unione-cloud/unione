@@ -2,6 +2,7 @@ package com.unione.cloud.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -78,5 +79,11 @@ public class Pojo implements Serializable {
 	 */
 	@Schema(title="修改人")
 	private Long lastUpdatedBy;
+
+	/**
+	 * 扩展属性
+	 */
+	@Schema(title="扩展属性",description="扩展属性，用于存储外键标题等信息")
+	private Map<String,Object> extra;
 	
 }
