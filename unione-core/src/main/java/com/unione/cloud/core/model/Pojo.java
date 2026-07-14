@@ -2,6 +2,7 @@ package com.unione.cloud.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -85,5 +86,19 @@ public class Pojo implements Serializable {
 	 */
 	@Schema(title="扩展属性",description="扩展属性，用于存储外键标题等信息")
 	private Map<String,Object> extra;
+
+	/**
+	 * 存储扩展属性
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public Pojo putExtra(String key,Object value) {
+		if(extra == null) {
+			extra = new HashMap<>();
+		}
+		extra.put(key, value);
+		return this;
+	}
 	
 }
