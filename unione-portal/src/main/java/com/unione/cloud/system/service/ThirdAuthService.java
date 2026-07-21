@@ -4,6 +4,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.SimpleScriptContext;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +61,13 @@ public class ThirdAuthService {
                 ScriptEngine scriptEngine = ScriptUtil.createJsEngine();
                 scriptEngine.put("polyglot.js.allowAllAccess", true);
 
-                scriptEngine.eval(String.format("(function(){\n %s \n})()", authObj.getScriptTxt()), context);
+                Object result = scriptEngine.eval(String.format("(function(){\n %s \n})()", authObj.getScriptTxt()), context);
+                log.debug("第三方认证处理结果:{}", result);
+                if(!ObjectUtil.isEmpty(result)){
+                    String json=JsonUtil.toJson(result);
+                    return JsonUtil.toBean(ThirdAuthDto.class, json);
+                }
+
             } catch (Exception e) {
                 log.error("第三方认证处理失败,id:{},url:{},auth:{},script:{}", authObj.getId(), authObj.getUrl(), auth,authObj.getScriptTxt(), e);
                 throw new ServiceException("第三方认证处理失败", e);
