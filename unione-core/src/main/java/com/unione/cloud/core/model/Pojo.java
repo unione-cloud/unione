@@ -19,6 +19,7 @@ import lombok.Data;
  * @since 1.0.0
  */
 @Data
+@Schema(title="系统持久化对象基类")
 public class Pojo implements Serializable {
 
 	private static final long serialVersionUID = -4658799939880991528L;
