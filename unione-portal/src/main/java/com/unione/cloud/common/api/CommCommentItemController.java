@@ -138,8 +138,9 @@ public class CommCommentItemController implements TreeFeignApi<CommCommentItem>{
 
 			// 加载子集列表
 			List<CommCommentItem> children = dataBaseDao.findList(SqlBuilder.build(CommCommentItem.class)
-				.where("delFlag = 0 and status = 1 and targetId = ? and forEach(lvsns,lvsn like [?%],or)")
+				.where("delFlag = 0 and (status = 1 or status = 2 and userId = ?) and targetId = ? and forEach(lvsns,lvsn like [?%],or)")
 				.where("targetId", params.getBody().getTargetId())
+				.where("userId", sessionService.getUserId())
 				.where("lvsns", lvsnList)
 				.sort(Sort.build("isTop", "desc"),Sort.build("ordered", "desc")));
 			list.addAll(children);
