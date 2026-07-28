@@ -2,6 +2,7 @@ package com.unione.cloud.common.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -129,7 +130,7 @@ public class CommCommentItemController implements TreeFeignApi<CommCommentItem>{
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 
-		List<CommCommentItem> list=results.getBody();
+		List<CommCommentItem> list=new ArrayList<>(results.getBody());
 
 		// 如果是同步加载
 		if(ObjectUtil.equal(target.getAsyncFlag(), 1) && !ObjectUtil.isEmpty(results.getBody())){
@@ -138,33 +139,43 @@ public class CommCommentItemController implements TreeFeignApi<CommCommentItem>{
 
 			// 加载子集列表
 			List<CommCommentItem> children = dataBaseDao.findList(SqlBuilder.build(CommCommentItem.class)
-				.where("delFlag = 0 and (status = 1 or status = 2 and userId = ?) and targetId = ? and forEach(lvsns,lvsn like [?%],or)")
+				.where("delFlag = 0 and (status = 1 or status = 2 and userId = ?) and targetId = ? and (forEach(lvsns,lvsn like [?%],or))")
 				.where("targetId", params.getBody().getTargetId())
 				.where("userId", sessionService.getUserId())
 				.where("lvsns", lvsnList)
 				.sort(Sort.build("isTop", "desc"),Sort.build("ordered", "desc")));
-			list.addAll(children);
-
-			// 构建树结构
-			Map<Long,CommCommentItem> roots=results.getBody().stream().collect(Collectors.toMap(CommCommentItem::getId, Function.identity()));
-			Map<Long,CommCommentItem> map = list.stream().collect(Collectors.toMap(CommCommentItem::getId, Function.identity()));
-			list.stream().forEach(item->{
-				CommCommentItem parent=map.get(item.getParentId());
-				if(parent==null){
-					CommCommentItem root=roots.get(item.getParentId());
-					if(root!=null){
-						if(root.getChildren()==null){
-							root.setChildren(new ArrayList<>());
+			if(!children.isEmpty()){
+				list.addAll(children);
+	
+				// 构建树结构
+				Map<Long,CommCommentItem> roots=results.getBody().stream().collect(Collectors.toMap(CommCommentItem::getId, Function.identity()));
+				Map<Long,CommCommentItem> map = new HashMap<>();
+				children.stream().forEach(row->{
+					if(roots.get(row.getId())==null){
+						map.put(row.getId(), row);
+					}
+				});
+				children.stream().forEach(item->{
+					if(roots.get(item.getId())!=null){
+						return;
+					}
+					CommCommentItem parent=map.get(item.getParentId());
+					if(parent==null){
+						CommCommentItem root=roots.get(item.getParentId());
+						if(root!=null){
+							if(root.getChildren()==null){
+								root.setChildren(new ArrayList<>());
+							}
+							root.getChildren().add(item);
 						}
-						root.getChildren().add(item);
+					}else{
+						if(parent.getChildren()==null){
+							parent.setChildren(new ArrayList<>());
+						}
+						parent.getChildren().add(item);
 					}
-				}else{
-					if(parent.getChildren()==null){
-						parent.setChildren(new ArrayList<>());
-					}
-					parent.getChildren().add(item);
-				}
-			});
+				});
+			}
 		}
 
 		// 渲染用户信息
@@ -181,7 +192,7 @@ public class CommCommentItemController implements TreeFeignApi<CommCommentItem>{
 			}
 		});
 
-		entity.setItems(list);
+		entity.setItems(results.getBody());
 		entity.setSetting(setting);
 		return Results.success(entity).setPage(results.getPage()).setPageSize(params.getPageSize());
 	}
