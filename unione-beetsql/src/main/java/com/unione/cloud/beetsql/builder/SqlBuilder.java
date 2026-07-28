@@ -1,6 +1,7 @@
 package com.unione.cloud.beetsql.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +106,7 @@ public class SqlBuilder<T> {
 	private Pattern inRegix=Pattern.compile("( IN )|( NOT IN )",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?\\.?\\w*[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	private Pattern humpFieldRegix=Pattern.compile("[\\s]*([a-z][A-Za-z0-9]+)[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN)|IS|like|(not like)|in|(not in)|is)[\\s]+");
+	private Pattern forEachRegix=Pattern.compile("forEach\\(([\\w\\d\\s,?%\\[\\]]+)\\)");
 	
 	private boolean initComplete;
 	
@@ -744,9 +746,21 @@ public class SqlBuilder<T> {
 			return;
 		}
 		
+		String whereSql=this.where;
+		
+		//forEach循环：预处理
+		List<String[]> forEachs=new ArrayList<String[]>();
+		Matcher forEachMatcher=forEachRegix.matcher(this.where);
+		while(forEachMatcher.find()) {
+			String full=forEachMatcher.group(0);
+			String content=forEachMatcher.group(1);
+			forEachs.add(new String[] {full,content});
+			whereSql=whereSql.replace(full, String.format("$FOR_EACH%s", forEachs.size()));
+		}
+		
 		// where条件处理
 		Matcher matcher=conditionRegix.matcher(this.where);
-		String whereSql=this.where.replaceAll("\\(", "\r\n-- @SQLTRIM_{\r\n(")
+		whereSql=whereSql.replaceAll("\\(", "\r\n-- @SQLTRIM_{\r\n(")
 				.replaceAll("\\)", ")\r\n-- @}\n")
 				.replaceAll("@SQLTRIM_", "@sqlTrim()");
 		while(matcher.find()) {
@@ -759,6 +773,17 @@ public class SqlBuilder<T> {
 		while(matcher.find()) {
 			String condition=matcher.group();
 			whereSql=whereSql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
+		}
+		
+		//forEach循环：处理
+		if(!forEachs.isEmpty()) {
+			int index=0;
+			for(String[] item:forEachs) {
+				index++;
+				String content=item[1];
+				String tmp=Arrays.asList(content.split(",")).stream().collect(Collectors.joining("\",\""));
+				whereSql=whereSql.replace(String.format("$FOR_EACH%s",index), String.format("${forEach(%s)}", String.format("\"%s\"", tmp)));
+			}
 		}
 		
 		// 关键字查询处理
