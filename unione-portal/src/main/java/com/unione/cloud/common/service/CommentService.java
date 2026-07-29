@@ -183,24 +183,23 @@ public class CommentService {
 
     /**
      * 加载评论明细
-     * @param tid
+     * @param id
      * @return
      */
-    public CommCommentItem loadItem(Long tid){
+    public CommCommentItem loadItem(Long id){
         Cache<Long,CommCommentItem> cache=getItemCache();
-        CommCommentItem entity=cache.get(tid);
+        CommCommentItem entity=cache.get(id);
         if(entity==null){
-            entity=redisService.doHpdl(new HpdlProcess<CommCommentItem>(String.format("hpdl:moment:item:%s", tid)) {
+            entity=redisService.doHpdl(new HpdlProcess<CommCommentItem>(String.format("hpdl:moment:item:%s", id)) {
                 @Override
                 public CommCommentItem process() {
-                    CommCommentItem tmp=cache.get(tid);
+                    CommCommentItem tmp=cache.get(id);
                     if(tmp==null){
-                        tmp = dataBaseDao.findOne(SqlBuilder.build(CommCommentItem.class)
-                            .where("targetId",tid).dataPermis(PermisRule.ALL));
+                        tmp = dataBaseDao.findById(SqlBuilder.build(CommCommentItem.class,id).dataPermis(PermisRule.ALL));
                         if(tmp==null){
                             tmp=new CommCommentItem();
                         }
-                        cache.put(tid,tmp);
+                        cache.put(id,tmp);
                     }
                     return tmp;
                 }
@@ -215,10 +214,10 @@ public class CommentService {
 
     /**
      * 清除明细缓存
-     * @param tid
+     * @param id
      */
-    public void clearItem(Long tid){
-        getItemCache().remove(tid);
+    public void clearItem(Long id){
+        getItemCache().remove(id);
     }
 
 
