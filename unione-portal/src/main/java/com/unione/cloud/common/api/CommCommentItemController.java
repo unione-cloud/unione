@@ -213,6 +213,7 @@ public class CommCommentItemController implements TreeFeignApi<CommCommentItem>{
 		entity.setDelFlag(0);
 		entity.setLikeCount(0);
 		entity.setIsTop(0);
+		entity.setOrdered(0);
 		if(ObjectUtil.equal(target.getAuditFlag(), 1)){
 			entity.setStatus(2);
 		}
