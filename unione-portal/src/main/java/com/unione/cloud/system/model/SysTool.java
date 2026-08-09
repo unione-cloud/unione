@@ -4,8 +4,11 @@ import org.beetl.sql.mapper.annotation.SqlResource;
 
 import com.unione.cloud.beetsql.annotation.DataPermis;
 import com.unione.cloud.core.model.Pojo;
+import com.unione.cloud.core.model.Validator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,6 +50,8 @@ public class SysTool extends Pojo {
 	* 标题
 	*/
 	@Schema(title="标题",description="长度为：50")
+	@NotNull(message="标题不能为空",groups = {Validator.save.class})
+	@NotEmpty(message="标题不能为空",groups = {Validator.save.class})
 	private String title;
 	/**
 	* URL
@@ -72,6 +77,7 @@ public class SysTool extends Pojo {
 	* 类型，字典TOOLTYPE  1应用，2工具
 	*/
 	@Schema(title="类型，字典TOOLTYPE  1应用，2工具",description="长度为：10")
+	@NotNull(message="类型不能为空",groups = {Validator.save.class})
 	private Integer types;
 	/**
 	* 响应方式，字典ANSWERWAY dialog对话框，drawer抽屉，router路由，page页面（浏览器新tab页）

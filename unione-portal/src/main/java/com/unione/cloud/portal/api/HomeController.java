@@ -20,6 +20,7 @@ import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.portal.dto.AppDto;
 import com.unione.cloud.portal.dto.ResourceDto;
 import com.unione.cloud.web.logs.LogsUtil;
@@ -52,7 +53,7 @@ public class HomeController {
 		Map<String, Object> params=new HashMap<>();
 		params.put("user", sessionService.getPrincipal());
 		params.put("type", type);	
-		params.put("isAdmin", sessionService.isAdmin());
+		params.put("isAdmin", sessionService.isAdmin()||sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN));
 		
 		List<AppDto> appList = dataBaseDao.findList("portal.permision.loadAppPermisForUser",params, AppDto.class);
 		List<Long> appIdsList = appList.stream().map(AppDto::getId).collect(Collectors.toList());

@@ -1,8 +1,12 @@
 package com.unione.cloud.system.service;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +48,19 @@ public class SystemService {
     @Autowired
     private HttpServletRequest request;
 
-    private Cache<String, SystemInfoDto> getCache() {
-        Cache<String, SystemInfoDto> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:INFO:")
+    private Cache<String, Long> getCtxCache() {
+        Cache<String, Long> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:CTX:")
                 .cacheType(CacheType.BOTH)
+                .localExpire(Duration.ofSeconds(60))
+                .cacheNullValue(true)
+                .build());
+        return cache;
+    }
+
+    private Cache<Long, SystemInfoDto> getIdCache() {
+        Cache<Long, SystemInfoDto> cache = cacheManager.getOrCreateCache(QuickConfig.newBuilder("SYS:SYSTEM:ID:")
+                .cacheType(CacheType.BOTH)
+                .localExpire(Duration.ofSeconds(60))
                 .cacheNullValue(true)
                 .build());
         return cache;
@@ -90,31 +104,61 @@ public class SystemService {
      */
     public SystemInfoDto load(String ctx) {
         LogsUtil.add("加载系统:%s", ctx);
-        SystemInfoDto sys = getCache().get(ctx);
-        if (sys == null) {
-            sys = redisService.doHpdl(new HpdlProcess<SystemInfoDto>(String.format("hpdl:system:%s", ctx)) {
-                @Override
-                public SystemInfoDto process() {
-                    SystemInfoDto tmp = getCache().get(ctx);
-                    if (tmp == null) {
-                        SysSystem sys = new SysSystem();
-                        sys.setCtx(ctx);
-                        sys.setDelFlag(0);
-                        sys = dataBaseDao.findOne(SqlBuilder.build(sys).dataPermis(PermisRule.ALL));
-                        if (sys == null) {
-                            tmp = new SystemInfoDto();
-                        } else {
-                            tmp = SystemInfoDto.from(sys);
-                        }
-                        getCache().put(ctx, tmp);
-                        return tmp;
-                    }
-                    return tmp;
-                }
-            }, 300, 3);
+        Long sysId=getCtxCache().get(ctx);
+        if(sysId!=null){
+            return getIdCache().get(sysId);
         }
+        SystemInfoDto sys = redisService.doHpdl(new HpdlProcess<SystemInfoDto>(String.format("hpdl:system:%s", ctx)) {
+            @Override
+            public SystemInfoDto process() {
+                Long sid=getCtxCache().get(ctx);
+                if(sid!=null){
+                    return getIdCache().get(sid);
+                }
+               
+                SystemInfoDto tmp = new SystemInfoDto();
+                SysSystem sys = new SysSystem();
+                sys.setCtx(ctx);
+                sys.setDelFlag(0);
+                sys = dataBaseDao.findOne(SqlBuilder.build(sys).dataPermis(PermisRule.ALL));
+                if (sys != null) {
+                    tmp = SystemInfoDto.from(sys);
+                    getCtxCache().put(ctx, sys.getId());
+                    getIdCache().put(sys.getId(), tmp);
+                }else{
+                    getCtxCache().put(ctx, -1L);
+                }
+                return tmp;
+            }
+        }, 300, 3);
+        
         AssertUtil.service().notNull(sys, String.format("系统信息[%s]不存在", ctx)).notNull(sys.getId(), String.format("系统信息[%s]不存在", ctx));
         return sys;
+    }
+
+    
+    public Map<Long,SystemInfoDto> load(Set<Long> ids){
+        Map<Long,SystemInfoDto> map = new HashMap<>();
+        Set<Long> uids=new HashSet<>();
+        ids.forEach(id->{
+            SystemInfoDto sys=getIdCache().get(id);
+            if(sys!=null){
+                map.put(id, sys);
+            }else{
+                uids.add(id);
+            }
+        });
+
+        if(!uids.isEmpty()){
+            dataBaseDao.findByIds(SqlBuilder.build(SysSystem.class,uids).dataPermis(PermisRule.ALL)).stream().forEach(sys->{
+                SystemInfoDto info=SystemInfoDto.from(sys);
+                getCtxCache().put(info.getCtx(),info.getId());
+                getIdCache().put(info.getId(), info);
+                map.put(info.getId(), info);
+            });
+        }
+
+        return map;
     }
 
     /**
@@ -123,7 +167,11 @@ public class SystemService {
      * @param ctx
      */
     public void clear(String ctx) {
-        getCache().remove(ctx);
+        Long sysId=getCtxCache().get(ctx);
+        if(sysId!=null){
+            getIdCache().remove(sysId);
+        }
+        getCtxCache().remove(ctx);
     }
 
     /**

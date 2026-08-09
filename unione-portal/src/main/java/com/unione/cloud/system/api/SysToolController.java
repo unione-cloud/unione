@@ -1,15 +1,21 @@
 package com.unione.cloud.system.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unione.cloud.beetsql.DataBaseDao;
+import com.unione.cloud.beetsql.annotation.DataPermis.PermisRule;
 import com.unione.cloud.beetsql.builder.SqlBuilder;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -18,10 +24,19 @@ import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.feign.PojoFeignApi;
 import com.unione.cloud.core.model.Validator;
+import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
+import com.unione.cloud.core.util.BeanUtils;
+import com.unione.cloud.system.dto.SystemInfoDto;
+import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysTool;
+import com.unione.cloud.system.service.ResourceService;
+import com.unione.cloud.system.service.SystemService;
 import com.unione.cloud.web.logs.LogsUtil;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +54,15 @@ public class SysToolController implements PojoFeignApi<SysTool>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SessionService sessionService;
+
+	@Autowired
+	private SystemService systemService;
+
+	@Autowired
+	private ResourceService resourceService;
 	
 	
 	@Override
@@ -46,11 +70,46 @@ public class SysToolController implements PojoFeignApi<SysTool>{
 	public Results<List<SysTool>> find(Params<SysTool> params) {
 		AssertUtil.service().notNull(params.getBody(),"请求参数body不能为空");
 				
+		params.getBody().setDelFlag(0);
 		Results<List<SysTool>> results = dataBaseDao.findPages(SqlBuilder.build(params));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
+		Set<Long> rids=results.getBody().stream().map(SysTool::getResId).collect(Collectors.toSet());
+		Set<Long> sids=results.getBody().stream().map(SysTool::getSysId).collect(Collectors.toSet());
+		Map<Long,SysResource> resMap=resourceService.load(rids);
+		Map<Long,SystemInfoDto> sysMap=systemService.load(sids);
+
+		results.getBody().forEach(tool->{
+			SysResource res=resMap.get(tool.getResId());
+			SystemInfoDto sys=sysMap.get(tool.getSysId());
+			if(res!=null){
+				tool.putExtra("resName", res.getTitle());
+			}
+			if(sys!=null){
+				tool.putExtra("sysName", sys.getCtx());
+			}
+		});
+		
 		return results;
+	}
+
+
+	@PostMapping("/load")
+	@Operation(description = "加载常用工具",summary = "加载当前用户拥有的常用工具列表（根据资源权限过滤）")
+	@Action(title="加载常用工具",type = ActionType.Query,nolog = true)
+	public Results<List<SysTool>> load(@RequestBody SysTool tool) {
+				
+		Map<String, Object> params=new HashMap<>();
+		params.put("isAdmin", sessionService.isAdmin()||sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN));
+		params.put("pricipal", sessionService.getPrincipal());
+		params.put("sysId", systemService.load().getId());
+		params.put("gname", tool.getGname());
+		params.put("types", tool.getTypes());
+
+		List<SysTool> list = dataBaseDao.findList("system.toolDto.loadUserToolsByPermis",params,SysTool.class);
+		
+		return Results.success(list);
 	}
 
 
@@ -59,10 +118,31 @@ public class SysToolController implements PojoFeignApi<SysTool>{
 	public Results<Long> save(@Validated(Validator.save.class) SysTool entity) {
 		// 参数处理
 		int len = 0;
+
+		BeanUtils.setDefaultValue(entity, "isGlobal", 0);
+		BeanUtils.setDefaultValue(entity, "status", 1);
+		BeanUtils.setDefaultValue(entity, "delFlag", 0);
+		BeanUtils.setDefaultValue(entity, "ordered", 0);
+		BeanUtils.setDefaultValue(entity, "isDefualt", 0);
+		BeanUtils.setDefaultValue(entity, "isPrivate", 0);
+		BeanUtils.setDefaultValue(entity, "configs", "{}");
+		
+		if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+			entity.setIsGlobal(0);
+		}
+
 		if(entity.getId()==null) {
 			len = dataBaseDao.insert(entity);
 		}else {
-			String[] fields = {"orgId","userId","sysId","resId","gname","title","url","isGlobal","isDefualt","isPrivate","types","answerWay","icon","picMax","picMid","picMix","ordered","status","descs","configs","delFlag"};
+			SysTool tmp = dataBaseDao.findById(SqlBuilder.build(SysTool.class,entity.getId()).dataPermis(PermisRule.ALL));
+			AssertUtil.service().notNull(tmp, "记录未找到");
+			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
+				AssertUtil.service().notNull(tmp, "记录未找到或无权限")
+					.isTrue(ObjectUtil.equal(tmp.getIsGlobal(), 0), "当前帐号无权修改全局数据")
+					.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
+			}
+
+			String[] fields = {"resId","gname","title","url","isGlobal","isDefualt","isPrivate","types","answerWay","icon","picMax","picMid","picMix","ordered","status","descs","configs"};
 			SqlBuilder<SysTool> sqlBuilder=SqlBuilder.build(entity).field(fields);
 		 	len = dataBaseDao.updateById(sqlBuilder);
 		}
@@ -105,7 +185,7 @@ public class SysToolController implements PojoFeignApi<SysTool>{
 		
 		// 执行删除
 		LogsUtil.add("删除数ids:"+JSONUtil.toJsonStr(ids));
-		int count = dataBaseDao.deleteById(SqlBuilder.build(SysTool.class,ids));
+		int count = dataBaseDao.deleteLogicById(SqlBuilder.build(SysTool.class,ids));
 		LogsUtil.add("成功删除记录数量:"+count);
 		
 		results.setSuccess(count>0);
@@ -115,19 +195,5 @@ public class SysToolController implements PojoFeignApi<SysTool>{
 		return results;
 	}
 
-
-//	@Override
-//  @Action(title="加载常用工具子级",type = ActionType.Query,nolog = true)
-//	public Results<List<SysTool>> children(Long pid){
-//		 //参数处理
-//		AssertUtil.service().notNull(pid, "参数pid不能为空");
-//		
-//		// 执行查询
-//		SysTool params = new SysTool();
-//		params.setParentId(pid);
-//		List<SysTool> rows = dataBaseDao.findList(SqlBuilder.build(params));
-//		
-//		return Results.success(rows);
-//	}
 
 }
