@@ -1,4 +1,9 @@
 /**
+ *
+ * 版本：1.0.2-V0.1.1
+ * 时间：2026-07-29
+ * 1、修改操作日志，增加设备id字段
+ *
  * 版本：UniOneV1.0.2-4-动态表单V0.1.0
  * 时间：2026-08-06
  * 1、增加表单数据溯源模块
@@ -9,6 +14,9 @@
  * 时间：2026-08-09
  * 1、修改常用工具表，增加系统ID，资源ID，分组名称，删除标记字段
  */
+
+ALTER TABLE `unione`.`sys_logs` 
+ADD COLUMN `DEVICE_ID` varchar(50) NULL COMMENT '设备ID' AFTER `PREQUEST_ID`;
 
 
 CREATE TABLE `sys_data_tracing_row` (

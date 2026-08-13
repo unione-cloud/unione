@@ -62,6 +62,11 @@ public class SysLogs extends Pojo {
 	@Schema(title="前置请求ID",description="长度为：19")
 	private Long prequestId;
 	/**
+	* 设备ID
+	*/
+	@Schema(title="设备ID",description="长度为：50")
+	private String deviceId;
+	/**
 	* 操作标题
 	*/
 	@Schema(title="操作标题",description="长度为：50")

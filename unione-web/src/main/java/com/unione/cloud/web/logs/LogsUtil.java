@@ -200,6 +200,21 @@ public class LogsUtil {
 				ent.setRequestId(IdGenHolder.generate());
 				sessionService.setVar("_unione_requestid", ent.getRequestId()+"");
 			}
+
+			String deviceId=sessionService.getAttr("deviceId");
+			if(StringUtils.isEmpty(deviceId)) {
+				deviceId=sessionService.getVar("_unione_deviceid");
+				if(StringUtils.isEmpty(deviceId)) {
+					HttpServletRequest req=getRequest();
+					if(req!=null){
+						deviceId=req.getHeader("deviceId");
+					}
+				}
+			}
+			if(!ObjectUtil.isEmpty(deviceId)) {
+				ent.setDeviceId(deviceId);
+				sessionService.setVar("_unione_deviceid", deviceId);
+			}
 		}
 		return ent;
 	} 
