@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
 import com.unione.cloud.core.dto.Results;
-import com.unione.cloud.system.dto.CodeLvsnParam;
 import com.unione.cloud.system.service.CodeTreeService;
+import com.unione.cloud.web.common.dto.CodeLvsnParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
