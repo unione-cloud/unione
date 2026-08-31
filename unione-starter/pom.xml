@@ -12,6 +12,17 @@
 	<name>unione-starter</name>
 	
 	<dependencies>
+		<!-- 数据库版本迁移：Flyway 11 起数据库支持按类型拆分，MySQL 需同时引入 flyway-mysql -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>${flyway.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+			<version>${flyway.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>cloud.unione</groupId>
 			<artifactId>unione-portal</artifactId>
