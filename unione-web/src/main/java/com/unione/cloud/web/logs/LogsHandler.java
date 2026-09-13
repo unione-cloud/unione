@@ -40,7 +40,7 @@ public class LogsHandler {
     private SessionService sessionService;
     
     @Around("@annotation(com.unione.cloud.core.annotation.Action)")
-    public Object logMethodExecution(ProceedingJoinPoint joinPoint){
+    public Object logMethodExecution(ProceedingJoinPoint joinPoint) throws Throwable {
 		// 获得Action注解
 		Action action = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Action.class);
 		LogsUtil.set(action.type(), action.title());
@@ -104,7 +104,11 @@ public class LogsHandler {
 				res.setCode(500);
 				res.setMessage("无操作权限");
 				LogsUtil.error("500","无操作权限");
-				return res;
+				if (!((MethodSignature) joinPoint.getSignature()).getReturnType().isInstance(res)) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.FORBIDDEN, "无操作权限");
+                }
+                return res;
 			}
 		}
 		// 操作权限验证 END
@@ -151,7 +155,11 @@ public class LogsHandler {
 			log.error("处理异常",e);
 
 			Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getMethod().getReturnType();
-			Object resultObj=null;
+			if (!Results.class.isAssignableFrom(returnType) && !returnType.isAssignableFrom(Results.class)) {
+                LogsUtil.error(e);
+                throw e;
+            }
+            Object resultObj=null;
 			try{
 				resultObj=returnType.getConstructor().newInstance();
 			}catch(Exception ex){}
