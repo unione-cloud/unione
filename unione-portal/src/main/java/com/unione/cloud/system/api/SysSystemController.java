@@ -264,7 +264,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 		resources.stream().forEach(res->{
 			TreeNodeDto node = new TreeNodeDto();
 			node.setNtype("res");
-			node.setPid(params.getBody().getParentId());
+			node.setPid(res.getParentId());
 			node.setId(res.getId());
 			node.setTitle(res.getTitle());
 			node.setIconName(res.getIconName());
