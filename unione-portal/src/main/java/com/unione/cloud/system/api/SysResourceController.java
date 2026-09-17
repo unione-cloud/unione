@@ -30,6 +30,7 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.dto.ResTreeNodeDto;
+import com.unione.cloud.system.dto.ResourceMoveDto;
 import com.unione.cloud.system.model.SysAppInfo;
 import com.unione.cloud.system.model.SysGroupPermis;
 import com.unione.cloud.system.model.SysOrganPermis;
@@ -37,6 +38,7 @@ import com.unione.cloud.system.model.SysPostPermis;
 import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserPermis;
+import com.unione.cloud.system.service.ResourceService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ArrayUtil;
@@ -63,6 +65,9 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 
 	@Autowired
 	private SessionService sessionService;
+
+	@Autowired
+	private ResourceService resourceService;
 	
 	
 	@Override
@@ -113,6 +118,13 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		}
 		
 		return Results.build(len>0, entity.getId());
+	}
+
+	@PostMapping("/move")
+	@Action(title="移动资源",type = ActionType.Save,roles = {UserRoles.FORMDEV})
+	@Operation(summary = "移动资源", description="调整同级顺序，或将资源节点移动到其他父节点")
+	public Results<Long> move(@RequestBody ResourceMoveDto request) {
+		return Results.success(resourceService.move(request));
 	}
 
 
