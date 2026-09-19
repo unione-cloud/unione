@@ -1,0 +1,83 @@
+CREATE TABLE `base_i18n_bundle` (
+    `ID` bigint NOT NULL COMMENT '主键',
+    `TENANT_ID` bigint DEFAULT NULL COMMENT '租户ID',
+    `ORG_ID` bigint DEFAULT NULL COMMENT '组织机构ID',
+    `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
+    `BUNDLE_CODE` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '语言包编码',
+    `BUNDLE_NAME` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '语言包名称',
+    `CLIENT_SCOPES` varchar(200) COLLATE utf8mb4_bin NOT NULL COMMENT '适用端，多个值以逗号分隔',
+    `DEFAULT_LOCALE` varchar(50) COLLATE utf8mb4_bin NOT NULL COMMENT '默认语言代码',
+    `CURRENT_RELEASE_ID` bigint DEFAULT NULL COMMENT '当前发布版本ID',
+    `DESCS` varchar(500) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '说明',
+    `STATUS` int NOT NULL COMMENT '状态：1启用，0停用',
+    `DEL_FLAG` int NOT NULL DEFAULT 0 COMMENT '删除标记：0正常，1删除',
+    `CREATED` timestamp NOT NULL COMMENT '创建时间',
+    `CREATED_BY` bigint NOT NULL COMMENT '创建人',
+    `LAST_UPDATED` timestamp NOT NULL COMMENT '更新时间',
+    `LAST_UPDATED_BY` bigint NOT NULL COMMENT '更新人',
+    PRIMARY KEY (`ID`),
+    UNIQUE KEY `UK_I18N_BUNDLE_TENANT_CODE` (`TENANT_ID`, `BUNDLE_CODE`),
+    KEY `IDX_I18N_BUNDLE_STATUS` (`STATUS`, `DEL_FLAG`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='基础：界面语言包';
+
+CREATE TABLE `base_i18n_entry` (
+    `ID` bigint NOT NULL COMMENT '主键',
+    `TENANT_ID` bigint DEFAULT NULL COMMENT '租户ID',
+    `ORG_ID` bigint DEFAULT NULL COMMENT '组织机构ID',
+    `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
+    `BUNDLE_ID` bigint NOT NULL COMMENT '语言包ID',
+    `LOCALE_CODE` varchar(50) COLLATE utf8mb4_bin NOT NULL COMMENT '语言代码或方言代码',
+    `ENTRY_KEY` varchar(250) COLLATE utf8mb4_bin NOT NULL COMMENT '文案键',
+    `ENTRY_VALUE` text COLLATE utf8mb4_bin NOT NULL COMMENT '文案值',
+    `SOURCE_TYPE` varchar(20) COLLATE utf8mb4_bin NOT NULL DEFAULT 'manual' COMMENT '翻译来源：manual或ai',
+    `REVISION_NO` int NOT NULL DEFAULT 1 COMMENT '修订号',
+    `STATUS` int NOT NULL COMMENT '状态：1启用，0停用',
+    `DEL_FLAG` int NOT NULL DEFAULT 0 COMMENT '删除标记：0正常，1删除',
+    `CREATED` timestamp NOT NULL COMMENT '创建时间',
+    `CREATED_BY` bigint NOT NULL COMMENT '创建人',
+    `LAST_UPDATED` timestamp NOT NULL COMMENT '更新时间',
+    `LAST_UPDATED_BY` bigint NOT NULL COMMENT '更新人',
+    PRIMARY KEY (`ID`),
+    UNIQUE KEY `UK_I18N_ENTRY_BUNDLE_LOCALE_KEY` (`BUNDLE_ID`, `LOCALE_CODE`, `ENTRY_KEY`),
+    KEY `IDX_I18N_ENTRY_LOCALE` (`BUNDLE_ID`, `LOCALE_CODE`, `STATUS`, `DEL_FLAG`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='基础：界面语言条目';
+
+CREATE TABLE `base_i18n_release` (
+    `ID` bigint NOT NULL COMMENT '主键',
+    `TENANT_ID` bigint DEFAULT NULL COMMENT '租户ID',
+    `ORG_ID` bigint DEFAULT NULL COMMENT '组织机构ID',
+    `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
+    `BUNDLE_ID` bigint NOT NULL COMMENT '语言包ID',
+    `VERSION_NO` int NOT NULL COMMENT '版本号',
+    `VERSION_DESC` varchar(500) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '版本说明',
+    `SNAPSHOT_DATA` longtext COLLATE utf8mb4_bin NOT NULL COMMENT '发布快照JSON',
+    `CHECKSUM` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '快照SHA-256校验值',
+    `ROLLBACK_FROM_ID` bigint DEFAULT NULL COMMENT '回滚来源版本ID',
+    `RELEASED` timestamp NOT NULL COMMENT '发布时间',
+    `RELEASED_BY` bigint NOT NULL COMMENT '发布人',
+    `DEL_FLAG` int NOT NULL DEFAULT 0 COMMENT '删除标记：0正常，1删除',
+    `CREATED` timestamp NOT NULL COMMENT '创建时间',
+    `CREATED_BY` bigint NOT NULL COMMENT '创建人',
+    `LAST_UPDATED` timestamp NOT NULL COMMENT '更新时间',
+    `LAST_UPDATED_BY` bigint NOT NULL COMMENT '更新人',
+    PRIMARY KEY (`ID`),
+    UNIQUE KEY `UK_I18N_RELEASE_BUNDLE_VERSION` (`BUNDLE_ID`, `VERSION_NO`),
+    KEY `IDX_I18N_RELEASE_TIME` (`BUNDLE_ID`, `RELEASED`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='基础：界面语言包发布版本';
+
+CREATE TABLE `base_i18n_pref` (
+    `ID` bigint NOT NULL COMMENT '主键',
+    `TENANT_ID` bigint DEFAULT NULL COMMENT '租户ID',
+    `ORG_ID` bigint DEFAULT NULL COMMENT '组织机构ID',
+    `USER_ID` bigint NOT NULL COMMENT '用户ID',
+    `INTERFACE_LOCALE` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '界面语言',
+    `CONTENT_LOCALE` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '内容语言',
+    `DIALECT_LOCALE` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '方言偏好',
+    `DEL_FLAG` int NOT NULL DEFAULT 0 COMMENT '删除标记：0正常，1删除',
+    `CREATED` timestamp NOT NULL COMMENT '创建时间',
+    `CREATED_BY` bigint NOT NULL COMMENT '创建人',
+    `LAST_UPDATED` timestamp NOT NULL COMMENT '更新时间',
+    `LAST_UPDATED_BY` bigint NOT NULL COMMENT '更新人',
+    PRIMARY KEY (`ID`),
+    UNIQUE KEY `UK_I18N_PREF_TENANT_USER` (`TENANT_ID`, `USER_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='基础：用户语言偏好';

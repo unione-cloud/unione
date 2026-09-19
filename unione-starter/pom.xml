@@ -58,6 +58,14 @@
 	<build>
 		<finalName>portal</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.2</version>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
 			<!-- spring-boot-maven-plugin:应用打包插件 -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
