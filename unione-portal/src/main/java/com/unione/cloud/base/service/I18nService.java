@@ -84,7 +84,13 @@ public class I18nService {
         entity.setBundleCode(request.getBundleCode().trim());
         entity.setBundleName(request.getBundleName().trim());
         entity.setClientScopes(I18nRules.normalizeClientScopes(request.getClientScopes()));
-        entity.setDefaultLocale(I18nRules.normalizeLocale(request.getDefaultLocale()));
+        AssertUtil.service().isTrue(Objects.equals(request.getDefaultLocale(), 0)
+                || Objects.equals(request.getDefaultLocale(), 1),
+                "默认语言只能为0或1");
+        entity.setDefaultLocale(request.getDefaultLocale());
+        if (Objects.equals(entity.getDefaultLocale(), 0)) {
+            assertAnotherDefaultBundleExists(entity.getId());
+        }
         entity.setDescs(request.getDescs());
         entity.setStatus(request.getStatus() == null ? 1 : request.getStatus());
         I18nRules.validateStatus(entity.getStatus());
@@ -96,6 +102,9 @@ public class I18nService {
             dataBaseDao.updateById(SqlBuilder.build(entity).field(
                     "bundleCode", "bundleName", "clientScopes", "defaultLocale", "descs", "status"));
         }
+        if (Objects.equals(entity.getDefaultLocale(), 1)) {
+            clearOtherDefaultBundles(entity);
+        }
         return entity.getId();
     }
 
@@ -104,7 +113,9 @@ public class I18nService {
         assertPlatformAdmin();
         AssertUtil.service().isTrue(ids != null && !ids.isEmpty(), "参数ids不能为空");
         ids.forEach(id -> {
-            loadOwnedBundle(id);
+            BaseI18nBundle bundle = loadOwnedBundle(id);
+            AssertUtil.service().isTrue(!Objects.equals(bundle.getDefaultLocale(), 1),
+                    "默认语言包不能删除，请先将其他语言包设为默认");
             AssertUtil.service().isTrue(findEntries(id, null).isEmpty(), "语言包存在条目，不能删除");
             AssertUtil.service().isTrue(findReleases(id).isEmpty(), "语言包存在发布版本，不能删除");
         });
@@ -300,9 +311,10 @@ public class I18nService {
     }
 
     public MissingStatsResponse missingStats(Long bundleId, String localeCode) {
-        BaseI18nBundle bundle = loadOwnedBundle(bundleId);
+        loadOwnedBundle(bundleId);
+        BaseI18nBundle defaultBundle = findDefaultBundle();
         String normalizedLocale = I18nRules.normalizeLocale(localeCode);
-        Set<String> referenceKeys = findEntries(bundleId, bundle.getDefaultLocale()).stream()
+        Set<String> referenceKeys = findEntries(defaultBundle.getId(), defaultBundle.getBundleCode()).stream()
                 .filter(entry -> Objects.equals(entry.getStatus(), 1))
                 .map(BaseI18nEntry::getEntryKey).collect(Collectors.toSet());
         Set<String> translatedKeys = findEntries(bundleId, normalizedLocale).stream()
@@ -389,6 +401,34 @@ public class I18nService {
         BaseI18nBundle existing = dataBaseDao.findOne(SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
         AssertUtil.service().isTrue(existing == null || Objects.equals(existing.getId(), currentId),
                 "语言包编码已存在");
+    }
+
+    private void clearOtherDefaultBundles(BaseI18nBundle current) {
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1).defaultLocale(1).build();
+        condition.setTenantId(sessionService.getTenantId());
+        dataBaseDao.findList(SqlBuilder.build(condition).dataPermis(PermisRule.ALL)).stream()
+                .filter(bundle -> !Objects.equals(bundle.getId(), current.getId()))
+                .forEach(bundle -> {
+                    bundle.setDefaultLocale(0);
+                    dataBaseDao.updateById(SqlBuilder.build(bundle).field("defaultLocale"));
+                });
+    }
+
+    private void assertAnotherDefaultBundleExists(Long currentId) {
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1).defaultLocale(1).build();
+        condition.setTenantId(sessionService.getTenantId());
+        boolean exists = dataBaseDao.findList(SqlBuilder.build(condition).dataPermis(PermisRule.ALL)).stream()
+                .anyMatch(bundle -> !Objects.equals(bundle.getId(), currentId));
+        AssertUtil.service().isTrue(exists, "必须保留一个默认语言包");
+    }
+
+    private BaseI18nBundle findDefaultBundle() {
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1).defaultLocale(1).build();
+        condition.setTenantId(sessionService.getTenantId());
+        BaseI18nBundle defaultBundle = dataBaseDao.findOne(
+                SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
+        AssertUtil.service().notNull(defaultBundle, "未配置默认语言包");
+        return defaultBundle;
     }
 
     private void assertEntryUnique(Long currentId, Long bundleId, String localeCode, String entryKey) {
@@ -559,6 +599,8 @@ public class I18nService {
         response.setClientScopes(entity.getClientScopes());
         response.setDefaultLocale(entity.getDefaultLocale());
         response.setCurrentReleaseId(entity.getCurrentReleaseId());
+        response.setCurrentVersionNo(entity.getCurrentReleaseId() == null
+                ? 0 : loadRelease(entity.getCurrentReleaseId()).getVersionNo());
         response.setDescs(entity.getDescs());
         response.setStatus(entity.getStatus());
         return response;

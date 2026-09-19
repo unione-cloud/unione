@@ -71,14 +71,14 @@ public class BaseI18nBundleController {
 
     @PostMapping("/missing")
     @Operation(summary = "统计语言条目缺失情况")
-    public Results<MissingStatsResponse> missing(@RequestParam Long bundleId,
-            @RequestParam String localeCode) {
+    public Results<MissingStatsResponse> missing(@RequestParam("bundleId") Long bundleId,
+            @RequestParam("localeCode") String localeCode) {
         return Results.success(i18nService.missingStats(bundleId, localeCode));
     }
 
     @PostMapping("/history")
     @Operation(summary = "查询语言包发布版本")
-    public Results<List<ReleaseResponse>> history(@RequestParam Long bundleId) {
+    public Results<List<ReleaseResponse>> history(@RequestParam("bundleId") Long bundleId) {
         return Results.success(i18nService.listReleases(bundleId));
     }
 
@@ -110,4 +110,3 @@ public class BaseI18nBundleController {
 
 
 }
-

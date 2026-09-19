@@ -51,6 +51,11 @@ class I18nModuleStructureTests {
         assertTrue(sql.contains("UK_I18N_ENTRY_BUNDLE_LOCALE_KEY"));
         assertTrue(sql.contains("UK_I18N_RELEASE_BUNDLE_VERSION"));
         assertTrue(sql.contains("UK_I18N_PREF_TENANT_USER"));
+
+        Path defaultLocaleMigration = Path.of("src/main/resources/db/migration/mysql/"
+                + "V1_0_3_20260919_02__change_i18n_default_locale_to_flag.sql");
+        String defaultLocaleSql = Files.readString(defaultLocaleMigration, StandardCharsets.UTF_8);
+        assertTrue(defaultLocaleSql.contains("MODIFY COLUMN `DEFAULT_LOCALE` int NOT NULL DEFAULT 0"));
     }
 
     @Test
@@ -62,6 +67,8 @@ class I18nModuleStructureTests {
                 BaseI18nBundleController.class.getDeclaredField("i18nService").getType());
         assertEquals(I18nService.class,
                 BaseI18nEntryController.class.getDeclaredField("i18nService").getType());
+        assertEquals(Integer.class, BaseI18nBundle.class.getDeclaredField("defaultLocale").getType());
+        assertEquals(Integer.class, BundleSaveRequest.class.getDeclaredField("defaultLocale").getType());
     }
 
     @Test
@@ -85,7 +92,7 @@ class I18nModuleStructureTests {
     @Test
     void normalizesLocaleAndClientScopes() {
         assertEquals("zh-CN", I18nRules.normalizeLocale("ZH_cn"));
-        assertEquals("author,user,admin", I18nRules.normalizeClientScopes("author,user,author,admin"));
+        assertEquals("all,app,pc", I18nRules.normalizeClientScopes("all,app,all,pc"));
         assertEquals("manual", I18nRules.normalizeSourceType(null));
         assertEquals("ai", I18nRules.normalizeSourceType("AI"));
     }

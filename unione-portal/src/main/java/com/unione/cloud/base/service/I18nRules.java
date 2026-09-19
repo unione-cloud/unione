@@ -45,7 +45,7 @@ public final class I18nRules {
                 .map(value -> value.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         AssertUtil.service().isTrue(!scopes.isEmpty() && CLIENT_SCOPES.containsAll(scopes),
-                "适用端只能包含author、user、admin");
+                "适用端只能包含all、app、pc");
         return String.join(",", scopes);
     }
 

@@ -39,8 +39,8 @@ public class BaseI18nController {
 
     @PostMapping("/lang/data")
     @Operation(summary = "加载语言包数据")
-    public Results<PublishedBundleResponse> langData(@RequestParam String bundleCode,
-            @RequestParam(required = false) Long releaseId) {
+    public Results<PublishedBundleResponse> langData(@RequestParam("bundleCode") String bundleCode,
+            @RequestParam(value = "releaseId", required = false) Long releaseId) {
         return Results.success(i18nService.getPublished(bundleCode, releaseId));
     }
 

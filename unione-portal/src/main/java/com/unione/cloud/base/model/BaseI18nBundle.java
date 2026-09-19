@@ -47,8 +47,8 @@ public class BaseI18nBundle extends Pojo {
     @Schema(title = "适用端，多个值以逗号分隔")
     private String clientScopes;
 
-    @Schema(title = "默认语言代码")
-    private String defaultLocale;
+    @Schema(title = "是否默认语言，1是，0否")
+    private Integer defaultLocale;
 
     @Schema(title = "当前发布版本ID")
     private Long currentReleaseId;

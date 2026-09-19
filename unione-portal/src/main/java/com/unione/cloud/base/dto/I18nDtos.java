@@ -27,8 +27,8 @@ public final class I18nDtos {
         private String bundleName;
         @NotBlank(message = "适用端不能为空")
         private String clientScopes;
-        @NotBlank(message = "默认语言不能为空")
-        private String defaultLocale;
+        @NotNull(message = "默认语言不能为空")
+        private Integer defaultLocale;
         private String descs;
         private Integer status;
     }
@@ -41,8 +41,9 @@ public final class I18nDtos {
         private String bundleCode;
         private String bundleName;
         private String clientScopes;
-        private String defaultLocale;
+        private Integer defaultLocale;
         private Long currentReleaseId;
+        private Integer currentVersionNo;
         private String descs;
         private Integer status;
     }
@@ -122,7 +123,7 @@ public final class I18nDtos {
         private Integer personalized;
         private Long globalBundleId;
         private String bundleCode;
-        private String defaultLocale;
+        private Integer defaultLocale;
         private String clientScopes;
         private Long releaseId;
         private Integer versionNo;
