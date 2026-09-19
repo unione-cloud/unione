@@ -19,6 +19,7 @@ import com.unione.cloud.base.dto.I18nDtos.PublishRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishedBundleResponse;
 import com.unione.cloud.base.dto.I18nDtos.ReleaseResponse;
 import com.unione.cloud.base.dto.I18nDtos.RollbackRequest;
+import com.unione.cloud.base.dto.I18nDtos.TenantCustomizationRequest;
 import com.unione.cloud.base.service.I18nService;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -44,7 +45,7 @@ public class BaseI18nBundleController {
     }
 
     @PostMapping("/save")
-    @Action(title = "保存界面语言包", type = ActionType.Save, roles = {UserRoles.FORMDEV})
+    @Action(title = "保存全局界面语言包", type = ActionType.Save, roles = {UserRoles.SUPPERADMIN})
     public Results<Long> save(@Validated @RequestBody BundleSaveRequest request) {
         return Results.success(i18nService.saveBundle(request));
     }
@@ -62,7 +63,7 @@ public class BaseI18nBundleController {
     }
 
     @PostMapping("/delete")
-    @Action(title = "删除界面语言包", type = ActionType.Delete, roles = {UserRoles.FORMDEV})
+    @Action(title = "删除全局界面语言包", type = ActionType.Delete, roles = {UserRoles.SUPPERADMIN})
     public Results<Integer> delete(@RequestBody Set<Long> ids) {
         int count = i18nService.deleteBundles(ids);
         return Results.build(count > 0, count);
@@ -82,18 +83,31 @@ public class BaseI18nBundleController {
     }
 
     @PostMapping("/rollback")
-    @Action(title = "回滚界面语言包", type = ActionType.Save, roles = {UserRoles.FORMDEV})
+    @Action(title = "回滚界面语言包", type = ActionType.Save,
+            roles = {UserRoles.SUPPERADMIN, UserRoles.TENANTADMIN})
     public Results<PublishedBundleResponse> rollback(@Validated @RequestBody RollbackRequest request) {
         return Results.success(i18nService.rollback(request));
     }
     
     @PostMapping("/release")
-    @Action(title = "发布界面语言包", type = ActionType.Save, roles = {UserRoles.FORMDEV})
+    @Action(title = "发布界面语言包", type = ActionType.Save,
+            roles = {UserRoles.SUPPERADMIN, UserRoles.TENANTADMIN})
     public Results<PublishedBundleResponse> release(@Validated @RequestBody PublishRequest request) {
         return Results.success(i18nService.release(request));
     }
 
+    @PostMapping("/personalize")
+    @Action(title = "创建租户个性化方言配置", type = ActionType.Save, roles = {UserRoles.TENANTADMIN})
+    public Results<Long> personalize(@Validated @RequestBody TenantCustomizationRequest request) {
+        return Results.success(i18nService.personalize(request));
+    }
+
+    @PostMapping("/restore")
+    @Action(title = "还原租户个性化方言配置", type = ActionType.Save, roles = {UserRoles.TENANTADMIN})
+    public Results<Integer> restore(@Validated @RequestBody TenantCustomizationRequest request) {
+        return Results.success(i18nService.restoreTenantCustomization(request));
+    }
+
 
 }
-
 

@@ -22,6 +22,7 @@ import com.unione.cloud.base.dto.I18nDtos.PublishRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishedBundleResponse;
 import com.unione.cloud.base.dto.I18nDtos.ReleaseResponse;
 import com.unione.cloud.base.dto.I18nDtos.RollbackRequest;
+import com.unione.cloud.base.dto.I18nDtos.TenantCustomizationRequest;
 import com.unione.cloud.base.dto.I18nDtos.MissingStatsResponse;
 import com.unione.cloud.base.model.BaseI18nBundle;
 import com.unione.cloud.base.model.BaseI18nEntry;
@@ -35,6 +36,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 import com.unione.cloud.core.dto.Params;
 import com.unione.cloud.core.dto.Results;
 import com.unione.cloud.core.security.SessionService;
+import com.unione.cloud.core.security.UserRoles;
 
 /** 方言模块基础数据服务。 */
 @Service
@@ -74,7 +76,10 @@ public class I18nService {
 
     @Transactional(rollbackFor = Exception.class)
     public Long saveBundle(BundleSaveRequest request) {
+        assertPlatformAdmin();
         BaseI18nBundle entity = request.getId() == null ? new BaseI18nBundle() : loadOwnedBundle(request.getId());
+        AssertUtil.service().isTrue(entity.getId() == null || Objects.equals(entity.getIsGlobal(), 1),
+                "租户个性化语言包不能通过通用保存接口修改");
         assertBundleCodeUnique(request.getId(), request.getBundleCode().trim());
         entity.setBundleCode(request.getBundleCode().trim());
         entity.setBundleName(request.getBundleName().trim());
@@ -84,6 +89,7 @@ public class I18nService {
         entity.setStatus(request.getStatus() == null ? 1 : request.getStatus());
         I18nRules.validateStatus(entity.getStatus());
         if (entity.getId() == null) {
+            entity.setIsGlobal(1);
             fillOwner(entity);
             dataBaseDao.insert(entity);
         } else {
@@ -95,6 +101,7 @@ public class I18nService {
 
     @Transactional(rollbackFor = Exception.class)
     public int deleteBundles(Set<Long> ids) {
+        assertPlatformAdmin();
         AssertUtil.service().isTrue(ids != null && !ids.isEmpty(), "参数ids不能为空");
         ids.forEach(id -> {
             loadOwnedBundle(id);
@@ -135,7 +142,11 @@ public class I18nService {
 
     @Transactional(rollbackFor = Exception.class)
     public Long saveEntry(EntrySaveRequest request) {
-        loadOwnedBundle(request.getBundleId());
+        BaseI18nBundle bundle = loadAccessibleBundle(request.getBundleId());
+        assertCanManage(bundle);
+        if (Objects.equals(bundle.getIsGlobal(), 0) && request.getId() == null) {
+            assertGlobalEntryExists(bundle.getGlobalBundleId(), request.getLocaleCode(), request.getEntryKey());
+        }
         BaseI18nEntry entity = request.getId() == null ? new BaseI18nEntry() : loadOwnedEntry(request.getId());
         if (entity.getId() != null) {
             AssertUtil.service().isTrue(Objects.equals(entity.getBundleId(), request.getBundleId()),
@@ -164,6 +175,7 @@ public class I18nService {
 
     @Transactional(rollbackFor = Exception.class)
     public int deleteEntries(Set<Long> ids) {
+        assertPlatformAdmin();
         AssertUtil.service().isTrue(ids != null && !ids.isEmpty(), "参数ids不能为空");
         ids.forEach(this::loadOwnedEntry);
         return dataBaseDao.deleteById(SqlBuilder.build(BaseI18nEntry.class, ids));
@@ -176,21 +188,30 @@ public class I18nService {
 
     @Transactional(rollbackFor = Exception.class)
     public PublishedBundleResponse release(PublishRequest request) {
-        BaseI18nBundle bundle = loadOwnedBundle(request.getBundleId());
+        BaseI18nBundle bundle = loadAccessibleBundle(request.getBundleId());
+        assertCanManage(bundle);
         AssertUtil.service().isTrue(Objects.equals(bundle.getStatus(), 1), "停用的语言包不能发布");
         List<BaseI18nEntry> enabledEntries = findEntries(bundle.getId(), null).stream()
                 .filter(entry -> Objects.equals(entry.getStatus(), 1))
                 .toList();
-        AssertUtil.service().isTrue(!enabledEntries.isEmpty(), "语言包没有可发布的启用条目");
-        String snapshotData = I18nSnapshotCodec.encode(enabledEntries);
+        String snapshotData;
+        if (Objects.equals(bundle.getIsGlobal(), 1)) {
+            AssertUtil.service().isTrue(!enabledEntries.isEmpty(), "语言包没有可发布的启用条目");
+            snapshotData = I18nSnapshotCodec.encode(enabledEntries);
+        } else {
+            BaseI18nBundle globalBundle = loadGlobalBundle(bundle.getGlobalBundleId());
+            BaseI18nRelease globalRelease = loadCurrentRelease(globalBundle);
+            snapshotData = I18nSnapshotCodec.merge(globalRelease.getSnapshotData(), enabledEntries);
+        }
         return createRelease(bundle, request.getVersionDesc(), snapshotData,
                 I18nSnapshotCodec.checksum(snapshotData), null);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public PublishedBundleResponse rollback(RollbackRequest request) {
-        BaseI18nBundle bundle = loadOwnedBundle(request.getBundleId());
-        BaseI18nRelease source = loadOwnedRelease(request.getReleaseId());
+        BaseI18nBundle bundle = loadAccessibleBundle(request.getBundleId());
+        assertCanManage(bundle);
+        BaseI18nRelease source = loadRelease(request.getReleaseId());
         AssertUtil.service().isTrue(Objects.equals(source.getBundleId(), bundle.getId()),
                 "回滚版本不属于当前语言包");
         AssertUtil.service().isTrue(I18nSnapshotCodec.verify(source.getSnapshotData(), source.getChecksum()),
@@ -202,14 +223,22 @@ public class I18nService {
 
     public PublishedBundleResponse getPublished(String bundleCode, Long releaseId) {
         AssertUtil.service().isTrue(bundleCode != null && !bundleCode.isBlank(), "语言包编码不能为空");
-        BaseI18nBundle condition = BaseI18nBundle.builder().bundleCode(bundleCode.trim()).build();
-        condition.setTenantId(sessionService.getTenantId());
-        BaseI18nBundle bundle = dataBaseDao.findOne(
-                SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
-        AssertUtil.service().notNull(bundle, "语言包不存在");
-        Long selectedReleaseId = releaseId == null ? bundle.getCurrentReleaseId() : releaseId;
-        AssertUtil.service().notNull(selectedReleaseId, "语言包尚未发布");
-        BaseI18nRelease release = loadOwnedRelease(selectedReleaseId);
+        BaseI18nBundle globalBundle = findGlobalBundle(bundleCode.trim());
+        BaseI18nBundle tenantBundle = findTenantBundle(globalBundle.getId());
+        BaseI18nBundle bundle;
+        BaseI18nRelease release;
+        if (releaseId == null) {
+            bundle = tenantBundle != null && tenantBundle.getCurrentReleaseId() != null
+                    ? tenantBundle : globalBundle;
+            release = loadCurrentRelease(bundle);
+        } else {
+            release = loadRelease(releaseId);
+            boolean globalRelease = Objects.equals(release.getBundleId(), globalBundle.getId());
+            boolean tenantRelease = tenantBundle != null
+                    && Objects.equals(release.getBundleId(), tenantBundle.getId());
+            AssertUtil.service().isTrue(globalRelease || tenantRelease, "发布版本不属于当前语言包");
+            bundle = globalRelease ? globalBundle : tenantBundle;
+        }
         AssertUtil.service().isTrue(Objects.equals(release.getBundleId(), bundle.getId()),
                 "发布版本不属于当前语言包");
         AssertUtil.service().isTrue(I18nSnapshotCodec.verify(release.getSnapshotData(), release.getChecksum()),
@@ -218,20 +247,56 @@ public class I18nService {
     }
 
     public List<PublishedBundleResponse> listPublished() {
-        BaseI18nBundle condition = BaseI18nBundle.builder().status(1).build();
-        condition.setTenantId(sessionService.getTenantId());
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1).status(1).build();
         return dataBaseDao.findList(SqlBuilder.build(condition).dataPermis(PermisRule.ALL)
                 .sort(Sort.build("bundleCode", "asc"))).stream()
                 .filter(bundle -> bundle.getCurrentReleaseId() != null)
-                .map(bundle -> {
-                    BaseI18nRelease release = loadOwnedRelease(bundle.getCurrentReleaseId());
-                    AssertUtil.service().isTrue(Objects.equals(release.getBundleId(), bundle.getId()),
-                            "发布版本不属于当前语言包");
-                    AssertUtil.service().isTrue(
-                            I18nSnapshotCodec.verify(release.getSnapshotData(), release.getChecksum()),
-                            "发布版本快照校验失败");
-                    return toPublishedResponse(bundle, release);
+                .map(global -> {
+                    BaseI18nBundle tenant = findTenantBundle(global.getId());
+                    BaseI18nBundle selected = tenant != null && tenant.getCurrentReleaseId() != null
+                            ? tenant : global;
+                    return toPublishedResponse(selected, loadCurrentRelease(selected));
                 }).toList();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Long personalize(TenantCustomizationRequest request) {
+        assertTenantAdmin();
+        BaseI18nBundle global = loadGlobalBundle(request.getGlobalBundleId());
+        AssertUtil.service().notNull(global.getCurrentReleaseId(), "全局语言包尚未发布，不能个性化设置");
+        BaseI18nBundle existing = findTenantBundle(global.getId());
+        if (existing != null) {
+            return existing.getId();
+        }
+        BaseI18nBundle tenant = new BaseI18nBundle();
+        fillOwner(tenant);
+        tenant.setIsGlobal(0);
+        tenant.setGlobalBundleId(global.getId());
+        tenant.setBundleCode(global.getBundleCode());
+        tenant.setBundleName(global.getBundleName());
+        tenant.setClientScopes(global.getClientScopes());
+        tenant.setDefaultLocale(global.getDefaultLocale());
+        tenant.setDescs("租户个性化：" + global.getBundleName());
+        tenant.setStatus(1);
+        dataBaseDao.insert(tenant);
+        return tenant.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int restoreTenantCustomization(TenantCustomizationRequest request) {
+        assertTenantAdmin();
+        BaseI18nBundle tenant = findTenantBundle(request.getGlobalBundleId());
+        if (tenant == null) {
+            return 0;
+        }
+        List<BaseI18nEntry> overrides = findEntries(tenant.getId(), null);
+        if (!overrides.isEmpty()) {
+            dataBaseDao.deleteById(SqlBuilder.build(BaseI18nEntry.class,
+                    overrides.stream().map(BaseI18nEntry::getId).collect(Collectors.toSet())));
+        }
+        tenant.setCurrentReleaseId(null);
+        dataBaseDao.updateById(SqlBuilder.build(tenant).field("currentReleaseId"));
+        return 1;
     }
 
     public MissingStatsResponse missingStats(Long bundleId, String localeCode) {
@@ -377,6 +442,84 @@ public class I18nService {
         entity.setUserId(sessionService.getUserId());
     }
 
+    private void assertPlatformAdmin() {
+        AssertUtil.service().isTrue(sessionService.isAdmin()
+                || sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN), "仅平台管理员可管理全局方言");
+    }
+
+    private void assertTenantAdmin() {
+        AssertUtil.service().isTrue(sessionService.isAdmin()
+                || sessionService.getUserRoles().contains(UserRoles.TENANTADMIN), "仅租户管理员可管理个性化方言");
+    }
+
+    private void assertCanManage(BaseI18nBundle bundle) {
+        if (Objects.equals(bundle.getIsGlobal(), 1)) {
+            assertPlatformAdmin();
+        } else {
+            assertTenantAdmin();
+            AssertUtil.service().isTrue(Objects.equals(bundle.getTenantId(), sessionService.getTenantId()),
+                    "语言包不存在或无权访问");
+        }
+    }
+
+    private void assertGlobalEntryExists(Long globalBundleId, String localeCode, String entryKey) {
+        BaseI18nEntry condition = BaseI18nEntry.builder().bundleId(globalBundleId)
+                .localeCode(I18nRules.normalizeLocale(localeCode)).entryKey(entryKey.trim()).build();
+        AssertUtil.service().notNull(
+                dataBaseDao.findOne(SqlBuilder.build(condition).dataPermis(PermisRule.ALL)),
+                "租户管理员只能个性化全局语言包中已有的方言条目");
+    }
+
+    private BaseI18nBundle findGlobalBundle(String bundleCode) {
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1)
+                .bundleCode(bundleCode).status(1).build();
+        BaseI18nBundle bundle = dataBaseDao.findOne(SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
+        AssertUtil.service().notNull(bundle, "全局语言包不存在");
+        return bundle;
+    }
+
+    private BaseI18nBundle loadGlobalBundle(Long id) {
+        BaseI18nBundle bundle = dataBaseDao.findById(
+                SqlBuilder.build(BaseI18nBundle.class, id).dataPermis(PermisRule.ALL));
+        AssertUtil.service().notNull(bundle, "全局语言包不存在");
+        AssertUtil.service().isTrue(Objects.equals(bundle.getIsGlobal(), 1), "指定语言包不是全局语言包");
+        return bundle;
+    }
+
+    private BaseI18nBundle findTenantBundle(Long globalBundleId) {
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(0)
+                .globalBundleId(globalBundleId).build();
+        condition.setTenantId(sessionService.getTenantId());
+        return dataBaseDao.findOne(SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
+    }
+
+    private BaseI18nBundle loadAccessibleBundle(Long id) {
+        BaseI18nBundle bundle = dataBaseDao.findById(
+                SqlBuilder.build(BaseI18nBundle.class, id).dataPermis(PermisRule.ALL));
+        AssertUtil.service().notNull(bundle, "语言包不存在");
+        AssertUtil.service().isTrue(Objects.equals(bundle.getIsGlobal(), 1)
+                || Objects.equals(bundle.getTenantId(), sessionService.getTenantId()), "语言包不存在或无权访问");
+        return bundle;
+    }
+
+    private BaseI18nRelease loadCurrentRelease(BaseI18nBundle bundle) {
+        AssertUtil.service().notNull(bundle.getCurrentReleaseId(), "语言包尚未发布");
+        BaseI18nRelease release = loadRelease(bundle.getCurrentReleaseId());
+        AssertUtil.service().isTrue(Objects.equals(release.getBundleId(), bundle.getId()),
+                "发布版本不属于当前语言包");
+        AssertUtil.service().isTrue(I18nSnapshotCodec.verify(release.getSnapshotData(), release.getChecksum()),
+                "发布版本快照校验失败");
+        return release;
+    }
+
+    private BaseI18nRelease loadRelease(Long id) {
+        AssertUtil.service().notNull(id, "发布版本ID不能为空");
+        BaseI18nRelease release = dataBaseDao.findById(
+                SqlBuilder.build(BaseI18nRelease.class, id).dataPermis(PermisRule.ALL));
+        AssertUtil.service().notNull(release, "发布版本不存在");
+        return release;
+    }
+
     private BaseI18nBundle loadOwnedBundle(Long id) {
         AssertUtil.service().notNull(id, "语言包ID不能为空");
         BaseI18nBundle entity = dataBaseDao.findById(
@@ -409,6 +552,8 @@ public class I18nService {
     private BundleResponse toBundleResponse(BaseI18nBundle entity) {
         BundleResponse response = new BundleResponse();
         response.setId(entity.getId());
+        response.setIsGlobal(entity.getIsGlobal());
+        response.setGlobalBundleId(entity.getGlobalBundleId());
         response.setBundleCode(entity.getBundleCode());
         response.setBundleName(entity.getBundleName());
         response.setClientScopes(entity.getClientScopes());
@@ -448,6 +593,9 @@ public class I18nService {
     private PublishedBundleResponse toPublishedResponse(BaseI18nBundle bundle, BaseI18nRelease release) {
         PublishedBundleResponse response = new PublishedBundleResponse();
         response.setBundleId(bundle.getId());
+        response.setPersonalized(Objects.equals(bundle.getIsGlobal(), 0) ? 1 : 0);
+        response.setGlobalBundleId(Objects.equals(bundle.getIsGlobal(), 0)
+                ? bundle.getGlobalBundleId() : bundle.getId());
         response.setBundleCode(bundle.getBundleCode());
         response.setDefaultLocale(bundle.getDefaultLocale());
         response.setClientScopes(bundle.getClientScopes());

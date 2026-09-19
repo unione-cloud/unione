@@ -36,6 +36,8 @@ public final class I18nDtos {
     @Data
     public static class BundleResponse {
         private Long id;
+        private Integer isGlobal;
+        private Long globalBundleId;
         private String bundleCode;
         private String bundleName;
         private String clientScopes;
@@ -43,6 +45,12 @@ public final class I18nDtos {
         private Long currentReleaseId;
         private String descs;
         private Integer status;
+    }
+
+    @Data
+    public static class TenantCustomizationRequest {
+        @NotNull(message = "全局语言包ID不能为空")
+        private Long globalBundleId;
     }
 
     @Data
@@ -111,6 +119,8 @@ public final class I18nDtos {
     @Data
     public static class PublishedBundleResponse {
         private Long bundleId;
+        private Integer personalized;
+        private Long globalBundleId;
         private String bundleCode;
         private String defaultLocale;
         private String clientScopes;

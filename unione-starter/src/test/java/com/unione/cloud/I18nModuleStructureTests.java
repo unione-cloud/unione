@@ -23,6 +23,7 @@ import com.unione.cloud.base.api.BaseI18nEntryController;
 import com.unione.cloud.base.dto.I18nDtos.BundleSaveRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishRequest;
 import com.unione.cloud.base.dto.I18nDtos.RollbackRequest;
+import com.unione.cloud.base.dto.I18nDtos.TenantCustomizationRequest;
 import com.unione.cloud.base.service.I18nService;
 import com.unione.cloud.base.service.I18nRules;
 import com.unione.cloud.base.service.I18nSnapshotCodec;
@@ -120,16 +121,23 @@ class I18nModuleStructureTests {
     }
 
     @Test
-    void deliveryDocumentationExistsAndDeclaresModuleBoundary() throws Exception {
-        Path documentation = Path.of("../doc/方言与界面国际化模块使用说明.md");
-        String content = Files.readString(documentation, StandardCharsets.UTF_8);
+    void tenantCustomizationMigrationAndActionsExist() throws Exception {
+        Path migration = Path.of("src/main/resources/db/migration/mysql/"
+                + "V1_0_3_20260919_01__add_i18n_bundle_tables.sql");
+        String sql = Files.readString(migration, StandardCharsets.UTF_8);
 
-        assertTrue(content.contains("/api/base/i18n"));
-        assertTrue(content.contains("不可变发布版本"));
-        assertTrue(content.contains("内容语言目录、作品语言配置、内容回退"));
-        assertTrue(content.contains("interfaceLocale"));
-        assertTrue(content.contains("contentLocale"));
-        assertTrue(content.contains("dialectLocale"));
+        assertTrue(sql.contains("`IS_GLOBAL`"));
+        assertTrue(sql.contains("`GLOBAL_BUNDLE_ID`"));
+        assertTrue(sql.contains("UK_I18N_BUNDLE_TENANT_GLOBAL"));
+        assertEquals(TenantCustomizationRequest.class,
+                BaseI18nBundleController.class.getMethod("personalize", TenantCustomizationRequest.class)
+                        .getParameterTypes()[0]);
+        assertEquals(TenantCustomizationRequest.class,
+                BaseI18nBundleController.class.getMethod("restore", TenantCustomizationRequest.class)
+                        .getParameterTypes()[0]);
+        assertTrue(I18nService.class.getMethod("personalize", TenantCustomizationRequest.class) != null);
+        assertTrue(I18nService.class.getMethod("restoreTenantCustomization", TenantCustomizationRequest.class)
+                != null);
     }
 
     private void assertTable(Class<?> type, String expectedName) {

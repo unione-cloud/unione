@@ -30,6 +30,12 @@ public class BaseI18nBundle extends Pojo {
 
     private static final long serialVersionUID = 1L;
 
+    @Schema(title = "是否全局语言包，1是，0否")
+    private Integer isGlobal;
+
+    @Schema(title = "关联的全局语言包ID，租户个性化包必填")
+    private Long globalBundleId;
+
     @KeyWords
     @Schema(title = "语言包编码")
     private String bundleCode;

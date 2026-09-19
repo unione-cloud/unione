@@ -41,7 +41,8 @@ public class BaseI18nEntryController {
     }
 
     @PostMapping("/save")
-    @Action(title = "保存界面语言条目", type = ActionType.Save, roles = {UserRoles.FORMDEV})
+    @Action(title = "保存界面语言条目", type = ActionType.Save,
+            roles = {UserRoles.SUPPERADMIN, UserRoles.TENANTADMIN})
     public Results<Long> save(@Validated @RequestBody EntrySaveRequest request) {
         return Results.success(i18nService.saveEntry(request));
     }
@@ -59,7 +60,7 @@ public class BaseI18nEntryController {
     }
 
     @PostMapping("/delete")
-    @Action(title = "删除界面语言条目", type = ActionType.Delete, roles = {UserRoles.FORMDEV})
+    @Action(title = "删除全局界面语言条目", type = ActionType.Delete, roles = {UserRoles.SUPPERADMIN})
     public Results<Integer> delete(@RequestBody Set<Long> ids) {
         int count = i18nService.deleteEntries(ids);
         return Results.build(count > 0, count);

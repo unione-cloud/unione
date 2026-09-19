@@ -5,9 +5,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.unione.cloud.base.model.BaseI18nEntry;
 import com.unione.cloud.core.exception.ServiceException;
+import com.unione.cloud.core.util.JsonUtil;
 
 /** 界面语言包不可变快照的确定性编码与校验。 */
 public final class I18nSnapshotCodec {
@@ -61,6 +65,18 @@ public final class I18nSnapshotCodec {
         } catch (NoSuchAlgorithmException e) {
             throw new ServiceException("当前运行环境不支持SHA-256", e);
         }
+    }
+
+    public static String merge(String baseSnapshot, List<BaseI18nEntry> overrides) {
+        Map<String, Object> root = JsonUtil.toBean(new TypeReference<Map<String, Object>>() { }, baseSnapshot);
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, String>> source = (Map<String, Map<String, String>>) root.get("locales");
+        Map<String, Map<String, String>> locales = new TreeMap<>();
+        source.forEach((locale, entries) -> locales.put(locale, new TreeMap<>(entries)));
+        overrides.stream().filter(entry -> Integer.valueOf(1).equals(entry.getStatus())).forEach(entry ->
+                locales.computeIfAbsent(entry.getLocaleCode(), key -> new TreeMap<>())
+                        .put(entry.getEntryKey(), entry.getEntryValue()));
+        return JsonUtil.toJson(Map.of("locales", locales));
     }
 
     public static boolean verify(String snapshotData, String expectedChecksum) {
