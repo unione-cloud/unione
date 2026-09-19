@@ -15,7 +15,7 @@ import com.unione.cloud.core.exception.AssertUtil;
 public final class I18nRules {
 
     private static final Pattern LOCALE_PATTERN = Pattern.compile("^[A-Za-z]{2,8}([_-][A-Za-z0-9]{1,8})*$");
-    private static final Set<String> CLIENT_SCOPES = Set.of("author", "user", "admin");
+    private static final Set<String> CLIENT_SCOPES = Set.of("all", "app", "pc");
     private static final Set<String> SOURCE_TYPES = Set.of("manual", "ai");
 
     private I18nRules() {
