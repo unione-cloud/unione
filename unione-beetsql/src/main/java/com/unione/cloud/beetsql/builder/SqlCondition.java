@@ -3,6 +3,9 @@ package com.unione.cloud.beetsql.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.beetl.sql.clazz.kit.DefaultKeyWordHandler;
+import org.beetl.sql.clazz.kit.KeyWordHandler;
+
 import lombok.Data;
 
 @Data
@@ -32,12 +35,16 @@ public class SqlCondition {
 	
 	
 	public void toSql(StringBuffer buffer) {
+		toSql(buffer, new DefaultKeyWordHandler());
+	}
+
+	public void toSql(StringBuffer buffer, KeyWordHandler keyWordHandler) {
 		
 		// ID,IDS搜索特殊处理
 		if(SqlAction.ID.equals(this.action) || SqlAction.IDS.equals(this.action)) {
 			buffer.append("-- @if(notNull(query.").append(this.name).append(")){\n ")
 			  .append(this.fun.name()).append(" ")
-			  .append(this.column).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
+			  .append(keyWordHandler.getCol(this.column)).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
 			  .append("-- @}\n");
 			return;
 		}
@@ -50,12 +57,12 @@ public class SqlCondition {
 				buffer.append(" (");
 				StringBuffer keyBuffer=new StringBuffer();
 				this.childrens.stream().forEach((child)->{
-					keyBuffer.append(" OR ").append(child.getColumn()).append(" LIKE #{'%'+query.keywords+'%'}");
+					keyBuffer.append(" OR ").append(keyWordHandler.getCol(child.getColumn())).append(" LIKE #{'%'+query.keywords+'%'}");
 				});
 				buffer.append(keyBuffer.substring(4));
 				buffer.append(") \n");
 			}else {
-				buffer.append(" ").append(this.childrens.get(0).getColumn()).append(" LIKE #{'%'+query.keywords+'%'}");
+				buffer.append(" ").append(keyWordHandler.getCol(this.childrens.get(0).getColumn())).append(" LIKE #{'%'+query.keywords+'%'}");
 			}
 			buffer.append("-- @}\n");
 			return;
@@ -65,13 +72,13 @@ public class SqlCondition {
 		if(this.childrens==null || this.childrens.isEmpty()) {
 			buffer.append("-- @if(notNull(params.").append(this.name).append(")){\n ")
 				  .append(this.fun.name()).append(" ")
-				  .append(this.column).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
+				  .append(keyWordHandler.getCol(this.column)).append(this.action.getAction()).append(this.action.express(this.name)).append("\n")
 				  .append("-- @}\n");
 		}else {
 			buffer.append("-- @sqlTrim(){\n ")
 				  .append(this.fun.name()).append(" (\n-- @sqlTrim(){ \n");
 			this.childrens.stream().forEach(child->{
-				child.toSql(buffer);
+				child.toSql(buffer, keyWordHandler);
 			});
 			buffer.append("-- @}\n ) \n")
 				  .append("-- @}\n");

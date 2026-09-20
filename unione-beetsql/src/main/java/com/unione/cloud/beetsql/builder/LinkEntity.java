@@ -165,6 +165,7 @@ public class LinkEntity {
 
 
     public String toSql(SQLManager sqlManager){
+		var keyWordHandler = sqlManager.getDbStyle().getKeyWordHandler();
         if(ObjectUtil.isEmpty(this.linkTableName)){
             this.linkTableName=sqlManager.getNc().getTableName(this.linkEntityClass);
         }
@@ -177,12 +178,13 @@ public class LinkEntity {
 
         StringBuffer sb = new StringBuffer();
         sb.append("-- @if(notNull(").append(field).append("LinkParams)){\n");
-        sb.append(" AND ").append(field).append(" IN (\n")
-          .append("SELECT ").append(linkField).append(" FROM ").append(linkTableName).append("\n")
+        sb.append(" AND ").append(keyWordHandler.getCol(field)).append(" IN (\n")
+          .append("SELECT ").append(keyWordHandler.getCol(linkField)).append(" FROM ")
+          .append(keyWordHandler.getTable(linkTableName)).append("\n")
           .append("\n-- @sqlWhere(){\n");
         if (!linkConditions.isEmpty()) {
             linkConditions.forEach(linkCondition -> {
-                linkCondition.toSql(field,sb);
+                linkCondition.toSql(field, sb, keyWordHandler);
             });
         }
         sb.append("-- @}\n");

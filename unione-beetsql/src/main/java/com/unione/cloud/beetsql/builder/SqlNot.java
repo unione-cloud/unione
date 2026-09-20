@@ -2,6 +2,9 @@ package com.unione.cloud.beetsql.builder;
 
 import java.util.Map;
 
+import org.beetl.sql.clazz.kit.DefaultKeyWordHandler;
+import org.beetl.sql.clazz.kit.KeyWordHandler;
+
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -28,13 +31,18 @@ public class SqlNot {
 	private Object value;
 
     public void toSql(StringBuffer buffer) {
+		toSql(buffer, new DefaultKeyWordHandler());
+	}
+
+	public void toSql(StringBuffer buffer, KeyWordHandler keyWordHandler) {
+		String column = this.field.replaceAll("[A-Z]", "_$0").toUpperCase();
 		// ID,IDS搜索特殊处理
 		if(SqlAction.NOT_EQ.equals(this.action)) {
 			buffer.append(" ").append(this.fun.name()).append(" ")
-			  .append(this.field.replaceAll("[A-Z]", "_$0").toUpperCase()).append(this.action.getAction()).append(this.action.express(String.format("notEq%s", this.field)));
+			  .append(keyWordHandler.getCol(column)).append(this.action.getAction()).append(this.action.express(String.format("notEq%s", this.field)));
 		}else if(SqlAction.NOT_IN.equals(this.action)) {
             buffer.append(" ").append(this.fun.name()).append(" ")
-			  .append(this.field.replaceAll("[A-Z]", "_$0").toUpperCase()).append(this.action.getAction()).append(this.action.express(String.format("notIn%s", this.field)));
+			  .append(keyWordHandler.getCol(column)).append(this.action.getAction()).append(this.action.express(String.format("notIn%s", this.field)));
         }
 	}
 

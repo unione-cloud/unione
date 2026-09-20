@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.beetl.sql.clazz.ClassDesc;
 import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.BeanKit;
+import org.beetl.sql.clazz.kit.KeyWordHandler;
 import org.beetl.sql.core.SQLManager;
 
 import com.unione.cloud.beetsql.Sort;
@@ -415,12 +416,12 @@ public class SqlBuilder<T> {
 		if(SqlType.INSERT.equals(type)) {
 			buffer.append("INSERT INTO ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
-				buffer.append(this.entity.getSchema()).append(".");
+				buffer.append(table(this.entity.getSchema())).append(".");
 			}
-			buffer.append(this.entity.getTable()).append(" (");
+			buffer.append(table(this.entity.getTable())).append(" (");
 			for(int i=0;i<this.entity.getFields().size();i++) {
 				SqlField field=this.entity.getFields().get(i);
-				buffer.append(field.getColumn());
+				buffer.append(column(field.getColumn()));
 				if(i<this.entity.getFields().size()-1) {
 					buffer.append(",");
 				}
@@ -464,7 +465,7 @@ public class SqlBuilder<T> {
 				}
 				return true;
 			}).forEach(field->{
-				fieldBuf.append(",").append(field.getColumn());
+				fieldBuf.append(",").append(column(field.getColumn()));
 				if(!isJavaBean && !StringUtils.isEmpty(field.getAlias())) {
 					fieldBuf.append(" AS ").append(field.getAlias());
 				}
@@ -477,22 +478,22 @@ public class SqlBuilder<T> {
 			
 			// 查询表名称处理
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
-				buffer.append(this.entity.getSchema()).append(".");
+				buffer.append(table(this.entity.getSchema())).append(".");
 			}
-			buffer.append(this.entity.getTable()).append(" ");
+			buffer.append(table(this.entity.getTable())).append(" ");
 		}else if(SqlType.COUNT.equals(type)) {
 			buffer.append("SELECT COUNT(*) FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
-				buffer.append(this.entity.getSchema()).append(".");
+				buffer.append(table(this.entity.getSchema())).append(".");
 			}
-			buffer.append(this.entity.getTable()).append(" ");
+			buffer.append(table(this.entity.getTable())).append(" ");
 		}else if(SqlType.UPDATE.equals(type) || SqlType.UPDATE_BYID.equals(type) ||
 				SqlType.DELETE_LOGIC.equals(type) || SqlType.DELETE_LOGIC_BYID.equals(type)) {
 			buffer.append("UPDATE ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
-				buffer.append(this.entity.getSchema()).append(".");
+				buffer.append(table(this.entity.getSchema())).append(".");
 			}
-			buffer.append(this.entity.getTable()).append(" SET \n")
+			buffer.append(table(this.entity.getTable())).append(" SET \n")
 			.append("-- @sqlTrim(){\n");
 			
 			this.entity.getFields().stream()
@@ -508,14 +509,14 @@ public class SqlBuilder<T> {
 					return;
 				}
 				buffer.append("-- @if(isNotEmpty(fields.").append(field.getAlias()).append(")){\n")
-				      .append(field.getColumn()).append(" = #{data.").append(field.getAlias()).append("},\n")
+				      .append(column(field.getColumn())).append(" = #{data.").append(field.getAlias()).append("},\n")
 				      .append("-- @}\n");
 			});
 			
 			StringBuffer lastUpBuf=new StringBuffer();
 			this.entity.getStsFields(BaseField.LAST_UPDATED,BaseField.LAST_UPDATED_BY)
 				.stream().forEach(field->{
-					lastUpBuf.append(",").append(field.getColumn()).append(" = #{data.").append(field.getAlias()).append("}\n");
+					lastUpBuf.append(",").append(column(field.getColumn())).append(" = #{data.").append(field.getAlias()).append("}\n");
 				});
 			if(lastUpBuf.length()>0) {
 				buffer.append(lastUpBuf.substring(1));
@@ -526,9 +527,9 @@ public class SqlBuilder<T> {
 		}else if(SqlType.DELETE.equals(type) || SqlType.DELETE_BYID.equals(type)) {
 			buffer.append("DELETE FROM ");
 			if(!StringUtils.isEmpty(this.entity.getSchema())) {
-				buffer.append(this.entity.getSchema()).append(".");
+				buffer.append(table(this.entity.getSchema())).append(".");
 			}
-			buffer.append(this.entity.getTable()).append(" ");
+			buffer.append(table(this.entity.getTable())).append(" ");
 		}
 		
 		// 如果是findById,updateById,deleteById并且未设置查询条件，生成更新条件
@@ -542,32 +543,32 @@ public class SqlBuilder<T> {
 			
 			where.append("-- @if(notNull(params.").append(idField.getAlias()).append(") || notNull(query.id) || notNull(query.ids)){\n");
 			where.append("-- @if(notNull(params.").append(idField.getAlias()).append(") && !notNull(query.id) && !notNull(query.ids)){\n")
-		      .append(idField.getColumn()).append(" = #{params.").append(idField.getAlias()).append("}\n")
+		      .append(column(idField.getColumn())).append(" = #{params.").append(idField.getAlias()).append("}\n")
 		      .append("-- @}\n");
 			where.append("-- @if(notNull(query.id) && !notNull(query.ids)){\n")
-		      .append(idField.getColumn()).append(" = #{query.id}\n")
+		      .append(column(idField.getColumn())).append(" = #{query.id}\n")
 		      .append("-- @}\n");
 			where.append("-- @if(!notNull(params.").append(idField.getAlias()).append(") && !notNull(query.id) && notNull(query.ids)){\n")
-		      .append(idField.getColumn()).append(" IN (#{join(query.ids)})\n")
+		      .append(column(idField.getColumn())).append(" IN (#{join(query.ids)})\n")
 		      .append("-- @}\n");
 			
 			this.entity.getStsFields(BaseField.TENANT_ID,BaseField.ORGAN_ID,BaseField.USER_ID).stream().forEach(field->{
 				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
-			      .append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n")
+			      .append(" AND ").append(column(field.getColumn())).append(" = #{params.").append(field.getAlias()).append("}\n")
 			      .append("-- @}\n");
 			});
 
 			if(SqlType.SELECT_BYID.equals(type)){
 				this.entity.getStsFields(BaseField.DEL_FLAG).stream().forEach(field->{
 					where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
-					.append(" AND ").append(field.getColumn()).append(" = #{params.").append(field.getAlias()).append("}\n")
+					.append(" AND ").append(column(field.getColumn())).append(" = #{params.").append(field.getAlias()).append("}\n")
 					.append("-- @}\n");
 				});
 			}
 
 			this.entity.getStsFields(BaseField.ORGAN_CODE).stream().forEach(field->{
 				where.append("-- @if(isNotEmpty(params.").append(field.getAlias()).append(")){\n")
-			      .append(" AND ").append(field.getColumn()).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}\n")
+			      .append(" AND ").append(column(field.getColumn())).append(" LIKE #{params.").append(field.getAlias()).append("+'%'}\n")
 			      .append("-- @}\n");
 			});
 			
@@ -585,13 +586,13 @@ public class SqlBuilder<T> {
 			// not 条件处理
 			if(!this.entity.getNots().isEmpty()){
 				this.entity.getNots().stream().forEach(not->{
-					not.toSql(buffer);
+					not.toSql(buffer, keyWordHandler());
 				});
 			}
 		}else if(!this.entity.getConditions().isEmpty()){
 			buffer.append("\n-- @sqlWhere(){\n");
 			this.entity.getConditions().stream().forEach(con->{
-				con.toSql(buffer);
+				con.toSql(buffer, keyWordHandler());
 			});
 			this.linkEntitys.stream().forEach(link->{
 				buffer.append(link.toSql(sqlManager));
@@ -599,7 +600,7 @@ public class SqlBuilder<T> {
 			// not 条件处理
 			if(!this.entity.getNots().isEmpty()){
 				this.entity.getNots().stream().forEach(not->{
-					not.toSql(buffer);
+					not.toSql(buffer, keyWordHandler());
 				});
 			}
 			buffer.append("-- @}\n");
@@ -613,6 +614,18 @@ public class SqlBuilder<T> {
 		}
 		
 		return buffer.toString();
+	}
+
+	private KeyWordHandler keyWordHandler() {
+		return this.sqlManager.getDbStyle().getKeyWordHandler();
+	}
+
+	private String table(String tableName) {
+		return keyWordHandler().getTable(tableName);
+	}
+
+	private String column(String columnName) {
+		return keyWordHandler().getCol(columnName);
 	}
 		
 	/**
@@ -679,7 +692,10 @@ public class SqlBuilder<T> {
 		params.put("params", this.params);
 		params.put("fields", fields);
 		if(this.sort!=null && this.sort.length>0) {
-			params.put("sorts", Sort.use(this.sort));
+			String sorts=Arrays.stream(this.sort)
+					.map(item -> column(item.getName()) + " " + item.getOrder())
+					.collect(Collectors.joining(","));
+			params.put("sorts", sorts);
 		}
 		
 		Map<String, Object> query=new HashMap<>();
@@ -804,7 +820,7 @@ public class SqlBuilder<T> {
 			});
 			if(!ObjectUtil.isEmpty(keyWordCondition.getChildrens())){
 				StringBuffer buffer=new StringBuffer(whereSql);
-				keyWordCondition.toSql(buffer);
+				keyWordCondition.toSql(buffer, keyWordHandler());
 				whereSql=buffer.toString();
 			}
 		}
@@ -815,23 +831,23 @@ public class SqlBuilder<T> {
 			switch (dataPermis) {
 			case TENANTID:
 				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
-					BaseField.TENANT_ID.getName(),BaseField.TENANT_ID.getColumn(),BaseField.TENANT_ID.getName());
+					BaseField.TENANT_ID.getName(),column(BaseField.TENANT_ID.getColumn()),BaseField.TENANT_ID.getName());
 				break;
 			case ORGANID:
 				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",whereSql,
-					BaseField.ORGAN_ID.getName(),BaseField.ORGAN_ID.getColumn(),BaseField.ORGAN_ID.getName());
+					BaseField.ORGAN_ID.getName(),column(BaseField.ORGAN_ID.getColumn()),BaseField.ORGAN_ID.getName());
 				break;	
 			case ORGANCODE:
 				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
-					whereSql,BaseField.ORGAN_CODE.getName(),BaseField.ORGAN_CODE.getColumn(),BaseField.ORGAN_CODE.getName());
+					whereSql,BaseField.ORGAN_CODE.getName(),column(BaseField.ORGAN_CODE.getColumn()),BaseField.ORGAN_CODE.getName());
 				break;	
 			case AREACODE:
 				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s LIKE #{params.%s+'%%'}\n-- @}\n",
-					whereSql,BaseField.AREA_CODE.getName(),BaseField.AREA_CODE.getColumn(),BaseField.AREA_CODE.getName());
+					whereSql,BaseField.AREA_CODE.getName(),column(BaseField.AREA_CODE.getColumn()),BaseField.AREA_CODE.getName());
 				break;	
 			default:
 				whereSql=String.format("\n-- @sqlTrim(){\n(%s)\n-- @}\n-- @if(notNull(params.%s)){\n AND %s = #{params.%s}\n-- @}\n",
-					whereSql,BaseField.USER_ID.getName(),BaseField.USER_ID.getColumn(),BaseField.USER_ID.getName());
+					whereSql,BaseField.USER_ID.getName(),column(BaseField.USER_ID.getColumn()),BaseField.USER_ID.getName());
 				break;
 			}
 		}
