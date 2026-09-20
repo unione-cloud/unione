@@ -143,12 +143,12 @@ springdoc:
     - group: formPage
       display-name: 表单页面
       paths-to-match: /api/page/**
+    - group: uaiTools
+      display-name: AI工具接口
+      paths-to-match: /api/*/tools/**
     - group: ads
       display-name: 广告接口
       paths-to-match: /api/ads/**
-    - group: ai
-      display-name: AI接口
-      paths-to-match: /api/ai/**
     - group: license
       display-name: License接口
       paths-to-match: /api/lic/**
