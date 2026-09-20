@@ -131,6 +131,19 @@ public final class I18nDtos {
         private String snapshotData;
     }
 
+    /** 应用端语言列表项，不包含发布快照数据。 */
+    @Data
+    public static class PublishedBundleSummaryResponse {
+        private Long bundleId;
+        private Integer personalized;
+        private Long globalBundleId;
+        private String bundleCode;
+        private String bundleName;
+        private Integer defaultLocale;
+        private String clientScopes;
+        private Long releaseId;
+    }
+
     @Data
     public static class PreferenceSaveRequest {
         private String interfaceLocale;

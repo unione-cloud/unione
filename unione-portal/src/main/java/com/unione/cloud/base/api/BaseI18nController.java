@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unione.cloud.base.dto.I18nDtos.PreferenceResponse;
 import com.unione.cloud.base.dto.I18nDtos.PreferenceSaveRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishedBundleResponse;
+import com.unione.cloud.base.dto.I18nDtos.PublishedBundleSummaryResponse;
 import com.unione.cloud.base.service.I18nService;
 import com.unione.cloud.core.annotation.Action;
 import com.unione.cloud.core.annotation.ActionType;
@@ -31,17 +32,18 @@ public class BaseI18nController {
 
 
     @PostMapping("/lang/list")
-    @Operation(summary = "加载系统所有已发布语言包")
-    public Results<List<PublishedBundleResponse>> langList() {
+    @Operation(summary = "加载系统所有已发布语言包列表")
+    public Results<List<PublishedBundleSummaryResponse>> langList() {
         return Results.success(i18nService.listPublished());
     }
 
 
     @PostMapping("/lang/data")
     @Operation(summary = "加载语言包数据")
-    public Results<PublishedBundleResponse> langData(@RequestParam("bundleCode") String bundleCode,
-            @RequestParam(value = "releaseId", required = false) Long releaseId) {
-        return Results.success(i18nService.getPublished(bundleCode, releaseId));
+    public Results<PublishedBundleResponse> langData(
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "local", required = false) String local) {
+        return Results.success(i18nService.getPublished(code, local));
     }
 
     @GetMapping("/pref/data")

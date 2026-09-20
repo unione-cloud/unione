@@ -20,6 +20,7 @@ import com.unione.cloud.base.dto.I18nDtos.PreferenceResponse;
 import com.unione.cloud.base.dto.I18nDtos.PreferenceSaveRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishedBundleResponse;
+import com.unione.cloud.base.dto.I18nDtos.PublishedBundleSummaryResponse;
 import com.unione.cloud.base.dto.I18nDtos.ReleaseResponse;
 import com.unione.cloud.base.dto.I18nDtos.RollbackRequest;
 import com.unione.cloud.base.dto.I18nDtos.TenantCustomizationRequest;
@@ -232,32 +233,15 @@ public class I18nService {
         return createRelease(bundle, versionDesc, source.getSnapshotData(), source.getChecksum(), source.getId());
     }
 
-    public PublishedBundleResponse getPublished(String bundleCode, Long releaseId) {
-        AssertUtil.service().isTrue(bundleCode != null && !bundleCode.isBlank(), "语言包编码不能为空");
-        BaseI18nBundle globalBundle = findGlobalBundle(bundleCode.trim());
+    public PublishedBundleResponse getPublished(String code, String local) {
+        BaseI18nBundle globalBundle = resolvePublishedBundle(code, local);
         BaseI18nBundle tenantBundle = findTenantBundle(globalBundle.getId());
-        BaseI18nBundle bundle;
-        BaseI18nRelease release;
-        if (releaseId == null) {
-            bundle = tenantBundle != null && tenantBundle.getCurrentReleaseId() != null
-                    ? tenantBundle : globalBundle;
-            release = loadCurrentRelease(bundle);
-        } else {
-            release = loadRelease(releaseId);
-            boolean globalRelease = Objects.equals(release.getBundleId(), globalBundle.getId());
-            boolean tenantRelease = tenantBundle != null
-                    && Objects.equals(release.getBundleId(), tenantBundle.getId());
-            AssertUtil.service().isTrue(globalRelease || tenantRelease, "发布版本不属于当前语言包");
-            bundle = globalRelease ? globalBundle : tenantBundle;
-        }
-        AssertUtil.service().isTrue(Objects.equals(release.getBundleId(), bundle.getId()),
-                "发布版本不属于当前语言包");
-        AssertUtil.service().isTrue(I18nSnapshotCodec.verify(release.getSnapshotData(), release.getChecksum()),
-                "发布版本快照校验失败");
-        return toPublishedResponse(bundle, release);
+        BaseI18nBundle selected = tenantBundle != null && tenantBundle.getCurrentReleaseId() != null
+                ? tenantBundle : globalBundle;
+        return toPublishedResponse(selected, loadCurrentRelease(selected));
     }
 
-    public List<PublishedBundleResponse> listPublished() {
+    public List<PublishedBundleSummaryResponse> listPublished() {
         BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1).status(1).build();
         return dataBaseDao.findList(SqlBuilder.build(condition).dataPermis(PermisRule.ALL)
                 .sort(Sort.build("bundleCode", "asc"))).stream()
@@ -266,7 +250,7 @@ public class I18nService {
                     BaseI18nBundle tenant = findTenantBundle(global.getId());
                     BaseI18nBundle selected = tenant != null && tenant.getCurrentReleaseId() != null
                             ? tenant : global;
-                    return toPublishedResponse(selected, loadCurrentRelease(selected));
+                    return toPublishedSummaryResponse(selected);
                 }).toList();
     }
 
@@ -331,8 +315,7 @@ public class I18nService {
     }
 
     public PreferenceResponse getPreference() {
-        BaseI18nPref condition = preferenceCondition();
-        BaseI18nPref entity = dataBaseDao.findOne(SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
+        BaseI18nPref entity = findPreference();
         return entity == null ? new PreferenceResponse() : toPreferenceResponse(entity);
     }
 
@@ -358,6 +341,39 @@ public class I18nService {
         condition.setTenantId(sessionService.getTenantId());
         condition.setUserId(sessionService.getUserId());
         return condition;
+    }
+
+    private BaseI18nPref findPreference() {
+        return dataBaseDao.findOne(SqlBuilder.build(preferenceCondition()).dataPermis(PermisRule.ALL));
+    }
+
+    /**
+     * 解析应用端实际使用的语言包：显式编码优先，其次为用户界面语言偏好、浏览器语言和系统默认语言。
+     */
+    private BaseI18nBundle resolvePublishedBundle(String code, String local) {
+        if (code != null && !code.isBlank()) {
+            return findGlobalBundle(I18nRules.normalizeLocale(code));
+        }
+
+        BaseI18nPref preference = findPreference();
+        if (preference != null && preference.getInterfaceLocale() != null
+                && !preference.getInterfaceLocale().isBlank()) {
+            return findGlobalBundle(I18nRules.normalizeLocale(preference.getInterfaceLocale()));
+        }
+
+        BaseI18nBundle localBundle = findPublishedGlobalBundle(local);
+        return localBundle == null ? findDefaultBundle() : localBundle;
+    }
+
+    private BaseI18nBundle findPublishedGlobalBundle(String code) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        BaseI18nBundle condition = BaseI18nBundle.builder().isGlobal(1)
+                .bundleCode(I18nRules.normalizeLocale(code)).status(1).build();
+        BaseI18nBundle bundle = dataBaseDao.findOne(
+                SqlBuilder.build(condition).dataPermis(PermisRule.ALL));
+        return bundle != null && bundle.getCurrentReleaseId() != null ? bundle : null;
     }
 
     private <Q, E> Params<E> copyPage(Params<Q> source, E body) {
@@ -645,6 +661,20 @@ public class I18nService {
         response.setVersionNo(release.getVersionNo());
         response.setChecksum(release.getChecksum());
         response.setSnapshotData(release.getSnapshotData());
+        return response;
+    }
+
+    private PublishedBundleSummaryResponse toPublishedSummaryResponse(BaseI18nBundle bundle) {
+        PublishedBundleSummaryResponse response = new PublishedBundleSummaryResponse();
+        response.setBundleId(bundle.getId());
+        response.setPersonalized(Objects.equals(bundle.getIsGlobal(), 0) ? 1 : 0);
+        response.setGlobalBundleId(Objects.equals(bundle.getIsGlobal(), 0)
+                ? bundle.getGlobalBundleId() : bundle.getId());
+        response.setBundleCode(bundle.getBundleCode());
+        response.setBundleName(bundle.getBundleName());
+        response.setDefaultLocale(bundle.getDefaultLocale());
+        response.setClientScopes(bundle.getClientScopes());
+        response.setReleaseId(bundle.getCurrentReleaseId());
         return response;
     }
 

@@ -12,6 +12,7 @@ import org.beetl.sql.annotation.entity.Table;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.unione.cloud.base.model.BaseI18nBundle;
 import com.unione.cloud.base.model.BaseI18nEntry;
@@ -22,6 +23,7 @@ import com.unione.cloud.base.api.BaseI18nBundleController;
 import com.unione.cloud.base.api.BaseI18nEntryController;
 import com.unione.cloud.base.dto.I18nDtos.BundleSaveRequest;
 import com.unione.cloud.base.dto.I18nDtos.PublishRequest;
+import com.unione.cloud.base.dto.I18nDtos.PublishedBundleSummaryResponse;
 import com.unione.cloud.base.dto.I18nDtos.RollbackRequest;
 import com.unione.cloud.base.dto.I18nDtos.TenantCustomizationRequest;
 import com.unione.cloud.base.service.I18nService;
@@ -87,6 +89,24 @@ class I18nModuleStructureTests {
                 .getAnnotation(PostMapping.class);
         assertEquals("/lang/list", mapping.value()[0]);
         assertTrue(I18nService.class.getMethod("listPublished") != null);
+        assertTrue(java.util.Arrays.stream(PublishedBundleSummaryResponse.class.getDeclaredFields())
+                .noneMatch(field -> "snapshotData".equals(field.getName())));
+    }
+
+    @Test
+    void languageDataUsesOptionalCodeAndCurrentRelease() throws Exception {
+        java.lang.reflect.Method method = BaseI18nController.class.getMethod(
+                "langData", String.class, String.class);
+        PostMapping mapping = method.getAnnotation(PostMapping.class);
+        RequestParam codeParam = method.getParameters()[0].getAnnotation(RequestParam.class);
+        RequestParam localParam = method.getParameters()[1].getAnnotation(RequestParam.class);
+
+        assertEquals("/lang/data", mapping.value()[0]);
+        assertEquals("code", codeParam.value());
+        assertTrue(!codeParam.required());
+        assertEquals("local", localParam.value());
+        assertTrue(!localParam.required());
+        assertTrue(I18nService.class.getMethod("getPublished", String.class, String.class) != null);
     }
 
     @Test
@@ -124,7 +144,7 @@ class I18nModuleStructureTests {
                 BaseI18nBundleController.class.getMethod("rollback", RollbackRequest.class).getParameterTypes()[0]);
         assertTrue(I18nService.class.getMethod("release", PublishRequest.class) != null);
         assertTrue(I18nService.class.getMethod("rollback", RollbackRequest.class) != null);
-        assertTrue(I18nService.class.getMethod("getPublished", String.class, Long.class) != null);
+        assertTrue(I18nService.class.getMethod("getPublished", String.class, String.class) != null);
     }
 
     @Test
