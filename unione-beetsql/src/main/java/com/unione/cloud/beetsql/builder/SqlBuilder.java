@@ -693,9 +693,12 @@ public class SqlBuilder<T> {
 		params.put("fields", fields);
 		if(this.sort!=null && this.sort.length>0) {
 			String sorts=Arrays.stream(this.sort)
+			        .filter(s->!ObjectUtil.isEmpty(s.getName()))
 					.map(item -> column(item.getName()) + " " + item.getOrder())
 					.collect(Collectors.joining(","));
-			params.put("sorts", sorts);
+			if(!ObjectUtil.isEmpty(sorts)){
+				params.put("sorts", sorts);
+			}
 		}
 		
 		Map<String, Object> query=new HashMap<>();

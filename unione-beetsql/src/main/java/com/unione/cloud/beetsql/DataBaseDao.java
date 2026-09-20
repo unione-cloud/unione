@@ -425,6 +425,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteById(String sqlName,SqlBuilder<T> builder) {
+		builder.init(sqlManager);
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		
 		SessionService sessionService=SessionHolder.build();
@@ -575,6 +576,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> int deleteLogicById(String sqlName,SqlBuilder<T> builder) {
+		builder.init(sqlManager);
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 
 		SessionService sessionService=SessionHolder.build();
@@ -672,6 +674,7 @@ public class DataBaseDao {
 	 * @return
 	 */
 	public <T> long count(String sqlName, SqlBuilder<T> builder) {
+		builder.init(sqlManager);
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		return this.sqlManager.selectUnique(sqlId, builder.toParams(), Long.class);
 	}
@@ -726,6 +729,7 @@ public class DataBaseDao {
 
 	@SuppressWarnings("unchecked")
 	public <T> T findOne(String sqlName, SqlBuilder<T> builder) {
+		builder.init(sqlManager);
 		SqlId sqlId=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		return (T) this.sqlManager.selectSingle(sqlId, builder.toParams(), builder.targetClass());
 	}
@@ -881,6 +885,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findList(String sqlName, SqlBuilder<T> builder){
+		builder.init(sqlManager);
 		SqlId findsql=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.targetClass(), builder.toParams());
 		return rows;
@@ -1015,6 +1020,7 @@ public class DataBaseDao {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> findPageList(String sqlName,SqlBuilder<T> builder){
+		builder.init(sqlManager);
 		SqlId findsql=sqlName.indexOf(".")>0?SqlId.of(sqlName):SqlId.of(this.getNameSpace(builder.targetClass()), sqlName);
 		List<T> rows = (List<T>) this.sqlManager.select(findsql, builder.toParams(), builder.targetClass(),builder.getStart()+1,builder.getPageSize());
 		return rows;
@@ -1151,6 +1157,7 @@ public class DataBaseDao {
 
 	@SuppressWarnings("unchecked")
 	public <T> Results<List<T>> findPages(String listSql,String countSql,SqlBuilder<T> builder){
+		builder.init(sqlManager);
 		SqlId $listSql=listSql.indexOf(".")>0?SqlId.of(listSql):SqlId.of(this.getNameSpace(builder.targetClass()), listSql);
 		SqlId $countSql=countSql.indexOf(".")>0?SqlId.of(countSql):SqlId.of(this.getNameSpace(builder.targetClass()), countSql);
 		Results<List<T>> results=Results.success();
