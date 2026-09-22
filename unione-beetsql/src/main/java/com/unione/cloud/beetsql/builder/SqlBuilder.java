@@ -791,7 +791,9 @@ public class SqlBuilder<T> {
 		matcher=humpFieldRegix.matcher(whereSql);
 		while(matcher.find()) {
 			String condition=matcher.group();
-			whereSql=whereSql.replace(condition, condition.replaceAll("[A-Z]", "_$0").toUpperCase());
+			String columnName=matcher.group(1);
+			String convertedColumn=columnName.replaceAll("[A-Z]", "_$0").toUpperCase();
+			whereSql=whereSql.replace(condition, condition.replace(columnName, column(convertedColumn)));
 		}
 		
 		//forEach循环：处理
@@ -874,10 +876,11 @@ public class SqlBuilder<T> {
 		fieldMatcher.find();
 		String fieldName=fieldMatcher.group();
 		
-		// 字段名称变成大写
-		if(!fieldName.matches("^[A-Z\\_]*$")) {
-			condition=condition.replaceFirst(fieldName, fieldName.replaceAll("[A-Z]", "_$0").toUpperCase());
-		}
+		// 字段名称转换后，按数据库方言处理引用格式；sql() 可在 init() 前调用。
+		String columnName=fieldName.matches("^[A-Z\\_]*$")
+				? fieldName : fieldName.replaceAll("[A-Z]", "_$0").toUpperCase();
+		condition=condition.replaceFirst(fieldName,
+				this.sqlManager==null ? columnName : column(columnName));
 		
 		Matcher varMatcher=varRegix.matcher(condition);
 		if(varMatcher.find()) {
