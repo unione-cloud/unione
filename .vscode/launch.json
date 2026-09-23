@@ -6,13 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeBuilderFactoryTest",
-            "request": "launch",
-            "mainClass": "com.unione.cloud.CodeBuilderFactoryTest",
-            "projectName": "unione-starter"
-        },
-        {
-            "type": "java",
             "name": "UnioneGateway",
             "request": "launch",
             "mainClass": "com.unione.cloud.gateway.Application",
@@ -29,18 +22,11 @@
         },
         {
             "type": "java",
-            "name": "Current File",
-            "request": "launch",
-            "mainClass": "${file}",
-            "vmArgs": "-Dfile.encoding=UTF-8"
-        },
-        {
-            "type": "java",
             "name": "UnioneStarter",
             "request": "launch",
             "mainClass": "com.unione.cloud.Application",
             "projectName": "unione-starter",
-            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8090 -Dspring.cloud.nacos.config.enabled=false -Dspring.cloud.nacos.config.server-addr=127.0.0.1:2750"
+            "vmArgs": "-Dfile.encoding=UTF-8 -Dserver.port=8090 -Dspring.cloud.nacos.config.enabled=false -Dspring.cloud.nacos.config.server-addr=127.0.0.1:2750 -Dlogging.level.com.unione.cloud.form.cache.DataDefineCache=INFO"
         }
     ]
 }
