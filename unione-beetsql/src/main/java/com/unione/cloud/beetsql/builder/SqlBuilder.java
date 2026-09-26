@@ -106,7 +106,8 @@ public class SqlBuilder<T> {
 	private Pattern funRegix=Pattern.compile("[\\s]+(AND|OR)[\\s]+",Pattern.CASE_INSENSITIVE);
 	private Pattern inRegix=Pattern.compile("( IN )|( NOT IN )",Pattern.CASE_INSENSITIVE);
 	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?\\.?\\w*[\\s]*\\])",Pattern.CASE_INSENSITIVE);
-	private Pattern humpFieldRegix=Pattern.compile("[\\s]*([a-z][A-Za-z0-9]+)[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN)|IS|like|(not like)|in|(not in)|is)[\\s]+");
+	// 避免将 not in / not like 中的 not 当作字段名转义。
+	private Pattern humpFieldRegix=Pattern.compile("[\\s]*\\b((?!(?i:not)\\b)[a-z][A-Za-z0-9]+)[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN)|IS|like|(not like)|in|(not in)|is)[\\s]+");
 	private Pattern forEachRegix=Pattern.compile("forEach\\(([\\w\\d\\s,?%\\[\\]]+)\\)");
 	
 	private boolean initComplete;
