@@ -102,10 +102,10 @@ public class SqlBuilder<T> {
 	
 	
 	private Pattern fieldRegix=Pattern.compile("[\\w]+");
-	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?\\.?\\w*[\\s]*\\]");
+	private Pattern varRegix=Pattern.compile("\\[[\\s]*%?[\\s]*[\\w\\.]*\\??[\\s]*%?\\.?\\w*[\\s]*\\]");
 	private Pattern funRegix=Pattern.compile("[\\s]+(AND|OR)[\\s]+",Pattern.CASE_INSENSITIVE);
 	private Pattern inRegix=Pattern.compile("( IN )|( NOT IN )",Pattern.CASE_INSENSITIVE);
-	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*\\w*\\??[\\s]*%?\\.?\\w*[\\s]*\\])",Pattern.CASE_INSENSITIVE);
+	private Pattern conditionRegix=Pattern.compile("[\\s]*(AND|OR)?[\\s]*[\\w]+[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN))[\\s]*(\\?|\\[[\\s]*%?[\\s]*[\\w\\.]*\\??[\\s]*%?\\.?\\w*[\\s]*\\])",Pattern.CASE_INSENSITIVE);
 	// 避免将 not in / not like 中的 not 当作字段名转义。
 	private Pattern humpFieldRegix=Pattern.compile("[\\s]*\\b((?!(?i:not)\\b)[a-z][A-Za-z0-9]+)[\\s]*(=|>|>=|<|<=|!=|LIKE|(NOT LIKE)|IN|(NOT IN)|IS|like|(not like)|in|(not in)|is)[\\s]+");
 	private Pattern forEachRegix=Pattern.compile("forEach\\(([\\w\\d\\s,?%\\[\\]]+)\\)");
@@ -895,7 +895,10 @@ public class SqlBuilder<T> {
 			}else {
 				fieldName=paramName.trim();
 				if(fieldName.startsWith("%")) {
-					paramName="%"+String.format("params.%s", fieldName.substring(1));
+					if(!fieldName.contains("data.") && !fieldName.contains("query.") &&
+					!fieldName.contains("params.") && !fieldName.contains("principal.")){
+						paramName="%"+String.format("params.%s", fieldName.substring(1));
+					}
 				}else if(!fieldName.startsWith("data.") && !fieldName.startsWith("query.") &&
 					!fieldName.startsWith("params.") && !fieldName.startsWith("principal.")){
 					paramName=String.format("params.%s", fieldName);
