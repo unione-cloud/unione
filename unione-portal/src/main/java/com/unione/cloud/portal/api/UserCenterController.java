@@ -96,6 +96,42 @@ public class UserCenterController {
 		return Results.build(count>0);
 	}
 
+	
+	@PostMapping("/profile/name")
+	@Action(title="修改我的信息:姓名",type = ActionType.Save)
+	@Operation(summary="修改我的信息:姓名",description="修改姓名")
+	public Results<Void> saveProfileName(@RequestParam("name") String name){
+		LogsUtil.setTarget(sessionService.getUserId(), sessionService.getRealname());
+		// 参数处理
+		AssertUtil.service().notNull(name,"参数name不能为空");
+
+		String fields[] = {"realName"};
+		SysUser entity = new SysUser();
+		entity.setId(sessionService.getUserId());
+		entity.setRealName(name);
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
+			
+		return Results.build(count>0);
+	}
+
+	@PostMapping("/profile/alias")
+	@Action(title="修改我的信息:昵称",type = ActionType.Save)
+	@Operation(summary="修改我的信息:昵称",description="修改昵称")
+	public Results<Void> saveProfileAlias(@RequestParam("alias") String alias){
+		LogsUtil.setTarget(sessionService.getUserId(), sessionService.getRealname());
+		// 参数处理
+		AssertUtil.service().notNull(alias,"参数alias不能为空");
+
+		String fields[] = {"aliasName"};
+		SysUser entity = new SysUser();
+		entity.setId(sessionService.getUserId());
+		entity.setAliasName(alias);
+		int count = dataBaseDao.updateById(SqlBuilder.build(entity).field(fields));
+			
+		return Results.build(count>0);
+	}
+
+
 	@PostMapping("/profile/avatar")
 	@Action(title="修改我的信息:头像",type = ActionType.Save)
 	@Operation(summary="修改我的信息:头像",description="修改手机号逻辑：首先验证旧手机号是否一致，然后再验证手机短信验证码是否正确，如果都正确才执行更新")
