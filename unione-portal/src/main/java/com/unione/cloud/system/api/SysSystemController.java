@@ -73,7 +73,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 			params.getBody().setTenantId(sessionService.getTenantId());
 		}
 		Results<List<SysSystem>> results = dataBaseDao.findPages(SqlBuilder.build(params).dataPermis(PermisRule.ALL)
-			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and types=? and status=? and delFlag = 0"));
+			.where("(isGlobal = 1 or isGlobal = 0 and tenantId=?) and types=? and status=? and delFlag = 0 and (name like [%query.keywords%] or alias like [%query.keywords%])"));
 		LogsUtil.add("分页数据统计，数据总量count:"+results.getTotal());
 		LogsUtil.add("分页数据查询，记录数量size:"+results.getBody().size());
 		
