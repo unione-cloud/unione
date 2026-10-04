@@ -35,6 +35,7 @@ import com.unione.cloud.system.dto.SystemInfoDto;
 import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysSystem;
 import com.unione.cloud.system.service.SystemService;
+import com.unione.cloud.system.service.SystemContextService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -59,6 +60,9 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 
 	@Autowired
 	private SystemService systemService;
+
+	@Autowired
+	private SystemContextService systemContextService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -100,7 +104,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 
 
 		if(entity.getId()==null) {
-			len = dataBaseDao.insert(entity);
+			len = systemContextService.insert(entity);
 		}else {
 			if(!sessionService.isAdmin() && !sessionService.getUserRoles().contains(UserRoles.SUPPERADMIN)){
 				SysSystem tmp = dataBaseDao.findById(SqlBuilder.build(SysSystem.class,entity.getId()).dataPermis(PermisRule.ALL));
@@ -109,8 +113,7 @@ public class SysSystemController implements PojoFeignApi<SysSystem>{
 					.isTrue(ObjectUtil.equal(tmp.getTenantId(), sessionService.getTenantId()), "记录未找到");
 			}
 			String[] fields = {"name","alias","types","ctx","logoLarge","logoSmall","themeName","secret","footer","configs","appList","navList","versNo","versDesc","ordered","isGlobal","status","descs"};
-			SqlBuilder<SysSystem> sqlBuilder=SqlBuilder.build(entity).field(fields);
-		 	len = dataBaseDao.updateById(sqlBuilder);
+			len = systemContextService.update(entity, fields);
 		}
 		if(len>0){
 			systemService.clear(entity.getCtx());
