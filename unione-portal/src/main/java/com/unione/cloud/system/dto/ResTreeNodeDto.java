@@ -14,6 +14,9 @@ public class ResTreeNodeDto extends TreeNodeDto{
     @Schema(title="应用ID",description="长度为：19")
 	private Long appId;
 
+    @Schema(title="系统ID")
+    private Long sysId;
+
     @Schema(title="资源名称/编码，唯一",description="长度为：100")
 	private String name;
 

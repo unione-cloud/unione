@@ -39,9 +39,9 @@ public class SysUserPermis extends Pojo {
 	@Schema(title="资源ID",description="长度为：19")
 	private Long resId;
 	/**
-	* 资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具
+	* 资源类型，字典SYSRESTYPE app：应用，system：系统，menu：菜单，btn：按钮，tool：工具
 	*/
-	@Schema(title="资源类型，字典SYSRESTYPE menu：菜单，btn：按钮，tool：工具",description="长度为：20")
+	@Schema(title="资源类型，字典SYSRESTYPE app：应用，system：系统，menu：菜单，btn：按钮，tool：工具",description="长度为：20")
 	private String resType;
 	/**
 	* 是否可传递授权，1是，0否

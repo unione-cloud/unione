@@ -34,3 +34,40 @@ SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND APP_ID IN (#{join(pa
 -- @}
 ORDER BY res.ORDERED
 ```
+
+loadSystemPermisForUser
+===
+```
+SELECT sys.ID, sys.NAME, sys.CTX AS SN, sys.CTX, sys.CTX AS URL, sys.VERS_NO, sys.VERS_DESC, sys.LOGO_LARGE AS PIC_MAX, sys.LOGO_SMALL AS PIC_MIX, sys.ORDERED, sys.DESCS, 'system' AS CATEGORY FROM SYS_SYSTEM SYS WHERE 1=1 AND STATUS in (2,3) AND TYPES = #{params.type}
+-- @if(params.isAdmin==false){
+ AND (
+    sys.CREATED_BY=#{params.user.id}
+    OR
+    EXISTS (select 1 from sys_user_permis where RES_ID = sys.ID AND RES_TYPE='system' and USER_ID=#{params.user.id})
+    -- @if(isNotEmpty(params.user.userRoles)){
+    OR EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp LEFT JOIN SYS_ROLE SR ON srp.ROLE_ID = sr.ID WHERE RES_ID = sys.ID AND RES_TYPE='system' AND sr.SN in (#{join(params.user.userRoles)}))
+    -- @}
+    OR EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.GROUP_ID  WHERE RES_ID = sys.ID AND RES_TYPE='system' AND sgm.USER_ID = #{params.user.id})
+)
+-- @}
+ORDER BY sys.ORDERED
+```
+
+
+loadSystemResorucePermisForUser
+===
+```
+SELECT res.* FROM SYS_RESOURCE res WHERE res.STATUS = 1 AND SYS_ID IN (#{join(params.sysIds)})
+-- @if(params.isAdmin==false){
+ AND (
+    res.CREATED_BY=#{params.user.id}
+    OR
+    EXISTS (SELECT 1 FROM SYS_USER_PERMIS WHERE RES_ID = res.ID AND RES_TYPE = res.TYPES AND USER_ID=#{params.user.id})
+    -- @if(isNotEmpty(params.user.userRoles)){
+    OR EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp LEFT JOIN SYS_ROLE SR ON srp.ROLE_ID = sr.ID WHERE RES_ID = res.ID AND RES_TYPE = res.TYPES AND sr.SN IN (#{join(params.user.userRoles)}))
+    -- @}
+    OR EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm ON sgm.GROUP_ID=sgp.GROUP_ID  WHERE RES_ID = res.ID AND RES_TYPE = res.TYPES and sgm.USER_ID = #{params.user.id})
+)
+-- @}
+ORDER BY res.ORDERED
+```

@@ -14,6 +14,8 @@ public class ResourceDto {
 	private Long id;
 	@Schema(title="应用ID",description="长度为：19")
 	private Long appId;
+	@Schema(title="系统ID")
+	private Long sysId;
 	@JsonProperty("pid")
 	@Schema(title="上级菜单ID(根节点为-1)",description="长度为：19")
 	private Long parentId;

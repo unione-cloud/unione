@@ -7,6 +7,10 @@ import lombok.Data;
 
 @Data
 public class AppDto {
+	@Schema(title="容器类型",description="app:应用，system:系统")
+	private String category;
+	@Schema(title="系统ctx")
+	private String ctx;
 	@Schema(title="应用id",description="")
 	private Long id;
 	@Schema(title="应用名称",description="长度为：100")

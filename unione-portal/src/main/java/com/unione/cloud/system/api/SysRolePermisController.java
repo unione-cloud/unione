@@ -28,7 +28,7 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.core.util.BeanUtils;
 import com.unione.cloud.system.dto.RolePermisDto;
-import com.unione.cloud.system.model.SysResource;
+import com.unione.cloud.system.service.SystemResourceService;
 import com.unione.cloud.system.model.SysRole;
 import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserPermis;
@@ -53,6 +53,9 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SystemResourceService systemResourceService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -88,8 +91,7 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 				
 				SysRole role=dataBaseDao.findById(SqlBuilder.build(SysRole.class,entity.getRoleId()));
 				AssertUtil.service().notNull(role, "角色不存在");
-				SysResource res=dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getResId()));
-				AssertUtil.service().notNull(res, "资源不存在");
+				systemResourceService.loadTitle(entity.getResType(), entity.getResId());
 				
 				int len = dataBaseDao.insert(entity);
 				addCount.addAndGet(len);
@@ -102,23 +104,23 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 					LogsUtil.setTarget(target.getId(), target.getName());
 
 					// 加载角色已有权限集合
-					Map<Long,SysRolePermis> hdMap=new HashMap<>();
+					Map<String,SysRolePermis> hdMap=new HashMap<>();
 					dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
 						.where("roleId=?")
 						.where("roleId", entity.getRoleId()))
 						.stream().forEach(row->{
-							if(hdMap.containsKey(row.getResId())){
+							if(hdMap.containsKey(row.getResType() + ":" + row.getResId())){
 								// 删除多余授权记录
 								entity.getDelPermis().add(row.getId());
 							}
-							hdMap.put(row.getResId(),row);
+							hdMap.put(row.getResType() + ":" + row.getResId(),row);
 						});
 
 					// 批量添加：
 					if(ObjectUtil.isNotEmpty(entity.getAddPermis())){
 						// 过滤已存在的权限
 						List<SysRolePermis> adds = entity.getAddPermis().stream().filter(row->{
-							SysRolePermis hdup=hdMap.remove(row.getResId());
+							SysRolePermis hdup=hdMap.remove(row.getResType() + ":" + row.getResId());
 							if(hdup!=null){
 								if(!ObjectUtil.equal(hdup.getEnDilivery(), row.getEnDilivery())){
 									hdup.setEnDilivery(row.getEnDilivery());
@@ -156,7 +158,7 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 							int len = dataBaseDao.updateById(SqlBuilder.build(row).field("enDilivery"));
 							editCount.addAndGet(len);
 
-							hdMap.remove(row.getResId());
+							hdMap.remove(row.getResType() + ":" + row.getResId());
 						});
 						LogsUtil.add("修改角色权限，数量：%s,成功修改数量:%s",entity.getAddPermis().size(),editCount.get());
 					}
@@ -186,9 +188,8 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 					}
 				}else{
 					// 资源分配，批量添加用户：
-					SysResource target=dataBaseDao.findById(SqlBuilder.build(SysResource.class,entity.getResId()));
-					AssertUtil.service().notNull(target, "资源不存在");
-					LogsUtil.setTarget(target.getId(), target.getTitle());
+					String title = systemResourceService.loadTitle(entity.getResType(), entity.getResId());
+					LogsUtil.setTarget(entity.getResId(), title);
 
 					// 批量添加：
 					if(entity.getAddPermis()!=null){
@@ -197,8 +198,9 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 						Set<Long> hdMap=new HashSet<>();
 						if(uids.size()>0) {
 							dataBaseDao.findList(SqlBuilder.build(SysRolePermis.class)
-								.where("resId=? and roleId in [roleIds]")
+								.where("resId=? and resType=? and roleId in [roleIds]")
 								.where("resId", entity.getResId())
+								.where("resType", entity.getResType())
 								.where("roleIds", uids))
 								.stream().forEach(row->{
 									hdMap.add(row.getRoleId());
@@ -222,7 +224,8 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 					// 批量修改：
 					if(entity.getEditPermis()!=null){
 						entity.getEditPermis().stream()
-							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId()))
+							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId())
+								&& ObjectUtil.equal(row.getResType(), entity.getResType()))
 							.filter(row->row.getId()!=null)
 							.forEach(row->{
 							BeanUtils.setDefaultValue(row, "enDilivery",0);
@@ -249,7 +252,8 @@ public class SysRolePermisController implements PojoFeignApi<RolePermisDto>{
 						}
 						List<SysRolePermis> list = dataBaseDao.findByIds(SqlBuilder.build(rps).ids(entity.getDelPermis()));
 						List<Long> dels = list.stream()
-							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId()))
+							.filter(row->ObjectUtil.equal(row.getResId(), entity.getResId())
+								&& ObjectUtil.equal(row.getResType(), entity.getResType()))
 							.map(SysRolePermis::getId).collect(Collectors.toList());
 						LogsUtil.add("删除角色权限，数量：%s,可删除:%s",entity.getDelPermis().size(),dels.size());
 						if(dels.size()>0) {

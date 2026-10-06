@@ -39,6 +39,7 @@ import com.unione.cloud.system.model.SysResource;
 import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserPermis;
 import com.unione.cloud.system.service.ResourceService;
+import com.unione.cloud.system.service.SystemResourceService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ArrayUtil;
@@ -62,6 +63,9 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 	
 	@Autowired
 	private DataBaseDao dataBaseDao;
+
+	@Autowired
+	private SystemResourceService systemResourceService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -297,6 +301,9 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 		List<ResTreeNodeDto> nodes=new ArrayList<>();
 		AssertUtil.service().notNull(type, "参数type不能为空")
 			.notIn(type, Arrays.asList("permisOrgan","permisRole","permisUser","permisGroup","permisPost","view","mine"), "参数type取值范围[permisOrgan,permisRole,permisUser,permisGroup,permisPost,view,mine]");
+
+		// 系统与应用平级加载，系统资源按sysId查询。
+		nodes.addAll(systemResourceService.tree(type, params.getBody()));
 
 		// 加载应用列表
 		Map<String, Object> paramsApp=new HashMap<>();

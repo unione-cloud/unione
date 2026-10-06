@@ -8,7 +8,7 @@ SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3
         -- @if(!isEqules("view",params.type)){
         OR (
             EXISTS (select 1 from SYS_USER_PERMIS where APP_ID = app.ID AND RES_TYPE='app' and USER_ID=#{params.user.id}) OR
-            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE APP_ID=app.ID AND EN_DILIVERY=1 AND 
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE APP_ID=app.ID AND EN_DILIVERY=1 AND
                 srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
             ) OR
             EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.ID  WHERE APP_ID = app.ID AND sgm.USER_ID = #{params.user.id})
@@ -22,7 +22,7 @@ SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3
     AND (TENANT_ID=#{params.user.tenantId}
         OR (
             EXISTS (select 1 from SYS_USER_PERMIS where APP_ID = app.ID AND RES_TYPE='app' and USER_ID=#{params.user.id}) OR
-            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE APP_ID=app.ID AND EN_DILIVERY=1 AND 
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE APP_ID=app.ID AND EN_DILIVERY=1 AND
                 srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
             ) OR
             EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.ID  WHERE APP_ID = app.ID AND sgm.USER_ID = #{params.user.id})
@@ -44,7 +44,7 @@ WHERE STATUS = 1 AND APP_ID IN (#{join(params.appIds)})
         -- @if(!isEqules("view",params.type)){
         OR (
             EXISTS (SELECT 1 FROM SYS_USER_PERMIS sup WHERE sup.USER_ID=#{params.user.id} AND sup.RES_ID=res.ID AND EN_DILIVERY=1) OR
-            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND EN_DILIVERY=1 AND 
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND EN_DILIVERY=1 AND
                 srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
             ) OR
             EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.ID  WHERE sgp.RES_ID = res.ID AND sgm.USER_ID = #{params.user.id})
@@ -58,10 +58,81 @@ WHERE STATUS = 1 AND APP_ID IN (#{join(params.appIds)})
     AND (TENANT_ID=#{params.user.tenantId}
         OR (
             EXISTS (SELECT 1 FROM SYS_USER_PERMIS sup WHERE sup.USER_ID=#{params.user.id} AND sup.RES_ID=res.ID AND EN_DILIVERY=1) OR
-            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND EN_DILIVERY=1 AND 
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND EN_DILIVERY=1 AND
                 srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
             ) OR
             EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.ID  WHERE sgp.RES_ID = res.ID AND sgm.USER_ID = #{params.user.id})
+        )
+    )
+    -- @}
+-- @}
+
+ORDER BY res.ORDERED ASC
+```
+loadSysSystemList
+===
+```sql
+SELECT sys.* FROM SYS_SYSTEM SYS WHERE 1=1 AND STATUS in (2,3)
+-- @if(!isEqules("mine",params.type)){
+    -- @if(params.isAdmin==false){
+    AND (TENANT_ID=#{params.user.tenantId}
+        -- @if(!isEqules("view",params.type)){
+        OR (
+            EXISTS (select 1 from SYS_USER_PERMIS where RES_ID = sys.ID AND RES_TYPE='system' and USER_ID=#{params.user.id}) OR
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE RES_ID=sys.ID AND RES_TYPE='system' AND EN_DILIVERY=1 AND
+                srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
+            ) OR
+            EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.GROUP_ID  WHERE RES_ID = sys.ID AND RES_TYPE='system' AND sgm.USER_ID = #{params.user.id})
+        )
+        -- @}
+    )
+    -- @}
+-- @}
+-- @if(isEqules("mine",params.type)){
+    -- @if(params.isAdmin==false){
+    AND (TENANT_ID=#{params.user.tenantId}
+        OR (
+            EXISTS (select 1 from SYS_USER_PERMIS where RES_ID = sys.ID AND RES_TYPE='system' and USER_ID=#{params.user.id}) OR
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE RES_ID=sys.ID AND RES_TYPE='system' AND EN_DILIVERY=1 AND
+                srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
+            ) OR
+            EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.GROUP_ID  WHERE RES_ID = sys.ID AND RES_TYPE='system' AND sgm.USER_ID = #{params.user.id})
+        )
+    )
+    -- @}
+-- @}
+ORDER BY sys.ORDERED
+```
+
+loadSysSystemResourceTree
+===
+```sql
+SELECT * FROM SYS_RESOURCE res
+WHERE STATUS = 1 AND SYS_ID IN (#{join(params.sysIds)})
+-- @if(!isEqules("mine",params.type)){
+    -- @if(params.isAdmin==false){
+    AND (TENANT_ID=#{params.user.tenantId}
+        -- @if(!isEqules("view",params.type)){
+        OR (
+            EXISTS (SELECT 1 FROM SYS_USER_PERMIS sup WHERE sup.USER_ID=#{params.user.id} AND sup.RES_ID=res.ID AND sup.RES_TYPE=res.TYPES AND EN_DILIVERY=1) OR
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND srp.RES_TYPE=res.TYPES AND EN_DILIVERY=1 AND
+                srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
+            ) OR
+            EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.GROUP_ID  WHERE sgp.RES_ID = res.ID AND sgp.RES_TYPE=res.TYPES AND sgm.USER_ID = #{params.user.id})
+        )
+        -- @}
+    )
+    -- @}
+-- @}
+-- @if(isEqules("mine",params.type)){
+    -- @if(params.isAdmin==false){
+    AND (TENANT_ID=#{params.user.tenantId}
+        OR (
+            EXISTS (SELECT 1 FROM SYS_USER_PERMIS sup WHERE sup.USER_ID=#{params.user.id} AND sup.RES_ID=res.ID AND sup.RES_TYPE=res.TYPES AND EN_DILIVERY=1) OR
+            EXISTS (SELECT 1 FROM SYS_ROLE_PERMIS srp WHERE srp.RES_ID=res.ID AND srp.RES_TYPE=res.TYPES AND EN_DILIVERY=1 AND
+                srp.ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE sur WHERE sur.USER_ID=#{params.user.id})
+            ) OR
+            EXISTS (SELECT 1 FROM SYS_GROUP_PERMIS sgp LEFT JOIN SYS_GROUP_MEMBER sgm on sgm.GROUP_ID=sgp.GROUP_ID  WHERE sgp.RES_ID = res.ID AND sgp.RES_TYPE=res.TYPES AND sgm.USER_ID = #{params.user.id})
         )
     )
     -- @}
