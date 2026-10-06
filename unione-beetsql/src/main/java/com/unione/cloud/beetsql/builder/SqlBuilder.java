@@ -13,6 +13,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.sql.annotation.entity.Table;
 import org.beetl.sql.clazz.ClassDesc;
 import org.beetl.sql.clazz.TableDesc;
 import org.beetl.sql.clazz.kit.BeanKit;
@@ -245,14 +246,17 @@ public class SqlBuilder<T> {
 	public void init(SQLManager sqlManager) {
 		this.sqlManager=sqlManager;
 		if(StringUtils.isEmpty(this.tableName)) {
-			this.tableName=sqlManager.getNc().getTableName(this.data.getClass());
+			Table table=this.data.getClass().getAnnotation(Table.class);
+			if(table!=null){
+				this.tableName=table.name();
+			}
 		}
-		AssertUtil.service().notNull(this.tableName, "table name不能为空");
-		this.entity.setTable(tableName);
-		
-		if(!this.initComplete) {
-			this.initComplete=true;
-			this.resolve();
+		if(!StringUtils.isEmpty(this.tableName)){
+			this.entity.setTable(tableName);
+			if(!this.initComplete) {
+				this.initComplete=true;
+				this.resolve();
+			}
 		}
 	}
 	
