@@ -67,7 +67,7 @@ public class SystemResourceService {
             node.setSysId(system.getId());
             node.setTitle(system.getName());
             node.setName(system.getCtx());
-            node.setPlatform(system.getTypes());
+            node.setPlatform(PlatformTypeService.normalize(system.getTypes()));
             applyPermission(node, permissions);
             nodes.add(node);
         });
@@ -85,7 +85,7 @@ public class SystemResourceService {
             // 沿用授权表appId字段保存所属容器，根节点类型区分system和app。
             node.setAppId(resource.getSysId());
             node.setPid(Long.valueOf(-1L).equals(resource.getParentId()) ? resource.getSysId() : resource.getParentId());
-            node.setPlatform(systemMap.get(resource.getSysId()).getTypes());
+            node.setPlatform(PlatformTypeService.normalize(systemMap.get(resource.getSysId()).getTypes()));
             applyPermission(node, permissions);
             nodes.add(node);
         });

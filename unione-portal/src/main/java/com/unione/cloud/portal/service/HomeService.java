@@ -17,6 +17,7 @@ import com.unione.cloud.core.security.SessionService;
 import com.unione.cloud.core.security.UserRoles;
 import com.unione.cloud.portal.dto.AppDto;
 import com.unione.cloud.portal.dto.ResourceDto;
+import com.unione.cloud.system.service.PlatformTypeService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 @Service
@@ -38,8 +39,12 @@ public class HomeService {
         params.put("type", type);
         params.put("isAdmin", sessionService.isAdmin() || sessionService.hasRole(UserRoles.SUPPER_ADMIN));
 
-        List<AppDto> apps = new ArrayList<>(dataBaseDao.findList("portal.permision.loadAppPermisForUser", params, AppDto.class));
-        List<AppDto> systems = dataBaseDao.findList("portal.permision.loadSystemPermisForUser", params, AppDto.class);
+        List<AppDto> apps = dataBaseDao.findList("portal.permision.loadAppPermisForUser", params, AppDto.class)
+                .stream().filter(app -> PlatformTypeService.supports(app.getTypes(), type))
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<AppDto> systems = dataBaseDao.findList("portal.permision.loadSystemPermisForUser", params, AppDto.class)
+                .stream().filter(system -> PlatformTypeService.supports(system.getTypes(), type))
+                .collect(Collectors.toList());
         // 分别装载资源，避免不同容器的菜单和工具混合。
         loadResources(apps, params, false);
         loadResources(systems, params, true);

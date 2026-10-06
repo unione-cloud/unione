@@ -2,7 +2,7 @@
 loadAppPermisForUser
 ===
 ```
-SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3) AND TYPES = #{params.type}
+SELECT app.* FROM SYS_APP_INFO APP WHERE app.CATEGORY = 'app' AND STATUS in (2,3)
 -- @if(params.isAdmin==false){
  AND (
     app.CREATED_BY=#{params.user.id}
@@ -38,7 +38,7 @@ ORDER BY res.ORDERED
 loadSystemPermisForUser
 ===
 ```
-SELECT sys.ID, sys.NAME, sys.CTX AS SN, sys.CTX, sys.CTX AS URL, sys.VERS_NO, sys.VERS_DESC, sys.LOGO_LARGE AS PIC_MAX, sys.LOGO_SMALL AS PIC_MIX, sys.ORDERED, sys.DESCS, 'system' AS CATEGORY FROM SYS_SYSTEM SYS WHERE 1=1 AND STATUS in (2,3) AND TYPES = #{params.type}
+SELECT sys.ID, sys.TYPES, sys.NAME, sys.CTX AS SN, sys.CTX, sys.CTX AS URL, sys.VERS_NO, sys.VERS_DESC, sys.LOGO_LARGE AS PIC_MAX, sys.LOGO_SMALL AS PIC_MIX, sys.ORDERED, sys.DESCS, 'system' AS CATEGORY FROM SYS_SYSTEM SYS WHERE 1=1 AND STATUS in (2,3)
 -- @if(params.isAdmin==false){
  AND (
     sys.CREATED_BY=#{params.user.id}

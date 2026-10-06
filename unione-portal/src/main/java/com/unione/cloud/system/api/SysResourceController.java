@@ -40,6 +40,7 @@ import com.unione.cloud.system.model.SysRolePermis;
 import com.unione.cloud.system.model.SysUserPermis;
 import com.unione.cloud.system.service.ResourceService;
 import com.unione.cloud.system.service.SystemResourceService;
+import com.unione.cloud.system.service.PlatformTypeService;
 import com.unione.cloud.web.logs.LogsUtil;
 
 import cn.hutool.core.util.ArrayUtil;
@@ -407,7 +408,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 					node.setEnDilivery(0);
 				}
 			}
-			node.setPlatform(row.getTypes());
+			node.setPlatform(PlatformTypeService.normalize(row.getTypes()));
 			appMap.put(row.getId(), row);
 		});
 		resList.stream().forEach(row->{
@@ -430,7 +431,7 @@ public class SysResourceController implements TreeFeignApi<SysResource>{
 					node.setEnDilivery(0);
 				}
 			}
-			node.setPlatform(appMap.get(row.getAppId()).getTypes());
+			node.setPlatform(PlatformTypeService.normalize(appMap.get(row.getAppId()).getTypes()));
 			node.setPath(row.getPath());
 			node.setName(row.getName());
 			nodes.add(node);

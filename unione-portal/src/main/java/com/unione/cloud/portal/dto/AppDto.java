@@ -7,6 +7,9 @@ import lombok.Data;
 
 @Data
 public class AppDto {
+    @Schema(title="适用平台", description="逗号分隔的多选值：pc、app")
+    private String types;
+
 	@Schema(title="容器类型",description="app:应用，system:系统")
 	private String category;
 	@Schema(title="系统ctx")
