@@ -36,14 +36,16 @@ public class HomeService {
         LogsUtil.add("加载门户菜单,type:%s", type);
         Map<String, Object> params = new HashMap<>();
         params.put("user", sessionService.getPrincipal());
-        params.put("type", type);
         params.put("isAdmin", sessionService.isAdmin() || sessionService.hasRole(UserRoles.SUPPER_ADMIN));
 
         List<AppDto> apps = dataBaseDao.findList("portal.permision.loadAppPermisForUser", params, AppDto.class)
                 .stream().filter(app -> PlatformTypeService.supports(app.getTypes(), type))
                 .collect(Collectors.toCollection(ArrayList::new));
-        List<AppDto> systems = dataBaseDao.findList("portal.permision.loadSystemPermisForUser", params, AppDto.class)
-                .stream().filter(system -> PlatformTypeService.supports(system.getTypes(), type))
+        // 先按权限加载系统，再在 Java 中匹配多选平台，兼容同时配置 pc、app 的系统。
+        List<AppDto> permittedSystems = dataBaseDao.findList("portal.permision.loadSystemPermisForUser", params,
+                AppDto.class);
+        List<AppDto> systems = permittedSystems.stream()
+                .filter(system -> PlatformTypeService.supports(system.getTypes(), type))
                 .collect(Collectors.toList());
         // 分别装载资源，避免不同容器的菜单和工具混合。
         loadResources(apps, params, false);
