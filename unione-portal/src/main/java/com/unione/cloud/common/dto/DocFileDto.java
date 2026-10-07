@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.beetl.sql.mapper.annotation.SqlResource;
+import org.beetl.sql.annotation.entity.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,6 +16,7 @@ import lombok.Data;
 
 @Data
 @SqlResource("common.DocFileDto")
+@Table(name = "doc_file")
 public class DocFileDto extends DocFile{
 	
 	@Schema(title="文档权限集合")
